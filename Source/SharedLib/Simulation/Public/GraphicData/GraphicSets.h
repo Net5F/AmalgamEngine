@@ -5,6 +5,7 @@
 #include "EntityGraphicType.h"
 #include "Terrain.h"
 #include "Wall.h"
+#include "Rotation.h"
 #include <SDL_stdinc.h>
 #include <string>
 #include <array>
@@ -87,18 +88,29 @@ struct ObjectGraphicSet : public GraphicSet {
 };
 
 struct EntityGraphicSet : public GraphicSet {
-    /** The types of entity graphic that this set contains.
-        The IdleSouth graphic type will always be present. All others are 
-        optional. */
-    std::unordered_map<EntityGraphicType, GraphicRef> graphics;
+    /** The entity graphic types that this set contains.
+        Each graphic type is associated with an array of up to 8 graphics, one 
+        for each possible rotation of the entity.
+        The Idle graphic type will always be present. All others are optional.
+        If any slots weren't assigned a graphic, they will be set to the null 
+        sprite in the array (check for NULL_GRAPHIC_ID). */
+    std::unordered_map<EntityGraphicType,
+                       std::array<GraphicRef, Rotation::Direction::Count>>
+        graphics;
 
     /**
-     * Returns the IdleSouth graphic's model-space collision bounds.
+     * Returns the Idle South graphic's model-space collision bounds.
      * 
-     * We use IdleSouth's bounds for all collision in order to keep collision 
+     * We use Idle South's bounds for all collision in order to keep collision 
      * behavior consistent.
      */
     BoundingBox getCollisionModelBounds() const;
+
+    /**
+     * Returns true if this set contains an array for the given type, and the 
+     * graphic at the given direction is non-null.
+     */
+    bool contains(EntityGraphicType type, Rotation::Direction direction) const;
 };
 
 } // namespace AM

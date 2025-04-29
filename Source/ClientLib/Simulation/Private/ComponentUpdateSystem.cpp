@@ -135,7 +135,8 @@ void ComponentUpdateSystem::onGraphicStateUpdated(entt::registry& registry,
     // always must be valid and we don't know if the new graphic set has 
     // the old type.
     // GraphicSystem will set it to a real value the next time it runs.
-    clientGraphicState.graphicType = EntityGraphicType::IdleSouth;
+    clientGraphicState.graphicType = EntityGraphicType::Idle;
+    clientGraphicState.graphicDirection = Rotation::Direction::South;
 }
 
 } // namespace Client

@@ -6,6 +6,7 @@
 #include "GraphicState.h"
 #include "Input.h"
 #include "ClientGraphicState.h"
+#include "ClientCastState.h"
 #include "Log.h"
 #include "AMAssert.h"
 
@@ -13,12 +14,6 @@ namespace AM
 {
 namespace Client
 {
-
-// Values commonly used in calculations.
-static constexpr Uint8 RUN_SOUTH_VALUE{
-    static_cast<Uint8>(EntityGraphicType::RunSouth)};
-static constexpr Uint8 IDLE_SOUTH_VALUE{
-    static_cast<Uint8>(EntityGraphicType::IdleSouth)};
 
 GraphicSystem::GraphicSystem(World& inWorld, GraphicData& inGraphicData)
 : world{inWorld}
@@ -44,23 +39,22 @@ void GraphicSystem::updateAnimations()
             }
         }
 
-        // Update to either a run or idle graphic type, depending on whether 
-        // this entity is moving.
+        // Determine which graphic type is desired, based on the current 
+        // entity state.
+        EntityGraphicType desiredGraphicType{getDesiredGraphicType(entity)};
+
+        // Get the new graphic, accounting for missing graphics in the set.
         const EntityGraphicSet& graphicSet{
             graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
-        EntityGraphicType newGraphicType{EntityGraphicType::NotSet};
-        if (isMoving(entity)) {
-            newGraphicType = getUpdatedRunGraphicType(graphicSet, rotation,
-                                                      clientGraphicState);
-        }
-        else {
-            newGraphicType = getUpdatedIdleGraphicType(graphicSet, rotation,
-                                                       clientGraphicState);
-        }
+        GraphicReturn newGraphic{
+            getGraphicOrDefault(graphicSet, clientGraphicState,
+                                desiredGraphicType, rotation.direction)};
 
-        // If the graphic type has changed, update the component.
-        if (newGraphicType != clientGraphicState.graphicType) {
-            clientGraphicState.graphicType = newGraphicType;
+        // If the graphic has changed, update the component.
+        if ((newGraphic.type != clientGraphicState.graphicType)
+            || (newGraphic.direction != clientGraphicState.graphicDirection)) {
+            clientGraphicState.graphicType = newGraphic.type;
+            clientGraphicState.graphicDirection = newGraphic.direction;
             clientGraphicState.setStartTime = true;
         }
     }
@@ -71,39 +65,53 @@ void GraphicSystem::setExtension(ISimulationExtension* inExtension)
     extension = std::move(inExtension);
 }
 
-bool GraphicSystem::isMoving(entt::entity entity)
+EntityGraphicType GraphicSystem::getDesiredGraphicType(entt::entity entity)
 {
-    // If any inputs are pressed, return true.
-    if (const Input* input{world.registry.try_get<Input>(entity)}) {
-        if (input->inputStates.any()) {
-            return true;
+    // If the entity is moving, use a run graphic.
+    if (const Input* input{world.registry.try_get<Input>(entity)};
+        input && input->inputStates.any()) {
+        return EntityGraphicType::Run;
+    }
+    // If the entity is casting, use the appropriate graphic from the 
+    // Castable.
+    else if (const auto* castState{
+                 world.registry.try_get<ClientCastState>(entity)}) {
+        if (castState->state == ClientCastState::State::Casting) {
+            return castState->castInfo.castable->castingGraphicType;
+        }
+        else {
+            // CastComplete
+            return castState->castInfo.castable->castCompleteGraphicType;
         }
     }
 
-    return false;
+    // Default: Use an idle graphic.
+    return EntityGraphicType::Idle;
 }
 
-EntityGraphicType GraphicSystem::getUpdatedRunGraphicType(
-    const EntityGraphicSet& graphicSet, const Rotation& rotation,
-    const ClientGraphicState& clientGraphicState)
+GraphicSystem::GraphicReturn GraphicSystem::getGraphicOrDefault(
+    const EntityGraphicSet& graphicSet,
+    const ClientGraphicState& clientGraphicState, EntityGraphicType desiredType,
+    Rotation::Direction desiredDirection)
 {
-    // If the graphic set contains the desired type, use it.
-    EntityGraphicType desiredType{toRunGraphicType(rotation.direction)};
-    if (graphicSet.graphics.contains(desiredType)) {
-        return desiredType;
+    // If the graphic set contains the desired graphic, use it.
+    if (graphicSet.contains(desiredType, desiredDirection)) {
+        return {desiredType, desiredDirection};
     }
 
-    // If the new rotation is an ordinal direction and the current graphic 
-    // includes that direction, don't change the graphic.
+    // The set doesn't have the desired graphic. Find the closest match.
+
+    // #### Ordinal Strafing ####
+    // If the new rotation is an ordinal direction and the current direction 
+    // includes that direction, don't change it.
     // This will cause a "strafe" effect when moving ordinally, if the 
     // ordinal graphics are missing but the cardinal are present.
     EntityGraphicType currentType{clientGraphicState.graphicType};
-    Rotation::Direction currentDirection{
-        toDirection(clientGraphicState.graphicType)};
-    bool isDesiredSW{desiredType == EntityGraphicType::RunSouthWest};
-    bool isDesiredNW{desiredType == EntityGraphicType::RunNorthWest};
-    bool isDesiredNE{desiredType == EntityGraphicType::RunNorthEast};
-    bool isDesiredSE{desiredType == EntityGraphicType::RunSouthEast};
+    Rotation::Direction currentDirection{clientGraphicState.graphicDirection};
+    bool isDesiredSW{(desiredDirection == Rotation::Direction::SouthWest)};
+    bool isDesiredNW{(desiredDirection == Rotation::Direction::NorthWest)};
+    bool isDesiredNE{(desiredDirection == Rotation::Direction::NorthEast)};
+    bool isDesiredSE{(desiredDirection == Rotation::Direction::SouthEast)};
     bool isCurrentSouth{currentDirection == Rotation::Direction::South};
     bool isCurrentWest{currentDirection == Rotation::Direction::West};
     bool isCurrentNorth{currentDirection == Rotation::Direction::North};
@@ -112,141 +120,41 @@ EntityGraphicType GraphicSystem::getUpdatedRunGraphicType(
         || (isDesiredNW && (isCurrentNorth || isCurrentWest))
         || (isDesiredNE && (isCurrentNorth || isCurrentEast))
         || (isDesiredSE && (isCurrentSouth || isCurrentEast))) {
-        // Try to use a run graphic. Otherwise, fall back to the idle graphic.
-        EntityGraphicType currentTypeAsRun{toRunGraphicType(currentType)};
-        EntityGraphicType currentTypeAsIdle{toIdleGraphicType(currentType)};
-        if (graphicSet.graphics.contains(currentTypeAsRun)) {
-            return currentTypeAsRun;
+        // Try to use the current graphic. Otherwise, fall back to the Idle 
+        // graphic (the graphic set may have changed).
+        if (graphicSet.contains(clientGraphicState.graphicType,
+                                clientGraphicState.graphicDirection)) {
+            return {clientGraphicState.graphicType,
+                    clientGraphicState.graphicDirection};
         }
-        else if (graphicSet.graphics.contains(currentTypeAsIdle)) {
-            return currentTypeAsIdle;
+        else if (graphicSet.contains(EntityGraphicType::Idle,
+                                     clientGraphicState.graphicDirection)) {
+            return {EntityGraphicType::Idle,
+                    clientGraphicState.graphicDirection};
         }
     }
 
+    // #### Ordinal -> Cardinal ####
     // If the new rotation is an ordinal direction, try to use a cardinal 
     // direction. 
     if ((isDesiredSW || isDesiredSE)
-        && graphicSet.graphics.contains(EntityGraphicType::RunSouth)) {
-        return EntityGraphicType::RunSouth;
+        && graphicSet.contains(desiredType, Rotation::Direction::South)) {
+        return {desiredType, Rotation::Direction::South};
     }
     else if ((isDesiredNW || isDesiredNE)
-        && graphicSet.graphics.contains(EntityGraphicType::RunNorth)) {
-        return EntityGraphicType::RunNorth;
+             && graphicSet.contains(desiredType, Rotation::Direction::North)) {
+        return {desiredType, Rotation::Direction::North};
     }
 
-    // If the graphic set contains the idle version of the desired type, use it.
-    EntityGraphicType desiredTypeAsIdle{toIdleGraphicType(desiredType)};
-    if (graphicSet.graphics.contains(desiredTypeAsIdle)) {
-        return desiredTypeAsIdle;
+    // #### Idle With Desired Direction ####
+    // If the graphic set contains an Idle graphic for the desired direction, 
+    // use it.
+    if (graphicSet.contains(EntityGraphicType::Idle, desiredDirection)) {
+        return {EntityGraphicType::Idle, desiredDirection};
     }
 
-    return EntityGraphicType::IdleSouth;
-}
-
-EntityGraphicType GraphicSystem::getUpdatedIdleGraphicType(
-    const EntityGraphicSet& graphicSet, const Rotation& rotation,
-    const ClientGraphicState& clientGraphicState)
-{
-    // If the graphic set contains the desired type, use it.
-    EntityGraphicType desiredType{toIdleGraphicType(rotation.direction)};
-    if (graphicSet.graphics.contains(desiredType)) {
-        return desiredType;
-    }
-
-    // If the new rotation is an ordinal direction and the current graphic 
-    // includes that direction, don't change the graphic.
-    EntityGraphicType currentType{clientGraphicState.graphicType};
-    EntityGraphicType currentTypeAsIdle{toIdleGraphicType(currentType)};
-    bool isDesiredSW{desiredType == EntityGraphicType::IdleSouthWest};
-    bool isDesiredNW{desiredType == EntityGraphicType::IdleNorthWest};
-    bool isDesiredNE{desiredType == EntityGraphicType::IdleNorthEast};
-    bool isDesiredSE{desiredType == EntityGraphicType::IdleSouthEast};
-    if (graphicSet.graphics.contains(currentTypeAsIdle)) {
-        Rotation::Direction currentDirection{
-            toDirection(clientGraphicState.graphicType)};
-        bool isCurrentSouth{currentDirection == Rotation::Direction::South};
-        bool isCurrentWest{currentDirection == Rotation::Direction::West};
-        bool isCurrentNorth{currentDirection == Rotation::Direction::North};
-        bool isCurrentEast{currentDirection == Rotation::Direction::East};
-        if ((isDesiredSW && (isCurrentSouth || isCurrentWest))
-            || (isDesiredNW && (isCurrentNorth || isCurrentWest))
-            || (isDesiredNE && (isCurrentNorth || isCurrentEast))
-            || (isDesiredSE && (isCurrentSouth || isCurrentEast))) {
-            return currentTypeAsIdle;
-        }
-    }
-
-    // If the new rotation is an ordinal direction, try to use a cardinal 
-    // direction. 
-    if ((isDesiredSW || isDesiredSE)
-        && graphicSet.graphics.contains(EntityGraphicType::IdleSouth)) {
-        return EntityGraphicType::IdleSouth;
-    }
-    else if ((isDesiredNW || isDesiredNE)
-        && graphicSet.graphics.contains(EntityGraphicType::IdleNorth)) {
-        return EntityGraphicType::IdleNorth;
-    }
-
-    return EntityGraphicType::IdleSouth;
-}
-
-Rotation::Direction GraphicSystem::toDirection(EntityGraphicType graphicType)
-{
-    Uint8 graphicTypeValue{static_cast<Uint8>(graphicType)};
-    AM_ASSERT(
-        graphicTypeValue <= static_cast<Uint8>(EntityGraphicType::RunSouthEast),
-        "Tried to convert a graphic type that this function doesn't support.");
-
-    // Determine how much of an offset we need to match the Direction values.
-    Uint8 valueOffset{IDLE_SOUTH_VALUE};
-    if (graphicTypeValue >= RUN_SOUTH_VALUE) {
-        valueOffset = RUN_SOUTH_VALUE;
-    }
-
-    return static_cast<Rotation::Direction>(graphicTypeValue - valueOffset);
-}
-
-EntityGraphicType
-    GraphicSystem::toRunGraphicType(Rotation::Direction direction)
-{
-    return static_cast<EntityGraphicType>(direction + RUN_SOUTH_VALUE);
-}
-
-EntityGraphicType GraphicSystem::toRunGraphicType(EntityGraphicType graphicType)
-{
-    Uint8 graphicTypeValue{static_cast<Uint8>(graphicType)};
-    AM_ASSERT(
-        graphicTypeValue <= static_cast<Uint8>(EntityGraphicType::RunSouthEast),
-        "Tried to convert a graphic type that this function doesn't support.");
-
-    // If it's an Idle value, offset it up into the Run value range.
-    if (graphicTypeValue < RUN_SOUTH_VALUE) {
-        graphicTypeValue += (RUN_SOUTH_VALUE - IDLE_SOUTH_VALUE);
-    }
-
-    return static_cast<EntityGraphicType>(graphicTypeValue);
-}
-
-EntityGraphicType
-    GraphicSystem::toIdleGraphicType(Rotation::Direction direction)
-{
-    return static_cast<EntityGraphicType>(direction + IDLE_SOUTH_VALUE);
-}
-
-EntityGraphicType
-    GraphicSystem::toIdleGraphicType(EntityGraphicType graphicType)
-{
-    Uint8 graphicTypeValue{static_cast<Uint8>(graphicType)};
-    AM_ASSERT(
-        graphicTypeValue <= static_cast<Uint8>(EntityGraphicType::RunSouthEast),
-        "Tried to convert a graphic type that this function doesn't support.");
-
-    // If it's a Run value, offset it down into the Idle value range.
-    if (graphicTypeValue >= RUN_SOUTH_VALUE) {
-        graphicTypeValue -= (RUN_SOUTH_VALUE - IDLE_SOUTH_VALUE);
-    }
-
-    return static_cast<EntityGraphicType>(graphicTypeValue);
+    // #### Default: Idle South ####
+    return {EntityGraphicType::Idle, Rotation::Direction::South};
 }
 
 } // End namespace Client

@@ -5,6 +5,7 @@
 #include "TileOffset.h"
 #include "Wall.h"
 #include "Position.h"
+#include "Rotation.h"
 #include "Sprite.h"
 
 namespace AM
@@ -60,6 +61,10 @@ struct PhantomSpriteInfo {
 
     /** The graphic value of the phantom sprite to add. */
     Uint8 graphicValue{};
+
+    /** If this is an entity phantom (layerType == None), this is the phantom's
+        graphic direction. */
+    Rotation::Direction graphicDirection{};
 };
 
 } // End namespace Client

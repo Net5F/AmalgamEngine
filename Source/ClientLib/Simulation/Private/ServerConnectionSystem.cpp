@@ -156,9 +156,9 @@ void ServerConnectionSystem::initMockSimState()
         SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET)};
     registry.emplace<GraphicState>(newEntity, graphicSet.numericID);
 
-    // Entity collision always comes from its IdleSouth graphic.
-    const GraphicRef& graphic{
-        graphicSet.graphics.at(EntityGraphicType::IdleSouth)};
+    // Entity collision always comes from its Idle South graphic.
+    const auto& graphicArr{graphicSet.graphics.at(EntityGraphicType::Idle)};
+    const GraphicRef& graphic{graphicArr.at(Rotation::Direction::South)};
     const BoundingBox& modelBounds{graphic.getModelBounds()};
     const Collision& collision{registry.emplace<Collision>(
         newEntity, modelBounds,
@@ -174,8 +174,8 @@ void ServerConnectionSystem::initMockSimState()
                                         objectType);
 
     // Entities with GraphicState also get a ClientGraphicState.
-    registry.emplace<ClientGraphicState>(newEntity,
-                                         EntityGraphicType::IdleSouth);
+    registry.emplace<ClientGraphicState>(newEntity, EntityGraphicType::Idle,
+                                         Rotation::Direction::South);
 
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};

@@ -81,13 +81,15 @@ bool EntityGraphicSetModel::addEntity()
     }
 
     // Add the new, empty graphic set to the map.
-    std::unordered_map<EntityGraphicType, GraphicID> graphicIDs{};
-    graphicIDs.emplace(EntityGraphicType::IdleSouth, NULL_GRAPHIC_ID);
-    entityMap.emplace(
-        numericID, EditorEntityGraphicSet{numericID, displayName, graphicIDs});
+    entityMap.emplace(numericID,
+                      EditorEntityGraphicSet{numericID, displayName});
+    EditorEntityGraphicSet& graphicSet{entityMap[numericID]};
+    graphicSet.graphicIDs.emplace(
+        EntityGraphicType::Idle,
+        std::array<GraphicID, Rotation::Direction::Count>{
+            /* NULL_GRAPHIC_ID */});
 
     // Signal the new graphic set to the UI.
-    EditorEntityGraphicSet& graphicSet{entityMap[numericID]};
     entityAddedSig.publish(numericID, graphicSet);
 
     // Set the new graphic set as the active library item.
@@ -152,6 +154,7 @@ void EntityGraphicSetModel::setEntityDisplayName(
 
 void EntityGraphicSetModel::setEntitySlot(EntityGraphicSetID graphicSetID,
                                           EntityGraphicType graphicType,
+                                          Rotation::Direction direction,
                                           GraphicID newGraphicID)
 {
     auto graphicSetPair{entityMap.find(graphicSetID)};
@@ -162,13 +165,15 @@ void EntityGraphicSetModel::setEntitySlot(EntityGraphicSetID graphicSetID,
     // If newGraphicID is non-null, update or add it to the map.
     EditorEntityGraphicSet& graphicSet{graphicSetPair->second};
     if (newGraphicID) {
-        graphicSet.graphicIDs[graphicType] = newGraphicID;
+        graphicSet.graphicIDs[graphicType].at(direction) = newGraphicID;
     }
     // newGraphicID is null. Clear the map entry.
     else {
-        // Never erase IdleSouth, just set it to the null sprite.
-        if (graphicType == EntityGraphicType::IdleSouth) {
-            graphicSet.graphicIDs[graphicType] = toGraphicID(NULL_SPRITE_ID);
+        // Never erase Idle, just set it to the null graphic.
+        if (graphicType == EntityGraphicType::Idle) {
+            for (GraphicID& id : graphicSet.graphicIDs.at(graphicType)) {
+                id = NULL_GRAPHIC_ID;
+            }
         }
         else {
             graphicSet.graphicIDs.erase(graphicType);
@@ -176,7 +181,8 @@ void EntityGraphicSetModel::setEntitySlot(EntityGraphicSetID graphicSetID,
     }
 
     // Signal the change.
-    entitySlotChangedSig.publish(graphicSetID, graphicType, newGraphicID);
+    entitySlotChangedSig.publish(graphicSetID, graphicType, direction,
+                                 newGraphicID);
 }
 
 void EntityGraphicSetModel::resetModelState()
@@ -191,13 +197,27 @@ void EntityGraphicSetModel::removeGraphicIDFromSets(GraphicID graphicID)
     for (auto& pair : entityMap) {
         EditorEntityGraphicSet& graphicSet{pair.second};
 
-        // For each slot in the set.
+        // For each graphic type in the set.
         auto& graphicIDs{graphicSet.graphicIDs};
-        for (auto it = graphicIDs.begin(); it != graphicIDs.end();) {
-            // If graphicID is present, erase it and signal.
-            if (it->second == graphicID) {
-                entitySlotChangedSig.publish(graphicSet.numericID, it->first,
-                                             NULL_GRAPHIC_ID);
+        for (auto it{graphicIDs.begin()}; it != graphicIDs.end();) {
+            auto& graphicIDArr{it->second};
+
+            // For each graphic in the array.
+            for (int i{0}; i < Rotation::Direction::Count; ++i) {
+                // If graphicID is present, erase it and signal.
+                if (graphicIDArr.at(i) == graphicID) {
+                    graphicIDArr.at(i) = NULL_GRAPHIC_ID;
+                    entitySlotChangedSig.publish(
+                        graphicSet.numericID, it->first,
+                        static_cast<Rotation::Direction>(i), NULL_GRAPHIC_ID);
+                }
+            }
+
+            // If a non-Idle array is now empty, erase this type from the map.
+            if ((it->first != EntityGraphicType::Idle)
+                && std::ranges::all_of(graphicIDArr, [](GraphicID id) {
+                       return id == NULL_GRAPHIC_ID;
+                   })) {
                 it = graphicIDs.erase(it);
             }
             else {
@@ -216,7 +236,14 @@ bool EntityGraphicSetModel::parseEntityGraphicSet(const nlohmann::json& graphicS
 {
     EntityGraphicSetID numericID{
         static_cast<EntityGraphicSetID>(entityIDPool.reserveID())};
+
+    // If the display name isn't unique, error.
     std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
+    if (!graphicSetNameIsUnique(numericID, displayName)) {
+        errorString = "Entity display name isn't unique: ";
+        errorString += displayName.c_str();
+        return false;
+    }
 
     // Add the graphic set's graphics.
     // Note: Types/Values are parallel arrays to save file space. If we switch 
@@ -224,24 +251,20 @@ bool EntityGraphicSetModel::parseEntityGraphicSet(const nlohmann::json& graphicS
     //       used as key/value in a map.
     const auto& graphicIDTypesJson{graphicSetJson.at("graphicIDTypes")};
     const auto& graphicIDValuesJson{graphicSetJson.at("graphicIDValues")};
-    std::unordered_map<EntityGraphicType, GraphicID> graphicIDs{};
+    std::unordered_map<EntityGraphicType,
+                       std::array<GraphicID, Rotation::Direction::Count>>
+        graphicIDs{};
     for (std::size_t i{0}; i < graphicIDTypesJson.size(); ++i) {
         EntityGraphicType graphicType{
             graphicIDTypesJson.at(i).get<EntityGraphicType>()};
-        GraphicID graphicID{graphicIDValuesJson.at(i).get<GraphicID>()};
+        const auto& graphicIDArr{graphicIDValuesJson.at(i)};
 
-        graphicIDs.emplace(graphicType, graphicID);
-
-        if (!graphicSetNameIsUnique(numericID, displayName)) {
-            errorString = "Entity display name isn't unique: ";
-            errorString += displayName.c_str();
-            return false;
-        }
+        graphicIDs.emplace(graphicType, graphicIDArr);
     }
 
-    // If IdleSouth isn't present, error (must always be present).
-    if (!(graphicIDs.contains(EntityGraphicType::IdleSouth))) {
-        errorString = "Entity is missing IdleS graphic: ";
+    // If Idle isn't present, error (must always be present).
+    if (!(graphicIDs.contains(EntityGraphicType::Idle))) {
+        errorString = "Entity is missing Idle graphics: ";
         errorString += displayName.c_str();
         return false;
     }

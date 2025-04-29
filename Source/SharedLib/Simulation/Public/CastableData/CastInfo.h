@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Castable.h"
+#include "Item.h"
 #include "NetworkID.h"
 #include "Vector3.h"
 #include "entt/fwd.hpp"
@@ -8,9 +10,6 @@
 
 namespace AM
 {
-struct Castable;
-struct Item;
-
 /**
  * All of the information necessary to perform a cast.
  */

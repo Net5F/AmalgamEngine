@@ -2,6 +2,7 @@
 
 #include "CastableID.h"
 #include "Castable.h"
+#include "SharedConfig.h"
 #include <functional>
 
 namespace AM
@@ -19,9 +20,15 @@ public:
         addCastable(ItemInteractionType::Examine,
                     Castable{.triggersGCD{false}});
 
-        // TODO: Add a constant for standard interaction range
-        addCastable(EntityInteractionType::Talk,
-                    Castable{.range{32}, .triggersGCD{false}});
+        addCastable(
+            EntityInteractionType::Talk,
+            Castable{
+                .range{SharedConfig::CAST_ENTITY_INTERACTION_STANDARD_RANGE},
+                .castTime{2},
+                .cooldownTime{2},
+                .triggersGCD{false},
+                .castingGraphicType{EntityGraphicType::Run},
+                .castCompleteGraphicType{EntityGraphicType::Crouch}});
     }
 };
 

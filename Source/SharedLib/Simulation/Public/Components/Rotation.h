@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Log.h"
 #include <SDL_stdinc.h>
 
 namespace AM
@@ -41,5 +42,36 @@ void serialize(S& serializer, Rotation& rotation)
 {
     serializer.value1b(rotation.direction);
 }
+
+namespace DisplayStrings
+{
+static std::string get(Rotation::Direction direction)
+{
+    switch (direction) {
+        case Rotation::Direction::South:
+            return "S";
+        case Rotation::Direction::SouthWest:
+            return "SW";
+        case Rotation::Direction::West:
+            return "W";
+        case Rotation::Direction::NorthWest:
+            return "NW";
+        case Rotation::Direction::North:
+            return "N";
+        case Rotation::Direction::NorthEast:
+            return "NE";
+        case Rotation::Direction::East:
+            return "E";
+        case Rotation::Direction::SouthEast:
+            return "SE";
+        default:
+            break;
+    }
+
+    LOG_ERROR("Tried to get display string for unknown direction.");
+    return "?";
+}
+
+} // namespace DisplayStrings
 
 } // namespace AM

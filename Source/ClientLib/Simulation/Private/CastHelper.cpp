@@ -44,7 +44,7 @@ CastFailureType
     // Note: If we ever hit a situation where the item in the requested slot
     //       doesn't match what the user clicked, we can also put the item ID
     //       in the request message to confirm.
-    const auto& inventory{world.registry.get<Inventory>(params.casterEntity)};
+    const auto& inventory{world.registry.get<Inventory>(world.playerEntity)};
     const Item* item{inventory.getItem(params.slotIndex, itemData)};
     if (!item) {
         return CastFailureType::InvalidItem;
@@ -61,7 +61,7 @@ CastFailureType
 
     // Perform the shared validation checks.
     CastFailureType failureType{
-        performSharedChecks(*castable, params.casterEntity, params.targetEntity,
+        performSharedChecks(*castable, world.playerEntity, params.targetEntity,
                             params.targetPosition)};
     if (failureType != CastFailureType::None) {
         return failureType;
@@ -70,8 +70,8 @@ CastFailureType
     // Add a ClientCastState to the entity (we replace in case they're in the 
     // CastComplete state).
     world.registry.emplace_or_replace<ClientCastState>(
-        params.casterEntity,
-        ClientCastState{.castInfo{castable, params.casterEntity, item,
+        world.playerEntity,
+        ClientCastState{.castInfo{castable, world.playerEntity, item,
                                   params.targetEntity, params.targetPosition},
                         .endTick{0}});
 
@@ -94,7 +94,7 @@ CastFailureType
 
     // Perform the shared validation checks.
     CastFailureType failureType{
-        performSharedChecks(*castable, params.casterEntity, params.targetEntity,
+        performSharedChecks(*castable, world.playerEntity, params.targetEntity,
                             params.targetPosition)};
     if (failureType != CastFailureType::None) {
         return failureType;
@@ -109,8 +109,8 @@ CastFailureType
     // Add a ClientCastState to the entity (we replace in case they're in the 
     // CastComplete state).
     world.registry.emplace_or_replace<ClientCastState>(
-        params.casterEntity,
-        ClientCastState{.castInfo{castable, params.casterEntity, nullptr,
+        world.playerEntity,
+        ClientCastState{.castInfo{castable, world.playerEntity, nullptr,
                                   params.targetEntity, params.targetPosition},
                         .endTick{0}});
 
@@ -131,7 +131,7 @@ CastFailureType CastHelper::castSpell(const CastSpellParams& params)
 
     // Perform the shared validation checks.
     CastFailureType failureType{
-        performSharedChecks(*castable, params.casterEntity, params.targetEntity,
+        performSharedChecks(*castable, world.playerEntity, params.targetEntity,
                             params.targetPosition)};
     if (failureType != CastFailureType::None) {
         return failureType;
@@ -146,8 +146,8 @@ CastFailureType CastHelper::castSpell(const CastSpellParams& params)
     // Add a ClientCastState to the entity (we replace in case they're in the 
     // CastComplete state).
     world.registry.emplace_or_replace<ClientCastState>(
-        params.casterEntity,
-        ClientCastState{.castInfo{castable, params.casterEntity, nullptr,
+        world.playerEntity,
+        ClientCastState{.castInfo{castable, world.playerEntity, nullptr,
                                   params.targetEntity, params.targetPosition},
                         .endTick{0}});
 

@@ -217,19 +217,36 @@ Uint32 CastSystem::getCastCompleteEndTick(entt::entity entity,
     }
 
     // Check that the entity's graphic set has the Castable's "cast complete" 
-    // graphic.
+    // graphic type.
     const EntityGraphicSet& graphicSet{
         graphicData.getEntityGraphicSet(graphicState->graphicSetID)};
-    auto graphicIt{graphicSet.graphics.find(castable.castCompleteGraphicType)};
-    if (graphicIt == graphicSet.graphics.end()) {
+    auto graphicArrIt{
+        graphicSet.graphics.find(castable.castCompleteGraphicType)};
+    if (graphicArrIt == graphicSet.graphics.end()) {
+        return 0;
+    }
+
+    // Check that the graphic array has at least one graphic.
+    // Note: We use the first non-null graphic from the array, which may not
+    //       match the entity's current direction. We assume that all 
+    //       directions of this graphic type have the same length, so it 
+    //       shouldn't matter.
+    const GraphicRef* graphic{nullptr};
+    for (const GraphicRef& graphicRef : graphicArrIt->second) {
+        if (graphicRef.getGraphicID()) {
+            graphic = &graphicRef;
+            break;
+        }
+    }
+    if (!graphic) {
         return 0;
     }
 
     // Check that the graphic is an animation (we use the animation's length to
     // know how long to be in the "cast complete" state, so we can't support 
     // individual sprites).
-    const auto* animation{std::get_if<std::reference_wrapper<const Animation>>(
-        &(graphicIt->second))};
+    const auto* animation{
+        std::get_if<std::reference_wrapper<const Animation>>(graphic)};
     if (!animation) {
         return 0;
     }

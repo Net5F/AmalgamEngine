@@ -50,14 +50,6 @@ private:
      */
     void finishPlayerEntity();
 
-    /**
-     * Converts a direction to the associated idle graphic type.
-     * If the graphic set doesn't contain the desired direction, returns 
-     * IdleSouth.
-     */
-    EntityGraphicType toIdleGraphicType(const EntityGraphicSet& graphicSet,
-                                        Rotation::Direction direction) const;
-
     /** Used to get the current tick number. */
     Simulation& simulation;
     /** Used to access components. */

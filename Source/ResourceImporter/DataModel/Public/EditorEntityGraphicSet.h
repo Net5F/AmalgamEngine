@@ -3,9 +3,11 @@
 #include "GraphicID.h"
 #include "GraphicSetIDs.h"
 #include "EntityGraphicType.h"
+#include "Rotation.h"
 #include <SDL_stdinc.h>
 #include <string>
 #include <unordered_map>
+#include <array>
 
 namespace AM
 {
@@ -23,10 +25,15 @@ struct EditorEntityGraphicSet {
     /** Unique display name, shown in the UI.  */
     std::string displayName{""};
 
-    /** The numeric IDs for each graphic in this set.
-        The Idle graphic type will always be present. All others are optional. */
-    std::unordered_map<EntityGraphicType, GraphicID> graphicIDs{
-        /* NULL_GRAPHIC_ID */};
+    /** The entity graphic types that this set contains.
+        Each graphic type is associated with an array of up to 8 graphics, one 
+        for each possible rotation of the entity.
+        The Idle graphic type will always be present. All others are optional.
+        If any slots weren't assigned a graphic, they will be set to 
+        NULL_GRAPHIC_ID in the array. */
+    std::unordered_map<EntityGraphicType,
+                       std::array<GraphicID, Rotation::Direction::Count>>
+        graphicIDs{};
 };
 
 } // namespace ResourceImporter

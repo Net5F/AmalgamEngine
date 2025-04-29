@@ -36,60 +36,25 @@ public:
 
 private:
     /**
-     * Returns true if the given entity has an Input component and an input 
-     * is pressed.
+     * Returns the desired graphic type for the given entity, based on its 
+     * current state.
      */
-    bool isMoving(entt::entity entity);
+    EntityGraphicType getDesiredGraphicType(entt::entity entity);
 
+    struct GraphicReturn {
+        EntityGraphicType type{};
+        Rotation::Direction direction{};
+    };
     /**
-     * Returns the graphic type that an entity with the given state should be 
-     * set to, if that entity is also moving.
+     * Tries to return a graphic from graphicSet, matching the desired graphic 
+     * type and direction. If the set doesn't have a graphic in that slot, 
+     * returns the closest matching graphic.
      */
-    EntityGraphicType
-        getUpdatedRunGraphicType(const EntityGraphicSet& graphicSet,
-                                 const Rotation& rotation,
-                                 const ClientGraphicState& clientGraphicState);
-
-    /**
-     * Returns the graphic type that an entity with the given state should be 
-     * set to, if that entity is also not moving.
-     */
-    EntityGraphicType
-        getUpdatedIdleGraphicType(const EntityGraphicSet& graphicSet,
-                                  const Rotation& rotation,
-                                  const ClientGraphicState& clientGraphicState);
-
-    /**
-     * Converts a graphic type to its associated direction.
-     * Only works for Run or Idle graphic types.
-     */
-    Rotation::Direction toDirection(EntityGraphicType graphicType);
-
-    /**
-     * Converts a Direction to the associated Run graphic type.
-     */
-    EntityGraphicType toRunGraphicType(Rotation::Direction direction);
-
-    /**
-     * If graphicType is an Idle graphic type, converts it to the Run graphic 
-     * type of the same direction. If it's already a Run graphic type, does 
-     * nothing.
-     * Only works for Run or Idle graphic types.
-     */
-    EntityGraphicType toRunGraphicType(EntityGraphicType graphicType);
-
-    /**
-     * Converts a Direction to the associated Idle graphic type.
-     */
-    EntityGraphicType toIdleGraphicType(Rotation::Direction direction);
-
-    /**
-     * If graphicType is a Run graphic type, converts it to the Idle graphic 
-     * type of the same direction. If it's already an Idle graphic type, does 
-     * nothing.
-     * Only works for Run or Idle graphic types.
-     */
-    EntityGraphicType toIdleGraphicType(EntityGraphicType graphicType);
+    GraphicReturn
+        getGraphicOrDefault(const EntityGraphicSet& graphicSet,
+                            const ClientGraphicState& clientGraphicState,
+                            EntityGraphicType desiredType,
+                            Rotation::Direction desiredDirection);
 
     /** Used to get entity GraphicState components. */
     World& world;

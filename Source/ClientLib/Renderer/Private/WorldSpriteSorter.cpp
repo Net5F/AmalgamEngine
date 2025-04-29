@@ -137,7 +137,8 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
         = registry.view<Position, GraphicState, ClientGraphicState>();
     for (entt::entity entity : view) {
         auto [position, graphicState, clientGraphicState]
-            = view.get<Position, GraphicState, ClientGraphicState>(entity);
+            = view.get<Position, GraphicState, ClientGraphicState>(
+                entity);
 
         // If this entity has a previous position, calc a lerp'd position.
         Position renderPosition{position};
@@ -150,7 +151,8 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
         const Sprite& sprite{getEntitySprite(graphicState, clientGraphicState)};
         pushEntitySprite(entity, renderPosition, sprite, camera,
                          graphicState.graphicSetID,
-                         clientGraphicState.graphicType);
+                         clientGraphicState.graphicType,
+                         clientGraphicState.graphicDirection);
     }
 
     // Gather all of the UI's phantom entity sprites.
@@ -160,7 +162,8 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
             pushEntitySprite(
                 entt::null, info.position, graphic.getFirstSprite(), camera,
                 static_cast<EntityGraphicSetID>(info.graphicSet->numericID),
-                static_cast<EntityGraphicType>(info.graphicValue));
+                static_cast<EntityGraphicType>(info.graphicValue),
+                info.graphicDirection);
         }
     }
 }
@@ -365,8 +368,10 @@ const Sprite&
               "Tried to get entity sprite that doesn't exist in set. Set: %s, "
               "Graphic type: %u",
               graphicSet.displayName.c_str(), clientGraphicState.graphicType);
-    const GraphicRef& graphic{
+    const auto& graphicArr{
         graphicSet.graphics.at(clientGraphicState.graphicType)};
+    const GraphicRef graphic{
+        graphicArr.at(clientGraphicState.graphicDirection)};
     const Sprite* sprite{nullptr};
     std::visit(VariantTools::Overload{
         [&](std::reference_wrapper<const Sprite> spriteRef) {
@@ -390,12 +395,10 @@ const Sprite&
     return *sprite;
 }
 
-void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
-                                         const Position& position,
-                                         const Sprite& sprite,
-                                         const Camera& camera,
-                                         EntityGraphicSetID graphicSetID,
-                                         EntityGraphicType graphicType)
+void WorldSpriteSorter::pushEntitySprite(
+    entt::entity entity, const Position& position, const Sprite& sprite,
+    const Camera& camera, EntityGraphicSetID graphicSetID,
+    EntityGraphicType graphicType, Rotation::Direction graphicDirection)
 {
     // Get the iso screen extent for the sprite.
     const SpriteRenderData& renderData{
@@ -405,7 +408,8 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
 
     SDL_FRect screenExtent{ClientTransforms::entityToScreenExtent(
         position, graphicSet.getCollisionModelBounds().getBottomCenterPoint(),
-        graphicData.getRenderAlignmentOffset(graphicSetID, graphicType),
+        graphicData.getRenderAlignmentOffset(graphicSetID, graphicType,
+                                             graphicDirection),
         renderData, camera)};
 
     // If the sprite is on screen, push the render info.
@@ -577,7 +581,7 @@ GraphicRef WorldSpriteSorter::getPhantomGraphic(
             *(phantomSpriteInfo.graphicSet))};
         auto graphicIt{graphicSet.graphics.find(type)};
         if (graphicIt != graphicSet.graphics.end()) {
-            return graphicIt->second;
+            return graphicIt->second.at(phantomSpriteInfo.graphicDirection);
         }
     }
 

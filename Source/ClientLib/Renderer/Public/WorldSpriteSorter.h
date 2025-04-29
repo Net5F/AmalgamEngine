@@ -15,6 +15,7 @@ struct Camera;
 class Tile;
 struct TileLayerID;
 struct GraphicState;
+struct Rotation;
 
 namespace Client
 {
@@ -104,7 +105,8 @@ private:
     void pushEntitySprite(entt::entity entity, const Position& position,
                           const Sprite& sprite, const Camera& camera,
                           EntityGraphicSetID graphicSetID,
-                          EntityGraphicType graphicType);
+                          EntityGraphicType graphicType,
+                          Rotation::Direction graphicDirection);
 
     /**
      * Sorts the sprites into their draw order (farthest sprite first).

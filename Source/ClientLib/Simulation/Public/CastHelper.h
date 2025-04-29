@@ -2,7 +2,11 @@
 
 #include "CastInfo.h"
 #include "CastFailureType.h"
-#include "CastHelperParams.h"
+#include "ItemInteractionType.h"
+#include "EntityInteractionType.h"
+#include "SpellType.h"
+#include "entt/fwd.hpp"
+#include <SDL_stdinc.h>
 #include <unordered_map>
 #include <functional>
 
@@ -28,6 +32,7 @@ public:
     CastHelper(Simulation& inSimulation, Network& inNetwork,
                const ItemData& inItemData, const CastableData& inCastableData);
 
+    struct CastItemInteractionParams;
     /**
      * Casts an item interaction, using the given info.
      * 
@@ -37,6 +42,7 @@ public:
     CastFailureType
         castItemInteraction(const CastItemInteractionParams& params);
 
+    struct CastEntityInteractionParams;
     /**
      * Casts an entity interaction, using the given info.
      * 
@@ -46,6 +52,7 @@ public:
     CastFailureType
         castEntityInteraction(const CastEntityInteractionParams& params);
 
+    struct CastSpellParams;
     /**
      * Casts a spell, using the given info.
      * 
@@ -119,6 +126,48 @@ private:
     Network& network;
     const ItemData& itemData;
     const CastableData& castableData;
+
+public:
+struct CastItemInteractionParams {
+    // Note: The player entity is always assumed to be the caster.
+
+    /** The item interaction to cast. */
+    ItemInteractionType interactionType{};
+    /** The slot of the item that is being used, within casterEntity's 
+        inventory. */
+    Uint8 slotIndex{};
+    /** (Optional) The target entity. If the Castable's targetToolType is 
+        Entity, this must be valid. */
+    entt::entity targetEntity{};
+    /** (Optional) The target position. If the Castable's targetToolType 
+        is Circle, this must be valid. */
+    const Vector3& targetPosition{};
+};
+
+struct CastEntityInteractionParams {
+    // Note: The player entity is always assumed to be the caster.
+
+    /** The entity interaction to cast. */
+    EntityInteractionType interactionType{};
+    /** The target entity. */
+    entt::entity targetEntity{};
+    /** (Optional) The target position. If the Castable's targetToolType 
+        is Circle, this must be valid. */
+    const Vector3& targetPosition{};
+};
+
+struct CastSpellParams {
+    // Note: The player entity is always assumed to be the caster.
+
+    /** The item interaction to cast. */
+    SpellType interactionType{};
+    /** (Optional) The target entity. If the Castable's targetToolType is 
+        Entity, this must be valid. */
+    entt::entity targetEntity{};
+    /** (Optional) The client that requested this cast. If present, any
+        failure messages will be sent to this client. */
+    const Vector3& targetPosition{};
+};
 };
 
 } // End namespace Client 

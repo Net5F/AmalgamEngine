@@ -51,13 +51,15 @@ private:
      */
     void onEntitySlotChanged(EntityGraphicSetID graphicSetID,
                              EntityGraphicType graphicType,
+                             Rotation::Direction direction,
                              GraphicID newGraphicID);
 
     /**
      * Attempts to assign the currently selected library item to the 
      * given graphic type's slot.
      */
-    void onAssignButtonPressed(EntityGraphicType graphicType);
+    void onAssignButtonPressed(EntityGraphicType graphicType,
+                               Rotation::Direction direction);
 
     /**
      * Styles the given text.
@@ -73,6 +75,25 @@ private:
      * Fills the given slot widget with the given graphic's image and name.
      */
     void fillSlotGraphicData(GraphicSetSlot& slot, GraphicID graphicID);
+
+    /**
+     * Converts an entity graphic type and rotation into the associated 
+     * graphicContainer index.
+     */
+    std::size_t toIndex(EntityGraphicType graphicType,
+                        Rotation::Direction direction);
+
+    /**
+     * Iterates all of the engine and project entity graphic types, skipping the 
+     * gaps.
+     *
+     * @param callback A callback of form void(EntityGraphicType).
+     *
+     * Note: If we ever need this elsewhere, we can move it to 
+     *       EntityGraphicType.h.
+     */
+    template<typename Func>
+    void iterateEntityGraphicTypes(Func callback);
 
     /** Used to get the current working dir when displaying the graphic. */
     DataModel& dataModel;
@@ -90,7 +111,8 @@ private:
     AUI::Text modifyText;
     AUI::Text clearText;
 
-    /** Holds this graphic set's graphics. */
+    /** Holds a slot for each EntityGraphicType and Rotation::Direction, in 
+        order. */
     AUI::VerticalGridContainer graphicContainer;
 
     AUI::Text descText;

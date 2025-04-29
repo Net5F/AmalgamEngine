@@ -190,9 +190,8 @@ void World::addGraphicsComponents(entt::entity entity,
     // Use the current graphic as the entity's collision bounds.
     const EntityGraphicSet& graphicSet{
         graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
-    const GraphicRef& graphic{
-        graphicSet.graphics.at(EntityGraphicType::IdleSouth)};
-
+    const auto& graphicArr{graphicSet.graphics.at(EntityGraphicType::Idle)};
+    const GraphicRef& graphic{graphicArr[Rotation::Direction::South]};
     const BoundingBox modelBounds{graphic.getModelBounds()};
     const Position& position{registry.get<Position>(entity)};
     const Collision& collision{registry.emplace<Collision>(

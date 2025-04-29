@@ -11,7 +11,11 @@ namespace AM
 {
 namespace ResourceImporter
 {
-EntityGraphicSetEditView::EntityGraphicSetEditView(DataModel& inDataModel,
+/** The width of a graphic container slot. */
+static constexpr unsigned int SLOT_WIDTH{156};
+
+EntityGraphicSetEditView::EntityGraphicSetEditView(
+    DataModel& inDataModel,
                                        const LibraryWindow& inLibraryWindow)
 : AUI::Window({320, 58, 1297, 1022}, "EntityGraphicSetEditView")
 , dataModel{inDataModel}
@@ -20,7 +24,7 @@ EntityGraphicSetEditView::EntityGraphicSetEditView(DataModel& inDataModel,
 , topText{{0, 0, logicalExtent.w, 34}, "TopText"}
 , modifyText{{193, 58, 1000, 24}, "ModifyText"}
 , clearText{{193, 89, 1000, 24}, "ClearText"}
-, graphicContainer{{193, 135, 900, 632}, "GraphicContainer"}
+, graphicContainer{{25, 135, 1248, 632}, "GraphicContainer"}
 , descText{{24, 807, 1240, 156}, "DescText"}
 {
     // Add our children so they're included in rendering, etc.
@@ -52,8 +56,8 @@ EntityGraphicSetEditView::EntityGraphicSetEditView(DataModel& inDataModel,
         "displayed, its bounding box will not change."); 
 
     /* Container */
-    graphicContainer.setNumColumns(5);
-    graphicContainer.setCellWidth(180);
+    graphicContainer.setNumColumns(8);
+    graphicContainer.setCellWidth(SLOT_WIDTH);
     graphicContainer.setCellHeight(255 + 14);
     initGraphicContainer();
 
@@ -82,17 +86,19 @@ void EntityGraphicSetEditView::onActiveLibraryItemChanged(
     activeGraphicSetID = newActiveGraphicSet->numericID;
 
     // Fill the container with the graphic set's graphics.
-    for (auto& [graphicType, graphicID] : newActiveGraphicSet->graphicIDs) {
-        // Get the graphic set slot widget that matches graphicType.
-        std::size_t index{toIndex(graphicType)};
-        GraphicSetSlot& slot{
-            static_cast<GraphicSetSlot&>(*graphicContainer[index])};
+    for (auto& [graphicType, graphicIDArr] : newActiveGraphicSet->graphicIDs) {
+        for (Uint8 i{0}; i < Rotation::Direction::Count; ++i) {
+            GraphicID graphicID{graphicIDArr.at(i)};
 
-        // Set the top text.
-        slot.topText.setText(DisplayStrings::get(graphicType));
+            // Get the graphic set slot widget that matches graphicType.
+            std::size_t index{
+                toIndex(graphicType, static_cast<Rotation::Direction>(i))};
+            GraphicSetSlot& slot{
+                static_cast<GraphicSetSlot&>(*graphicContainer[index])};
 
-        // Fill in the graphic's data.
-        fillSlotGraphicData(slot, graphicID);
+            // Fill in the graphic's data.
+            fillSlotGraphicData(slot, graphicID);
+        }
     }
 
     // Make sure the container is visible.
@@ -109,7 +115,7 @@ void EntityGraphicSetEditView::onEntityRemoved(EntityGraphicSetID graphicSetID)
 
 void EntityGraphicSetEditView::onEntitySlotChanged(
     EntityGraphicSetID graphicSetID, EntityGraphicType graphicType,
-    GraphicID newGraphicID)
+    Rotation::Direction direction, GraphicID newGraphicID)
 {
     // If the changed data doesn't affect us, return early.
     if (graphicSetID != activeGraphicSetID) {
@@ -117,13 +123,14 @@ void EntityGraphicSetEditView::onEntitySlotChanged(
     }
 
     // Fill in the new slot data.
-    std::size_t index{toIndex(graphicType)};
-    GraphicSetSlot& slot{static_cast<GraphicSetSlot&>(*graphicContainer[index])};
+    std::size_t index{toIndex(graphicType, direction)};
+    GraphicSetSlot& slot{
+        static_cast<GraphicSetSlot&>(*graphicContainer[index])};
     fillSlotGraphicData(slot, newGraphicID);
 }
 
 void EntityGraphicSetEditView::onAssignButtonPressed(
-    EntityGraphicType graphicType)
+    EntityGraphicType graphicType, Rotation::Direction direction)
 {
     // If a graphic is selected, set the given slot to it.
     // Note: This just uses the first selected graphic. Multi-select is ignored.
@@ -134,14 +141,16 @@ void EntityGraphicSetEditView::onAssignButtonPressed(
             if (selectedItem->type == LibraryListItem::Type::Sprite) {
                 SpriteID spriteID{static_cast<SpriteID>(selectedItem->ID)};
                 dataModel.entityGraphicSetModel.setEntitySlot(
-                    activeGraphicSetID, graphicType, toGraphicID(spriteID));
+                    activeGraphicSetID, graphicType, direction,
+                    toGraphicID(spriteID));
                 break;
             }
             else if (selectedItem->type == LibraryListItem::Type::Animation) {
                 AnimationID animationID{
                     static_cast<AnimationID>(selectedItem->ID)};
                 dataModel.entityGraphicSetModel.setEntitySlot(
-                    activeGraphicSetID, graphicType, toGraphicID(animationID));
+                    activeGraphicSetID, graphicType, direction,
+                    toGraphicID(animationID));
                 break;
             }
         }
@@ -149,7 +158,7 @@ void EntityGraphicSetEditView::onAssignButtonPressed(
     else {
         // No selection. Empty the slot.
         dataModel.entityGraphicSetModel.setEntitySlot(
-            activeGraphicSetID, graphicType, NULL_GRAPHIC_ID);
+            activeGraphicSetID, graphicType, direction, NULL_GRAPHIC_ID);
     }
 }
 
@@ -161,33 +170,38 @@ void EntityGraphicSetEditView::styleText(AUI::Text& text)
 
 void EntityGraphicSetEditView::initGraphicContainer()
 {
-    // Fill the container with a slot widget for each EntityGraphicType.
+    // Fill the container with a slot widget for each EntityGraphicType 
+    // and Rotation::Direction.
     graphicContainer.clear();
-    for (Uint8 i{0}; i < ENTITY_GRAPHIC_TYPE_COUNT; ++i) {
-        EntityGraphicType graphicType{toEntityGraphicType(i)};
+    iterateEntityGraphicTypes([&](EntityGraphicType graphicType) {
+        for (Uint8 j{0}; j < Rotation::Direction::Count; j++) {
+            Rotation::Direction direction{static_cast<Rotation::Direction>(j)};
 
-        // Construct the new slot widget.
-        std::unique_ptr<AUI::Widget> slotPtr{
-            std::make_unique<GraphicSetSlot>(180)};
-        GraphicSetSlot& slot{static_cast<GraphicSetSlot&>(*slotPtr)};
+            // Construct the new slot widget.
+            std::unique_ptr<AUI::Widget> slotPtr{
+                std::make_unique<GraphicSetSlot>(SLOT_WIDTH)};
+            GraphicSetSlot& slot{static_cast<GraphicSetSlot&>(*slotPtr)};
 
-        // Set the top text.
-        slot.topText.setText(DisplayStrings::get(graphicType));
+            // Set the top text.
+            std::string topText{DisplayStrings::get(graphicType)};
+            topText += " " + DisplayStrings::get(direction);
+            slot.topText.setText(topText);
 
-        // Fill in the graphic's data.
-        fillSlotGraphicData(slot, NULL_GRAPHIC_ID);
+            // Fill in the graphic's data.
+            fillSlotGraphicData(slot, NULL_GRAPHIC_ID);
 
-        // Set the assignment button callback.
-        slot.assignButton.setOnPressed([this, graphicType]() {
-            onAssignButtonPressed(graphicType);
-        });
+            // Set the assignment button callback.
+            slot.assignButton.setOnPressed([this, graphicType, direction]() {
+                onAssignButtonPressed(graphicType, direction);
+            });
 
-        graphicContainer.push_back(std::move(slotPtr));
-    }
+            graphicContainer.push_back(std::move(slotPtr));
+        }
+    });
 }
 
 void EntityGraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
-                                              GraphicID graphicID)
+                                                   GraphicID graphicID)
 {
     // If this slot isn't empty, set the widget's data.
     if (graphicID) {
@@ -225,6 +239,38 @@ void EntityGraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
         // Empty slot.
         slot.spriteImage.setIsVisible(false);
         slot.spriteNameText.setText("Empty");
+    }
+}
+
+std::size_t EntityGraphicSetEditView::toIndex(EntityGraphicType graphicType,
+                                              Rotation::Direction direction)
+{
+    AM_ASSERT(graphicType != EntityGraphicType::NotSet,
+              "Tried to get index of uninitialized entity graphic type.");
+
+    return ((static_cast<std::size_t>(graphicType) - 1)
+            * Rotation::Direction::Count)
+           + direction;
+}
+
+template<typename Func>
+void EntityGraphicSetEditView::iterateEntityGraphicTypes(Func callback)
+{
+    static constexpr std::size_t NotSet{
+        static_cast<std::size_t>(EntityGraphicType::NotSet)};
+    static constexpr std::size_t PROJECT_START{
+        static_cast<std::size_t>(EntityGraphicType::PROJECT_START)};
+    static constexpr std::size_t PROJECT_END{
+        static_cast<std::size_t>(EntityGraphicType::PROJECT_END)};
+
+    // Engine types
+    for (std::size_t i{NotSet + 1}; i < PROJECT_START; ++i) {
+        callback(static_cast<EntityGraphicType>(i));
+    }
+
+    // Project types
+    for (std::size_t i{PROJECT_START + 1}; i < PROJECT_END; ++i) {
+        callback(static_cast<EntityGraphicType>(i));
     }
 }
 

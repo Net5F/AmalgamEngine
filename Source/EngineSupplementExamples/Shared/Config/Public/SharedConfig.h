@@ -98,6 +98,13 @@ public:
         static_cast<unsigned int>(CAST_GLOBAL_COOLDOWN_S
                                   / SIM_TICK_TIMESTEP_S)};
 
+    /** The standard range for entity interactions, such as "Talk".
+        This is the max distance between the caster and the target entity.
+        This will be the range of all engine-provided entity interactions, and 
+        you can choose to use it for project interactions as well. */
+    static constexpr float CAST_ENTITY_INTERACTION_STANDARD_RANGE{
+        TILE_WORLD_WIDTH};
+
     //-------------------------------------------------------------------------
     // Network
     //-------------------------------------------------------------------------

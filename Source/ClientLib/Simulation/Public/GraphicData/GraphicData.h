@@ -55,7 +55,8 @@ public:
      *       then needs to do some work to make sure the sprite lines up.
      */
     Vector3 getRenderAlignmentOffset(EntityGraphicSetID setID,
-                                     EntityGraphicType graphicType) const;
+                                     EntityGraphicType graphicType,
+                                     Rotation::Direction direction) const;
 
 private:
     /**

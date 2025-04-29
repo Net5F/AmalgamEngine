@@ -59,7 +59,8 @@ public:
                               const std::string& newDisplayName);
     /** If newGraphicID is null, the slot will be cleared. */
     void setEntitySlot(EntityGraphicSetID graphicSetID,
-                       EntityGraphicType graphicType, GraphicID newGraphicID);
+                       EntityGraphicType graphicType,
+                       Rotation::Direction direction, GraphicID newGraphicID);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
@@ -117,7 +118,8 @@ private:
 
     entt::sigh<void(EntityGraphicSetID graphicSetID)> entityRemovedSig;
     entt::sigh<void(EntityGraphicSetID graphicSetID,
-                    EntityGraphicType graphicType, GraphicID newGraphicID)>
+                    EntityGraphicType graphicType, Rotation::Direction,
+                    GraphicID newGraphicID)>
         entitySlotChangedSig;
     entt::sigh<void(EntityGraphicSetID graphicSetID,
                     const std::string& newDisplayName)>
@@ -137,9 +139,9 @@ public:
 
     /** An entity graphic set's graphic of the given type was changed.
         If ID == null, the slot was cleared. */
-    entt::sink<
-        entt::sigh<void(EntityGraphicSetID graphicSetID,
-                        EntityGraphicType graphicType, GraphicID newGraphicID)>>
+    entt::sink<entt::sigh<void(
+        EntityGraphicSetID graphicSetID, EntityGraphicType graphicType,
+        Rotation::Direction direction, GraphicID newGraphicID)>>
         entitySlotChanged;
 
     /** An entity graphic set's display name has changed. */

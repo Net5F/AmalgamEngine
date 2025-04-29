@@ -130,11 +130,12 @@ void GraphicData::parseAnimation(const nlohmann::json& animationJson)
 
 Vector3
     GraphicData::getRenderAlignmentOffset(EntityGraphicSetID setID,
-                                          EntityGraphicType graphicType) const
+                                          EntityGraphicType graphicType,
+                                          Rotation::Direction direction) const
 {
     const EntityGraphicSet& graphicSet{getEntityGraphicSet(setID)};
-    if (!(graphicSet.graphics.contains(EntityGraphicType::IdleSouth))) {
-        LOG_ERROR("Entity graphic set is missing IdleSouth: %s.",
+    if (!(graphicSet.graphics.contains(EntityGraphicType::Idle))) {
+        LOG_ERROR("Entity graphic set is missing Idle: %s.",
                   graphicSet.displayName.c_str());
         return {};
     }
@@ -146,7 +147,8 @@ Vector3
 
     // If the requested graphic is a Sprite, return 0 (sprites don't have 
     // alignment anchors).
-    const GraphicRef& graphicRef{graphicSet.graphics.at(graphicType)};
+    const auto& graphicArr{graphicSet.graphics.at(graphicType)};
+    const GraphicRef& graphicRef{graphicArr.at(direction)};
     if (std::holds_alternative<std::reference_wrapper<const Sprite>>(
             graphicRef)) {
         return {};
@@ -161,12 +163,12 @@ Vector3
         return {};
     }
 
-    // Return the difference between the IdleSouth graphic's bottom center and 
+    // Return the difference between the Idle South graphic's bottom center and 
     // the requested animation's alignment anchor.
-    Vector3 idleSouthBottomCenter{
-        graphicSet.graphics.at(EntityGraphicType::IdleSouth)
-            .getModelBounds()
-            .getBottomCenterPoint()};
+    const auto& idleGraphicArr{graphicSet.graphics.at(EntityGraphicType::Idle)};
+    Vector3 idleSouthBottomCenter{idleGraphicArr.at(Rotation::Direction::South)
+                                      .getModelBounds()
+                                      .getBottomCenterPoint()};
     Vector3 alignmentAnchor{renderData.entityAlignmentAnchor.value()};
     return (idleSouthBottomCenter - alignmentAnchor);
 }

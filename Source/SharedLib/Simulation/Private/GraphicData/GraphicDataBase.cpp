@@ -526,16 +526,16 @@ void GraphicDataBase::parseTerrainGraphicSet(const nlohmann::json& graphicSetJso
     GraphicRef nullSprite{sprites[NULL_SPRITE_ID]};
 
     // Add the graphics.
+    const nlohmann::json& graphicIDJsonArr{graphicSetJson.at("graphicIDs")};
+    if (graphicIDJsonArr.size() != Terrain::Height::Count) {
+        LOG_FATAL("Invalid count for terrain graphic set: %s.",
+                  graphicSet.displayName.c_str());
+    }
+
     std::size_t index{0};
-    for (auto& graphicIDJson : graphicSetJson.at("graphicIDs").items()) {
+    for (auto& graphicIDJson : graphicIDJsonArr.items()) {
         GraphicID graphicID{graphicIDJson.value().get<GraphicID>()};
-        if (graphicID) {
-            graphicSet.graphics[index] = getGraphic(graphicID);
-        }
-        else {
-            // Empty slot. Set it to the null sprite.
-            graphicSet.graphics[index] = {sprites[0]};
-        }
+        graphicSet.graphics[index] = getGraphic(graphicID);
         index++;
     }
 }
@@ -553,16 +553,16 @@ void GraphicDataBase::parseFloorGraphicSet(
     GraphicRef nullSprite{sprites[NULL_SPRITE_ID]};
 
     // Add the graphics.
+    const nlohmann::json& graphicIDJsonArr{graphicSetJson.at("graphicIDs")};
+    if (graphicIDJsonArr.size() != FloorGraphicSet::VARIATION_COUNT) {
+        LOG_FATAL("Invalid count for floor graphic set: %s.",
+                  graphicSet.displayName.c_str());
+    }
+
     std::size_t index{0};
-    for (auto& graphicIDJson : graphicSetJson.at("graphicIDs").items()) {
+    for (auto& graphicIDJson : graphicIDJsonArr.items()) {
         GraphicID graphicID{graphicIDJson.value().get<GraphicID>()};
-        if (graphicID) {
-            graphicSet.graphics[index] = getGraphic(graphicID);
-        }
-        else {
-            // Empty slot. Set it to the null sprite.
-            graphicSet.graphics[index] = {sprites[0]};
-        }
+        graphicSet.graphics[index] = getGraphic(graphicID);
         index++;
     }
 }
@@ -570,11 +570,18 @@ void GraphicDataBase::parseFloorGraphicSet(
 void GraphicDataBase::parseWallGraphicSet(const nlohmann::json& graphicSetJson)
 {
     // Collect the wall graphics.
-    const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
-    GraphicRef westGraphic{getGraphic(graphicIDJson[0].get<GraphicID>())};
-    GraphicRef northGraphic{getGraphic(graphicIDJson[1].get<GraphicID>())};
-    GraphicRef northwestGraphic{getGraphic(graphicIDJson[2].get<GraphicID>())};
-    GraphicRef northeastGraphic{getGraphic(graphicIDJson[3].get<GraphicID>())};
+    const nlohmann::json& graphicIDJsonArr{graphicSetJson.at("graphicIDs")};
+    if (graphicIDJsonArr.size() != Wall::Type::Count) {
+        LOG_FATAL("Invalid count for wall graphic set: %s.",
+                  graphicSetJson.at("displayName").get<std::string>().c_str());
+    }
+
+    GraphicRef westGraphic{getGraphic(graphicIDJsonArr[0].get<GraphicID>())};
+    GraphicRef northGraphic{getGraphic(graphicIDJsonArr[1].get<GraphicID>())};
+    GraphicRef northwestGraphic{
+        getGraphic(graphicIDJsonArr[2].get<GraphicID>())};
+    GraphicRef northeastGraphic{
+        getGraphic(graphicIDJsonArr[3].get<GraphicID>())};
 
     // Save the graphic set in the appropriate vector.
     WallGraphicSetID numericID{graphicSetJson.at("numericID")};
@@ -602,16 +609,16 @@ void GraphicDataBase::parseObjectGraphicSet(
         = constructAndFillArray<ObjectGraphicSet::VARIATION_COUNT>(nullSprite);
 
     // Add the graphics.
+    const nlohmann::json& graphicIDJsonArr{graphicSetJson.at("graphicIDs")};
+    if (graphicIDJsonArr.size() != ObjectGraphicSet::VARIATION_COUNT) {
+        LOG_FATAL("Invalid count for object graphic set: %s.",
+                  graphicSet.displayName.c_str());
+    }
+
     std::size_t index{0};
-    for (auto& graphicIDJson : graphicSetJson.at("graphicIDs").items()) {
+    for (auto& graphicIDJson : graphicIDJsonArr.items()) {
         GraphicID graphicID{graphicIDJson.value().get<GraphicID>()};
-        if (graphicID) {
-            graphicSet.graphics[index] = getGraphic(graphicID);
-        }
-        else {
-            // Empty slot. Set it to the null sprite.
-            graphicSet.graphics[index] = {sprites[0]};
-        }
+        graphicSet.graphics[index] = getGraphic(graphicID);
         index++;
     }
 }
@@ -630,12 +637,27 @@ void GraphicDataBase::parseEntityGraphicSet(
     // Add the graphics.
     const auto& graphicIDTypesJson{graphicSetJson.at("graphicIDTypes")};
     const auto& graphicIDValuesJson{graphicSetJson.at("graphicIDValues")};
+    GraphicRef nullSprite{sprites[NULL_SPRITE_ID]};
     for (std::size_t i{0}; i < graphicIDTypesJson.size(); ++i) {
+        if (graphicIDValuesJson.at(i).size() != Rotation::Direction::Count) {
+            LOG_FATAL("Invalid count for entity graphic set: %s, index: %u.",
+                      graphicSet.displayName.c_str(), i);
+        }
+
         EntityGraphicType graphicType{
             graphicIDTypesJson.at(i).get<EntityGraphicType>()};
-        GraphicID graphicID{graphicIDValuesJson.at(i).get<GraphicID>()};
+        const auto& graphicIDArr{graphicIDValuesJson.at(i)};
 
-        graphicSet.graphics.emplace(graphicType, getGraphic(graphicID));
+        // Init an empty array for this type.
+        graphicSet.graphics.emplace(
+            graphicType,
+            constructAndFillArray<Rotation::Direction::Count>(nullSprite));
+
+        // Fill the array.
+        auto& graphicArr{graphicSet.graphics.at(graphicType)};
+        for (int j{0}; j < Rotation::Direction::Count; ++j) {
+            graphicArr[j] = getGraphic(graphicIDArr.at(j).get<GraphicID>());
+        }
     }
 }
 

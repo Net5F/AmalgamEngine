@@ -171,8 +171,8 @@ void EntityLifetimeSystem::processEntityData(
         // Note: Entity collision always comes from its IdleSouth graphic.
         const EntityGraphicSet& graphicSet{
             graphicData.getEntityGraphicSet(graphicState->graphicSetID)};
-        const GraphicRef& graphic{
-            graphicSet.graphics.at(EntityGraphicType::IdleSouth)};
+        const auto& graphicArr{graphicSet.graphics.at(EntityGraphicType::Idle)};
+        const GraphicRef& graphic{graphicArr.at(Rotation::Direction::South)};
 
         const BoundingBox& modelBounds{graphic.getModelBounds()};
         const Position& position{registry.get<Position>(newEntity)};
@@ -189,13 +189,13 @@ void EntityLifetimeSystem::processEntityData(
                                             objectType);
 
         // Entities with GraphicState also get a ClientGraphicState.
-        // Set it to match the entity's Rotation, or IdleSouth if it has none.
-        EntityGraphicType initialGraphicType{EntityGraphicType::IdleSouth};
+        // Set it to match the entity's Rotation, or South if it has none.
+        Rotation::Direction graphicDirection{Rotation::Direction::South};
         if (const auto* rotation{registry.try_get<Rotation>(newEntity)}) {
-            initialGraphicType
-                = toIdleGraphicType(graphicSet, rotation->direction);
+            graphicDirection = rotation->direction;
         }
-        registry.emplace<ClientGraphicState>(newEntity, initialGraphicType);
+        registry.emplace<ClientGraphicState>(newEntity, EntityGraphicType::Idle,
+                                             graphicDirection);
     }
 
     // If this is the player entity, add any client components specific to it.
@@ -227,52 +227,6 @@ void EntityLifetimeSystem::finishPlayerEntity()
 
     // Flag that we need to request all map data.
     registry.emplace<NeedsAdjacentChunks>(playerEntity);
-}
-
-EntityGraphicType
-    EntityLifetimeSystem::toIdleGraphicType(const EntityGraphicSet& graphicSet,
-                                            Rotation::Direction direction) const
-{
-    // Convert Rotation -> EntityGraphicType.
-    EntityGraphicType desiredType{EntityGraphicType::IdleSouth};
-    switch (direction) {
-        case Rotation::Direction::South:
-            desiredType = EntityGraphicType::IdleSouth;
-            break;
-        case Rotation::Direction::SouthWest:
-            desiredType = EntityGraphicType::IdleSouthWest;
-            break;
-        case Rotation::Direction::West:
-            desiredType = EntityGraphicType::IdleWest;
-            break;
-        case Rotation::Direction::NorthWest:
-            desiredType = EntityGraphicType::IdleNorthWest;
-            break;
-        case Rotation::Direction::North:
-            desiredType = EntityGraphicType::IdleNorth;
-            break;
-        case Rotation::Direction::NorthEast:
-            desiredType = EntityGraphicType::IdleNorthEast;
-            break;
-        case Rotation::Direction::East:
-            desiredType = EntityGraphicType::IdleEast;
-            break;
-        case Rotation::Direction::SouthEast:
-            desiredType = EntityGraphicType::IdleSouthEast;
-            break;
-        default: 
-            desiredType = EntityGraphicType::IdleSouth;
-            break;
-    }
-
-    // If the graphic set has the desired type, return it.
-    if (graphicSet.graphics.contains(desiredType)) {
-        return desiredType;
-    }
-    else {
-        // Doesn't contain the type, return IdleSouth (guaranteed to exist).
-        return EntityGraphicType::IdleSouth;
-    }
 }
 
 } // End namespace Client
