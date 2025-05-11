@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GraphicSets.h"
-#include "entt/fwd.hpp"
 #include <vector>
 
 namespace AM
@@ -35,12 +34,6 @@ struct AVEntity {
         /** How long this phase should run before timing out. */
         float durationS{};
     };
-
-    /** The target entity, if one was provided. */
-    entt::entity targetEntity{};
-
-    /** The target position, if one was provided. */
-    Vector3 targetPosition{};
 
     /** The phases that this entity will go through before being destroyed. */
     std::vector<Phase> phases{};

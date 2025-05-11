@@ -24,18 +24,11 @@ struct VisualEffect {
 
     /** If the graphic is an animation, this determines whether to play the 
         animation once or to loop it. If the graphic is a sprite, this will 
-        always == Loop. */
+        be ignored (sprites are always treated as looping). */
     LoopMode loopMode{};
 
     /** If loopMode == Loop, this is how long to loop for. */
     float loopTime{};
-
-    /** A timestamp of when the current animation was started. */
-    double animationStartTime{};
-
-    /** If true, a new animation has begun and animationStartTime needs to be  
-        reset when its first frame is rendered. */
-    bool setStartTime{true};
 };
 
 } // namespace AM

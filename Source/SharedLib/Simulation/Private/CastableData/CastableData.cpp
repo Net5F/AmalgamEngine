@@ -1,4 +1,5 @@
 #include "CastableData.h"
+#include "GraphicDataBase.h"
 #include "EngineCastableDef.h"
 #include "CastableDef.h"
 #include "Log.h"
@@ -6,20 +7,20 @@
 namespace AM
 {
 
-CastableData::CastableData()
+CastableData::CastableData(const GraphicDataBase& graphicData)
 : itemInteractionMap{}
 , entityInteractionMap{}
 , spellMap{}
 {
     // Init all of the engine's Castables.
-    EngineCastableDef::defineCastables(
-        [this](CastableID castableID, const Castable& castable) {
+    EngineCastableDef::defineCastables(graphicData, 
+        [&](CastableID castableID, const Castable& castable) {
             addCastable(castableID, castable);
         });
 
     // Init all of the project's Castables.
-    CastableDef::defineCastables(
-        [this](CastableID castableID, const Castable& castable) {
+    CastableDef::defineCastables(graphicData,
+        [&](CastableID castableID, const Castable& castable) {
             addCastable(castableID, castable);
         });
 

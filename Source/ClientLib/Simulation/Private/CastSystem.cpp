@@ -8,6 +8,7 @@
 #include "ClientCastState.h"
 #include "CastCooldown.h"
 #include "Castable.h"
+#include "AVEffects.h"
 #include "EnttGroups.h"
 
 namespace AM
@@ -258,9 +259,18 @@ Uint32 CastSystem::getCastCompleteEndTick(entt::entity entity,
 
 void CastSystem::playAVEffects(const CastInfo& castInfo)
 {
-    // Create any visual effects.
+    // If this castable has AV effects, add them to the caster.
+    if (!(castInfo.castable->castCompleteVisualEffects.empty())) {
+        AVEffects& avEffects{
+            world.registry.get_or_emplace<AVEffects>(castInfo.casterEntity)};
 
-    // Create any AV entities.
+        for (const VisualEffect& visualEffect :
+             castInfo.castable->castCompleteVisualEffects) {
+            avEffects.visualEffects.emplace_back(visualEffect);
+        }
+    }
+
+    // If this castable spawns AV entities, add them to the local-only registry.
 }
 
 } // End namespace Client

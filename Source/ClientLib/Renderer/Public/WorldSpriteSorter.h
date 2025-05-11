@@ -49,6 +49,16 @@ public:
      */
     const std::vector<SpriteSortInfo>& getSortedSprites();
 
+    struct VisualEffectRenderInfo {
+        SpriteID spriteID{};
+        SDL_FRect screenExtent{};
+    };
+    /**
+     * @retrun A span containing all visual effects for the given entity.
+     */
+    std::span<const VisualEffectRenderInfo>
+        getEntityVisualEffects(entt::entity entity);
+
 private:
     /**
      * Gathers the sprites that should be drawn on this frame, calculates their
@@ -101,12 +111,21 @@ private:
 
     /**
      * Pushes the given entity sprite into the sorting vector.
+     * @return true if a sprite was pushed, else false (sprite was outside of 
+     *         the screen bounds).
      */
     void pushEntitySprite(entt::entity entity, const Position& position,
                           const Sprite& sprite, const Camera& camera,
                           EntityGraphicSetID graphicSetID,
                           EntityGraphicType graphicType,
                           Rotation::Direction graphicDirection);
+
+    /**
+     * If the given entity has any visual effects, pushes them into 
+     * entityVisualEffects.
+     */
+    void pushEntityVisualEffects(entt::entity entity, const Position& position,
+                                 const Camera& camera);
 
     /**
      * Sorts the sprites into their draw order (farthest sprite first).
@@ -181,6 +200,21 @@ private:
     /** Holds sprites that need to be sorted. Sprites are pushed during
         gatherSpriteInfo() and sorted during sortSpritesByDepth(). */
     std::vector<SpriteSortInfo> spritesToSort;
+
+    struct EntityVisualEffectIndex {
+        /** The entity that the effects belong to. */
+        entt::entity entity{};
+        /** The first index in entityVisualEffects that contains effects for 
+            this entity. */
+        std::size_t startIndex{};
+        /** The number of effects. */
+        std::size_t count{};
+    };
+    /** A parallel vector for indexing into entityVisualEffects. */
+    std::vector<EntityVisualEffectIndex> entityVisualEffectIndices;
+
+    /** Holds the current frame's entity visual effects. */
+    std::vector<VisualEffectRenderInfo> entityVisualEffects;
 
     /** The global timestamp that we're using during the current render 
         frame. */

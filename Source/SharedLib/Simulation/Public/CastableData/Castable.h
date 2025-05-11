@@ -87,8 +87,11 @@ struct Castable {
 
     // TODO: castCompleteSoundType
 
-    /** The client-only visual effects to show when this cast is successful. */
+    /** The client-only visual effects to play when this cast is successful. */
     std::vector<VisualEffect> castCompleteVisualEffects{};
+
+    /** The client-only audio effects to play when this cast is successful. */
+    //std::vector<AudioEffect> castCompleteAudioEffects{};
 
     /** The client-only A/V entities to spawn when this cast is successful. */
     std::vector<AVEntity> castCompleteAVEntities{};

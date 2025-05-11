@@ -26,6 +26,9 @@ struct ClientGraphicState
         within the entity's graphic set. */
     Rotation::Direction graphicDirection{};
 
+    //-------------------------------------------------------------------------
+    // Timing state (managed by WorldSpriteSorter)
+    //-------------------------------------------------------------------------
     /** A timestamp of when the current animation was started. */
     double animationStartTime{};
 

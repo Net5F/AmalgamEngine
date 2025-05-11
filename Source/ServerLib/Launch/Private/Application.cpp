@@ -19,7 +19,7 @@ Application::Application()
 , graphicData{resourceData.get()}
 , iconData{resourceData.get()}
 , itemData{}
-, castableData{}
+, castableData{graphicData}
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
                 SharedConfig::SERVER_NETWORK_TICK_TIMESTEP_S, "Network", true}

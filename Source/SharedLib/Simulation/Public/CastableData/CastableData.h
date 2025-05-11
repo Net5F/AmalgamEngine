@@ -9,6 +9,7 @@
 
 namespace AM
 {
+class GraphicDataBase;
 
 /**
  * Holds Castable data.
@@ -20,7 +21,7 @@ namespace AM
 class CastableData
 {
 public:
-    CastableData();
+    CastableData(const GraphicDataBase& graphicData);
 
     /**
      * @return If no castable with the given ID exists, returns nullptr. Else,

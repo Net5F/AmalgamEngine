@@ -31,6 +31,7 @@ class InventorySystem;
 class CastSystem;
 class ComponentUpdateSystem;
 class GraphicSystem;
+class AVSystem;
 class CameraSystem;
 
 /**
@@ -158,6 +159,7 @@ private:
     std::unique_ptr<CastSystem> castSystem;
     std::unique_ptr<ComponentUpdateSystem> componentUpdateSystem;
     std::unique_ptr<GraphicSystem> graphicSystem;
+    std::unique_ptr<AVSystem> avSystem;
     std::unique_ptr<CameraSystem> cameraSystem;
 };
 

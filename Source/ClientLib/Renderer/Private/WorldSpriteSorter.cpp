@@ -15,6 +15,7 @@
 #include "Collision.h"
 #include "GraphicState.h"
 #include "ClientGraphicState.h"
+#include "AVEffects.h"
 #include "Floor.h"
 #include "VariantTools.h"
 #include "Timer.h"
@@ -49,6 +50,8 @@ void WorldSpriteSorter::sortSprites(const Camera& camera, double alpha)
 
     // Clear the old data.
     sortedSprites.clear();
+    entityVisualEffectIndices.clear();
+    entityVisualEffects.clear();
 
     // Gather sprites relevant to this frame and calc their screen extents.
     gatherSpriteInfo(camera, alpha);
@@ -67,6 +70,22 @@ const std::vector<SpriteSortInfo>& WorldSpriteSorter::getSortedSprites()
 {
     // Return the sorted vector of sprites.
     return sortedSprites;
+}
+
+std::span<const WorldSpriteSorter::VisualEffectRenderInfo>
+    WorldSpriteSorter::getEntityVisualEffects(entt::entity entity)
+{
+    // If this entity has visual effects, return them.
+    auto it{std::ranges::find_if(
+        entityVisualEffectIndices,
+        [&](const auto& effect) { return effect.entity == entity; })};
+    if (it != entityVisualEffectIndices.end()) {
+        return {(entityVisualEffects.begin() + it->startIndex), it->count};
+    }
+    else {
+        // No visual effects, return an empty span.
+        return {};
+    }
 }
 
 void WorldSpriteSorter::gatherSpriteInfo(const Camera& camera, double alpha)
@@ -148,11 +167,15 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
                 previousPos, position, alpha);
         }
 
+        // Push the entity's sprite to be sorted.
         const Sprite& sprite{getEntitySprite(graphicState, clientGraphicState)};
         pushEntitySprite(entity, renderPosition, sprite, camera,
                          graphicState.graphicSetID,
                          clientGraphicState.graphicType,
                          clientGraphicState.graphicDirection);
+
+        // Push the entity's visual effects, if it has any.
+        pushEntityVisualEffects(entity, renderPosition, camera);
     }
 
     // Gather all of the UI's phantom entity sprites.
@@ -372,27 +395,20 @@ const Sprite&
         graphicSet.graphics.at(clientGraphicState.graphicType)};
     const GraphicRef graphic{
         graphicArr.at(clientGraphicState.graphicDirection)};
-    const Sprite* sprite{nullptr};
-    std::visit(VariantTools::Overload{
-        [&](std::reference_wrapper<const Sprite> spriteRef) {
-            sprite = &(spriteRef.get());
-        },
-        [&](std::reference_wrapper<const Animation> animation) {
-            // Calc how far we are into this animation and get the appropriate
-            // sprite.
-            double animationTime{currentAnimationTimestamp
-                                 - clientGraphicState.animationStartTime};
-            sprite = &(animation.get().getSpriteAtTime(animationTime));
 
-            // If this animation just began, set its start time.
-            if (clientGraphicState.setStartTime) {
-                clientGraphicState.animationStartTime = Timer::getGlobalTime();
-                clientGraphicState.setStartTime = false;
-            }
-        }
-    }, graphic);
+    // Calc how far we are into this animation and get the appropriate
+    // sprite (or just get the sprite, if this isn't an animation).
+    double animationTime{currentAnimationTimestamp
+                         - clientGraphicState.animationStartTime};
+    const Sprite& sprite{graphic.getSpriteAtTime(animationTime)};
 
-    return *sprite;
+    // If this animation just began, set its start time.
+    if (clientGraphicState.setStartTime) {
+        clientGraphicState.animationStartTime = Timer::getGlobalTime();
+        clientGraphicState.setStartTime = false;
+    }
+
+    return sprite;
 }
 
 void WorldSpriteSorter::pushEntitySprite(
@@ -434,6 +450,46 @@ void WorldSpriteSorter::pushEntitySprite(
         // Push the entity's render info for this frame.
         spritesToSort.emplace_back(&sprite, ownerID, worldBounds, screenExtent,
                                    colorMod);
+    }
+}
+
+void WorldSpriteSorter::pushEntityVisualEffects(entt::entity entity,
+                                                const Position& position,
+                                                const Camera& camera)
+{
+    // If this entity has any visual effects, calculate their screen extent 
+    // and pass them to the callback.
+    if (AVEffects*
+          avEffects{world.registry.try_get<AVEffects>(entity)}) {
+        // Push an index entry for this entity.
+        entityVisualEffectIndices.emplace_back(entity,
+                                               entityVisualEffects.size(),
+                                               avEffects->visualEffects.size());
+
+        // Calculate screen extents and push each effect.
+        for (VisualEffectState& effectState : avEffects->visualEffects) {
+            // If this effect just began, set its start time.
+            if (effectState.startTime == 0) {
+                effectState.startTime = Timer::getGlobalTime();
+            }
+
+            // Calc how far we are into this animation and get the appropriate
+            // sprite (or just get the sprite, if this isn't an animation).
+            GraphicRef graphic{graphicData.getGraphic(
+                effectState.visualEffect.get().graphicID)};
+            double animationTime{currentAnimationTimestamp
+                                 - effectState.startTime};
+            const Sprite& sprite{graphic.getSpriteAtTime(animationTime)};
+
+            // Place the effect on top of the entity and get its screen extent.
+            const SpriteRenderData& renderData{
+                graphicData.getSpriteRenderData(sprite.numericID)};
+            SDL_FRect screenExtent{ClientTransforms::entityToScreenExtent(
+                position, graphic.getModelBounds().getBottomCenterPoint(),
+                Vector3{}, renderData, camera)};
+
+            entityVisualEffects.emplace_back(sprite.numericID, screenExtent);
+        }
     }
 }
 

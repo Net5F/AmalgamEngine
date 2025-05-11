@@ -136,54 +136,101 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
     // Draw depth-sorted tiles and sprites.
     // Note: These are already culled during the gather step.
     for (const SpriteSortInfo& spriteInfo : sortedSprites) {
-        const SpriteRenderData& renderData{
-            graphicData.getSpriteRenderData(spriteInfo.sprite->numericID)};
-        const SDL_Color& colorMod{spriteInfo.colorMod};
+        // Render the sprite.
+        renderSprite(spriteInfo);
 
-        // Apply the alpha mod that the UI gave us.
-        SDL_SetTextureAlphaMod(renderData.texture.get(), colorMod.a);
+        // If this sprite belongs to an entity that has visual effects, render
+        // them on top of it.
+        if (const entt::entity* entity{
+                std::get_if<entt::entity>(&spriteInfo.spriteOwnerID)}) {
+            renderEntityVisualEffects(*entity);
+        }
+
+        // For debugging: Render the sprite's bounding box.
+        //drawBoundingBox(spriteInfo.worldBounds, camera);
+    }
+}
+
+void Renderer::renderSprite(const SpriteSortInfo& spriteInfo)
+{
+    const SpriteRenderData& renderData{
+        graphicData.getSpriteRenderData(spriteInfo.sprite->numericID)};
+    const SDL_Color& colorMod{spriteInfo.colorMod};
+
+    // Apply the alpha mod that the UI gave us.
+    SDL_SetTextureAlphaMod(renderData.texture.get(), colorMod.a);
+
+    // Render the sprite with an appropriate blend mode.
+    if (renderData.premultiplyAlpha) {
+        static SDL_BlendMode premultipliedAlphaBlendMode{
+            SDL_ComposeCustomBlendMode(
+                SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+                SDL_BLENDOPERATION_ADD, SDL_BLENDFACTOR_ONE,
+                SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+                SDL_BLENDOPERATION_ADD)};
+        SDL_SetTextureBlendMode(renderData.texture.get(),
+                                premultipliedAlphaBlendMode);
+        SDL_RenderCopyF(sdlRenderer, renderData.texture.get(),
+                        &(renderData.textureExtent), &(spriteInfo.screenExtent));
+    }
+    else {
+        SDL_SetTextureBlendMode(renderData.texture.get(),
+                                SDL_BLENDMODE_BLEND);
+        SDL_RenderCopyF(sdlRenderer, renderData.texture.get(),
+                        &(renderData.textureExtent), &(spriteInfo.screenExtent));
+    }
+
+    // If the UI gave us a color mod to apply, render an additional sprite
+    // with an additive blend mode and apply the color to that.
+    if (colorMod.r > 0 || colorMod.g > 0 || colorMod.b > 0) {
+        SDL_SetTextureColorMod(renderData.texture.get(), colorMod.r,
+                               colorMod.g, colorMod.b);
+        SDL_SetTextureBlendMode(renderData.texture.get(),
+                                SDL_BLENDMODE_ADD);
+
+        SDL_RenderCopyF(sdlRenderer, renderData.texture.get(),
+                        &(renderData.textureExtent),
+                        &(spriteInfo.screenExtent));
+
+        SDL_SetTextureBlendMode(renderData.texture.get(),
+                                SDL_BLENDMODE_BLEND);
+        SDL_SetTextureColorMod(renderData.texture.get(), 255, 255, 255);
+    }
+
+    // Reset the texture's alpha.
+    SDL_SetTextureAlphaMod(renderData.texture.get(), 255);
+}
+
+void Renderer::renderEntityVisualEffects(entt::entity entity)
+{
+    const auto& visualEffects{
+        worldSpriteSorter.getEntityVisualEffects(entity)};
+    for (const auto& visualEffect : visualEffects) {
+        const SpriteRenderData& renderData{
+            graphicData.getSpriteRenderData(visualEffect.spriteID)};
 
         // Render the sprite with an appropriate blend mode.
         if (renderData.premultiplyAlpha) {
             static SDL_BlendMode premultipliedAlphaBlendMode{
                 SDL_ComposeCustomBlendMode(
-                    SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+                    SDL_BLENDFACTOR_ONE,
+                    SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
                     SDL_BLENDOPERATION_ADD, SDL_BLENDFACTOR_ONE,
                     SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
                     SDL_BLENDOPERATION_ADD)};
             SDL_SetTextureBlendMode(renderData.texture.get(),
                                     premultipliedAlphaBlendMode);
             SDL_RenderCopyF(sdlRenderer, renderData.texture.get(),
-                            &(renderData.textureExtent), &(spriteInfo.screenExtent));
+                            &(renderData.textureExtent),
+                            &(visualEffect.screenExtent));
         }
         else {
             SDL_SetTextureBlendMode(renderData.texture.get(),
                                     SDL_BLENDMODE_BLEND);
             SDL_RenderCopyF(sdlRenderer, renderData.texture.get(),
-                            &(renderData.textureExtent), &(spriteInfo.screenExtent));
-        }
-
-        // If the UI gave us a color mod to apply, render an additional sprite
-        // with an additive blend mode and apply the color to that.
-        if (colorMod.r > 0 || colorMod.g > 0 || colorMod.b > 0) {
-            SDL_SetTextureColorMod(renderData.texture.get(), colorMod.r,
-                                   colorMod.g, colorMod.b);
-            SDL_SetTextureBlendMode(renderData.texture.get(),
-                                    SDL_BLENDMODE_ADD);
-
-            SDL_RenderCopyF(sdlRenderer, renderData.texture.get(),
                             &(renderData.textureExtent),
-                            &(spriteInfo.screenExtent));
-
-            SDL_SetTextureBlendMode(renderData.texture.get(),
-                                    SDL_BLENDMODE_BLEND);
-            SDL_SetTextureColorMod(renderData.texture.get(), 255, 255, 255);
+                            &(visualEffect.screenExtent));
         }
-
-        // Reset the texture's alpha.
-        SDL_SetTextureAlphaMod(renderData.texture.get(), 255);
-
-        //drawBoundingBox(spriteInfo.worldBounds, camera);
     }
 }
 

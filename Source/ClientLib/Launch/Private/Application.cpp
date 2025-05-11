@@ -27,7 +27,7 @@ Application::Application()
 , graphicData{resourceData.get(), assetCache}
 , iconData{resourceData.get()}
 , itemData{}
-, castableData{}
+, castableData{graphicData}
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
                 SharedConfig::CLIENT_NETWORK_TICK_TIMESTEP_S, "Network", true}

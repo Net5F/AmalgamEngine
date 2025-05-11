@@ -2,6 +2,7 @@
 
 #include "CastableID.h"
 #include "Castable.h"
+#include "GraphicDataBase.h"
 #include "SharedConfig.h"
 #include <functional>
 
@@ -15,6 +16,7 @@ namespace AM
 class EngineCastableDef {
 public:
     static void defineCastables(
+        const GraphicDataBase& graphicData,
         std::function<void(CastableID, const Castable&)> addCastable)
     {
         addCastable(ItemInteractionType::Examine,
@@ -28,7 +30,11 @@ public:
                 .cooldownTime{2},
                 .triggersGCD{false},
                 .castingGraphicType{EntityGraphicType::Run},
-                .castCompleteGraphicType{EntityGraphicType::Crouch}});
+                //.castCompleteGraphicType{EntityGraphicType::Crouch},
+                .castCompleteVisualEffects{
+                    {toGraphicID(
+                         graphicData.getAnimation("explosion").numericID),
+                     VisualEffect::LoopMode::Loop, 3}}});
     }
 };
 

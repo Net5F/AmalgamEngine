@@ -67,6 +67,16 @@ private:
     void renderWorld(const Camera& camera, double alpha);
 
     /**
+     * Renders a sprite using the given info.
+     */
+    void renderSprite(const SpriteSortInfo& spriteInfo);
+
+    /**
+     * Renders the given entity's visual effects, if it has any.
+     */
+    void renderEntityVisualEffects(entt::entity entity);
+
+    /**
      * Draws the given box. Useful for debug visuals.
      * Note: Don't use this for anything real, it's super slow.
      */

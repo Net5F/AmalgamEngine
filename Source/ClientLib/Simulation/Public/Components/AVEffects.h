@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VisualEffect.h"
+#include "VisualEffectState.h"
 #include <vector>
 #include <variant>
 
@@ -13,10 +13,11 @@ namespace Client
  * Tracks all audio/visual effects that are currently active on an entity.
  */
 struct AVEffects {
-    using AVEffect = std::variant<VisualEffect, /* TODO: AudioEffect */>;
+    /** This entity's currently active visual effects. */
+    std::vector<VisualEffectState> visualEffects{};
 
-    /** This entity's currently active effects. */
-    std::vector<AVEffect> avEffects{};
+    /** This entity's currently active audio effects. */
+    //std::vector<AVEffect> avEffects{};
 };
 
 } // namespace Client

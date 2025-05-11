@@ -1,8 +1,9 @@
 target_sources(ClientLib
     PRIVATE
+        Private/AVSystem.cpp
+        Private/CameraSystem.cpp
         Private/CastHelper.cpp
         Private/CastSystem.cpp
-        Private/CameraSystem.cpp
         Private/ChunkUpdateSystem.cpp
         Private/ComponentUpdateSystem.cpp
         Private/EntityLifetimeSystem.cpp
@@ -22,9 +23,10 @@ target_sources(ClientLib
         Private/ItemData/ItemData.cpp
         Private/TileMap/TileMap.cpp
     PUBLIC
+        Public/AVSystem.h
+        Public/CameraSystem.h
         Public/CastHelper.h
         Public/CastSystem.h
-        Public/CameraSystem.h
         Public/ChunkUpdateSystem.h
         Public/ComponentUpdateSystem.h
         Public/EntityLifetimeSystem.h
@@ -43,6 +45,8 @@ target_sources(ClientLib
         Public/TileUpdateSystem.h
         Public/World.h
         Public/WorldObjectID.h
+        Public/CastableData/AVEntityState.h
+        Public/CastableData/VisualEffectState.h
         Public/Components/AVEffects.h
         Public/Components/ClientCastState.h
         Public/Components/ClientGraphicState.h
@@ -67,6 +71,7 @@ target_include_directories(ClientLib
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/TileMap
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/CastableData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/GraphicData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/IconData

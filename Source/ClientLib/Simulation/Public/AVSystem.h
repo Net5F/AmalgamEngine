@@ -1,0 +1,49 @@
+#pragma once
+
+#include <vector>
+
+namespace AM
+{
+namespace Client
+{
+class World;
+class GraphicData;
+struct VisualEffectState;
+
+/**
+ * Updates audio/visual effects and entities.
+ *
+ * A/V effects are attached to a particular entity, and follow that entity 
+ * around for a set period of time. These are used for e.g. a power-up effect.
+ *
+ * A/V entities are spawned as local-only entities, and have a set of logic 
+ * to perform before being destroyed. These are used for e.g. a blizzard spell.
+ */
+class AVSystem
+{
+public:
+    AVSystem(World& inWorld, const GraphicData& inGraphicData);
+
+    /**
+     * Updates A/V effects and entities.
+     */
+    void updateAVEffectsAndEntities();
+
+private:
+    /**
+     * Updates all AVEffects components.
+     */
+    void updateAVEffects();
+
+    /**
+     * Updates all of the given visual effects.
+     */
+    void updateVisualEffects(std::vector<VisualEffectState>& visualEffects);
+
+    /** Used to access entity data. */
+    World& world;
+    const GraphicData& graphicData;
+};
+
+} // End namespace Client
+} // End namespace AM

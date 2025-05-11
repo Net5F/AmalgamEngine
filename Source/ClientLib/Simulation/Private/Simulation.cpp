@@ -15,6 +15,7 @@
 #include "CastSystem.h"
 #include "ComponentUpdateSystem.h"
 #include "GraphicSystem.h"
+#include "AVSystem.h"
 #include "CameraSystem.h"
 #include "Item.h"
 #include "Config.h"
@@ -170,6 +171,9 @@ void Simulation::tick()
         // Update every entity's graphic state.
         graphicSystem->updateAnimations();
 
+        // Update our local-only AV effects and entities.
+        avSystem->updateAVEffectsAndEntities();
+
         // Move all cameras to their new positions.
         cameraSystem->moveCameras();
 
@@ -241,6 +245,7 @@ void Simulation::initializeSystems()
     componentUpdateSystem = std::make_unique<ComponentUpdateSystem>(
         *this, world, network, graphicData);
     graphicSystem = std::make_unique<GraphicSystem>(world, graphicData);
+    avSystem = std::make_unique<AVSystem>(world, graphicData);
     cameraSystem = std::make_unique<CameraSystem>(world);
 
     // Tell the project to initialize its systems.
