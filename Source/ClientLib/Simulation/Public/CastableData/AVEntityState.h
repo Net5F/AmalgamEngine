@@ -12,7 +12,7 @@ namespace Client
 {
 
 /**
- * Defines a client-only entity for displaying audio/visual effects.
+ * An instance of a client-only entity for displaying audio/visual effects.
  */
 struct AVEntityState {
     /** The definition that this entity is an instance of.
@@ -27,6 +27,13 @@ struct AVEntityState {
 
     /** The index within phases of the current phase. */
     std::size_t currentPhaseIndex{0};
+
+    //-------------------------------------------------------------------------
+    // Timing state (managed by WorldSpriteSorter)
+    //-------------------------------------------------------------------------
+    /** A timestamp of when the current phase was started.
+        If 0, this entity has not yet been started. */
+    double startTime{0};
 };
 
 } // namespace Client

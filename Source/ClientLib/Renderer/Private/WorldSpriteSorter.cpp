@@ -15,6 +15,7 @@
 #include "Collision.h"
 #include "GraphicState.h"
 #include "ClientGraphicState.h"
+#include "AVEntityState.h"
 #include "AVEffects.h"
 #include "Floor.h"
 #include "VariantTools.h"
@@ -149,9 +150,31 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
 void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
                                                double alpha)
 {
+    // Gather all server-synchronized entities.
+    gatherServerEntitySpriteInfo(camera, alpha);
+
+    // Gather all A/V entities.
+    gatherAVEntitySpriteInfo(camera, alpha);
+
+    // Gather all of the UI's phantom entity sprites.
+    for (const PhantomSpriteInfo& info : phantomSprites) {
+        if (info.layerType == TileLayer::Type::None) {
+            GraphicRef graphic{getPhantomGraphic(info)};
+            pushEntitySprite(
+                entt::null, info.position, graphic.getFirstSprite(), camera,
+                static_cast<EntityGraphicSetID>(info.graphicSet->numericID),
+                static_cast<EntityGraphicType>(info.graphicValue),
+                info.graphicDirection);
+        }
+    }
+}
+
+void WorldSpriteSorter::gatherServerEntitySpriteInfo(const Camera& camera,
+                                                     double alpha)
+{
     entt::registry& registry{world.registry};
 
-    // Gather all entities that have a Position and GraphicState.
+    // Gather all graphical entities.
     auto view
         = registry.view<Position, GraphicState, ClientGraphicState>();
     for (entt::entity entity : view) {
@@ -159,7 +182,7 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
             = view.get<Position, GraphicState, ClientGraphicState>(
                 entity);
 
-        // If this entity has a previous position, calc a lerp'd position.
+        // If this entity has a PreviousPosition, calc a lerp'd position.
         Position renderPosition{position};
         if (registry.all_of<PreviousPosition>(entity)) {
             const auto& previousPos{registry.get<PreviousPosition>(entity)};
@@ -177,17 +200,42 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
         // Push the entity's visual effects, if it has any.
         pushEntityVisualEffects(entity, renderPosition, camera);
     }
+}
 
-    // Gather all of the UI's phantom entity sprites.
-    for (const PhantomSpriteInfo& info : phantomSprites) {
-        if (info.layerType == TileLayer::Type::None) {
-            GraphicRef graphic{getPhantomGraphic(info)};
-            pushEntitySprite(
-                entt::null, info.position, graphic.getFirstSprite(), camera,
-                static_cast<EntityGraphicSetID>(info.graphicSet->numericID),
-                static_cast<EntityGraphicType>(info.graphicValue),
-                info.graphicDirection);
+void WorldSpriteSorter::gatherAVEntitySpriteInfo(const Camera& camera,
+                                                 double alpha)
+{
+    entt::registry& avRegistry{world.avRegistry};
+
+    // Gather all A/V entities.
+    auto view = avRegistry.view<Position, GraphicState, ClientGraphicState,
+                                AVEntityState>();
+    for (entt::entity entity : view) {
+        auto [position, graphicState, clientGraphicState, avEntityState]
+            = view.get<Position, GraphicState, ClientGraphicState,
+                       AVEntityState>(entity);
+
+        // If this entity has a PreviousPosition, calc a lerp'd position.
+        Position renderPosition{position};
+        if (avRegistry.all_of<PreviousPosition>(entity)) {
+            const auto& previousPos{avRegistry.get<PreviousPosition>(entity)};
+            renderPosition = MovementHelpers::interpolatePosition(
+                previousPos, position, alpha);
         }
+
+        // Push the entity's sprite to be sorted.
+        const Sprite& sprite{getEntitySprite(graphicState, clientGraphicState)};
+        pushEntitySprite(entity, renderPosition, sprite, camera,
+                         graphicState.graphicSetID,
+                         clientGraphicState.graphicType,
+                         clientGraphicState.graphicDirection);
+
+        // If this A/V entity just began, set its start time.
+        if (avEntityState.startTime == 0) {
+            avEntityState.startTime = Timer::getGlobalTime();
+        }
+
+        // Note: A/V entities don't have visual effects.
     }
 }
 
@@ -396,17 +444,17 @@ const Sprite&
     const GraphicRef graphic{
         graphicArr.at(clientGraphicState.graphicDirection)};
 
-    // Calc how far we are into this animation and get the appropriate
-    // sprite (or just get the sprite, if this isn't an animation).
-    double animationTime{currentAnimationTimestamp
-                         - clientGraphicState.animationStartTime};
-    const Sprite& sprite{graphic.getSpriteAtTime(animationTime)};
-
     // If this animation just began, set its start time.
     if (clientGraphicState.setStartTime) {
         clientGraphicState.animationStartTime = Timer::getGlobalTime();
         clientGraphicState.setStartTime = false;
     }
+
+    // Calc how far we are into this animation and get the appropriate
+    // sprite (or just get the sprite, if this isn't an animation).
+    double animationTime{currentAnimationTimestamp
+                         - clientGraphicState.animationStartTime};
+    const Sprite& sprite{graphic.getSpriteAtTime(animationTime)};
 
     return sprite;
 }

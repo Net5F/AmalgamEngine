@@ -37,8 +37,14 @@ public:
           const GraphicData& inGraphicData, const ItemData& inItemData,
           const CastableData& inCastableData);
 
-    /** Entity data registry. */
+    /** Server-synchronized entity data registry. For entity state that we try
+        to keep in sync with the server. */
     entt::registry registry;
+
+    /** Audio/visual entity data registry. A/V entities are processed 
+        by AVSystem and aren't synchronized with the server and other 
+        clients. */
+    entt::registry avRegistry;
 
     /** The entity that this client is controlling. */
     entt::entity playerEntity;

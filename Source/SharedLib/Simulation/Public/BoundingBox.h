@@ -155,7 +155,8 @@ struct BoundingBox {
     [[nodiscard]] BoundingBox unionWith(const BoundingBox& other) const;
 
     /**
-     * Increases the size of this box by the given amount in all directions.
+     * Returns this box with its size increased by the given amount in all 
+     * directions.
      */
     [[nodiscard]] BoundingBox expandBy(float amountToExpandBy) const;
 

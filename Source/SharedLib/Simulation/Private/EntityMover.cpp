@@ -175,8 +175,8 @@ EntityMover::NarrowPhaseResult EntityMover::narrowPhase(
         const BoundingBox& currentBox{currentBounds};
         const BoundingBox& otherBox{otherVolumeInfo->collisionVolume};
 
-        // Calc the distances required for resolvedBounds to enter and exit 
-        // otherBounds along each axis, then calc the time intervals where 
+        // Calc the distances required for currentBox to enter and exit 
+        // otherBox along each axis, then calc the time intervals where 
         // each axis is intersecting.
         if (realVelocity.x > 0.f) {
             entryDistance.x = otherBox.min.x - currentBox.max.x;

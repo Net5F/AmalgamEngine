@@ -9,7 +9,7 @@ namespace Client
 {
 
 /**
- * Defines a single visual effect.
+ * An instance of a single visual effect.
  *
  * Typically, this will be attached to an entity to display a temporary graphic, 
  * e.g. showing a heal graphic when an entity uses a health item.

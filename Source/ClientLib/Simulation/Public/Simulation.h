@@ -13,6 +13,7 @@ namespace AM
 class EventDispatcher;
 class CastableData;
 struct Item;
+struct CastFailed;
 
 namespace Client
 {
@@ -108,6 +109,12 @@ public:
         simulation has stopped running. */
     entt::sink<entt::sigh<void(ConnectionError)>>&
         getServerConnectionErrorSink();
+
+    /** The server has told us that a player entity cast failed.
+        If the client rejects a cast locally, it'll tell you through the 
+        return value of e.g. CastHelper::castSpell(). */
+    entt::sink<entt::sigh<void(const CastFailed&)>>&
+        getCastFailedSink();
 
 private:
     /**

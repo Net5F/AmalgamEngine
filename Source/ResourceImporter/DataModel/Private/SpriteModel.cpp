@@ -715,12 +715,12 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
     // Find the power of two that our texture's side lengths should equal, in 
     // order to fit all of the sprites (assuming a square grid).
     int spriteCount{static_cast<int>(spriteSheet.spriteIDs.size())};
-    int gridSideLength{0};
+    int spritesPerRow{};
     for (int powerOfTwo{0}; true; ++powerOfTwo) {
-        gridSideLength = static_cast<int>(std::pow(2, powerOfTwo));
+        int gridSideLength{static_cast<int>(std::pow(2, powerOfTwo))};
 
         // Determine how many sprites can fit with this side length.
-        int spritesPerRow{gridSideLength / maxSpriteWidth};
+        spritesPerRow = gridSideLength / maxSpriteWidth;
         int spritesPerColumn{gridSideLength / maxSpriteHeight};
         if ((spritesPerRow < 1) || (spritesPerColumn < 1)) {
             // Can't fit any, continue to the next power of two.
@@ -760,7 +760,7 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
         // If the next sprite would go past the edge of the grid, wrap to the 
         // next row.
         gridX++;
-        if ((gridX * maxSpriteWidth) >= gridSideLength) {
+        if (gridX == spritesPerRow) {
             gridX = 0;
             gridY++;
         }

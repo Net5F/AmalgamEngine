@@ -74,6 +74,11 @@ private:
     void sendCastStarted(CastState& castState);
 
     /**
+     * Sends a CastFailed message to all nearby clients.
+     */
+    void sendCastFailed(CastState& castState, CastFailureType failureType);
+
+    /**
      * Passes the given cast to the associated callback, if one is registered.
      */
     void handleCast(const CastInfo& castInfo);

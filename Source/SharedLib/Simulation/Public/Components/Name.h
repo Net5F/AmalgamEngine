@@ -7,7 +7,8 @@ namespace AM
 /**
  * Represents an entity's name.
  *
- * All entities have a name.
+ * All client/server-synchronized entities have a name. Client-only A/V 
+ * entities don't have names.
  */
 struct Name {
     /** The max length of a name. */

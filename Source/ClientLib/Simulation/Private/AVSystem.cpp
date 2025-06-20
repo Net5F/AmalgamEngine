@@ -1,7 +1,12 @@
 #include "AVSystem.h"
 #include "World.h"
 #include "GraphicData.h"
+#include "ClientGraphicState.h"
+#include "GraphicHelpers.h"
 #include "AVEffects.h"
+#include "AVEntityState.h"
+#include "AVEntityHelpers.h"
+#include "EnttGroups.h"
 #include "Timer.h"
 
 namespace AM
@@ -18,6 +23,8 @@ AVSystem::AVSystem(World& inWorld, const GraphicData& inGraphicData)
 void AVSystem::updateAVEffectsAndEntities()
 {
     updateAVEffects();
+
+    updateAVEntities();
 }
 
 void AVSystem::updateAVEffects()
@@ -69,6 +76,86 @@ void AVSystem::updateVisualEffects(
         }
         else {
             it++;
+        }
+    }
+}
+
+void AVSystem::updateAVEntities()
+{
+    double currentTime{Timer::getGlobalTime()};
+
+    // Process the current phase for each A/V entity.
+    auto view{world.avRegistry.view<Position, PreviousPosition, AVEntityState,
+                                    GraphicState, ClientGraphicState>()};
+    for (auto [entity, position, previousPosition, avEntityState,
+               graphicState, clientGraphicState] :
+         view.each()) {
+        // If all phases have completed, delete the entity.
+        // Note: Since we increment below, entities will stay alive for an extra 
+        //       tick. This lets positon-based phases actually reach the target.
+        //       Time-based phases will stay alive for 1 tick too long, but 
+        //       that's fine.
+        const AVEntity& avEntity{avEntityState.avEntity.get()};
+        if (avEntityState.currentPhaseIndex == avEntity.phases.size()) {
+            world.avRegistry.destroy(entity);
+            continue;
+        }
+
+        const AVEntity::Phase& phase{
+            avEntity.phases.at(avEntityState.currentPhaseIndex)};
+
+        // Determine the target's position.
+        std::optional<Position> targetOpt{AVEntityHelpers::getTargetPosition(
+            phase.behavior, avEntityState.targetEntity,
+            static_cast<Position>(avEntityState.targetPosition), position,
+            world.registry, false)};
+        if (!targetOpt) {
+            continue;
+        }
+        Position targetPosition{targetOpt.value()};
+
+        // Save the entity's old position.
+        previousPosition = position;
+
+        // Move the entity towards the target.
+        position = position.moveTowards(targetPosition, phase.movementSpeed);
+
+        // Entity is still alive. Get its desired graphic state, based on the 
+        // current entity state.
+        auto graphicStateOpt{AVEntityHelpers::getGraphicState(
+            phase.behavior, position, targetPosition)};
+        if (!graphicStateOpt) {
+            continue;
+        }
+        auto& [desiredGraphicType, desiredGraphicDirection]
+            = graphicStateOpt.value();
+
+        // Get the new graphic, accounting for missing graphics in the set.
+        graphicState.graphicSetID = phase.graphicSetID;
+        const EntityGraphicSet& graphicSet{
+            graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
+        GraphicHelpers::GraphicReturn newGraphic{
+            GraphicHelpers::getGraphicOrFallback(
+                graphicSet, desiredGraphicType, desiredGraphicDirection,
+                desiredGraphicType, desiredGraphicDirection)};
+        if (newGraphic.type != clientGraphicState.graphicType) {
+            clientGraphicState.graphicType = newGraphic.type;
+            clientGraphicState.setStartTime = true;
+        }
+        if (newGraphic.direction != clientGraphicState.graphicDirection) {
+            clientGraphicState.graphicDirection = newGraphic.direction;
+            // Note: We don't reset the animation time, since we want e.g. 
+            //       a run animation to play smoothly when changing direction.
+        }
+
+        // If the entity has reached the completion condition for this phase, 
+        // move to the next phase.
+        if (AVEntityHelpers::timeElapsed(phase.behavior,
+                                         avEntityState.startTime,
+                                         phase.durationS, currentTime)
+            || AVEntityHelpers::positionReached(phase.behavior, position,
+                                                targetPosition)) {
+            avEntityState.currentPhaseIndex++;
         }
     }
 }

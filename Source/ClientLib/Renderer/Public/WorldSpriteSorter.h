@@ -83,6 +83,16 @@ private:
      */
     void gatherEntitySpriteInfo(const Camera& camera, double alpha);
 
+    /**
+     * Gathers the server-synchronized entity data.
+     */
+    void gatherServerEntitySpriteInfo(const Camera& camera, double alpha);
+
+    /**
+     * Gathers the A/V entity data.
+     */
+    void gatherAVEntitySpriteInfo(const Camera& camera, double alpha);
+
     // All of these just call pushTileSprite(), but Floor and Wall also check
     // if the UI wants to swap any of their sprites with a phantom.
     void pushTerrainSprites(const Tile& tile, const Camera& camera,
@@ -102,14 +112,6 @@ private:
                         const TileLayerID& layerID, bool isFullPhantom);
 
     /**
-     * Returns the current sprite for the given entity data, or nullptr if 
-     * the entity is using an empty animation.
-     * Updates clientGraphicState's data if necessary.
-     */
-    const Sprite& getEntitySprite(const GraphicState& graphicState,
-                                  ClientGraphicState& clientGraphicState);
-
-    /**
      * Pushes the given entity sprite into the sorting vector.
      * @return true if a sprite was pushed, else false (sprite was outside of 
      *         the screen bounds).
@@ -119,6 +121,14 @@ private:
                           EntityGraphicSetID graphicSetID,
                           EntityGraphicType graphicType,
                           Rotation::Direction graphicDirection);
+
+    /**
+     * Returns the current sprite for the given entity data, or nullptr if 
+     * the entity is using an empty animation.
+     * Updates clientGraphicState's data if necessary.
+     */
+    const Sprite& getEntitySprite(const GraphicState& graphicState,
+                                  ClientGraphicState& clientGraphicState);
 
     /**
      * If the given entity has any visual effects, pushes them into 

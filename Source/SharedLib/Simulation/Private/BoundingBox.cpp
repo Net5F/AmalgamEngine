@@ -3,6 +3,7 @@
 #include "Cylinder.h"
 #include "Ray.h"
 #include "TileExtent.h"
+#include "MovementHelpers.h"
 #include <cmath>
 
 namespace AM

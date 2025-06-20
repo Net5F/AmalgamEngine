@@ -25,10 +25,7 @@ struct EditorSprite {
     // Note: We don't need to store the sprite sheet ID, since sprite sheets 
     //       know which sprites they own (both in memory and in json).
 
-    /** The relPath to the individual image file for this sprite.
-        Note: This path isn't used by the engine, but we need to save it to 
-              the json for use by the editor (we use it when building sprite 
-              sheets). */
+    /** The relPath to the individual image file for this sprite. */
     std::string imagePath{""};
 
     /** Unique display name, shown in the UI.  */

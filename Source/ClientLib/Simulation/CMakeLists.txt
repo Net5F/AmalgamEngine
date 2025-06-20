@@ -1,5 +1,6 @@
 target_sources(ClientLib
     PRIVATE
+        Private/AVEntityHelpers.cpp
         Private/AVSystem.cpp
         Private/CameraSystem.cpp
         Private/CastHelper.cpp
@@ -7,6 +8,7 @@ target_sources(ClientLib
         Private/ChunkUpdateSystem.cpp
         Private/ComponentUpdateSystem.cpp
         Private/EntityLifetimeSystem.cpp
+        Private/GraphicHelpers.cpp
         Private/GraphicSystem.cpp
         Private/InventorySystem.cpp
         Private/ItemSystem.cpp
@@ -23,6 +25,7 @@ target_sources(ClientLib
         Private/ItemData/ItemData.cpp
         Private/TileMap/TileMap.cpp
     PUBLIC
+        Public/AVEntityHelpers.h
         Public/AVSystem.h
         Public/CameraSystem.h
         Public/CastHelper.h
@@ -31,6 +34,7 @@ target_sources(ClientLib
         Public/ComponentUpdateSystem.h
         Public/EntityLifetimeSystem.h
         Public/EnttGroups.h
+        Public/GraphicHelpers.h
         Public/GraphicSystem.h
         Public/InventorySystem.h
         Public/ISimulationExtension.h

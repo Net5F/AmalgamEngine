@@ -10,6 +10,10 @@
 #include "Castable.h"
 #include "AVEffects.h"
 #include "EnttGroups.h"
+#include "ClientGraphicState.h"
+#include "GraphicHelpers.h"
+#include "AVEntityState.h"
+#include "AVEntityHelpers.h"
 
 namespace AM
 {
@@ -75,17 +79,22 @@ void CastSystem::handleCastStarted(const CastStarted& castStarted)
 
 void CastSystem::handleCastFailed(const CastFailed& castFailed)
 {
-    // If the given info lines up with an existing cast, kill it.
-    if (auto* castState{
-            world.registry.try_get<ClientCastState>(castFailed.casterEntity)}) {
-        if (castState->castInfo.castable->castableID == castFailed.castableID) {
-            world.registry.erase<ClientCastState>(castFailed.casterEntity);
-        }
-    }
+    // Try to match the failed cast info with an ongoing cast.
+    if (auto* castState{world.registry.try_get<ClientCastState>(
+            castFailed.casterEntity)}) {
+        if (castState->castInfo.castable->castableID
+            == castFailed.castableID) {
+            // If the failure is a type that results in the cast ending, 
+            // kill the cast.
+            if (castFailed.castFailureType != CastFailureType::AlreadyCasting) {
+                world.registry.erase<ClientCastState>(castFailed.casterEntity);
+            }
 
-    // If this is for the player entity, signal it to the UI.
-    if (castFailed.casterEntity == world.playerEntity) {
-        castFailedSig.publish(castFailed);
+            // If this is for the player entity, signal it to the UI.
+            if (castFailed.casterEntity == world.playerEntity) {
+                castFailedSig.publish(castFailed);
+            }
+        }
     }
 }
 
@@ -162,15 +171,6 @@ void CastSystem::startCast(ClientCastState& castState)
             = SharedConfig::CAST_GLOBAL_COOLDOWN_TICKS;
     }
 
-    // If this castable has a cooldown, track it.
-    if (castInfo.castable->cooldownTime > 0) {
-        Uint32 castTimeTicks{
-            static_cast<Uint32>(castInfo.castable->cooldownTime
-                                / SharedConfig::SIM_TICK_TIMESTEP_S)};
-        castCooldown.cooldowns.emplace_back(castInfo.castable->castableID,
-                                            castTimeTicks);
-    }
-
     // If this is an instant cast, finish it immediately.
     if (castInfo.castable->castTime == 0) {
         finishCast(castState);
@@ -185,6 +185,19 @@ void CastSystem::startCast(ClientCastState& castState)
 
 void CastSystem::finishCast(ClientCastState& castState)
 {
+    // If this castable has a cooldown, track it.
+    const CastInfo& castInfo{castState.castInfo};
+    if (castInfo.castable->cooldownTime > 0) {
+        Uint32 castTimeTicks{
+            static_cast<Uint32>(castInfo.castable->cooldownTime
+                                / SharedConfig::SIM_TICK_TIMESTEP_S)};
+
+        CastCooldown& castCooldown{
+            world.registry.get<CastCooldown>(castInfo.casterEntity)};
+        castCooldown.cooldowns.emplace_back(castInfo.castable->castableID,
+                                            castTimeTicks);
+    }
+
     // If the caster has a valid graphic, mark the cast as complete and
     // play its audio/visual effects.
     if (Uint32 castCompleteEndTick{getCastCompleteEndTick(
@@ -270,7 +283,61 @@ void CastSystem::playAVEffects(const CastInfo& castInfo)
         }
     }
 
-    // If this castable spawns AV entities, add them to the local-only registry.
+    // If this castable spawns AV entities, add them to the A/V registry.
+    for (const AVEntity& avEntity :
+         castInfo.castable->castCompleteAVEntities) {
+        // If this entity def has no phases, skip it.
+        if (avEntity.phases.empty()) {
+            continue;
+        }
+        const AVEntity::Phase& firstPhase{avEntity.phases.at(0)};
+
+        // Get the caster's position.
+        std::optional<Position> casterOpt{AVEntityHelpers::getCasterPosition(
+            castInfo.casterEntity, world.registry)};
+        if (!casterOpt) {
+            continue;
+        }
+        Position casterPosition{casterOpt.value()};
+
+        // Determine the target's position.
+        std::optional<Position> targetOpt{AVEntityHelpers::getTargetPosition(
+            firstPhase.behavior, castInfo.targetEntity,
+            static_cast<Position>(castInfo.targetPosition), {}, world.registry,
+            true)};
+        if (!targetOpt) {
+            continue;
+        }
+        Position targetPosition{targetOpt.value()};
+
+        // Determine the A/V entity's desired starting state.
+        auto startStateOpt{AVEntityHelpers::getStartState(
+            firstPhase.behavior, casterPosition, targetPosition,
+            avEntity.startDistance)};
+        if (!startStateOpt) {
+            continue;
+        }
+        auto& [startPosition, desiredGraphicType, desiredGraphicDirection]
+            = startStateOpt.value();
+
+        // Get a valid graphic from the graphic set.
+        const EntityGraphicSet& graphicSet{
+            graphicData.getEntityGraphicSet(firstPhase.graphicSetID)};
+        auto graphicReturn{GraphicHelpers::getGraphicOrFallback(
+            graphicSet, desiredGraphicType, desiredGraphicDirection,
+            desiredGraphicType, desiredGraphicDirection)};
+
+        entt::entity newAVEntity{world.avRegistry.create()};
+        world.avRegistry.emplace<Position>(newAVEntity, startPosition);
+        world.avRegistry.emplace<PreviousPosition>(newAVEntity, startPosition);
+        world.avRegistry.emplace<GraphicState>(newAVEntity,
+                                               firstPhase.graphicSetID);
+        world.avRegistry.emplace<ClientGraphicState>(
+            newAVEntity, graphicReturn.type, graphicReturn.direction);
+        world.avRegistry.emplace<AVEntityState>(newAVEntity, avEntity,
+                                                castInfo.targetEntity,
+                                                castInfo.targetPosition);
+    }
 }
 
 } // End namespace Client

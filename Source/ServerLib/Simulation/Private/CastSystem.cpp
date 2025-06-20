@@ -137,6 +137,15 @@ void CastSystem::updateCasts()
             Position& position{world.registry.get<Position>(entity)};
             if (position != *prevPosition) {
                 world.registry.erase<CastState>(entity);
+
+                // If this castable has any visuals, send a CastFailed to all 
+                // nearby clients.
+                // Note: If it has no visuals, there's no reason for a client 
+                //       to replicate it. Thus, we can skip sending the message.
+                CastInfo& castInfo{castState.castInfo};
+                if (castInfo.castable->hasVisuals()) {
+                    sendCastFailed(castState, CastFailureType::Canceled);
+                }
                 continue;
             }
         }
@@ -176,15 +185,6 @@ void CastSystem::startCast(CastState& castState)
             = SharedConfig::CAST_GLOBAL_COOLDOWN_TICKS;
     }
 
-    // If this castable has a cooldown, track it.
-    if (castInfo.castable->cooldownTime > 0) {
-        Uint32 castTimeTicks{
-            static_cast<Uint32>(castInfo.castable->cooldownTime
-                                / SharedConfig::SIM_TICK_TIMESTEP_S)};
-        castCooldown.cooldowns.emplace_back(castInfo.castable->castableID,
-                                            castTimeTicks);
-    }
-
     // If this is an instant cast, finish it immediately.
     if (castInfo.castable->castTime == 0) {
         finishCast(castState);
@@ -199,6 +199,20 @@ void CastSystem::startCast(CastState& castState)
 
 void CastSystem::finishCast(CastState& castState)
 {
+    // If this castable has a cooldown, track it.
+    const CastInfo& castInfo{castState.castInfo};
+    if (castInfo.castable->cooldownTime > 0) {
+        Uint32 castTimeTicks{
+            static_cast<Uint32>(castInfo.castable->cooldownTime
+                                / SharedConfig::SIM_TICK_TIMESTEP_S)};
+
+        CastCooldown& castCooldown{
+            world.registry.get<CastCooldown>(castInfo.casterEntity)};
+        castCooldown.cooldowns.emplace_back(castInfo.castable->castableID,
+                                            castTimeTicks);
+    }
+
+    // Handle the cast.
     handleCast(castState.castInfo);
     world.registry.erase<CastState>(castState.castInfo.casterEntity);
 }
@@ -231,6 +245,43 @@ void CastSystem::sendCastStarted(CastState& castState)
     // Send the update to all nearby clients.
     // Note: We skip the caster so that they don't restart a cast that they're
     //       already replicating.
+    auto view{world.registry.view<Position, ClientSimData>()};
+    for (entt::entity entity : *entitiesInRange) {
+        if ((entity != castInfo.casterEntity) && view.contains(entity)) {
+            const auto& client{view.get<ClientSimData>(entity)};
+            network.send(client.netID, message);
+        }
+    }
+}
+
+void CastSystem::sendCastFailed(CastState& castState,
+                                CastFailureType failureType)
+{
+    // Serialize a CastFailed message.
+    CastInfo& castInfo{castState.castInfo};
+    CastFailed castFailed{.casterEntity{castInfo.casterEntity},
+                          .castableID{castInfo.castable->castableID},
+                          .castFailureType{failureType}};
+    BinaryBufferSharedPtr message{network.serialize(castFailed)};
+
+    // Get the list of entities that are in range of the caster entity.
+    const std::vector<entt::entity>* entitiesInRange{nullptr};
+    if (const auto* client
+        = world.registry.try_get<ClientSimData>(castInfo.casterEntity)) {
+        // Clients already have their AOI list built.
+        entitiesInRange = &(client->entitiesInAOI);
+    }
+    else {
+        const auto& casterEntityPosition{
+            world.registry.get<Position>(castInfo.casterEntity)};
+        entitiesInRange = &(world.entityLocator.getEntities(
+            Cylinder{casterEntityPosition, SharedConfig::AOI_RADIUS,
+                     SharedConfig::AOI_HALF_HEIGHT}));
+    }
+
+    // Send the update to all nearby clients.
+    // Note: We skip the caster since clients predict all of the same types 
+    //       of failure for their own player entity.
     auto view{world.registry.view<Position, ClientSimData>()};
     for (entt::entity entity : *entitiesInRange) {
         if ((entity != castInfo.casterEntity) && view.contains(entity)) {

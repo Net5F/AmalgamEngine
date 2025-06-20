@@ -224,6 +224,16 @@ entt::sink<entt::sigh<void(ConnectionError)>>&
     return serverConnectionSystem.serverConnectionError;
 }
 
+entt::sink<entt::sigh<void(const CastFailed&)>>&
+    Simulation::getCastFailedSink()
+{
+    if (!castSystem) {
+        LOG_FATAL("Tried to subscribe to a system signal before the sim was "
+                  "fully constructed.");
+    }
+    return castSystem->castFailed;
+}
+
 void Simulation::initializeSystems()
 {
     // Initialize our engine systems.

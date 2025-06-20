@@ -1,20 +1,16 @@
 #pragma once
 
 #include "EntityGraphicType.h"
-#include "Rotation.h"
 #include "entt/fwd.hpp"
 
 namespace AM
 {
-struct EntityGraphicSet;
-
 namespace Client
 {
 
 class World;
 class GraphicData;
 class ISimulationExtension;
-struct ClientGraphicState;
 
 /**
  * Handles updating each entity's graphic state to reflect their current sim 
@@ -40,21 +36,6 @@ private:
      * current state.
      */
     EntityGraphicType getDesiredGraphicType(entt::entity entity);
-
-    struct GraphicReturn {
-        EntityGraphicType type{};
-        Rotation::Direction direction{};
-    };
-    /**
-     * Tries to return a graphic from graphicSet, matching the desired graphic 
-     * type and direction. If the set doesn't have a graphic in that slot, 
-     * returns the closest matching graphic.
-     */
-    GraphicReturn
-        getGraphicOrDefault(const EntityGraphicSet& graphicSet,
-                            const ClientGraphicState& clientGraphicState,
-                            EntityGraphicType desiredType,
-                            Rotation::Direction desiredDirection);
 
     /** Used to get entity GraphicState components. */
     World& world;

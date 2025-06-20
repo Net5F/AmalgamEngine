@@ -1,9 +1,13 @@
 #pragma once
 
+#include "Rotation.h"
 #include <vector>
 
 namespace AM
 {
+struct Vector3;
+struct AVEntity;
+
 namespace Client
 {
 class World;
@@ -39,6 +43,11 @@ private:
      * Updates all of the given visual effects.
      */
     void updateVisualEffects(std::vector<VisualEffectState>& visualEffects);
+
+    /**
+     * Updates all A/V entities.
+     */
+    void updateAVEntities();
 
     /** Used to access entity data. */
     World& world;

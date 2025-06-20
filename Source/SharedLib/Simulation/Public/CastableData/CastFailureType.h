@@ -32,7 +32,33 @@ enum class CastFailureType : Uint8 {
     /** The target position is outside of the tile map. */
     InvalidTargetPosition,
     /** The project's validateCast() call returned false. */
-    ProjectValidationFailed
+    ProjectValidationFailed,
+    /** The cast was canceled for some reason (caster entity moved, cast was 
+        interrupted by a spell, etc. */
+    Canceled,
 };
+
+/**
+ * Returns a user-facing failure string for the given failure type.
+ */
+static const char* getCastFailureString(CastFailureType failureType)
+{
+    // Note: We only add strings for failure types that the user can do 
+    //       something about. Internal failures due to e.g. bugs shouldn't be 
+    //       sent to the user.
+    switch (failureType) {
+        case CastFailureType::AlreadyCasting:
+            return "A cast is already underway.";
+        // Note: We don't add a failure message for OnCooldown because there 
+        //       should already be something in the UI to show cooldowns.
+        //case CastFailureType::OnCooldown:
+        case CastFailureType::OutOfRange:
+            return "You must move closer to do that.";
+        default:
+            break;
+    }
+
+    return "";
+}
 
 } // namespace AM

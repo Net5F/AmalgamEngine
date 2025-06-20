@@ -14,6 +14,7 @@ World::World(Simulation& inSimulation, Network& inNetwork,
              const GraphicData& inGraphicData, const ItemData& inItemData,
              const CastableData& inCastableData)
 : registry{}
+, avRegistry{}
 , playerEntity{entt::null}
 , entityLocator{registry}
 , collisionLocator{}

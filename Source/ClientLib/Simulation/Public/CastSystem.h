@@ -3,6 +3,7 @@
 #include "CastStarted.h"
 #include "CastFailed.h"
 #include "CastCooldownInit.h"
+#include "Rotation.h"
 #include "QueuedEvents.h"
 #include "entt/signal/sigh.hpp"
 
