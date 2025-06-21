@@ -160,7 +160,7 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
     for (const PhantomSpriteInfo& info : phantomSprites) {
         if (info.layerType == TileLayer::Type::None) {
             GraphicRef graphic{getPhantomGraphic(info)};
-            pushEntitySprite(
+            pushEntitySprite<entt::entity>(
                 entt::null, info.position, graphic.getFirstSprite(), camera,
                 static_cast<EntityGraphicSetID>(info.graphicSet->numericID),
                 static_cast<EntityGraphicType>(info.graphicValue),
@@ -205,12 +205,12 @@ void WorldSpriteSorter::gatherServerEntitySpriteInfo(const Camera& camera,
 void WorldSpriteSorter::gatherAVEntitySpriteInfo(const Camera& camera,
                                                  double alpha)
 {
-    entt::registry& avRegistry{world.avRegistry};
+    entt::basic_registry<AVEntityID>& avRegistry{world.avRegistry};
 
     // Gather all A/V entities.
     auto view = avRegistry.view<Position, GraphicState, ClientGraphicState,
                                 AVEntityState>();
-    for (entt::entity entity : view) {
+    for (AVEntityID entity : view) {
         auto [position, graphicState, clientGraphicState, avEntityState]
             = view.get<Position, GraphicState, ClientGraphicState,
                        AVEntityState>(entity);
@@ -459,10 +459,13 @@ const Sprite&
     return sprite;
 }
 
-void WorldSpriteSorter::pushEntitySprite(
-    entt::entity entity, const Position& position, const Sprite& sprite,
-    const Camera& camera, EntityGraphicSetID graphicSetID,
-    EntityGraphicType graphicType, Rotation::Direction graphicDirection)
+template<typename T>
+void WorldSpriteSorter::pushEntitySprite(T entity, const Position& position,
+                                         const Sprite& sprite,
+                                         const Camera& camera,
+                                         EntityGraphicSetID graphicSetID,
+                                         EntityGraphicType graphicType,
+                                         Rotation::Direction graphicDirection)
 {
     // Get the iso screen extent for the sprite.
     const SpriteRenderData& renderData{
@@ -487,7 +490,7 @@ void WorldSpriteSorter::pushEntitySprite(
             graphicSet.getCollisionModelBounds(), position)};
 
         // If the UI wants a color mod on this sprite, use it.
-        SDL_Color colorMod{getColorMod<entt::entity>(entity)};
+        SDL_Color colorMod{getColorMod<T>(entity)};
 
         // If this sprite doesn't come from a phantom, set the owner ID.
         WorldObjectID ownerID{std::monostate{}};
@@ -690,6 +693,35 @@ GraphicRef WorldSpriteSorter::getPhantomGraphic(
     }
 
     return GraphicRef{graphicData.getSprite(NULL_SPRITE_ID)};
+}
+
+template<typename T>
+SDL_Color WorldSpriteSorter::getColorMod(const T& objectID)
+{
+    auto objectIDsMatch = [&](const SpriteColorModInfo& info) {
+        // If this color mod is for the same type of object.
+        if (const T* colorModLayerID = std::get_if<T>(&(info.objectToModify))) {
+            // If the IDs match, return true.
+            if (*colorModLayerID == objectID) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    // If the UI wants a color mod on this sprite, use it.
+    auto colorModInfo = std::find_if(spriteColorMods.begin(),
+                                     spriteColorMods.end(), objectIDsMatch);
+    if (colorModInfo != spriteColorMods.end()) {
+        // Remove this color mod from our temp vector, since it's been used.
+        SDL_Color colorMod{colorModInfo->colorMod};
+        spriteColorMods.erase(colorModInfo);
+        return colorMod;
+    }
+    else {
+        return {0, 0, 0, 255};
+    }
 }
 
 Uint8 WorldSpriteSorter::getTerrainHeight(const TilePosition& tilePosition)

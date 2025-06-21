@@ -4,6 +4,7 @@
 #include "EntityLocator.h"
 #include "CollisionLocator.h"
 #include "CastHelper.h"
+#include "AVEntityID.h"
 #include "entt/entity/registry.hpp"
 
 struct SDL_Rect;
@@ -44,7 +45,7 @@ public:
     /** Audio/visual entity data registry. A/V entities are processed 
         by AVSystem and aren't synchronized with the server and other 
         clients. */
-    entt::registry avRegistry;
+    entt::basic_registry<AVEntityID> avRegistry;
 
     /** The entity that this client is controlling. */
     entt::entity playerEntity;

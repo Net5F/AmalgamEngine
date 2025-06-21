@@ -26,6 +26,7 @@ target_sources(ClientLib
         Private/TileMap/TileMap.cpp
     PUBLIC
         Public/AVEntityHelpers.h
+        Public/AVEntityID.h
         Public/AVSystem.h
         Public/CameraSystem.h
         Public/CastHelper.h

@@ -327,7 +327,7 @@ void CastSystem::playAVEffects(const CastInfo& castInfo)
             graphicSet, desiredGraphicType, desiredGraphicDirection,
             desiredGraphicType, desiredGraphicDirection)};
 
-        entt::entity newAVEntity{world.avRegistry.create()};
+        AVEntityID newAVEntity{world.avRegistry.create()};
         world.avRegistry.emplace<Position>(newAVEntity, startPosition);
         world.avRegistry.emplace<PreviousPosition>(newAVEntity, startPosition);
         world.avRegistry.emplace<GraphicState>(newAVEntity,

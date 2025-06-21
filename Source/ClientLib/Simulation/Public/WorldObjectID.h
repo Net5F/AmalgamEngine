@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TileLayerID.h"
+#include "AVEntityID.h"
 #include "entt/fwd.hpp"
 #include <variant>
 
@@ -18,7 +19,8 @@ namespace Client
  * Note: "Object" doesn't mean the same as when we say "Object tile layer".
  *       A better name for this would be welcome.
  */
-using WorldObjectID = std::variant<std::monostate, TileLayerID, entt::entity>;
+using WorldObjectID
+    = std::variant<std::monostate, TileLayerID, entt::entity, AVEntityID>;
 
 } // namespace Client
 } // namespace AM

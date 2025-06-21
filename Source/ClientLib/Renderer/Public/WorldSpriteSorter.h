@@ -113,10 +113,12 @@ private:
 
     /**
      * Pushes the given entity sprite into the sorting vector.
+     * @param T An entt::entity or AVEntityID.
      * @return true if a sprite was pushed, else false (sprite was outside of 
      *         the screen bounds).
      */
-    void pushEntitySprite(entt::entity entity, const Position& position,
+    template<typename T>
+    void pushEntitySprite(T entity, const Position& position,
                           const Sprite& sprite, const Camera& camera,
                           EntityGraphicSetID graphicSetID,
                           EntityGraphicType graphicType,
@@ -234,35 +236,6 @@ private:
         Allows us to calculate time deltas. */
     double currentAnimationTimestamp;
 };
-
-template<typename T>
-SDL_Color WorldSpriteSorter::getColorMod(const T& objectID)
-{
-    auto objectIDsMatch = [&](const SpriteColorModInfo& info) {
-        // If this color mod is for the same type of object.
-        if (const T* colorModLayerID = std::get_if<T>(&(info.objectToModify))) {
-            // If the IDs match, return true.
-            if (*colorModLayerID == objectID) {
-                return true;
-            }
-        }
-
-        return false;
-    };
-
-    // If the UI wants a color mod on this sprite, use it.
-    auto colorModInfo = std::find_if(spriteColorMods.begin(),
-                                     spriteColorMods.end(), objectIDsMatch);
-    if (colorModInfo != spriteColorMods.end()) {
-        // Remove this color mod from our temp vector, since it's been used.
-        SDL_Color colorMod{colorModInfo->colorMod};
-        spriteColorMods.erase(colorModInfo);
-        return colorMod;
-    }
-    else {
-        return {0, 0, 0, 255};
-    }
-}
 
 } // End namespace Client
 } // End namespace AM
