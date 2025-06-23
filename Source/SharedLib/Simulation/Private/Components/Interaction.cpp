@@ -30,11 +30,4 @@ bool Interaction::supports(EntityInteractionType desiredInteraction) const
             != supportedInteractions.end());
 }
 
-EntityInteractionType Interaction::getDefault() const
-{
-    AM_ASSERT(supportedInteractions.size() > 0,
-              "Interaction component should never be empty.");
-    return supportedInteractions[0];
-}
-
 } // End namespace AM

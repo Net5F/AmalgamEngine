@@ -173,7 +173,7 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     entt::registry& registry{world.registry};
 
     // Check that the caster entity exists.
-    // Note: This should only be able to happen if a non-CastSystem caller 
+    // Note: This should only be able to fail if a non-CastSystem caller 
     //       doesn't fill the struct properly.
     if (!(registry.valid(casterEntity))) {
         return CastFailureType::InvalidCasterEntity;
@@ -192,15 +192,20 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
         }
     }
 
-    // If a target entity was provided or the Castable requires a target entity.
+    // If a target entity was provided or the Castable requires a target entity,
+    // check that it exists.
     if ((targetEntity != entt::null)
         || (castable.targetToolType == Castable::TargetToolType::Entity)) {
-        // Check that the target entity exists.
         if (!(registry.valid(targetEntity))) {
             return CastFailureType::InvalidTargetEntity;
         }
+    }
 
+    // If the Castable requires a target entity, check that the caster is 
+    // in range of it.
+    if (castable.targetToolType == Castable::TargetToolType::Entity) {
         // Check that the caster is in range of the target entity.
+        // Note: We already checked that both entities exist above.
         const Position& casterPosition{registry.get<Position>(casterEntity)};
         const Position& targetPosition{registry.get<Position>(targetEntity)};
         float squaredRange{castable.range * castable.range};

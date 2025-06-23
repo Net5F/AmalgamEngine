@@ -85,23 +85,22 @@ void CastSystem::processCastRequests()
         entt::entity clientEntity{it->second};
 
         // Try to perform the cast.
-        CastFailureType failureType{CastFailureType::None};
+        CastFailureType result{CastFailureType::None};
         if (auto* type{
                 std::get_if<ItemInteractionType>(&castRequest.castableID)}) {
-            failureType = world.castHelper.castItemInteraction(
+            result = world.castHelper.castItemInteraction(
                 {*type, clientEntity, castRequest.slotIndex,
                  castRequest.targetEntity, castRequest.targetPosition,
                  castRequest.netID});
         }
-        else if (auto* type{
-                std::get_if<EntityInteractionType>(&castRequest.castableID)}) {
-            failureType = world.castHelper.castEntityInteraction(
+        else if (auto* type{std::get_if<EntityInteractionType>(
+                     &castRequest.castableID)}) {
+            result = world.castHelper.castEntityInteraction(
                 {*type, clientEntity, castRequest.targetEntity,
                  castRequest.targetPosition, castRequest.netID});
         }
-        else if (auto* type{
-                std::get_if<SpellType>(&castRequest.castableID)}) {
-            failureType = world.castHelper.castSpell(
+        else if (auto* type{std::get_if<SpellType>(&castRequest.castableID)}) {
+            result = world.castHelper.castSpell(
                 {*type, clientEntity, castRequest.targetEntity,
                  castRequest.targetPosition, castRequest.netID});
         }
@@ -110,10 +109,10 @@ void CastSystem::processCastRequests()
         }
 
         // If the cast failed, send the failure to the caster.
-        if (failureType != CastFailureType::None) {
+        if (result != CastFailureType::None) {
             network.serializeAndSend<CastFailed>(
                 castRequest.netID,
-                {clientEntity, castRequest.castableID, failureType});
+                {clientEntity, castRequest.castableID, result});
         }
     }
 }

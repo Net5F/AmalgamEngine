@@ -39,10 +39,11 @@ struct CastCooldown {
      * Returns true if the global cooldown is active, or the given cast is on 
      * cooldown.
      * 
-     * This function has a side effect of updating all the cooldown times and 
-     * removing expired cooldowns. We do this because it's efficient: we need 
-     * to update the desired cooldown (if present) anyway to tell if it has 
-     * expired, so doing the rest of the updates is relatively low-cost.
+     * This function has a side effect of updating all of this component's 
+     * cooldown times and removing expired cooldowns. We do this because it's 
+     * efficient: we need to update the desired cooldown (if present) anyway 
+     * to tell if it has expired, so doing the rest of the updates is 
+     * relatively low-cost.
      */
     bool isCastOnCooldown(CastableID castableID, Uint32 currentTick);
 

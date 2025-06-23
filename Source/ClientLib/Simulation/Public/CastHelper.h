@@ -9,6 +9,7 @@
 #include <SDL_stdinc.h>
 #include <unordered_map>
 #include <functional>
+#include <limits>
 
 namespace AM
 {
@@ -138,10 +139,12 @@ struct CastItemInteractionParams {
     Uint8 slotIndex{};
     /** (Optional) The target entity. If the Castable's targetToolType is 
         Entity, this must be valid. */
-    entt::entity targetEntity{};
+    entt::entity targetEntity{entt::null};
     /** (Optional) The target position. If the Castable's targetToolType 
         is Circle, this must be valid. */
-    const Vector3& targetPosition{};
+    Vector3 targetPosition{std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max()};
 };
 
 struct CastEntityInteractionParams {
@@ -150,10 +153,12 @@ struct CastEntityInteractionParams {
     /** The entity interaction to cast. */
     EntityInteractionType interactionType{};
     /** The target entity. */
-    entt::entity targetEntity{};
+    entt::entity targetEntity{entt::null};
     /** (Optional) The target position. If the Castable's targetToolType 
         is Circle, this must be valid. */
-    const Vector3& targetPosition{};
+    Vector3 targetPosition{std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max()};
 };
 
 struct CastSpellParams {
@@ -163,10 +168,12 @@ struct CastSpellParams {
     SpellType interactionType{};
     /** (Optional) The target entity. If the Castable's targetToolType is 
         Entity, this must be valid. */
-    entt::entity targetEntity{};
+    entt::entity targetEntity{entt::null};
     /** (Optional) The client that requested this cast. If present, any
         failure messages will be sent to this client. */
-    const Vector3& targetPosition{};
+    Vector3 targetPosition{std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max()};
 };
 };
 

@@ -29,11 +29,6 @@ struct Interaction {
      * Returns true if this component supports the given interaction.
      */
     bool supports(EntityInteractionType desiredInteraction) const;
-
-    /**
-     * Returns this component's default interaction.
-     */
-    EntityInteractionType getDefault() const;
 };
 
 template<typename S>
