@@ -63,11 +63,7 @@ std::optional<AVEntityHelpers::StartStateReturn> AVEntityHelpers::getStartState(
         case AVEntity::Behavior::MoveToPosition:
         case AVEntity::Behavior::FollowDirection: {
             // Calculate a direction vector that points towards the target.
-            Vector3 normalizedTargetPos{targetPosition};
-            normalizedTargetPos.normalize();
-            Vector3 normalizedCasterPos{casterPosition};
-            normalizedCasterPos.normalize();
-            Vector3 directionVec{normalizedTargetPos - normalizedCasterPos};
+            Vector3 directionVec{targetPosition - casterPosition};
             directionVec.normalize();
 
             // Start at the front of the caster, offset towards the target.
