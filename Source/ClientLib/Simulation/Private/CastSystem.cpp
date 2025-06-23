@@ -219,7 +219,7 @@ Uint32 CastSystem::getCastCompleteEndTick(entt::entity entity,
                                           const Castable& castable)
 {
     // Check that the Castable has a "cast complete" graphic.
-    if (castable.castingGraphicType == EntityGraphicType::NotSet) {
+    if (castable.castCompleteGraphicType == EntityGraphicType::NotSet) {
         return 0;
     }
 
