@@ -54,6 +54,8 @@ static const char* getCastFailureString(CastFailureType failureType)
         //case CastFailureType::OnCooldown:
         case CastFailureType::OutOfRange:
             return "You must move closer to do that.";
+        case CastFailureType::InvalidTargetEntity:
+            return "You need a target to cast that.";
         default:
             break;
     }

@@ -27,8 +27,7 @@ DialogueSystem::DialogueSystem(
     // Register a callback for entity Talk interactions.
     world.castHelper.setOnEntityInteractionCompleted(
         EntityInteractionType::Talk,
-        [this](const CastInfo&
-                   castInfo) { /* processTalkInteraction(castInfo); */ });
+        [this](const CastInfo& castInfo) { processTalkInteraction(castInfo); });
 }
 
 void DialogueSystem::processDialogueInteractions()
