@@ -411,16 +411,10 @@ void AnimationPropertiesWindow::onAnimationEntityAlignmentAnchorChanged(
 
 void AnimationPropertiesWindow::onAnimationRemoved(AnimationID animationID)
 {
+    // If the active animation was deleted, hide this window.
     if (animationID == activeAnimationID) {
         activeAnimationID = NULL_ANIMATION_ID;
-        nameInput.setText("");
-        boundingBoxNameLabel.setText("");
-        minXInput.setText("");
-        minYInput.setText("");
-        minZInput.setText("");
-        maxXInput.setText("");
-        maxYInput.setText("");
-        maxZInput.setText("");
+        setIsVisible(false);
     }
 }
 

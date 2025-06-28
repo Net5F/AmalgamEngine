@@ -69,6 +69,8 @@ SpriteSheetPropertiesWindow::SpriteSheetPropertiesWindow(MainScreen& inScreen,
     dataModel.activeLibraryItemChanged
         .connect<&SpriteSheetPropertiesWindow::onActiveLibraryItemChanged>(
             *this);
+    dataModel.spriteModel.sheetRemoved
+        .connect<&SpriteSheetPropertiesWindow::onSheetRemoved>(*this);
 }
 
 void SpriteSheetPropertiesWindow::onActiveLibraryItemChanged(
@@ -86,6 +88,15 @@ void SpriteSheetPropertiesWindow::onActiveLibraryItemChanged(
 
     // Update all of our property fields to match the new active sheet's data.
     nameInput.setText(newActiveSpriteSheet->displayName);
+}
+
+void SpriteSheetPropertiesWindow::onSheetRemoved(SpriteSheetID parentSheetID)
+{
+    // If the active sheet was deleted, hide this window.
+    if (parentSheetID == activeSpriteSheetID) {
+        activeSpriteSheetID = NULL_SPRITE_SHEET_ID;
+        setIsVisible(false);
+    }
 }
 
 void SpriteSheetPropertiesWindow::onAddImagesButtonPressed()

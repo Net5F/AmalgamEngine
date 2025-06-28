@@ -36,12 +36,12 @@ public:
 
 private:
     /**
-     * If the new active item is an icon, loads it's data into this panel.
+     * If the new active item is an icon, loads it's data into this window.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If active icon was removed) Sets this panel back to its default state.
+     * (If active icon was removed) Hides this window.
      */
     void onIconRemoved(IconID iconID);
 

@@ -77,12 +77,12 @@ public:
 
 private:
     /**
-     * If the new active item is a sprite, loads it's data into this panel.
+     * If the new active item is a sprite, loads it's data into this window.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If active sprite was removed) Sets this panel back to its default state.
+     * (If active sprite was removed) Hides this window.
      */
     void onSpriteRemoved(SpriteID spriteID);
 

@@ -851,6 +851,11 @@ void LibraryWindow::removeListItem(LibraryListItem* listItem)
                 static_cast<ObjectGraphicSetID>(listItem->ID));
             break;
         }
+        case LibraryListItem::Type::Entity: {
+            dataModel.entityGraphicSetModel.remEntity(
+                static_cast<EntityGraphicSetID>(listItem->ID));
+            break;
+        }
         default: {
             // Note: We purposely don't support deleting animations, since 
             //       they're automatically managed based on sprite filenames.

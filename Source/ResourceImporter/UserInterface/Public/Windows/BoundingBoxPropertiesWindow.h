@@ -65,8 +65,7 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If active bounding box was removed) Sets this panel back to its default 
-     * state.
+     * (If active bounding box was removed) Hides this window.
      */
     void onBoundingBoxRemoved(BoundingBoxID boundingBoxID);
 

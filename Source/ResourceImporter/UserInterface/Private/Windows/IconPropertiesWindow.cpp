@@ -74,9 +74,10 @@ void IconPropertiesWindow::onActiveLibraryItemChanged(
 
 void IconPropertiesWindow::onIconRemoved(IconID iconID)
 {
+    // If the active icon was deleted, hide this window.
     if (iconID == activeIconID) {
         activeIconID = NULL_ICON_ID;
-        nameInput.setText("");
+        setIsVisible(false);
     }
 }
 

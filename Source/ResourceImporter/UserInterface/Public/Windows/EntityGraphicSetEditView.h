@@ -41,7 +41,7 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If ID matches active set) Sets this panel back to its default state.
+     * (If ID matches active set) Hides this view.
      */
     void onEntityRemoved(EntityGraphicSetID graphicSetID);
 

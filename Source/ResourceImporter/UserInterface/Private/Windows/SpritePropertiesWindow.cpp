@@ -262,20 +262,10 @@ void SpritePropertiesWindow::onActiveLibraryItemChanged(
 
 void SpritePropertiesWindow::onSpriteRemoved(SpriteID spriteID)
 {
+    // If the active sprite was deleted, hide this window.
     if (spriteID == activeSpriteID) {
         activeSpriteID = NULL_SPRITE_ID;
-        nameInput.setText("");
-        boundingBoxNameLabel.setText("");
-        minXInput.setText("");
-        minYInput.setText("");
-        minZInput.setText("");
-        maxXInput.setText("");
-        maxYInput.setText("");
-        maxZInput.setText("");
-        collisionEnabledInput.setCurrentState(AUI::Checkbox::State::Unchecked);
-        stageOriginXInput.setText("");
-        stageOriginYInput.setText("");
-        premultiplyAlphaInput.setCurrentState(AUI::Checkbox::State::Unchecked);
+        setIsVisible(false);
     }
 }
 

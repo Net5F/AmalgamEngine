@@ -30,8 +30,7 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If active icon was removed) Sets activeIcon to invalid and returns
-     * the stage to its default state.
+     * (If active icon was removed) Hides this view.
      */
     void onIconRemoved(IconID iconID);
 

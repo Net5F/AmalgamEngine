@@ -149,15 +149,10 @@ void BoundingBoxPropertiesWindow::onActiveLibraryItemChanged(
 void BoundingBoxPropertiesWindow::onBoundingBoxRemoved(
     BoundingBoxID boundingBoxID)
 {
+    // If the active box was deleted, hide this window.
     if (boundingBoxID == activeBoundingBoxID) {
         activeBoundingBoxID = NULL_BOUNDING_BOX_ID;
-        nameInput.setText("");
-        minXInput.setText("");
-        minYInput.setText("");
-        minZInput.setText("");
-        maxXInput.setText("");
-        maxYInput.setText("");
-        maxZInput.setText("");
+        setIsVisible(false);
     }
 }
 

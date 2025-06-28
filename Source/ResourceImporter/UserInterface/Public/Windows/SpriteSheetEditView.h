@@ -31,6 +31,11 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
+     * (If active sheet was removed) Hides this view.
+     */
+    void onSheetRemoved(SpriteSheetID parentSheetID);
+
+    /**
      * Adds the sprite to the active sheet and refreshes the texture.
      */
     void onSpriteAdded(SpriteID spriteID, const EditorSprite& sprite,

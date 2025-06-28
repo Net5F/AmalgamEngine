@@ -56,6 +56,8 @@ SpriteSheetEditView::SpriteSheetEditView(DataModel& inDataModel)
     // When the active sprite sheet is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
         .connect<&SpriteSheetEditView::onActiveLibraryItemChanged>(*this);
+    dataModel.spriteModel.sheetRemoved
+        .connect<&SpriteSheetEditView::onSheetRemoved>(*this);
     dataModel.spriteModel.spriteAdded
         .connect<&SpriteSheetEditView::onSpriteAdded>(*this);
     dataModel.spriteModel.spriteRemoved
@@ -77,6 +79,15 @@ void SpriteSheetEditView::onActiveLibraryItemChanged(
 
     // Refresh the generated sprite sheet image.
     refreshSpriteSheetImage(*newActiveSpriteSheet);
+}
+
+void SpriteSheetEditView::onSheetRemoved(SpriteSheetID parentSheetID)
+{
+    // If the active sheet was deleted, hide this window.
+    if (parentSheetID == activeSpriteSheetID) {
+        activeSpriteSheetID = NULL_SPRITE_SHEET_ID;
+        setIsVisible(false);
+    }
 }
 
 void SpriteSheetEditView::onSpriteAdded(SpriteID spriteID, const EditorSprite&,

@@ -133,13 +133,10 @@ void BoundingBoxEditView::onBoundingBoxBoundsChanged(
 
 void BoundingBoxEditView::onBoundingBoxRemoved(BoundingBoxID boundingBoxID)
 {
+    // If the active box was deleted, hide this window.
     if (boundingBoxID == activeBoundingBoxID) {
         activeBoundingBoxID = NULL_BOUNDING_BOX_ID;
-
-        // Set everything back to being invisible.
-        checkerboardImage.setIsVisible(false);
-        spriteImage.setIsVisible(false);
-        boundingBoxGizmo.setIsVisible(false);
+        setIsVisible(false);
     }
 }
 

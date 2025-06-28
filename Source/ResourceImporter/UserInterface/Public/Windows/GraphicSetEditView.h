@@ -39,8 +39,7 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If type/ID matches active set) Sets this stage back to its default
-     * state.
+     * (If type/ID matches active set) Hides this view.
      */
     void onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID);
 

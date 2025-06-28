@@ -44,8 +44,7 @@ private:
                                     const SDL_Point& newStageOrigin);
 
     /**
-     * (If active sprite was removed) Sets activeSprite to invalid and returns
-     * the stage to its default state.
+     * (If active sprite was removed) Hides this view.
      */
     void onSpriteRemoved(SpriteID spriteID);
 

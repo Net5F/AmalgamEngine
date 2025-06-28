@@ -74,7 +74,7 @@ void GraphicSetEditView::onActiveLibraryItemChanged(
                              get<EditorObjectGraphicSet>(newActiveItem));
     }
     else {
-        // New active item is not a graphic set. Clear this stage.
+        // New active item is not a graphic set. Clear this view.
         activeGraphicSetType = GraphicSet::Type::None;
         activeGraphicSetID = SDL_MAX_UINT16;
         graphicContainer.setIsVisible(false);
@@ -84,10 +84,11 @@ void GraphicSetEditView::onActiveLibraryItemChanged(
 void GraphicSetEditView::onGraphicSetRemoved(GraphicSet::Type type,
                                             Uint16 graphicSetID)
 {
+    // If the active set was deleted, hide this window.
     if ((type == activeGraphicSetType) && (graphicSetID == activeGraphicSetID)) {
         activeGraphicSetType = GraphicSet::Type::None;
         activeGraphicSetID = SDL_MAX_UINT16;
-        graphicContainer.setIsVisible(false);
+        setIsVisible(false);
     }
 }
 

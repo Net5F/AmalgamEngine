@@ -42,12 +42,12 @@ public:
 private:
     /**
      * If the new active item is an entity graphic set, loads it's data into 
-     * this panel.
+     * this window.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If ID matches active set) Sets this panel back to its default state.
+     * (If ID matches active set) Hides this window.
      */
     void onEntityRemoved(EntityGraphicSetID graphicSetID);
 

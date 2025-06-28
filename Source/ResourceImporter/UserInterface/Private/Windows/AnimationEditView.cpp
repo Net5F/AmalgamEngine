@@ -274,14 +274,10 @@ void AnimationEditView::onAnimationEntityAlignmentAnchorChanged(
 
 void AnimationEditView::onAnimationRemoved(AnimationID animationID)
 {
+    // If the active animation was deleted, hide this window.
     if (animationID == activeAnimationID) {
         activeAnimationID = NULL_ANIMATION_ID;
-
-        // Set everything back to being invisible.
-        spriteImage.setIsVisible(false);
-        checkerboardImage.setIsVisible(false);
-        stageGraphic.setIsVisible(false);
-        boundingBoxGizmo.setIsVisible(false);
+        setIsVisible(false);
     }
 }
 

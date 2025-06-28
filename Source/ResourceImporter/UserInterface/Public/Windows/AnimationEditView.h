@@ -62,8 +62,7 @@ private:
         const std::optional<Vector3>& newEntityAlignmentAnchor);
 
     /**
-     * (If active animation was removed) Sets activeAnimation to invalid and 
-     * returns the stage to its default state.
+     * (If active animation was removed) Hides this view.
      */
     void onAnimationRemoved(AnimationID animationID);
 

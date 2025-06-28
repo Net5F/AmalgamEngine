@@ -43,9 +43,14 @@ public:
 
 private:
     /**
-     * If the new active item is a sprite, loads it's data into this panel.
+     * If the new active item is a sprite, loads it's data into this window.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
+
+    /**
+     * (If active sheet was removed) Hides this window.
+     */
+    void onSheetRemoved(SpriteSheetID parentSheetID);
 
     /**
      * Opens the sprite image file selector dialog.

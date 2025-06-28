@@ -44,8 +44,7 @@ private:
                                     const BoundingBox& newBounds);
 
     /**
-     * (If active box was removed) Sets activeBoundingBoxID to invalid and 
-     * returns the stage to its default state.
+     * (If active box was removed) Hides this view.
      */
     void onBoundingBoxRemoved(BoundingBoxID boundingBoxID);
 

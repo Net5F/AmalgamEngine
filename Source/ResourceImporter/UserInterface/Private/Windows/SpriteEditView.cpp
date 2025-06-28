@@ -197,13 +197,10 @@ void SpriteEditView::onSpriteStageOriginChanged(SpriteID spriteID,
 
 void SpriteEditView::onSpriteRemoved(SpriteID spriteID)
 {
+    // If the active sprite was deleted, hide this window.
     if (spriteID == activeSpriteID) {
         activeSpriteID = NULL_SPRITE_ID;
-
-        // Set everything back to being invisible.
-        checkerboardImage.setIsVisible(false);
-        spriteImage.setIsVisible(false);
-        boundingBoxGizmo.setIsVisible(false);
+        setIsVisible(false);
     }
 }
 

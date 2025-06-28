@@ -84,9 +84,10 @@ void EntityGraphicSetPropertiesWindow::onActiveLibraryItemChanged(
 void EntityGraphicSetPropertiesWindow::onEntityRemoved(
     EntityGraphicSetID graphicSetID)
 {
+    // If the active entity set was deleted, hide this window.
     if (graphicSetID == activeGraphicSetID) {
         activeGraphicSetID = SDL_MAX_UINT16;
-        nameInput.setText("");
+        setIsVisible(false);
     }
 }
 

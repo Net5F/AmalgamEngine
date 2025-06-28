@@ -101,10 +101,11 @@ void GraphicSetPropertiesWindow::onActiveLibraryItemChanged(
 void GraphicSetPropertiesWindow::onGraphicSetRemoved(GraphicSet::Type type,
                                                    Uint16 graphicSetID)
 {
+    // If the active set was deleted, hide this window.
     if ((type == activeGraphicSetType) && (graphicSetID == activeGraphicSetID)) {
         activeGraphicSetType = GraphicSet::Type::None;
         activeGraphicSetID = SDL_MAX_UINT16;
-        nameInput.setText("");
+        setIsVisible(false);
     }
 }
 

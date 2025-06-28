@@ -42,13 +42,12 @@ public:
 
 private:
     /**
-     * If the new active item is a graphic set, loads it's data into this panel.
+     * If the new active item is a graphic set, loads it's data into this window.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If type/ID matches active set) Sets this panel back to its default
-     * state.
+     * (If type/ID matches active set) Hides this window.
      */
     void onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID);
 

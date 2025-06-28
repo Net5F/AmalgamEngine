@@ -84,12 +84,10 @@ void IconEditView::onActiveLibraryItemChanged(
 
 void IconEditView::onIconRemoved(IconID iconID)
 {
+    // If the active icon was deleted, hide this window.
     if (iconID == activeIconID) {
         activeIconID = NULL_ICON_ID;
-
-        // Set everything back to being invisible.
-        checkerboardImage.setIsVisible(false);
-        iconImage.setIsVisible(false);
+        setIsVisible(false);
     }
 }
 

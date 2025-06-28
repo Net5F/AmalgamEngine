@@ -149,8 +149,10 @@ void AnimationElementsWindow::onAnimationEntityAlignmentAnchorChanged(
 
 void AnimationElementsWindow::onAnimationRemoved(AnimationID animationID)
 {
+    // If the active animation was deleted, hide this window.
     if (animationID == activeAnimationID) {
         activeAnimationID = NULL_ANIMATION_ID;
+        setIsVisible(false);
     }
 }
 

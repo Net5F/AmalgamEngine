@@ -61,12 +61,12 @@ public:
 
 private:
     /**
-     * If the new active item is a animation, loads it's data into this panel.
+     * If the new active item is a animation, loads it's data into this window.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If ID matches active animation) Updates this panel with the active 
+     * (If ID matches active animation) Updates this window with the active 
      * animation's new properties.
      */
     void onAnimationEntityAlignmentAnchorChanged(
@@ -74,8 +74,7 @@ private:
         const std::optional<Vector3>& newEntityAlignmentAnchor);
 
     /**
-     * (If active animation was removed) Sets this panel back to its default 
-     * state.
+     * (If active animation was removed) Hides this window.
      */
     void onAnimationRemoved(AnimationID animationID);
 

@@ -107,8 +107,7 @@ private:
         const std::optional<Vector3>& newEntityAlignmentAnchor);
 
     /**
-     * (If active animation was removed) Sets this panel back to its default 
-     * state.
+     * (If active animation was removed) Hides this window.
      */
     void onAnimationRemoved(AnimationID animationID);
 
