@@ -20,8 +20,8 @@ struct DialogueLua {
     /** Lua environment for dialogue topic and choice action script 
         processing.
         Global variables:
-          "user": The ID of the entity that is controlling the dialogue.
           "self": The ID of the entity that is delivering the dialogue.
+          "target": The ID of the entity that is controlling the dialogue.
           "GLOBAL": A constant used to identify the global value store. */
     sol::state luaState{};
 
