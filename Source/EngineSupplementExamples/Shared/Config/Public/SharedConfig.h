@@ -7,6 +7,9 @@ namespace AM
 /**
  * Contains shared configuration constants that must be consistent between the
  * client, server, and resource importer.
+ *
+ * Note: When you update the engine, you may need to add additional fields
+ *       here. Refer to the engine's default SharedConfig.h.
  */
 class SharedConfig
 {

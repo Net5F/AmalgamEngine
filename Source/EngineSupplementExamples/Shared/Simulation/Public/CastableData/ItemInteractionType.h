@@ -8,6 +8,9 @@ namespace AM
 
 /**
  * The types of interactions that a user may be able to perform on an item.
+ *
+ * Note: When you update the engine, you may need to add additional values
+ *       here. Refer to the engine's default ItemInteractionType.h.
  */
 enum class ItemInteractionType : Uint8 {
     // Engine interactions (copied here so we can use one strongly-typed enum).
