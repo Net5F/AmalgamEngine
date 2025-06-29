@@ -100,6 +100,7 @@ std::optional<AVEntityHelpers::GraphicStateReturn>
         }
         case AVEntity::Behavior::FollowEntityStartTarget:
         case AVEntity::Behavior::StaticPosition:
+        case AVEntity::Behavior::CurrentPosition:
             return GraphicStateReturn{EntityGraphicType::Idle,
                                       Rotation::Direction::South};
     }
@@ -114,7 +115,8 @@ bool AVEntityHelpers::timeElapsed(AVEntity::Behavior behavior, double startTime,
         case AVEntity::Behavior::FollowEntityStartCaster:
         case AVEntity::Behavior::FollowDirection:
         case AVEntity::Behavior::FollowEntityStartTarget:
-        case AVEntity::Behavior::StaticPosition: {
+        case AVEntity::Behavior::StaticPosition:
+        case AVEntity::Behavior::CurrentPosition: {
             bool entityStarted{startTime != 0};
             double endTime{startTime + durationS};
             if (entityStarted && (currentTime >= endTime)) {

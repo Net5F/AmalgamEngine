@@ -110,6 +110,7 @@ void AVSystem::updateAVEntities()
             static_cast<Position>(avEntityState.targetPosition), position,
             world.registry, false)};
         if (!targetOpt) {
+            world.avRegistry.destroy(entity);
             continue;
         }
         Position targetPosition{targetOpt.value()};
@@ -125,6 +126,7 @@ void AVSystem::updateAVEntities()
         auto graphicStateOpt{AVEntityHelpers::getGraphicState(
             phase.behavior, position, targetPosition)};
         if (!graphicStateOpt) {
+            world.avRegistry.destroy(entity);
             continue;
         }
         auto& [desiredGraphicType, desiredGraphicDirection]

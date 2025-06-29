@@ -571,6 +571,13 @@ void WorldSpriteSorter::calcDepthDependencies()
                 SpriteSortInfo& spriteA{spritesToSort[i]};
                 SpriteSortInfo& spriteB{spritesToSort[j]};
 
+                // If an A/V entity is intersecting something, consider the 
+                // A/V entity to be in front.
+                if (std::holds_alternative<AVEntityID>(spriteB.spriteOwnerID)
+                    && spriteB.worldBounds.intersects(spriteA.worldBounds)) {
+                    continue;
+                }
+
                 if ((spriteB.worldBounds.min.x < spriteA.worldBounds.max.x)
                     && (spriteB.worldBounds.min.y < spriteA.worldBounds.max.y)
                     && (spriteB.worldBounds.min.z
