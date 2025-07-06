@@ -55,7 +55,9 @@ struct AVEntity {
         /** How fast the entity should move. */
         float movementSpeed{};
 
-        /** How long this phase should run before timing out. */
+        /** How long this phase should run before timing out.
+            If -1, this phase will last until the animation completes. If the 
+            graphic is a sprite, it will end immediately. */
         float durationS{};
     };
 

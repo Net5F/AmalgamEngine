@@ -20,6 +20,7 @@ AnimationModel::AnimationModel(DataModel& inDataModel)
 , animationDisplayNameChangedSig{}
 , animationFrameCountChangedSig{}
 , animationFpsChangedSig{}
+, animationLoopStartFrameChangedSig{}
 , animationFrameChangedSig{}
 , animationModelBoundsIDChangedSig{}
 , animationCustomModelBoundsChangedSig{}
@@ -30,6 +31,7 @@ AnimationModel::AnimationModel(DataModel& inDataModel)
 , animationDisplayNameChanged{animationDisplayNameChangedSig}
 , animationFrameCountChanged{animationFrameCountChangedSig}
 , animationFpsChanged{animationFpsChangedSig}
+, animationLoopStartFrameChanged{animationLoopStartFrameChangedSig}
 , animationFrameChanged{animationFrameChangedSig}
 , animationModelBoundsIDChanged{animationModelBoundsIDChangedSig}
 , animationCustomModelBoundsChanged{animationCustomModelBoundsChangedSig}
@@ -75,9 +77,10 @@ void AnimationModel::save(nlohmann::json& json)
         // Add the numeric ID.
         json["animations"][i]["numericID"] = animation.numericID;
 
-        // Add the frame count and fps.
+        // Add the frame count, fps, and loop start frame.
         json["animations"][i]["frameCount"] = animation.frameCount;
         json["animations"][i]["fps"] = animation.fps;
+        json["animations"][i]["loopStartFrame"] = animation.loopStartFrame;
 
         // If the animation has any filled frames, add them.
         // Note: Frame numbers/IDs are parallel arrays to save file space. If we 
@@ -210,10 +213,17 @@ void AnimationModel::setAnimationFrameCount(AnimationID animationID,
         LOG_FATAL("Tried to set frame count using invalid animation ID.");
     }
 
-    // Set the new fps and signal the change.
+    // If loopStartFrame is past the end of the new frame count, pull it back 
+    // in.
     EditorAnimation& animation{animationPair->second};
-    animation.frameCount = newFrameCount;
+    if (animation.loopStartFrame > newFrameCount) {
+        animation.loopStartFrame = newFrameCount;
+        animationLoopStartFrameChangedSig.publish(animationID,
+                                                  animation.loopStartFrame);
+    }
 
+    // Set the new frame count and signal the change.
+    animation.frameCount = newFrameCount;
     animationFrameCountChangedSig.publish(animationID, newFrameCount);
 }
 
@@ -229,6 +239,26 @@ void AnimationModel::setAnimationFps(AnimationID animationID, Uint8 newFps)
     animation.fps = newFps;
 
     animationFpsChangedSig.publish(animationID, newFps);
+}
+
+void AnimationModel::setAnimationLoopStartFrame(AnimationID animationID,
+                                                Uint8 newLoopStartFrame)
+{
+    auto animationPair{animationMap.find(animationID)};
+    if (animationPair == animationMap.end()) {
+        LOG_FATAL("Tried to set loop start frame using invalid animation ID.");
+    }
+
+    // If the new frame number isn't valid, exit early.
+    EditorAnimation& animation{animationPair->second};
+    if (newLoopStartFrame > animation.frameCount) {
+        return;
+    }
+
+    // Set the new loop start frame and signal the change.
+    animation.loopStartFrame = newLoopStartFrame;
+
+    animationLoopStartFrameChangedSig.publish(animationID, newLoopStartFrame);
 }
 
 void AnimationModel::setAnimationModelBoundsID(AnimationID animationID,
@@ -349,6 +379,12 @@ void AnimationModel::addAnimationFrame(AnimationID animationID,
             animation.frameCount = static_cast<Uint8>(frames.size());
             animationFrameCountChangedSig.publish(animationID,
                                                   animation.frameCount);
+            // Note: We don't update loop start because the user will likely be
+            //       adding all their sprites at once, in which case we want to 
+            //       keep loopStartFrame at 0 (to loop all). The downside is, 
+            //       if the user sets their loopStart elsewhere (e.g. the end, 
+            //       to loop none) and then adds a sprite, they may need to re-
+            //       adjust their loop start.
         }
     }
 
@@ -451,6 +487,9 @@ bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
     // Add the frame count and fps.
     animation.frameCount = animationJson.at("frameCount");
     animation.fps = animationJson.at("fps");
+
+    // Add the loop start frame.
+    animation.loopStartFrame = animationJson.at("loopStartFrame");
 
     // Add the frames.
     // Note: Frame numbers/IDs are parallel arrays to save file space. If we 

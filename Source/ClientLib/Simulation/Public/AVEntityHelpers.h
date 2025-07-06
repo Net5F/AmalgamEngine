@@ -63,7 +63,8 @@ public:
      * true.
      */
     static bool timeElapsed(AVEntity::Behavior behavior, double startTime,
-                            double durationS, double currentTime);
+                            double durationS, double currentTime,
+                            GraphicRef currentGraphic);
 
     /**
      * If the given behavior is position-based and entityPos == targetPos, 

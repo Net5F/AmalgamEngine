@@ -109,7 +109,8 @@ std::optional<AVEntityHelpers::GraphicStateReturn>
 }
 
 bool AVEntityHelpers::timeElapsed(AVEntity::Behavior behavior, double startTime,
-                                  double durationS, double currentTime)
+                                  double durationS, double currentTime,
+                                  GraphicRef currentGraphic)
 {
     switch (behavior) {
         case AVEntity::Behavior::FollowEntityStartCaster:
@@ -117,10 +118,35 @@ bool AVEntityHelpers::timeElapsed(AVEntity::Behavior behavior, double startTime,
         case AVEntity::Behavior::FollowEntityStartTarget:
         case AVEntity::Behavior::StaticPosition:
         case AVEntity::Behavior::CurrentPosition: {
-            bool entityStarted{startTime != 0};
-            double endTime{startTime + durationS};
-            if (entityStarted && (currentTime >= endTime)) {
+            // If the phase hasn't started yet, return false.
+            if (startTime == 0) {
+                return false;
+            }
+
+            // If a duration was given, use it.
+            if (durationS != -1) {
+                double endTime{startTime + durationS};
+                return (currentTime >= endTime);
+            }
+
+            // Duration == -1. Use the graphic's duration.
+            if (std::holds_alternative<
+                    std::reference_wrapper<const Sprite>>(currentGraphic)) {
+                // Sprites have no duration, end immediately.
                 return true;
+            }
+            else {
+                const auto& animation{
+                    std::get<std::reference_wrapper<const Animation>>(
+                        currentGraphic)};
+
+                // Subtract 1 tick's worth of time, since the A/V entity will 
+                // be alive for an extra tick after we increment.
+                double endTime{startTime + animation.get().getLengthS()
+                               - SharedConfig::SIM_TICK_TIMESTEP_S};
+                if (currentTime >= endTime) {
+                    return true;
+                }
             }
         }
     }

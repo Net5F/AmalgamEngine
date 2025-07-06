@@ -13,7 +13,7 @@ target_sources(ResourceImporter
         Private/Widgets/PointGizmo.cpp
         Private/Widgets/StageGraphic.cpp
         Private/Widgets/TimelineFrame.cpp
-        Private/Widgets/TimelineScrubber.cpp
+        Private/Widgets/TimelineHandle.cpp
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddIconSheetDialog.cpp
         Private/Windows/AddSpriteDialog.cpp
@@ -55,7 +55,7 @@ target_sources(ResourceImporter
         Public/Widgets/PointGizmo.h
         Public/Widgets/StageGraphic.h
         Public/Widgets/TimelineFrame.h
-        Public/Widgets/TimelineScrubber.h
+        Public/Widgets/TimelineHandle.h
         Public/Widgets/TitleButton.h
         Public/Windows/AddIconSheetDialog.h
         Public/Windows/AddSpriteDialog.h

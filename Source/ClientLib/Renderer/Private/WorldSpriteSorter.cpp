@@ -231,8 +231,9 @@ void WorldSpriteSorter::gatherAVEntitySpriteInfo(const Camera& camera,
                          clientGraphicState.graphicDirection);
 
         // If this A/V entity just began, set its start time.
-        if (avEntityState.startTime == 0) {
-            avEntityState.startTime = Timer::getGlobalTime();
+        if (avEntityState.setStartTime) {
+            avEntityState.phaseStartTime = currentAnimationTimestamp;
+            avEntityState.setStartTime = false;
         }
 
         // Note: A/V entities don't have visual effects.
@@ -446,7 +447,7 @@ const Sprite&
 
     // If this animation just began, set its start time.
     if (clientGraphicState.setStartTime) {
-        clientGraphicState.animationStartTime = Timer::getGlobalTime();
+        clientGraphicState.animationStartTime = currentAnimationTimestamp;
         clientGraphicState.setStartTime = false;
     }
 
@@ -521,7 +522,7 @@ void WorldSpriteSorter::pushEntityVisualEffects(entt::entity entity,
         for (VisualEffectState& effectState : avEffects->visualEffects) {
             // If this effect just began, set its start time.
             if (effectState.startTime == 0) {
-                effectState.startTime = Timer::getGlobalTime();
+                effectState.startTime = currentAnimationTimestamp;
             }
 
             // Calc how far we are into this animation and get the appropriate

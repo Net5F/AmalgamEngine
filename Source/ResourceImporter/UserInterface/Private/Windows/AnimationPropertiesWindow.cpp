@@ -20,7 +20,7 @@ namespace ResourceImporter
 {
 AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
     DataModel& inDataModel, LibraryWindow& inLibraryWindow)
-: AUI::Window({1617, 0, 303, 881}, "AnimationPropertiesWindow")
+: AUI::Window({1617, 0, 303, 931}, "AnimationPropertiesWindow")
 , mainScreen{inScreen}
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
@@ -28,34 +28,37 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
 , frameCountInput{{150, 160, 129, 38}, "FrameCountInput"}
 , fpsLabel{{24, 216, 110, 28}, "FpsLabel"}
 , fpsInput{{150, 210, 129, 38}, "FpsInput"}
-, boundingBoxLabel{{24, 286, 210, 27}, "BoundingBoxLabel"}
-, boundingBoxNameLabel{{24, 319, 178, 21}, "BoundingBoxNameLabel"}
-, boundingBoxButton{{207, 312, 72, 26}, "Assign", "BoundingBoxButton"}
-, minXLabel{{24, 358, 110, 38}, "MinXLabel"}
-, minXInput{{150, 352, 129, 38}, "MinXInput"}
-, minYLabel{{24, 408, 110, 38}, "MinYLabel"}
-, minYInput{{150, 402, 129, 38}, "MinYInput"}
-, minZLabel{{24, 458, 110, 38}, "MinZLabel"}
-, minZInput{{150, 452, 129, 38}, "MinZInput"}
-, maxXLabel{{24, 508, 110, 38}, "MaxXLabel"}
-, maxXInput{{150, 502, 129, 38}, "MaxXInput"}
-, maxYLabel{{24, 558, 110, 38}, "MaxYLabel"}
-, maxYInput{{150, 552, 129, 38}, "MaxYInput"}
-, maxZLabel{{24, 608, 110, 38}, "MaxZLabel"}
-, maxZInput{{150, 602, 129, 38}, "MaxZInput"}
-, collisionEnabledLabel{{24, 652, 210, 27}, "CollisionLabel"}
-, collisionEnabledInput{{257, 654, 22, 22}, "CollisionInput"}
-, alignXLabel{{24, 717, 110, 38}, "AlignXLabel"}
-, alignXInput{{150, 711, 129, 38}, "AlignXInput"}
-, alignYLabel{{24, 767, 110, 38}, "AlignYLabel"}
-, alignYInput{{150, 761, 129, 38}, "AlignYInput"}
-, alignZLabel{{24, 817, 110, 38}, "AlignZLabel"}
-, alignZInput{{150, 811, 129, 38}, "AlignZInput"}
+, loopStartFrameLabel{{24, 266, 110, 28}, "LoopStartFrameLabel"}
+, loopStartFrameInput{{150, 260, 129, 38}, "LoopStartFrameInput"}
+, boundingBoxLabel{{24, 336, 210, 27}, "BoundingBoxLabel"}
+, boundingBoxNameLabel{{24, 369, 178, 21}, "BoundingBoxNameLabel"}
+, boundingBoxButton{{207, 362, 72, 26}, "Assign", "BoundingBoxButton"}
+, minXLabel{{24, 408, 110, 38}, "MinXLabel"}
+, minXInput{{150, 402, 129, 38}, "MinXInput"}
+, minYLabel{{24, 458, 110, 38}, "MinYLabel"}
+, minYInput{{150, 452, 129, 38}, "MinYInput"}
+, minZLabel{{24, 508, 110, 38}, "MinZLabel"}
+, minZInput{{150, 502, 129, 38}, "MinZInput"}
+, maxXLabel{{24, 558, 110, 38}, "MaxXLabel"}
+, maxXInput{{150, 552, 129, 38}, "MaxXInput"}
+, maxYLabel{{24, 608, 110, 38}, "MaxYLabel"}
+, maxYInput{{150, 602, 129, 38}, "MaxYInput"}
+, maxZLabel{{24, 658, 110, 38}, "MaxZLabel"}
+, maxZInput{{150, 652, 129, 38}, "MaxZInput"}
+, collisionEnabledLabel{{24, 702, 210, 27}, "CollisionLabel"}
+, collisionEnabledInput{{257, 704, 22, 22}, "CollisionInput"}
+, alignXLabel{{24, 773, 110, 38}, "AlignXLabel"}
+, alignXInput{{150, 767, 129, 38}, "AlignXInput"}
+, alignYLabel{{24, 823, 110, 38}, "AlignYLabel"}
+, alignYInput{{150, 817, 129, 38}, "AlignYInput"}
+, alignZLabel{{24, 873, 110, 38}, "AlignZLabel"}
+, alignZInput{{150, 867, 129, 38}, "AlignZInput"}
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
 , activeAnimationID{NULL_ANIMATION_ID}
 , committedFrameCount{0}
 , committedFps{0}
+, committedLoopStartFrame{0}
 , committedMinX{0.0}
 , committedMinY{0.0}
 , committedMinZ{0.0}
@@ -80,6 +83,8 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
     children.push_back(frameCountInput);
     children.push_back(fpsLabel);
     children.push_back(fpsInput);
+    children.push_back(loopStartFrameLabel);
+    children.push_back(loopStartFrameInput);
     children.push_back(boundingBoxLabel);
     children.push_back(boundingBoxNameLabel);
     children.push_back(boundingBoxButton);
@@ -145,6 +150,14 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
 
     styleTextInput(fpsInput);
     fpsInput.setOnTextCommitted([this]() { saveFps(); });
+
+    /* Loop start frame entry. */
+    styleLabel(loopStartFrameLabel, "Loop to", 21);
+    loopStartFrameLabel.setVerticalAlignment(
+        AUI::Text::VerticalAlignment::Center);
+
+    styleTextInput(loopStartFrameInput);
+    loopStartFrameInput.setOnTextCommitted([this]() { saveLoopStartFrame(); });
 
     /* Bounding box selection. */
     styleLabel(boundingBoxLabel, "Bounding Box", 21);
@@ -212,6 +225,9 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
             *this);
     animationModel.animationFpsChanged
         .connect<&AnimationPropertiesWindow::onAnimationFpsChanged>(*this);
+    animationModel.animationLoopStartFrameChanged
+        .connect<&AnimationPropertiesWindow::onAnimationLoopStartFrameChanged>(
+            *this);
     animationModel.animationModelBoundsIDChanged
         .connect<&AnimationPropertiesWindow::onAnimationModelBoundsIDChanged>(
             *this);
@@ -247,6 +263,8 @@ void AnimationPropertiesWindow::onActiveLibraryItemChanged(
     nameInput.setText(newActiveAnimation->displayName);
     frameCountInput.setText(std::to_string(newActiveAnimation->frameCount));
     fpsInput.setText(std::to_string(newActiveAnimation->fps));
+    loopStartFrameInput.setText(
+        std::to_string(newActiveAnimation->loopStartFrame));
 
     if (newActiveAnimation->modelBoundsID) {
         const EditorBoundingBox& boundingBox{
@@ -319,6 +337,14 @@ void AnimationPropertiesWindow::onAnimationFpsChanged(AnimationID animationID,
 {
     if (animationID == activeAnimationID) {
         fpsInput.setText(std::to_string(newFps));
+    }
+}
+
+void AnimationPropertiesWindow::onAnimationLoopStartFrameChanged(
+    AnimationID animationID, Uint8 newLoopStartFrame)
+{
+    if (animationID == activeAnimationID) {
+        loopStartFrameInput.setText(std::to_string(newLoopStartFrame));
     }
 }
 
@@ -480,10 +506,12 @@ void AnimationPropertiesWindow::saveFrameCount()
         // Convert the input string to an int.
         int newFrameCount{std::stoi(frameCountInput.getText())};
 
-        // Determine the lower bound. There must always be at least 1 frame 
-        // in every animation.
-        // If the animation has filled frames, only let it be reduced to the 
-        // position of the last filled frame.
+        // Determine the lower bound.
+        // Note: There must always be at least 1 frame in every animation.
+        // Note: We only let this be reduced to the position of the last filled 
+        //       frame. This is because we consider sprites to "belong" to the 
+        //       animation that they were named for. If you want to remove the 
+        //       sprite from the animation, you need to delete it.
         int lowerBound{1};
         const EditorAnimation& animation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
@@ -522,6 +550,29 @@ void AnimationPropertiesWindow::saveFps()
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         fpsInput.setText(std::to_string(committedFps));
+    }
+}
+
+void AnimationPropertiesWindow::saveLoopStartFrame()
+{
+    // Validate the user input as a valid value.
+    try {
+        // Convert the input string to an int.
+        int newLoopStartFrame{std::stoi(loopStartFrameInput.getText())};
+
+        // Clamp the value to its bounds.
+        // Note: Loop start can go 1 past the last frame, to denote no loop.
+        const EditorAnimation& animation{
+            dataModel.animationModel.getAnimation(activeAnimationID)};
+        newLoopStartFrame = std::clamp(newLoopStartFrame, 0,
+                                       static_cast<int>(animation.frameCount));
+
+        // Apply the new value.
+        dataModel.animationModel.setAnimationLoopStartFrame(activeAnimationID,
+                                                            newLoopStartFrame);
+    } catch (std::exception&) {
+        // Input was not valid, reset the field to what it was.
+        loopStartFrameInput.setText(std::to_string(committedLoopStartFrame));
     }
 }
 

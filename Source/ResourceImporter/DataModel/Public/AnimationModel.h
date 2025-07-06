@@ -60,6 +60,8 @@ public:
     //       be based on the sprite image filename.
     void setAnimationFrameCount(AnimationID animationID, Uint8 newFrameCount);
     void setAnimationFps(AnimationID animationID, Uint8 newFps);
+    void setAnimationLoopStartFrame(AnimationID animationID,
+                                    Uint8 newLoopStartFrame);
     void setAnimationModelBoundsID(AnimationID animationID,
                                 BoundingBoxID newModelBoundsID);
     void setAnimationCustomModelBounds(AnimationID animationID,
@@ -148,6 +150,8 @@ private:
         animationFrameCountChangedSig;
     entt::sigh<void(AnimationID animationID, Uint8 newFps)>
         animationFpsChangedSig;
+    entt::sigh<void(AnimationID animationID, Uint8 newLoopStartFrame)>
+        animationLoopStartFrameChangedSig;
     entt::sigh<void(AnimationID animationID, Uint8 newFrameNumber,
                     const EditorSprite* newSprite)>
         animationFrameChangedSig;
@@ -186,6 +190,11 @@ public:
     /** An animation's fps has changed. */
     entt::sink<entt::sigh<void(AnimationID animationID, Uint8 newFps)>>
         animationFpsChanged;
+
+    /** An animation's loop start frame. */
+    entt::sink<
+        entt::sigh<void(AnimationID animationID, Uint8 newLoopStartFrame)>>
+        animationLoopStartFrameChanged;
 
     /** An animation frame has changed.
         newSprite == nullptr if frame was cleared. */

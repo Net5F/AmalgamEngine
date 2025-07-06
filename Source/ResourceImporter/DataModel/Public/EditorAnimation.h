@@ -34,6 +34,11 @@ struct EditorAnimation {
     /** This animation's framerate (frames per second). */
     Uint8 fps{10};
 
+    /** When the animation completes, it will loop to this frame and continue 
+        playing. If == frameCount, no frames will be looped.
+        Must always be <= frameCount. */
+    Uint8 loopStartFrame{0};
+
     struct Frame
     {
         Uint8 frameNumber{0};

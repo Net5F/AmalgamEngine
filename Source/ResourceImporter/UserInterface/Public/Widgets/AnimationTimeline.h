@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TimelineScrubber.h"
+#include "TimelineHandle.h"
 #include "Timer.h"
 #include "AUI/Widget.h"
 #include "AUI/Text.h"
@@ -30,19 +30,21 @@ public:
 
     void setFrameCount(Uint8 newFrameCount);
 
+    void setLoopStartFrame(Uint8 newLoopStartFrame);
+
     void setFrame(Uint8 frameNumber, bool hasSprite);
 
     /**
-     * Resets the scrubber to frame 0 and cycles through the frames at the 
-     * active animation's framerate.
+     * If an animation isn't currently playing, plays the active animation 
+     * from the start. If an animation is currently playing, pauses it.
      */
-    void playAnimation();
+    void playOrPauseAnimation();
 
     /**
      * @return The currently selected frame (the one that the scrubber is 
      *         hovering over).
      */
-    Uint8 getSelectedFrameNumber();
+    Uint8 getSelectedFrameNumber() const;
 
     //-------------------------------------------------------------------------
     // Callback registration
@@ -53,6 +55,13 @@ public:
      */
     void setOnSelectionChanged(
         std::function<void(Uint8 selectedFrameNumber)> inOnSelectionChanged);
+
+    /**
+     * @param inOnLoopStartFrameChanged A callback that expects the new 
+     *                                  loop start frame.
+     */
+    void setOnLoopStartFrameChanged(
+        std::function<void(Uint8 newLoopStartFrame)> inOnLoopStartFrameChanged);
 
     /**
      * @param inOnSpriteMoved A callback that expects the old and new frame 
@@ -67,11 +76,20 @@ public:
     //-------------------------------------------------------------------------
     void onTick(double timestepS) override;
 
+    void render(const SDL_Point& windowTopLeft) override;
+
 private:
     /**
      * If the scrubber has been dragged far enough, selects a new frame.
      */
-    void onScrubberDragged(const SDL_Point& cursorPosition);
+    void onFrameScrubberDragged(const SDL_Point& cursorPosition);
+
+    // TODO: We're trying this to see if it's performant enough. If updating 
+    //       while dragging is too slow, we can do it like SpriteDrag
+    /**
+     * If the handle has been dragged far enough, changes the loop value.
+     */
+    void onLoopHandleDragged(const SDL_Point& cursorPosition);
 
     /**
      * Handles a frame that contains a sprite being right-click dragged.
@@ -86,7 +104,7 @@ private:
     void onSpriteDragged(Uint8 frameNumber, const SDL_Point& cursorPosition);
 
     /**
-     * If the cursor is over a frame other than originDragSpriteFrameNumber, 
+     * If the cursor is over a frame other than originSpriteDragFrameNumber, 
      * moves the sprite into that frame.
      */
     void onSpriteDragReleased(Uint8 frameNumber,
@@ -98,9 +116,14 @@ private:
     void refreshFrames();
 
     /**
-     * Moves the scrubber to the given frame.
+     * Moves the frame scrubber to the given frame.
      */
-    void setSelectedFrame(Uint8 frameNumber);
+    void setFrameScrubberPosition(Uint8 frameNumber);
+
+    /**
+     * Moves the loop handle to the given frame.
+     */
+    void setLoopHandlePosition(Uint8 frameNumber);
 
     /** 
      * Returns which frame the given cursor position is aligned with.
@@ -115,8 +138,13 @@ private:
     /** Holds the frames that contain the animation's frames. */
     AUI::HorizontalGridContainer frameContainer;
 
+    /** Used to select how many frames will be looped.
+        Note: This needs to be behind frameScrubber since it's double-tall to 
+              account for the handle (even though we don't render it). */
+    TimelineHandle loopHandle;
+
     /** Used to move between frames. */
-    TimelineScrubber scrubber;
+    TimelineHandle frameScrubber;
 
     /** The current selected frame. */
     Uint8 selectedFrameNumber;
@@ -140,7 +168,12 @@ private:
     /** If true, we're currently playing the animation. */
     bool playingAnimation;
 
+    /** The amber background that we render to show the loop area. */
+    SDL_Rect loopBackgroundExtent;
+
     std::function<void(Uint8)> onSelectionChanged;
+
+    std::function<void(Uint8)> onLoopStartFrameChanged;
 
     std::function<void(Uint8, Uint8)> onSpriteMoved;
 };

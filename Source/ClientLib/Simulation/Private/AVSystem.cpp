@@ -101,8 +101,21 @@ void AVSystem::updateAVEntities()
             continue;
         }
 
+        // If we just incremented phases, flag the phase start time to be reset.
         const AVEntity::Phase& phase{
             avEntity.phases.at(avEntityState.currentPhaseIndex)};
+        if (avEntityState.phaseWasIncremented) {
+            avEntityState.setStartTime = true;
+
+            // If the graphic changed, flag the graphic start time to be reset.
+            const AVEntity::Phase& lastPhase{
+                avEntity.phases.at(avEntityState.currentPhaseIndex - 1)};
+            if (lastPhase.graphicSetID != phase.graphicSetID) {
+                clientGraphicState.setStartTime = true;
+            }
+
+            avEntityState.phaseWasIncremented = false;
+        }
 
         // Determine the target's position.
         std::optional<Position> targetOpt{AVEntityHelpers::getTargetPosition(
@@ -146,18 +159,24 @@ void AVSystem::updateAVEntities()
         }
         if (newGraphic.direction != clientGraphicState.graphicDirection) {
             clientGraphicState.graphicDirection = newGraphic.direction;
-            // Note: We don't reset the animation time, since we want e.g. 
+            // Note: We don't reset the animation start time, since we want e.g. 
             //       a run animation to play smoothly when changing direction.
         }
 
         // If the entity has reached the completion condition for this phase, 
         // move to the next phase.
-        if (AVEntityHelpers::timeElapsed(phase.behavior,
-                                         avEntityState.startTime,
-                                         phase.durationS, currentTime)
+        GraphicRef currentGraphic{
+            graphicSet.graphics.at(clientGraphicState.graphicType)
+                .at(clientGraphicState.graphicDirection)};
+        if (AVEntityHelpers::timeElapsed(
+                phase.behavior, avEntityState.phaseStartTime, phase.durationS,
+                currentTime, currentGraphic)
             || AVEntityHelpers::positionReached(phase.behavior, position,
                                                 targetPosition)) {
             avEntityState.currentPhaseIndex++;
+            avEntityState.phaseWasIncremented = true;
+            // Note: We don't flag setStartTime here because the new phase's 
+            //       graphics won't be set until our next tick.
         }
     }
 }

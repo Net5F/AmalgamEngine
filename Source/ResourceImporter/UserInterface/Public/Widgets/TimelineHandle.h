@@ -14,12 +14,22 @@ namespace ResourceImporter
 {
 
 /**
- * A scrubber used to move between frames in a timeline.
+ * A handle that can be dragged around to manipulate the timeline.
  */
-class TimelineScrubber : public AUI::Widget
+class TimelineHandle : public AUI::Widget
 {
 public:
-    TimelineScrubber();
+    TimelineHandle(const SDL_Rect& inLogicalExtent);
+
+    /**
+     * Sets the color of this widget's graphics.
+     */
+    void setColor(const SDL_Color& inColor);
+
+    /**
+     * Sets whether the line part of the handle graphic should be rendered.
+     */
+    void setRenderLine(bool inRenderLine);
 
     //-------------------------------------------------------------------------
     // Callback registration
@@ -51,6 +61,12 @@ public:
 
 private:
     std::function<void(const SDL_Point&)> onDragged;
+
+    /** The color of this widget's graphics. */
+    SDL_Color color;
+
+    /** If true, the line part of the handle graphic should be rendered. */
+    bool renderLine;
 
     /** If true, the mouse is currently dragging this scrubber. */
     bool isDragging;

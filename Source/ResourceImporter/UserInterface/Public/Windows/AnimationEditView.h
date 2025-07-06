@@ -51,6 +51,8 @@ private:
      */
     void onAnimationFrameCountChanged(AnimationID animationID,
                                       Uint8 newFrameCount);
+    void onAnimationLoopStartFrameChanged(AnimationID animationID,
+                                          Uint8 newLoopStartFrame);
     void onAnimationFrameChanged(AnimationID animationID, Uint8 frameNumber,
                                  const EditorSprite* newSprite);
     void onAnimationModelBoundsIDChanged(AnimationID animationID,
@@ -81,6 +83,11 @@ private:
      * Displays the timeline's new selected sprite.
      */
     void onTimelineSelectionChanged(Uint8 selectedFrameNumber);
+
+    /**
+     * Tells the model to update the animation.
+     */
+    void onTimelineLoopStartFrameChanged(Uint8 newLoopStartFrame);
 
     /**
      * Tells the model to move the sprite.

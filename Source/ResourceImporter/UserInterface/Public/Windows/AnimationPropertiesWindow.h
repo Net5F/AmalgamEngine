@@ -46,6 +46,9 @@ public:
     AUI::Text fpsLabel;
     MainTextInput fpsInput;
 
+    AUI::Text loopStartFrameLabel;
+    MainTextInput loopStartFrameInput;
+
     AUI::Text boundingBoxLabel;
     AUI::Text boundingBoxNameLabel;
     MainButton boundingBoxButton;
@@ -96,6 +99,8 @@ private:
                                       Uint8 newFrameCount);
     void onAnimationFpsChanged(AnimationID animationID,
                                Uint8 newFps);
+    void onAnimationLoopStartFrameChanged(AnimationID animationID,
+                                          Uint8 newLoopStartFrame);
     void onAnimationModelBoundsIDChanged(AnimationID animationID,
                                          BoundingBoxID newModelBoundsID);
     void onAnimationCustomModelBoundsChanged(
@@ -146,6 +151,7 @@ private:
         when the text is committed. */
     void saveFrameCount();
     void saveFps();
+    void saveLoopStartFrame();
     void saveMinX();
     void saveMinY();
     void saveMinZ();
@@ -161,6 +167,7 @@ private:
         if the user inputs invalid characters. */
     int committedFrameCount;
     int committedFps;
+    int committedLoopStartFrame;
     float committedMinX;
     float committedMinY;
     float committedMinZ;

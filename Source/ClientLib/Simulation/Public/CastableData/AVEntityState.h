@@ -28,12 +28,19 @@ struct AVEntityState {
     /** The index within phases of the current phase. */
     std::size_t currentPhaseIndex{0};
 
+    /** Used to track when the phase is incremented, so we can reset timers 
+        on the first tick of the new phase. */
+    bool phaseWasIncremented{false};
+
     //-------------------------------------------------------------------------
     // Timing state (managed by WorldSpriteSorter)
     //-------------------------------------------------------------------------
-    /** A timestamp of when the current phase was started.
-        If 0, this entity has not yet been started. */
-    double startTime{0};
+    /** A timestamp of when the current phase was started. */
+    double phaseStartTime{0};
+
+    /** If true, a new phase has begun and startTime needs to be reset when 
+        its first frame is rendered. */
+    bool setStartTime{true};
 };
 
 } // namespace Client

@@ -26,7 +26,7 @@ AnimationEditView::AnimationEditView(
 , spriteImage{{0, 0, 100, 100}, "SpriteImage"}
 , boundingBoxGizmo{{0, 52, 1297, 732}}
 , entityAlignmentAnchorGizmo{{0, 52, 1297, 732}}
-, timelineScrollArea{{109, 796, 1080, 48}, "TimelineScrollArea"}
+, timelineScrollArea{{109, 772, 1080, 74}, "TimelineScrollArea"}
 , descText{{24, 898, 1240, 100}, "DescText"}
 {
     // Add our children so they're included in rendering, etc.
@@ -89,6 +89,8 @@ AnimationEditView::AnimationEditView(
     AnimationModel& animationModel{dataModel.animationModel};
     animationModel.animationFrameCountChanged
         .connect<&AnimationEditView::onAnimationFrameCountChanged>(*this);
+    animationModel.animationLoopStartFrameChanged
+        .connect<&AnimationEditView::onAnimationLoopStartFrameChanged>(*this);
     animationModel.animationFrameChanged
         .connect<&AnimationEditView::onAnimationFrameChanged>(*this);
     animationModel.animationModelBoundsIDChanged
@@ -104,6 +106,9 @@ AnimationEditView::AnimationEditView(
     timeline->setOnSelectionChanged([&](Uint8 selectedFrameNumber) {
         onTimelineSelectionChanged(selectedFrameNumber);
     });
+    timeline->setOnLoopStartFrameChanged([&](Uint8 newLoopStartFrame) {
+        onTimelineLoopStartFrameChanged(newLoopStartFrame);
+    });
     timeline->setOnSpriteMoved([&](Uint8 oldFrameNumber, Uint8 newFrameNumber) {
         onTimelineSpriteMoved(oldFrameNumber, newFrameNumber);
     });
@@ -116,9 +121,9 @@ AnimationEditView::AnimationEditView(
 
 AUI::EventResult AnimationEditView::onKeyDown(SDL_Keycode keyCode)
 {
-    // If the space bar was pressed, play the animation.
+    // If the space bar was pressed, play or pause the animation.
     if (keyCode == SDLK_SPACE) {
-        timeline->playAnimation();
+        timeline->playOrPauseAnimation();
 
         return AUI::EventResult{.wasHandled{true}};
     }
@@ -195,10 +200,18 @@ void AnimationEditView::onActiveLibraryItemChanged(
 }
 
 void AnimationEditView::onAnimationFrameCountChanged(AnimationID animationID,
-                                                      Uint8 newFrameCount)
+                                                     Uint8 newFrameCount)
 {
     if (animationID == activeAnimationID) {
         timeline->setFrameCount(newFrameCount);
+    }
+}
+
+void AnimationEditView::onAnimationLoopStartFrameChanged(
+    AnimationID animationID, Uint8 newLoopStartFrame)
+{
+    if (animationID == activeAnimationID) {
+        timeline->setLoopStartFrame(newLoopStartFrame);
     }
 }
 
@@ -353,6 +366,13 @@ void AnimationEditView::onTimelineSelectionChanged(Uint8 selectedFrameNumber)
 
     // Note: Since all sprites in an animation are guaranteed to be the same 
     //       size, we don't need to update the gizmo bounds.
+}
+
+void AnimationEditView::onTimelineLoopStartFrameChanged(Uint8 newLoopStartFrame)
+{
+    // Update the animation.
+    dataModel.animationModel.setAnimationLoopStartFrame(activeAnimationID,
+                                                        newLoopStartFrame);
 }
 
 void AnimationEditView::onTimelineSpriteMoved(Uint8 oldFrameNumber,
