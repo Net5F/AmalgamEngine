@@ -41,8 +41,9 @@ struct GraphicRef : public std::variant<std::reference_wrapper<const Sprite>,
      * If this ref points to a Sprite, returns it.
      * If this ref points to an Animation, returns the sprite that should be 
      * displayed at the given animation time.
+     * @return nullptr if no sprite should be displayed.
      */
-    const Sprite& getSpriteAtTime(double animationTime) const;
+    const Sprite* getSpriteAtTime(double animationTime) const;
 };
 
 } // End namespace AM

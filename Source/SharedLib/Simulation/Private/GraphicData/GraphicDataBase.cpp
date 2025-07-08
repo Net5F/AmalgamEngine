@@ -485,9 +485,10 @@ void GraphicDataBase::parseAnimation(const nlohmann::json& animationJson)
     animation.displayName = animationJson.at("displayName").get<std::string>();
     StringTools::deriveStringID(animation.displayName, animation.stringID);
 
-    // Add the frame count and fps.
+    // Add the frame count, fps, and loop start frame.
     animation.frameCount = animationJson.at("frameCount");
     animation.fps = animationJson.at("fps");
+    animation.loopStartFrame = animationJson.at("loopStartFrame");
 
     // Add the frames.
     // Note: If the animation is empty, the importer will give it a single 

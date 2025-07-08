@@ -56,7 +56,7 @@ struct AVEntity {
         float movementSpeed{};
 
         /** How long this phase should run before timing out.
-            If -1, this phase will last until the animation completes. If the 
+            If -1, this phase will last until the graphic plays once. If the 
             graphic is a sprite, it will end immediately. */
         float durationS{};
     };

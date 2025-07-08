@@ -191,8 +191,11 @@ void WorldSpriteSorter::gatherServerEntitySpriteInfo(const Camera& camera,
         }
 
         // Push the entity's sprite to be sorted.
-        const Sprite& sprite{getEntitySprite(graphicState, clientGraphicState)};
-        pushEntitySprite(entity, renderPosition, sprite, camera,
+        const Sprite* sprite{getEntitySprite(graphicState, clientGraphicState)};
+        if (!sprite) {
+            continue;
+        }
+        pushEntitySprite(entity, renderPosition, *sprite, camera,
                          graphicState.graphicSetID,
                          clientGraphicState.graphicType,
                          clientGraphicState.graphicDirection);
@@ -224,8 +227,11 @@ void WorldSpriteSorter::gatherAVEntitySpriteInfo(const Camera& camera,
         }
 
         // Push the entity's sprite to be sorted.
-        const Sprite& sprite{getEntitySprite(graphicState, clientGraphicState)};
-        pushEntitySprite(entity, renderPosition, sprite, camera,
+        const Sprite* sprite{getEntitySprite(graphicState, clientGraphicState)};
+        if (!sprite) {
+            continue;
+        }
+        pushEntitySprite(entity, renderPosition, *sprite, camera,
                          graphicState.graphicSetID,
                          clientGraphicState.graphicType,
                          clientGraphicState.graphicDirection);
@@ -366,11 +372,14 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
 {
     // Get the current sprite for this graphic.
     // Note: We sync tile animations to the global timer so they all line up.
-    const Sprite& sprite{graphic.getSpriteAtTime(Timer::getGlobalTime())};
+    const Sprite* sprite{graphic.getSpriteAtTime(Timer::getGlobalTime())};
+    if (!sprite) {
+        return;
+    }
 
     // Get the iso screen extent for this sprite.
     const SpriteRenderData& renderData{
-        graphicData.getSpriteRenderData(sprite.numericID)};
+        graphicData.getSpriteRenderData(sprite->numericID)};
     SDL_FRect screenExtent{ClientTransforms::tileToScreenExtent(
         layerID.tilePosition, layerID.tileOffset, renderData, camera)};
 
@@ -425,11 +434,11 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     worldBounds.max.z += layerID.tileOffset.z;
 
     // Push the sprite to be sorted.
-    spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
+    spritesToSort.emplace_back(sprite, worldObjectID, worldBounds,
                                screenExtent, colorMod);
 }
 
-const Sprite&
+const Sprite*
     WorldSpriteSorter::getEntitySprite(const GraphicState& graphicState,
                                        ClientGraphicState& clientGraphicState)
 {
@@ -455,7 +464,7 @@ const Sprite&
     // sprite (or just get the sprite, if this isn't an animation).
     double animationTime{currentAnimationTimestamp
                          - clientGraphicState.animationStartTime};
-    const Sprite& sprite{graphic.getSpriteAtTime(animationTime)};
+    const Sprite* sprite{graphic.getSpriteAtTime(animationTime)};
 
     return sprite;
 }
@@ -531,16 +540,19 @@ void WorldSpriteSorter::pushEntityVisualEffects(entt::entity entity,
                 effectState.visualEffect.get().graphicID)};
             double animationTime{currentAnimationTimestamp
                                  - effectState.startTime};
-            const Sprite& sprite{graphic.getSpriteAtTime(animationTime)};
+            const Sprite* sprite{graphic.getSpriteAtTime(animationTime)};
+            if (!sprite) {
+                continue;
+            }
 
             // Place the effect on top of the entity and get its screen extent.
             const SpriteRenderData& renderData{
-                graphicData.getSpriteRenderData(sprite.numericID)};
+                graphicData.getSpriteRenderData(sprite->numericID)};
             SDL_FRect screenExtent{ClientTransforms::entityToScreenExtent(
                 position, graphic.getModelBounds().getBottomCenterPoint(),
                 Vector3{}, renderData, camera)};
 
-            entityVisualEffects.emplace_back(sprite.numericID, screenExtent);
+            entityVisualEffects.emplace_back(sprite->numericID, screenExtent);
         }
     }
 }

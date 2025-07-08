@@ -6,15 +6,44 @@
 namespace AM
 {
 
-const Sprite& Animation::getSpriteAtTime(double animationTime) const
+const Sprite* Animation::getSpriteAtTime(double animationTime) const
 { 
-    // Calculate which frame should be displayed at the given time.
-    double frameDuration{1.0 / static_cast<double>(fps)};
-    std::size_t desiredFrame{
-        static_cast<std::size_t>(std::round(animationTime / frameDuration))};
+    // Note: ResourceImporter should guarantee that every animation has at 
+    //       least one filled frame.
 
-    // Wrap the frame number if necessary.
-    desiredFrame %= frameCount;
+    // Calculate which frame should be displayed, based on the given time and 
+    // the animation's looping behavior.
+    std::size_t desiredFrame{};
+    double frameDuration{1.0 / static_cast<double>(fps)};
+    if (loopStartFrame == frameCount) {
+        // Play once
+        desiredFrame = static_cast<std::size_t>(
+            std::round(animationTime / frameDuration));
+        if (desiredFrame >= frameCount) {
+            return nullptr;
+        }
+    }
+    else {
+        // Loop
+
+        // If we haven't looped yet, calc the frame as normal.
+        double playOnceTime{frameCount * frameDuration};
+        if (animationTime < playOnceTime) {
+            desiredFrame = static_cast<std::size_t>(
+                std::floor(animationTime / frameDuration));
+        }
+        else {
+            // We've looped. Subtract the first play and calc the loop 
+            // remainder.
+            int loopFrameCount{frameCount - loopStartFrame};
+            double loopTime{loopFrameCount * frameDuration};
+            double remainderLoopTime{
+                std::fmod((animationTime - playOnceTime), loopTime)};
+            desiredFrame = loopStartFrame
+                           + static_cast<std::size_t>(
+                               std::floor(remainderLoopTime / frameDuration));
+        }
+    }
 
     // Find the sprite closest to, but not surpassing, the desired frame.
     const Sprite* sprite{&(frames[0].sprite.get())};
@@ -29,7 +58,7 @@ const Sprite& Animation::getSpriteAtTime(double animationTime) const
         }
     }
 
-    return *sprite;
+    return sprite;
 }
 
 double Animation::getLengthS() const

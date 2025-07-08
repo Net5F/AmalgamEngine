@@ -126,10 +126,10 @@ private:
 
     /**
      * Returns the current sprite for the given entity data, or nullptr if 
-     * the entity is using an empty animation.
+     * the entity doesn't have a sprite to display.
      * Updates clientGraphicState's data if necessary.
      */
-    const Sprite& getEntitySprite(const GraphicState& graphicState,
+    const Sprite* getEntitySprite(const GraphicState& graphicState,
                                   ClientGraphicState& clientGraphicState);
 
     /**

@@ -39,6 +39,11 @@ struct Animation {
     /** This animation's framerate (frames per second). */
     Uint8 fps{0};
 
+    /** When the animation completes, it will loop to this frame and continue 
+        playing. If == frameCount, no frames will be looped.
+        Must always be <= frameCount. */
+    Uint8 loopStartFrame{0};
+
     struct Frame
     {
         Uint8 frameNumber{0};
@@ -60,10 +65,10 @@ struct Animation {
     BoundingBox modelBounds{};
 
     /**
-     * Returns the sprite that should be displayed at the given animation time, 
-     * or nullptr if this animation has no frames.
+     * Returns the sprite that should be displayed at the given animation time.
+     * @return nullptr if no sprite should be displayed.
      */
-    const Sprite& getSpriteAtTime(double animationTime) const;
+    const Sprite* getSpriteAtTime(double animationTime) const;
 
     /**
      * Returns the animation's length in seconds.

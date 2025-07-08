@@ -7,12 +7,17 @@ namespace AM
 {
 struct Vector3;
 struct AVEntity;
+struct Position;
+struct PreviousPosition;
+struct GraphicState;
 
 namespace Client
 {
 class World;
 class GraphicData;
 struct VisualEffectState;
+struct AVEntityState;
+struct ClientGraphicState;
 
 /**
  * Updates audio/visual effects and entities.
@@ -48,6 +53,26 @@ private:
      * Updates all A/V entities.
      */
     void updateAVEntities();
+
+    /**
+     * If the given phase is completed, increments to the next phase.
+     * @return false if the update was invalid and the entity should be deleted.
+     */
+    bool incrementPhaseIfNecessary(AVEntityState& avEntityState,
+                                   const Position& position,
+                                   const GraphicState& graphicState,
+                                   ClientGraphicState& clientGraphicState,
+                                   double currentTime);
+
+    /**
+     * Updates the given A/V entity to the next tick.
+     * @return false if the update was invalid and the entity should be deleted.
+     */
+    bool updateAVEntity(const AVEntityState& avEntityState,
+                        Position& position,
+                        PreviousPosition& previousPosition,
+                        GraphicState& graphicState,
+                        ClientGraphicState& clientGraphicState);
 
     /** Used to access entity data. */
     World& world;

@@ -73,7 +73,7 @@ const Sprite& GraphicRef::getFirstSprite() const
     return *spritePtr;
 }
 
-const Sprite& GraphicRef::getSpriteAtTime(double animationTime) const
+const Sprite* GraphicRef::getSpriteAtTime(double animationTime) const
 {
     const Sprite* spritePtr{nullptr};
     std::visit(VariantTools::Overload{
@@ -81,11 +81,11 @@ const Sprite& GraphicRef::getSpriteAtTime(double animationTime) const
             spritePtr = &(sprite.get());
         },
         [&](std::reference_wrapper<const Animation> animation) {
-            spritePtr = &(animation.get().getSpriteAtTime(animationTime));
+            spritePtr = animation.get().getSpriteAtTime(animationTime);
         }
     }, *this);
 
-    return *spritePtr;
+    return spritePtr;
 }
 
 } // End namespace AM
