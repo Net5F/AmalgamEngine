@@ -12,6 +12,7 @@
 #include "CastStarted.h"
 #include "CastRequest.h"
 #include "Position.h"
+#include "PreviousPosition.h"
 #include "CastCooldown.h"
 #include "Cylinder.h"
 #include "SharedConfig.h"
@@ -190,6 +191,19 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     //       doesn't fill the struct properly.
     if (!(registry.valid(casterEntity))) {
         return CastFailureType::InvalidCasterEntity;
+    }
+
+    // If this isn't an instant cast, check that the caster isn't moving.
+    if (castable.castTime != 0) {
+        // Note: Since we compare to the previous tick's position, it takes an 
+        //       extra tick after movement stops before we let casts go through.
+        //       We consider this to be fine.
+        const Position& position{registry.get<Position>(casterEntity)};
+        const PreviousPosition* previousPosition{
+            registry.try_get<PreviousPosition>(casterEntity)};
+        if (previousPosition && (position != *previousPosition)) {
+            return CastFailureType::Movement;
+        }
     }
 
     // Check that the caster isn't already casting.

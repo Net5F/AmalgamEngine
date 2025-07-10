@@ -135,16 +135,7 @@ void CastSystem::updateCasts()
                 world.registry.try_get<PreviousPosition>(entity)}) {
             Position& position{world.registry.get<Position>(entity)};
             if (position != *prevPosition) {
-                world.registry.erase<CastState>(entity);
-
-                // If this castable has any visuals, send a CastFailed to all 
-                // nearby clients.
-                // Note: If it has no visuals, there's no reason for a client 
-                //       to replicate it. Thus, we can skip sending the message.
-                CastInfo& castInfo{castState.castInfo};
-                if (castInfo.castable->hasVisuals()) {
-                    sendCastFailed(castState, CastFailureType::Canceled);
-                }
+                cancelCast(castState);
                 continue;
             }
         }
@@ -194,6 +185,26 @@ void CastSystem::startCast(CastState& castState)
             castInfo.castable->castTime / SharedConfig::SIM_TICK_TIMESTEP_S)};
         castState.endTick = currentTick + castTimeTicks;
     }
+}
+
+void CastSystem::cancelCast(CastState& castState)
+{
+    // If this castable has any visuals, send a CastFailed to all 
+    // nearby clients.
+    // Note: If it has no visuals, there's no reason for a client 
+    //       to replicate it. Thus, we can skip sending the message.
+    CastInfo& castInfo{castState.castInfo};
+    if (castInfo.castable->hasVisuals()) {
+        sendCastFailed(castState, CastFailureType::Movement);
+    }
+
+    // Reset the GCD.
+    CastCooldown& castCooldown{
+        world.registry.get<CastCooldown>(castInfo.casterEntity)};
+    castCooldown.gcdTicksRemaining = 0;
+
+    // Cancel the cast.
+    world.registry.erase<CastState>(castInfo.casterEntity);
 }
 
 void CastSystem::finishCast(CastState& castState)

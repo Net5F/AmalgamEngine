@@ -131,7 +131,7 @@ void CastSystem::updateCasts()
             auto [position, prevPosition]
                 = movementGroup.get<Position, PreviousPosition>(entity);
             if (position != prevPosition) {
-                world.registry.erase<ClientCastState>(entity);
+                cancelCast(castState);
                 continue;
             }
         }
@@ -181,6 +181,27 @@ void CastSystem::startCast(ClientCastState& castState)
             castInfo.castable->castTime / SharedConfig::SIM_TICK_TIMESTEP_S)};
         castState.endTick = currentTick + castTimeTicks;
     }
+}
+
+void CastSystem::cancelCast(ClientCastState& castState)
+{
+    // Reset the GCD.
+    CastInfo& castInfo{castState.castInfo};
+    CastCooldown& castCooldown{
+        world.registry.get<CastCooldown>(castInfo.casterEntity)};
+    castCooldown.gcdTicksRemaining = 0;
+
+    // If the caster is the player entity, signal the failure to the UI (the 
+    // server doesn't send failure messages for the player entity, since we 
+    // can detect them ourself).
+    if (castInfo.casterEntity == world.playerEntity) {
+        castFailedSig.publish({castInfo.casterEntity,
+                               castState.castInfo.castable->castableID,
+                               CastFailureType::Movement});
+    }
+
+    // Cancel the cast.
+    world.registry.erase<ClientCastState>(castInfo.casterEntity);
 }
 
 void CastSystem::finishCast(ClientCastState& castState)

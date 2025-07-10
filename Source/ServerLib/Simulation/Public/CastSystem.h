@@ -64,6 +64,12 @@ private:
     void startCast(CastState& castState);
 
     /**
+     * Cancels the current cast, resetting cooldowns and sending error messages 
+     * appropriately.
+     */
+    void cancelCast(CastState& castState);
+
+    /**
      * Finishes the given cast.
      */
     void finishCast(CastState& castState);

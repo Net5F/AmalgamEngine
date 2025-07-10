@@ -33,9 +33,8 @@ enum class CastFailureType : Uint8 {
     InvalidTargetPosition,
     /** The project's validateCast() call returned false. */
     ProjectValidationFailed,
-    /** The cast was canceled for some reason (caster entity moved, cast was 
-        interrupted by a spell, etc. */
-    Canceled,
+    /** The caster entity moved. */
+    Movement,
 };
 
 /**
@@ -53,9 +52,11 @@ static const char* getCastFailureString(CastFailureType failureType)
         //       should already be something in the UI to show cooldowns.
         //case CastFailureType::OnCooldown:
         case CastFailureType::OutOfRange:
-            return "You must move closer to do that.";
+            return "Out of range.";
         case CastFailureType::InvalidTargetEntity:
-            return "You need a target to cast that.";
+            return "You have no target.";
+        case CastFailureType::Movement:
+            return "Can't do that while moving.";
         default:
             break;
     }

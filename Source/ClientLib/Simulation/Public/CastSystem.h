@@ -64,6 +64,12 @@ private:
     void startCast(ClientCastState& castState);
 
     /**
+     * Cancels the current cast, resetting cooldowns and sending error signals 
+     * appropriately.
+     */
+    void cancelCast(ClientCastState& castState);
+
+    /**
      * Finishes the given cast, either ending it or continuing on to the "cast 
      * complete" state.
      */
