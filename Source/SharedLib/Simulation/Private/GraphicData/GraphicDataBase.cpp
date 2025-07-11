@@ -525,6 +525,8 @@ void GraphicDataBase::parseTerrainGraphicSet(const nlohmann::json& graphicSetJso
         = graphicSetJson.at("displayName").get<std::string>();
     StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
     GraphicRef nullSprite{sprites[NULL_SPRITE_ID]};
+    graphicSet.graphics
+        = constructAndFillArray<Terrain::Height::Count>(nullSprite);
 
     // Add the graphics.
     const nlohmann::json& graphicIDJsonArr{graphicSetJson.at("graphicIDs")};
@@ -552,6 +554,8 @@ void GraphicDataBase::parseFloorGraphicSet(
         = graphicSetJson.at("displayName").get<std::string>();
     StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
     GraphicRef nullSprite{sprites[NULL_SPRITE_ID]};
+    graphicSet.graphics
+        = constructAndFillArray<FloorGraphicSet::VARIATION_COUNT>(nullSprite);
 
     // Add the graphics.
     const nlohmann::json& graphicIDJsonArr{graphicSetJson.at("graphicIDs")};

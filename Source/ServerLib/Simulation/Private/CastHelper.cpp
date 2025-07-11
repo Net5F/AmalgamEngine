@@ -23,13 +23,13 @@ namespace Server
 
 CastHelper::CastHelper(Simulation& inSimulation, const ItemData& inItemData,
                        const CastableData& inCastableData)
-: simulation{inSimulation}
+: onItemInteractionCompletedMap{}
+, onEntityInteractionCompletedMap{}
+, onSpellCompletedMap{}
+, simulation{inSimulation}
 , world{inSimulation.getWorld()}
 , itemData{inItemData}
 , castableData{inCastableData}
-, onItemInteractionCompletedMap{}
-, onEntityInteractionCompletedMap{}
-, onSpellCompletedMap{}
 {
 }
 

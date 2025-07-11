@@ -16,7 +16,7 @@ namespace AM
 class EngineCastableDef {
 public:
     static void defineCastables(
-        const GraphicDataBase& graphicData,
+        const GraphicDataBase&,
         std::function<void(CastableID, const Castable&)> addCastable)
     {
         addCastable(ItemInteractionType::Examine,

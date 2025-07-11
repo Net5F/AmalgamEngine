@@ -67,9 +67,7 @@ void onComponentDestroyed(entt::registry& registry, entt::entity entity)
 World::World(Simulation& inSimulation, const GraphicData& inGraphicData,
              ItemData& inItemData, const CastableData& inCastableData,
              EntityInitLua& inEntityInitLua, ItemInitLua& inItemInitLua)
-: simulation{inSimulation}
-, graphicData{inGraphicData}
-, registry{}
+: registry{}
 , entityLocator{registry}
 , collisionLocator{}
 , tileMap{inGraphicData, collisionLocator}
@@ -78,6 +76,8 @@ World::World(Simulation& inSimulation, const GraphicData& inGraphicData,
 , castHelper{inSimulation, inItemData, inCastableData}
 , database{std::make_unique<Database>()}
 , netIDMap{}
+, simulation{inSimulation}
+, graphicData{inGraphicData}
 , entityInitLua{inEntityInitLua}
 , itemInitLua{inItemInitLua}
 , nextStoredValueID{NULL_ENTITY_STORED_VALUE_ID + 1}

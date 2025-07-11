@@ -39,7 +39,7 @@ bool StringTools::pathStartsWith(std::string_view pathA, std::string_view pathB)
     }
 
     // Compare char-by-char.
-    for (int index{0}; index < pathB.size(); ++index) {
+    for (int index{0}; index < static_cast<int>(pathB.size()); ++index) {
         char charA{pathA.at(index)};
         char charB{pathB.at(index)};
 

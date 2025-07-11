@@ -365,7 +365,7 @@ void Database::checkDataVersions()
     if (!(requiredMigrations.empty())) {
         std::string errorText{"Database load error: Data version is older than "
                               "code version.\nRequired migrations:"};
-        for (const std::string migrationText : requiredMigrations) {
+        for (const std::string& migrationText : requiredMigrations) {
             errorText += "\n    " + migrationText;
         }
 

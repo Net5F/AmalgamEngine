@@ -25,14 +25,14 @@ namespace Client
 CastHelper::CastHelper(Simulation& inSimulation, Network& inNetwork,
                        const ItemData& inItemData,
                        const CastableData& inCastableData)
-: simulation{inSimulation}
+: onItemInteractionCompletedMap{}
+, onEntityInteractionCompletedMap{}
+, onSpellCompletedMap{}
+, simulation{inSimulation}
 , world{inSimulation.getWorld()}
 , network{inNetwork}
 , itemData{inItemData}
 , castableData{inCastableData}
-, onItemInteractionCompletedMap{}
-, onEntityInteractionCompletedMap{}
-, onSpellCompletedMap{}
 {
 }
 

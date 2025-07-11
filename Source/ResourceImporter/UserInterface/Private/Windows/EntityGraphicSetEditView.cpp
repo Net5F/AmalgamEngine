@@ -5,6 +5,7 @@
 #include "LibraryItemData.h"
 #include "Paths.h"
 #include "DisplayStrings.h"
+#include "Rotation.h"
 #include "AUI/Core.h"
 
 namespace AM

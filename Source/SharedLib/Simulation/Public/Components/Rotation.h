@@ -45,7 +45,7 @@ void serialize(S& serializer, Rotation& rotation)
 
 namespace DisplayStrings
 {
-static std::string get(Rotation::Direction direction)
+inline std::string get(Rotation::Direction direction)
 {
     switch (direction) {
         case Rotation::Direction::South:
@@ -73,5 +73,4 @@ static std::string get(Rotation::Direction direction)
 }
 
 } // namespace DisplayStrings
-
 } // namespace AM

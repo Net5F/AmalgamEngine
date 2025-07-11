@@ -40,7 +40,7 @@ enum class CastFailureType : Uint8 {
 /**
  * Returns a user-facing failure string for the given failure type.
  */
-static const char* getCastFailureString(CastFailureType failureType)
+inline const char* getCastFailureString(CastFailureType failureType)
 {
     // Note: We only add strings for failure types that the user can do 
     //       something about. Internal failures due to e.g. bugs shouldn't be 

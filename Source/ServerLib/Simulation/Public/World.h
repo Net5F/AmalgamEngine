@@ -49,10 +49,6 @@ struct ItemInitLua;
  */
 class World
 {
-private:
-    /** Used to get graphics info. */
-    const GraphicData& graphicData;
-
 public:
     World(Simulation& inSimulation, const GraphicData& inGraphicData,
           ItemData& inItemData, const CastableData& inCastableData,
@@ -229,6 +225,9 @@ private:
 
     /** Used to get the current tick. */
     Simulation& simulation;
+
+    /** Used to get graphics info. */
+    const GraphicData& graphicData;
 
     /** Used to run entity init scripts. */
     EntityInitLua& entityInitLua;

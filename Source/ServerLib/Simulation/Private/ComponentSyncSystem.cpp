@@ -57,8 +57,8 @@ ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
         //       send one, but until then it isn't a huge cost.
         updateObservers[typeIndex].bind(world.registry);
         updateObservers[typeIndex]
-            .on_construct<ComponentType>()
-            .on_update<ComponentType>();
+            .template on_construct<ComponentType>()
+            .template on_update<ComponentType>();
 
         destroyObservers[typeIndex].bind(world.registry);
         destroyObservers[typeIndex].on_destroy<ComponentType>();

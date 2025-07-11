@@ -14,7 +14,7 @@ namespace AM
  */
 namespace DisplayStrings
 {
-static std::string get(EntityInteractionType interactionType)
+inline std::string get(EntityInteractionType interactionType)
 {
     switch (interactionType) {
         // Engine interaction types.
@@ -31,7 +31,7 @@ static std::string get(EntityInteractionType interactionType)
     return "?";
 }
 
-static std::string get(ItemInteractionType interactionType)
+inline std::string get(ItemInteractionType interactionType)
 {
     switch (interactionType) {
         // Engine interaction types.
@@ -50,7 +50,7 @@ static std::string get(ItemInteractionType interactionType)
     return "?";
 }
 
-static std::string get(EntityGraphicType graphicType)
+inline std::string get(EntityGraphicType graphicType)
 {
     switch (graphicType) {
         // Engine graphic types.

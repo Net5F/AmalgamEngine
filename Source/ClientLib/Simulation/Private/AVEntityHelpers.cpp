@@ -148,7 +148,10 @@ bool AVEntityHelpers::timeElapsed(AVEntity::Behavior behavior, double startTime,
                     return true;
                 }
             }
+            break;
         }
+        default:
+            break;
     }
 
     return false;
@@ -166,7 +169,10 @@ bool AVEntityHelpers::positionReached(AVEntity::Behavior behavior,
             if (entityPos == targetPos) {
                 return true;
             }
+            break;
         }
+        default:
+            break;
     }
 
     return false;
