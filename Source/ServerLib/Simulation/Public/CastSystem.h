@@ -9,6 +9,7 @@
 #include "Vector3.h"
 #include "EnttObserver.h"
 #include "QueuedEvents.h"
+#include "EventSorter.h"
 #include "entt/fwd.hpp"
 #include <unordered_map>
 #include <functional>
@@ -51,6 +52,11 @@ private:
      * Processes all waiting cast request messages.
      */
     void processCastRequests();
+
+    /**
+     * Processes the given cast request.
+     */
+    void processCastRequest(const CastRequest& castRequest);
 
     /**
      * Updates any ongoing casts, canceling or completing them as necessary.
@@ -103,6 +109,7 @@ private:
     EnttObserver playerCastCooldownObserver;
 
     EventQueue<CastRequest> castRequestQueue;
+    EventSorter<CastRequest> castRequestSorter;
 };
 
 } // End namespace Server

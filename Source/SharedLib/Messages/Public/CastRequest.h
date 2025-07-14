@@ -23,10 +23,8 @@ struct CastRequest {
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    // Note: We don't include a tick number in our interaction requests, because
-    //       there isn't anything that a client would want to sync the
-    //       interaction with. NPC state is in the past, and the client entity's
-    //       predicted state (e.g. position) wouldn't be useful to sync to.
+    /** The tick that this cast corresponds to. */
+    Uint32 tickNum{0};
 
     /** The castable that's being cast. */
     CastableID castableID{};
@@ -59,6 +57,7 @@ struct CastRequest {
 template<typename S>
 void serialize(S& serializer, CastRequest& castRequest)
 {
+    serializer.value4b(castRequest.tickNum);
     serializer.object(castRequest.castableID);
     serializer.value1b(castRequest.slotIndex);
     serializer.value4b(castRequest.targetEntity);

@@ -37,6 +37,11 @@ public:
     CastHelper(Simulation& inSimulation, const ItemData& inItemData,
                const CastableData& inCastableData);
 
+    // Note: There's a potential failure where an entity stops moving, but a 
+    //       system tries to cast before MovementSystem has ran, causing the 
+    //       cast to still fail. We had to solve this on the client because the
+    //       UI casts were failing, but it doesn't seem very likely to occur 
+    //       here (any system that casts should be post-movement).
     struct CastItemInteractionParams;
     /**
      * Casts an item interaction, using the given info.
@@ -95,17 +100,15 @@ public:
         SpellType spellType,
         std::function<void(const CastInfo&)> callback);
 
-    /** Holds the handler callbacks for each type of item interaction. */
+    // Maps that hold handler callbacks for each type of cast. Only CastSystem 
+    // should call these handlers, but we just set them as public to avoid 
+    // overcomplication.
     std::unordered_map<ItemInteractionType,
                        std::function<void(const CastInfo&)>>
         onItemInteractionCompletedMap;
-
-    /** Holds the handler callbacks for each type of entity interaction. */
     std::unordered_map<EntityInteractionType,
                        std::function<void(const CastInfo&)>>
         onEntityInteractionCompletedMap;
-
-    /** Holds the handler callbacks for each type of spell. */
     std::unordered_map<SpellType,
                        std::function<void(const CastInfo&)>>
         onSpellCompletedMap;

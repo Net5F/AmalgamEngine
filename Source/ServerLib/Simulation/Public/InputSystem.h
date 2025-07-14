@@ -1,8 +1,8 @@
 #pragma once
 
 #include "NetworkDefs.h"
-#include "QueuedEvents.h"
 #include "InputChangeRequest.h"
+#include "QueuedEvents.h"
 #include "EventSorter.h"
 
 namespace AM

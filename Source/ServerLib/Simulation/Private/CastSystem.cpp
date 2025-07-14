@@ -33,6 +33,7 @@ CastSystem::CastSystem(Simulation& inSimulation, Network& inNetwork,
 , castableData{inCastableData}
 , playerCastCooldownObserver{}
 , castRequestQueue{inNetwork.getEventDispatcher()}
+, castRequestSorter{}
 {
     // Observe player CastCooldown construction events.
     playerCastCooldownObserver.bind(world.registry);
@@ -74,46 +75,89 @@ void CastSystem::processCasts()
 
 void CastSystem::processCastRequests()
 {
-    CastRequest castRequest{};
-    while (castRequestQueue.pop(castRequest)) {
-        // Find the entity ID of the client that sent this request.
-        auto it{world.netIDMap.find(castRequest.netID)};
-        if (it == world.netIDMap.end()) {
-            // Client doesn't exist (may have disconnected), skip this request.
+    // Sort or process any waiting cast requests.
+    while (CastRequest* castRequest{castRequestQueue.peek()}) {
+        // If the castable doesn't exist, drop this request.
+        const Castable* castable{
+            castableData.getCastable(castRequest->castableID)};
+        if (!castable) {
+            castRequestQueue.pop();
             continue;
         }
-        entt::entity clientEntity{it->second};
 
-        // Try to perform the cast.
-        CastFailureType result{CastFailureType::None};
-        if (auto* type{
-                std::get_if<ItemInteractionType>(&castRequest.castableID)}) {
-            result = world.castHelper.castItemInteraction(
-                {*type, clientEntity, castRequest.slotIndex,
-                 castRequest.targetEntity, castRequest.targetPosition,
-                 castRequest.netID});
-        }
-        else if (auto* type{std::get_if<EntityInteractionType>(
-                     &castRequest.castableID)}) {
-            result = world.castHelper.castEntityInteraction(
-                {*type, clientEntity, castRequest.targetEntity,
-                 castRequest.targetPosition, castRequest.netID});
-        }
-        else if (auto* type{std::get_if<SpellType>(&castRequest.castableID)}) {
-            result = world.castHelper.castSpell(
-                {*type, clientEntity, castRequest.targetEntity,
-                 castRequest.targetPosition, castRequest.netID});
+        // If this castable is tick-synchronized, sort the request.
+        if (castable->isTickSynchronized) {
+            // Push the cast request into the sorter.
+            SorterBase::ValidityResult result{
+                castRequestSorter.push(*castRequest, castRequest->tickNum)};
+
+            // If the cast request was late, process it immediately (it may 
+            // still succeed).
+            if (result != SorterBase::ValidityResult::Valid) {
+                processCastRequest(*castRequest);
+            }
+            else {
+                castRequestQueue.pop();
+                continue;
+            }
         }
         else {
-            LOG_ERROR("Tried to cast Castable with invalid type.");
+            // Not tick-synchronized. Process it immediately.
+            processCastRequest(*castRequest);
         }
 
-        // If the cast failed, send the failure to the caster.
-        if (result != CastFailureType::None) {
-            network.serializeAndSend<CastFailed>(
-                castRequest.netID,
-                {clientEntity, castRequest.castableID, result});
-        }
+        castRequestQueue.pop();
+    }
+
+    // Process all cast requests for this tick.
+    std::queue<CastRequest>& queue{castRequestSorter.getCurrentQueue()};
+    for (; !(queue.empty()); queue.pop()) {
+        processCastRequest(queue.front());
+    }
+
+    // Advance the sorter to the next tick.
+    castRequestSorter.advance();
+}
+
+void CastSystem::processCastRequest(const CastRequest& castRequest)
+{
+    // Find the entity ID of the client that sent this request.
+    auto it{world.netIDMap.find(castRequest.netID)};
+    if (it == world.netIDMap.end()) {
+        // Client doesn't exist (may have disconnected), skip this request.
+        return;
+    }
+    entt::entity clientEntity{it->second};
+
+    // Try to perform the cast.
+    CastFailureType result{CastFailureType::None};
+    if (auto* type{
+            std::get_if<ItemInteractionType>(&castRequest.castableID)}) {
+        result = world.castHelper.castItemInteraction(
+            {*type, clientEntity, castRequest.slotIndex,
+             castRequest.targetEntity, castRequest.targetPosition,
+             castRequest.netID});
+    }
+    else if (auto* type{std::get_if<EntityInteractionType>(
+                 &castRequest.castableID)}) {
+        result = world.castHelper.castEntityInteraction(
+            {*type, clientEntity, castRequest.targetEntity,
+             castRequest.targetPosition, castRequest.netID});
+    }
+    else if (auto* type{std::get_if<SpellType>(&castRequest.castableID)}) {
+        result = world.castHelper.castSpell(
+            {*type, clientEntity, castRequest.targetEntity,
+             castRequest.targetPosition, castRequest.netID});
+    }
+    else {
+        LOG_ERROR("Tried to cast Castable with invalid type.");
+    }
+
+    // If the cast failed, send the failure to the caster.
+    if (result != CastFailureType::None) {
+        network.serializeAndSend<CastFailed>(
+            castRequest.netID,
+            {clientEntity, castRequest.castableID, result});
     }
 }
 

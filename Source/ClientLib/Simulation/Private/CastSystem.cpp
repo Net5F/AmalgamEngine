@@ -37,24 +37,68 @@ CastSystem::CastSystem(Simulation& inSimulation, Network& inNetwork,
 
 void CastSystem::processCasts()
 {
+    // Process any waiting UI cast requests.
+    processUICasts();
+
     // Process any waiting cast messages.
-    CastStarted castStarted{};
-    while (castStartedQueue.pop(castStarted)) {
-        handleCastStarted(castStarted);
+    while (const CastStarted* castStarted{castStartedQueue.peek()}) {
+        handleCastStarted(*castStarted);
+        castStartedQueue.pop();
     }
 
-    CastFailed castFailed{};
-    while (castFailedQueue.pop(castFailed)) {
-        handleCastFailed(castFailed);
+    while (const CastFailed* castFailed{castFailedQueue.peek()}) {
+        handleCastFailed(*castFailed);
+        castFailedQueue.pop();
     }
 
-    CastCooldownInit castCooldownInit{};
-    while (castCooldownInitQueue.pop(castCooldownInit)) {
-        handleCastCooldownInit(castCooldownInit);
+    while (const CastCooldownInit
+           * castCooldownInit{castCooldownInitQueue.peek()}) {
+        handleCastCooldownInit(*castCooldownInit);
+        castCooldownInitQueue.pop();
     }
 
     // Update ongoing casts.
     updateCasts();
+}
+
+void CastSystem::processUICasts()
+{
+    // Note: This setup is a little weird (we pop from CastHelper queue, then 
+    //       pass the struct to a CastHelper function), but we need the return
+    //       type so we can signal failures.
+
+    CastHelper& castHelper{world.castHelper};
+    auto& castItemInteractionQueue{castHelper.castItemInteractionQueue};
+    for (; !(castItemInteractionQueue.empty());
+         castItemInteractionQueue.pop()) {
+        const auto& params{castItemInteractionQueue.front()};
+        CastFailureType failureType{castHelper.castItemInteraction(params)};
+        if (failureType != CastFailureType::None) {
+            castFailedSig.publish(CastFailed{
+                world.playerEntity, params.interactionType, failureType});
+        }
+    }
+
+    auto& castEntityInteractionQueue{castHelper.castEntityInteractionQueue};
+    for (; !(castEntityInteractionQueue.empty());
+         castEntityInteractionQueue.pop()) {
+        const auto& params{castEntityInteractionQueue.front()};
+        CastFailureType failureType{castHelper.castEntityInteraction(params)};
+        if (failureType != CastFailureType::None) {
+            castFailedSig.publish(CastFailed{
+                world.playerEntity, params.interactionType, failureType});
+        }
+    }
+
+    auto& castSpellQueue{castHelper.castSpellQueue};
+    for (; !(castSpellQueue.empty()); castSpellQueue.pop()) {
+        const auto& params{castSpellQueue.front()};
+        CastFailureType failureType{castHelper.castSpell(params)};
+        if (failureType != CastFailureType::None) {
+            castFailedSig.publish(CastFailed{
+                world.playerEntity, params.interactionType, failureType});
+        }
+    }
 }
 
 void CastSystem::handleCastStarted(const CastStarted& castStarted)

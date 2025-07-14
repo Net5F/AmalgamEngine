@@ -18,6 +18,7 @@ InputSystem::InputSystem(Simulation& inSimulation, World& inWorld,
 : simulation{inSimulation}
 , world{inWorld}
 , inputChangeRequestQueue{inNetwork.getEventDispatcher()}
+, inputChangeRequestSorter{}
 {
 }
 
@@ -25,14 +26,14 @@ void InputSystem::processInputMessages()
 {
     ZoneScoped;
 
-    // Sort any waiting client input events.
-    while (InputChangeRequest* inputChangeRequest
-           = inputChangeRequestQueue.peek()) {
-        // Push the event into the sorter.
+    // Sort any waiting client input requests.
+    while (const InputChangeRequest
+           * inputChangeRequest{inputChangeRequestQueue.peek()}) {
+        // Push the request into the sorter.
         SorterBase::ValidityResult result{inputChangeRequestSorter.push(
             *inputChangeRequest, inputChangeRequest->tickNum)};
 
-        // If we had to drop an event, handle it.
+        // If we had to drop a request, handle it.
         if (result != SorterBase::ValidityResult::Valid) {
             LOG_INFO("Dropped message from %u. Tick: %u, received: %u",
                      inputChangeRequest->netID, simulation.getCurrentTick(),
@@ -43,24 +44,25 @@ void InputSystem::processInputMessages()
         inputChangeRequestQueue.pop();
     }
 
-    // Process all client input events for this tick.
+    // Process all client input requests for this tick.
     std::queue<InputChangeRequest>& queue{
         inputChangeRequestSorter.getCurrentQueue()};
-    while (!(queue.empty())) {
-        // Get the next event.
+    Uint32 currentTick{simulation.getCurrentTick()};
+    for (; !(queue.empty()); queue.pop()) {
+        // Get the next request.
         InputChangeRequest& inputChangeRequest{queue.front()};
 
         // If the input is from an earlier tick, drop it and continue.
-        if (inputChangeRequest.tickNum < simulation.getCurrentTick()) {
+        if (inputChangeRequest.tickNum < currentTick) {
             LOG_INFO("Dropped message from %u. Tick: %u, received: %u",
-                     inputChangeRequest.netID, simulation.getCurrentTick(),
+                     inputChangeRequest.netID, currentTick,
                      inputChangeRequest.tickNum);
             handleDroppedMessage(inputChangeRequest.netID);
             inputChangeRequestQueue.pop();
             continue;
         }
         // If the message is from a later tick, we're done.
-        else if (inputChangeRequest.tickNum > simulation.getCurrentTick()) {
+        else if (inputChangeRequest.tickNum > currentTick) {
             break;
         }
 
@@ -78,8 +80,6 @@ void InputSystem::processInputMessages()
             // The entity was probably disconnected. Do nothing with the
             // message.
         }
-
-        queue.pop();
     }
 
     // Advance the sorter to the next tick.

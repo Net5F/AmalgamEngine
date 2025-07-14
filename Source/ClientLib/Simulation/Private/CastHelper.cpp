@@ -25,15 +25,31 @@ namespace Client
 CastHelper::CastHelper(Simulation& inSimulation, Network& inNetwork,
                        const ItemData& inItemData,
                        const CastableData& inCastableData)
-: onItemInteractionCompletedMap{}
-, onEntityInteractionCompletedMap{}
-, onSpellCompletedMap{}
-, simulation{inSimulation}
+: simulation{inSimulation}
 , world{inSimulation.getWorld()}
 , network{inNetwork}
 , itemData{inItemData}
 , castableData{inCastableData}
+, castItemInteractionQueue{}
+, castEntityInteractionQueue{}
+, castSpellQueue{}
 {
+}
+
+void CastHelper::queueItemInteraction(const CastItemInteractionParams& params)
+{
+    castItemInteractionQueue.emplace(params);
+}
+
+void CastHelper::queueEntityInteraction(
+    const CastEntityInteractionParams& params)
+{
+    castEntityInteractionQueue.emplace(params);
+}
+
+void CastHelper::queueSpell(const CastSpellParams& params)
+{
+    castSpellQueue.emplace(params);
 }
 
 CastFailureType
@@ -77,9 +93,10 @@ CastFailureType
                         .endTick{0}});
 
     // Send a cast request.
-    network.serializeAndSend(CastRequest{castable->castableID, params.slotIndex,
-                                         params.targetEntity,
-                                         params.targetPosition});
+    network.serializeAndSend(CastRequest{
+        simulation.getCurrentTick(), castable->castableID, params.slotIndex,
+        params.targetEntity, params.targetPosition});
+
 
     return CastFailureType::None;
 }
@@ -116,8 +133,9 @@ CastFailureType
                         .endTick{0}});
 
     // Send a cast request.
-    network.serializeAndSend(CastRequest{
-        castable->castableID, 0, params.targetEntity, params.targetPosition});
+    network.serializeAndSend(
+        CastRequest{simulation.getCurrentTick(), castable->castableID, 0,
+                    params.targetEntity, params.targetPosition});
 
     return CastFailureType::None;
 }
@@ -153,30 +171,11 @@ CastFailureType CastHelper::castSpell(const CastSpellParams& params)
                         .endTick{0}});
 
     // Send a cast request.
-    network.serializeAndSend(CastRequest{
-        castable->castableID, 0, params.targetEntity, params.targetPosition});
+    network.serializeAndSend(
+        CastRequest{simulation.getCurrentTick(), castable->castableID, 0,
+                    params.targetEntity, params.targetPosition});
 
     return CastFailureType::None;
-}
-
-void CastHelper::setOnItemInteractionCompleted(
-    ItemInteractionType interactionType,
-    std::function<void(const CastInfo&)> callback)
-{
-    onItemInteractionCompletedMap[interactionType] = callback;
-}
-
-void CastHelper::setOnEntityInteractionCompleted(
-    EntityInteractionType interactionType,
-    std::function<void(const CastInfo&)> callback)
-{
-    onEntityInteractionCompletedMap[interactionType] = callback;
-}
-
-void CastHelper::setOnSpellCompleted(
-    SpellType spellType, std::function<void(const CastInfo&)> callback)
-{
-    onSpellCompletedMap[spellType] = callback;
 }
 
 CastFailureType CastHelper::performSharedChecks(const Castable& castable,

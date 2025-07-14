@@ -68,7 +68,7 @@ void PlayerInputSystem::processHeldInputs()
     // Update our saved input state.
     Input& playerInput{world.registry.get<Input>(world.playerEntity)};
     bool inputHasChanged{false};
-    for (std::size_t inputType = 0; inputType < Input::Type::Count;
+    for (std::size_t inputType{0}; inputType < Input::Type::Count;
          ++inputType) {
         // If the saved state doesn't match the latest.
         if (newInputStates[inputType] != playerInput.inputStates[inputType]) {

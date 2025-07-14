@@ -67,6 +67,13 @@ struct Castable {
         SharedConfig::CAST_GLOBAL_COOLDOWN_S). */
     bool triggersGCD{true};
 
+    /** If true, this cast will be queued by the server and processed on the 
+        tick when the client cast it (clients are in the future). If false, it 
+        will be processed as soon as the server receives it.
+        Most castables will want this to be true. False is useful for things 
+        that should be instant and don't affect the sim, e.g. Examine, Talk. */
+    bool isTickSynchronized{true};
+
     /** Project-specific data. */
     CastableProjectData projectData{};
 

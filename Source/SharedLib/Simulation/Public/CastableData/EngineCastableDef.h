@@ -20,14 +20,13 @@ public:
         std::function<void(CastableID, const Castable&)> addCastable)
     {
         addCastable(ItemInteractionType::Examine,
-                    Castable{.triggersGCD{false}});
+                    Castable{.triggersGCD{false}, .isTickSynchronized{false}});
 
         addCastable(
             EntityInteractionType::Talk,
-            {
-                .range{SharedConfig::CAST_ENTITY_INTERACTION_STANDARD_RANGE},
-                .triggersGCD{false},
-            });
+            {.range{SharedConfig::CAST_ENTITY_INTERACTION_STANDARD_RANGE},
+             .triggersGCD{false},
+             .isTickSynchronized{false}});
     }
 };
 

@@ -28,6 +28,10 @@ target_link_libraries(SharedLib
         Bitsery::bitsery
         nlohmann_json::nlohmann_json
         Tracy::TracyClient
+
+        # Only included for PCH.
+        readerwriterqueue
+        QueuedEvents
 )
 
 # Compile with C++23.

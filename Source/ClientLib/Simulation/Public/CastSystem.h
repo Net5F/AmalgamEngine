@@ -38,6 +38,11 @@ public:
 
 private:
     /**
+     * Processes any waiting casts that the UI queued through CastHelper.
+     */
+    void processUICasts();
+
+    /**
      * Starts the given cast.
      */
     void handleCastStarted(const CastStarted& castStarted);

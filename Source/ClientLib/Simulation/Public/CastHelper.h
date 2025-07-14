@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <functional>
 #include <limits>
+#include <queue>
 
 namespace AM
 {
@@ -35,6 +36,26 @@ public:
 
     struct CastItemInteractionParams;
     /**
+     * Queues the given item interaction to be cast during the next CastSystem 
+     * tick.
+     */
+    void queueItemInteraction(const CastItemInteractionParams& params);
+
+    struct CastEntityInteractionParams;
+    /**
+     * Queues the given entity interaction to be cast during the next CastSystem
+     * tick.
+     */
+    void queueEntityInteraction(const CastEntityInteractionParams& params);
+
+    struct CastSpellParams;
+    /**
+     * Queues the given spell to be cast during the next CastSystem tick.
+     */
+    void queueSpell(const CastSpellParams& params);
+
+private:
+    /**
      * Casts an item interaction, using the given info.
      * 
      * @return None if the cast is successful, otherwise returns the reason for
@@ -43,70 +64,23 @@ public:
     CastFailureType
         castItemInteraction(const CastItemInteractionParams& params);
 
-    struct CastEntityInteractionParams;
     /**
      * Casts an entity interaction, using the given info.
-     * 
+     *
      * @return None if the cast is successful, otherwise returns the reason for
      *         failure.
      */
     CastFailureType
         castEntityInteraction(const CastEntityInteractionParams& params);
 
-    struct CastSpellParams;
     /**
      * Casts a spell, using the given info.
-     * 
+     *
      * @return None if the cast is successful, otherwise returns the reason for
      *         failure.
      */
     CastFailureType castSpell(const CastSpellParams& params);
 
-    // Note: These functions are just to provide a friendly interface. The 
-    //       maps are public, so you could just add to them directly.
-    /**
-     * Registers a callback for when an item interaction of the given type is 
-     * successfully cast.
-     * Note: Only one callback can be set for each type.
-     */
-    void setOnItemInteractionCompleted(
-        ItemInteractionType interactionType,
-        std::function<void(const CastInfo&)> callback);
-
-    /**
-     * Registers a callback for when an entity interaction of the given type is 
-     * successfully cast.
-     * Note: Only one callback can be set for each type.
-     */
-    void setOnEntityInteractionCompleted(
-        EntityInteractionType interactionType,
-        std::function<void(const CastInfo&)> callback);
-
-    /**
-     * Registers a callback for when a spell of the given type is successfully 
-     * cast.
-     * Note: Only one callback can be set for each type.
-     */
-    void setOnSpellCompleted(
-        SpellType spellType,
-        std::function<void(const CastInfo&)> callback);
-
-    /** Holds the handler callbacks for each type of item interaction. */
-    std::unordered_map<ItemInteractionType,
-                       std::function<void(const CastInfo&)>>
-        onItemInteractionCompletedMap;
-
-    /** Holds the handler callbacks for each type of entity interaction. */
-    std::unordered_map<EntityInteractionType,
-                       std::function<void(const CastInfo&)>>
-        onEntityInteractionCompletedMap;
-
-    /** Holds the handler callbacks for each type of spell. */
-    std::unordered_map<SpellType,
-                       std::function<void(const CastInfo&)>>
-        onSpellCompletedMap;
-
-private:
     /**
      * Performs generic validation that's applicable to all 3 types of 
      * Castable.
@@ -127,6 +101,12 @@ private:
     Network& network;
     const ItemData& itemData;
     const CastableData& castableData;
+
+    // We friend CastSystem so it can use the queues and cast() functions 
+    // without letting users get confused and call e.g. castSpell() instead of 
+    // queueSpell(). Ideally, we would set this up differently to avoid 
+    // exposing the rest of our private state.
+    friend class CastSystem;
 
 public:
 struct CastItemInteractionParams {
@@ -175,6 +155,12 @@ struct CastSpellParams {
                            std::numeric_limits<float>::max(),
                            std::numeric_limits<float>::max()};
 };
+
+private:
+    // Queues that hold cast requests sent by the UI. 
+    std::queue<CastItemInteractionParams> castItemInteractionQueue;
+    std::queue<CastEntityInteractionParams> castEntityInteractionQueue;
+    std::queue<CastSpellParams> castSpellQueue;
 };
 
 } // End namespace Client 
