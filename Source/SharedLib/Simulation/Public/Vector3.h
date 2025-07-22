@@ -45,6 +45,12 @@ struct Vector3 {
     void normalize();
 
     /**
+     * Returns the per-component reciprocal of this vector (i.e. 
+     * {1/x, 1/y, 1/z}).
+     */
+    [[nodiscard]] Vector3 reciprocal() const;
+
+    /**
      * Returns the dot product of this vector and the given vector.
      */
     [[nodiscard]] float dot(const Vector3& other) const;

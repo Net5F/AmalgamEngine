@@ -36,6 +36,7 @@ target_sources(SharedLib
         Private/TileMap/TileMapBase.cpp
         Private/TileMap/TilePosition.cpp
     PUBLIC
+        Public/AMMath.h
         Public/BoundingBox.h
         Public/BoundingBoxID.h
         Public/CollisionLocator.h

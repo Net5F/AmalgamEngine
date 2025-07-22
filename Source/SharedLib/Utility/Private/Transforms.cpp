@@ -57,17 +57,18 @@ std::optional<Vector3>
     Transforms::screenToWorldTarget(const SDL_FPoint& screenPoint,
                                     const Camera& camera)
 {
-    // Find the T where a ray cast from screenPoint intersects the camera 
+    // Find the t where a ray cast from screenPoint intersects the camera 
     // target's Z plane.
     if (std::optional<Ray> rayOpt{screenToWorldRay(screenPoint, camera)}) {
         Ray& ray{rayOpt.value()};
         BoundingBox zPlane{{-1'000'000.f, -1'000'000.f, -0.1f},
                            {1'000'000.f, 1'000'000.f, camera.target.z}};
-        float intersectT{zPlane.getMinIntersection(ray)};
-        AM_ASSERT(intersectT > 0, "Screen ray failed to intersect Z plane.");
+        auto [didIntersect, tMin, _]
+            = zPlane.intersects(ray, 0, std::numeric_limits<float>::infinity());
+        AM_ASSERT(didIntersect, "Screen ray failed to intersect Z plane.");
 
         // Return the intersected point.
-        return ray.getPointAtT(intersectT);
+        return ray.getPointAtT(tMin);
     }
 
     return std::nullopt;
@@ -82,14 +83,16 @@ std::optional<Ray> Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
     Vector3 minimum{screenToWorldMinimum(screenPoint, camera)};
 
     // Cast a ray up from the minimum point towards the camera.
-    // Find the furthest point where this ray intersects the camera's bounds.
+    // Find the furthest point where the ray intersects the camera's bounds
+    // (tMin will be invalid since our point is inside the bounds).
     Ray rayToCamera{minimum,
                     {TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
                      TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
                      TILE_FACE_HEIGHT_WORLD_TO_SCREEN}};
     rayToCamera.direction.normalize();
-    float tMax{camera.viewBounds.getMaxIntersection(rayToCamera)};
-    if (tMax <= 0) {
+    auto [didIntersect, _, tMax] = camera.viewBounds.intersects(
+        rayToCamera, 0, std::numeric_limits<float>::infinity());
+    if (!didIntersect) {
         // rayToCamera failed to intersect the camera's view bounds.
         return std::nullopt;
     }

@@ -1,6 +1,7 @@
 #include "WorldObjectLocator.h"
 #include "SDLHelpers.h"
 #include "Transforms.h"
+#include "AMAssert.h"
 #include "entt/entity/entity.hpp"
 #include <stdexcept>
 #include <cmath>
@@ -96,11 +97,16 @@ WorldObjectID
         (ray.origin.z - (currentCellPosition.z * CELL_WORLD_HEIGHT))
         / CELL_WORLD_HEIGHT * cellStepZ};
 
-    // Find the furthest intersection between the ray and the camera's view 
-    // bounds so we know where to stop the walk.
-    float furthestT{camera.viewBounds.getMaxIntersection(ray)};
-    Position furthestViewIntersection{ray.getPointAtT(furthestT)};
-    CellPosition endCellPosition{TilePosition(furthestViewIntersection),
+    // Find the furthest intersection between the ray and the camera's view
+    // bounds, so we know where to stop the walk (tMin will be invalid since our
+    // point is inside the bounds).
+    // Note: This ray starts at the camera bounds and travels downwards.
+    auto [didIntersect, _, tMax] = camera.viewBounds.intersects(
+        ray, 0, std::numeric_limits<float>::infinity());
+    AM_ASSERT(didIntersect,
+              "Ray towards screen failed to intersect camera's view bounds.");
+    Position viewIntersection{ray.getPointAtT(tMax)};
+    CellPosition endCellPosition{TilePosition(viewIntersection),
                                  Config::WORLD_OBJECT_LOCATOR_CELL_WIDTH,
                                  Config::WORLD_OBJECT_LOCATOR_CELL_HEIGHT};
 

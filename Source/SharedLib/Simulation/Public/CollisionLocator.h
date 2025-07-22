@@ -138,6 +138,39 @@ public:
                       CollisionObjectTypeMask objectTypeMask);
 
     /**
+     * Returns true if the given ray intersects any collision volume.
+     *
+     * @param objectTypeMask The bitmask to use when filtering objects. If an 
+     *                       object type is present in the mask, it will be 
+     *                       included in the results.
+     */
+    //bool raycastAny(const Vector3& start, const Vector3& end,
+    //                CollisionObjectTypeMask objectTypeMask);
+
+    /**
+     * Returns the first collision volume that the given ray intersects.
+     *
+     * @param objectTypeMask The bitmask to use when filtering objects. If an 
+     *                       object type is present in the mask, it will be 
+     *                       included in the results.
+     * @return Pointers to the info of each hit world object. These pointers 
+     *         are not stable, and may become invalid when any of this locator's 
+     *         functions are called.
+     */
+    //std::vector<const CollisionInfo*>&
+    //    raycastFirst(const Vector3& start, const Vector3& end,
+    //                 CollisionObjectTypeMask objectTypeMask);
+
+    /**
+     * Returns all collision volumes that the given ray intersects.
+     *
+     * See rayCastFirst() for more info.
+     */
+    //std::vector<const CollisionInfo*>&
+    //    raycastAll(const Vector3& start, const Vector3& end,
+    //               CollisionObjectTypeMask objectTypeMask);
+
+    /**
      * Performs a broad phase to get all collision volumes in cells intersected
      * by the given cylinder.
      *
@@ -172,6 +205,21 @@ public:
     std::vector<const CollisionInfo*>&
         getCollisionsBroad(const ChunkExtent& chunkExtent,
                            CollisionObjectTypeMask objectTypeMask);
+
+    /**
+     * Performs a broad phase to get all collision volumes in cells intersected
+     * by the given ray.
+     *
+     * Note: All volumes in the intersected cells are returned, which may
+     *       include volumes that aren't actually intersected by the ray.
+     *
+     * @param objectTypeMask The bitmask to use when filtering objects. If an
+     *                       object type is present in the mask, it will be
+     *                       included in the results.
+     */
+    //std::vector<const CollisionInfo*>&
+    //    rayCastBroad(const Vector3& start, const Vector3& end,
+    //                 CollisionObjectTypeMask objectTypeMask);
 
 private:
     /** The width of a grid cell in world units. */
@@ -209,11 +257,13 @@ private:
 
     /**
      * Performs a broad phase to get all collision volumes in cells intersected
-     * by the given cylinder.
+     * by the given cellExtent.
      *
      * Note: All volumes in the intersected cells are returned, which may
      *       include volumes that aren't actually within the radius.
      *
+     * @param tileExtent A tile extent matching cellExtent. Used to generate 
+     *                   terrain.
      * @param objectTypeMask The bitmask to use when filtering objects. If an
      *                       object type is present in the mask, it will be
      *                       included in the results.

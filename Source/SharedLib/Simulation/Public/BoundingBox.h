@@ -80,11 +80,6 @@ struct BoundingBox {
     bool intersects(const Cylinder& cylinder) const;
 
     /**
-     * Returns true if this box intersects the given ray.
-     */
-    bool intersects(const Ray& ray) const;
-
-    /**
      * Returns true if this box intersects the given tile extent.
      *
      * Note: This treats the tile extent as having infinite length along the
@@ -92,6 +87,53 @@ struct BoundingBox {
      * Note: Shared edges are considered to be intersecting.
      */
     bool intersects(const TileExtent& tileExtent) const;
+
+    /**
+     * Returns true if this box intersects the given ray.
+     */
+    bool intersects(const Ray& ray) const;
+
+    /**
+     * Returns true if this box intersects the given line.
+     */
+    bool intersects(const Vector3& start, const Vector3& end) const;
+
+    struct RayIntersectReturn
+    {
+        /** If true, an intersection occurred. */
+        bool didIntersect{};
+        /** If didIntersect == true, this is the t value where the ray first 
+            intersects the box.
+            If the ray origin is inside the box, this will be <= 0 and
+            clamped to tMinBound. */
+        float tMin{};
+        /** If didIntersect == true, this is the t value where the ray last
+            intersects the box.
+            This will be clamped to tMaxBound. */
+        float tMax{};
+    };
+    /**
+     * Looks for an intersection between this box and the given ray, within the 
+     * range [tMinBound, tMaxBound].
+     *
+     * Note: If you're going to constrain to a magnitude-independent range like
+     *       [0, 1], remember to normalize the ray's direction before taking the 
+     *       reciprocal. However, if the magnitude is important to your 
+     *       calculations (e.g. if you want to compare the resultant tMin to a
+     *       distance), don't normalize.
+     */
+    RayIntersectReturn intersects(const Ray& ray, float tMinBound,
+                                  float tMaxBound) const;
+
+    /**
+     * Looks for an intersection between this box and the given ray, within the 
+     * range [tMinBound, tMaxBound].
+     *
+     * Note: See intersects(Ray) for a note on normalization.
+     */
+    RayIntersectReturn intersects(const Vector3& rayOrigin,
+                                  const Vector3& inverseRayDirection,
+                                  float tMinBound, float tMaxBound) const;
 
     /**
      * Returns true if this box fully encloses the given other bounding box.
@@ -109,25 +151,6 @@ struct BoundingBox {
      * Returns true if this box contains the given world point.
      */
     bool contains(const Vector3& worldPoint) const;
-
-    /**
-     * Returns the minimum t at which this box intersects the given ray.
-     * Returns -1 if there's no intersection.
-     */
-    float getMinIntersection(const Ray& ray) const;
-
-    /**
-     * Returns the maximum t at which this box intersects the given ray.
-     * Returns -1 if there's no intersection.
-     */
-    float getMaxIntersection(const Ray& ray) const;
-
-    /**
-     * Returns tMin and tMax for the given ray's intersection with this 
-     * bounding box.
-     * @return {tMin, tMax}
-     */
-    std::array<float, 2> getIntersections(const Ray& ray) const;
 
     /**
      * Returns this box with its min point moved to the given point.

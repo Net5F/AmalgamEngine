@@ -276,6 +276,109 @@ std::vector<const CollisionLocator::CollisionInfo*>&
     return getCollisionsBroad(TileExtent(chunkExtent), objectTypeMask);
 }
 
+// TODO: Remember to move this
+// TODO: Implement, then decide how we can abstract for the others
+//bool CollisionLocator::raycastAny(const Vector3& start, const Vector3& end,
+//                                  CollisionObjectTypeMask objectTypeMask)
+//{
+//    // DDA Algorithm Ref: https://lodev.org/cgtutor/raycasting.html
+//    //                    https://www.youtube.com/watch?v=NbSee-XM7WA
+//
+//    // Calc the ratio of how long we have to travel along the ray to
+//    // fully move through 1 cell in each direction.
+//    Vector3 rayDirection{end - start};
+//    Vector3 normal{rayDirection};
+//    normal.normalize();
+//    const float unitStepX{std::abs(1 / normal.x)};
+//    const float unitStepY{std::abs(1 / normal.y)};
+//    const float unitStepZ{std::abs(1 / normal.z)};
+//    const float cellStepX{unitStepX * CELL_WORLD_WIDTH};
+//    const float cellStepY{unitStepY * CELL_WORLD_WIDTH};
+//    const float cellStepZ{unitStepZ * CELL_WORLD_HEIGHT};
+//
+//    // Calc the start and end cells for the walk.
+//    CellPosition currentCellPosition(
+//        start, SharedConfig::COLLISION_LOCATOR_CELL_WIDTH,
+//        SharedConfig::COLLISION_LOCATOR_CELL_HEIGHT);
+//    CellPosition endCellPosition{end,
+//                                 SharedConfig::COLLISION_LOCATOR_CELL_WIDTH,
+//                                 SharedConfig::COLLISION_LOCATOR_CELL_HEIGHT};
+//
+//    // These hold the value (relative to stepX/Y/Z) where the next
+//    // intersection occurs in each direction.
+//    // Note: Dividing by CELL_WORLD_ gives us a ratio of total cell size, 
+//    //       which we can then multiply by cellStep to get "how much of a 
+//    //       step would we have to make along the ray to reach the next cell".
+//    float nextIntersectionX{
+//        (start.x - (currentCellPosition.x * CELL_WORLD_WIDTH))
+//        / CELL_WORLD_WIDTH * cellStepX};
+//    float nextIntersectionY{
+//        (start.y - (currentCellPosition.y * CELL_WORLD_WIDTH))
+//        / CELL_WORLD_WIDTH * cellStepY};
+//    float nextIntersectionZ{
+//        (start.z - (currentCellPosition.z * CELL_WORLD_HEIGHT))
+//        / CELL_WORLD_HEIGHT * cellStepZ};
+//
+//    // Walk along the ray, checking each cell for a hit collision object.
+//    // (We iterate until we walk past the end position along some axis).
+//    Vector3 inverseRayDirection{rayDirection.reciprocal()};
+//    while ((currentCellPosition.x >= endCellPosition.x)
+//           && (currentCellPosition.y >= endCellPosition.y)
+//           && (currentCellPosition.z >= endCellPosition.z)) {
+//        // TODO: Is there a better way to go from cell -> tile iteration?
+//        // TODO: We need to skip this if tile layers are masked
+//        // If the ray intersects any of this cell's terrain, return true.
+//        // Note: We ignore modelBounds and collisionEnabled on terrain, all 
+//        //       terrain gets generated collision. 
+//        TileExtent cellTileExtent{CellExtent{currentCellPosition.x,
+//                                             currentCellPosition.y,
+//                                             currentCellPosition.z, 1, 1, 1},
+//                                  SharedConfig::COLLISION_LOCATOR_CELL_WIDTH,
+//                                  SharedConfig::COLLISION_LOCATOR_CELL_HEIGHT};
+//        for (int z{cellTileExtent.z}; z <= cellTileExtent.zMax(); ++z) {
+//            for (int y{cellTileExtent.y}; y <= cellTileExtent.yMax(); ++y) {
+//                for (int x{cellTileExtent.x}; x <= cellTileExtent.xMax(); ++x) {
+//                    TilePosition tilePosition{x, y, z};
+//                    std::size_t linearizedIndex{linearizeTileIndex(tilePosition)};
+//                    Terrain::Value terrainValue{terrainGrid[linearizedIndex]};
+//                    if (terrainValue == EMPTY_TERRAIN) {
+//                        continue;
+//                    }
+//
+//                    BoundingBox collisionVolume{
+//                        Terrain::calcWorldBounds(tilePosition, terrainValue)};
+//                    if (collisionVolume.intersects(start,
+//                                                   inverseRayDirection)) {
+//                        return true;
+//                    }
+//                }
+//            }
+//        }
+//
+//        // If the ray intersects any of this cell's objects, return true.
+//        // TODO: We might need to ignore shapes if the starting point is inside them
+//        //       Godot has it as an option
+//
+//        // Move towards the next closest cell.
+//        if ((nextIntersectionX < nextIntersectionY)
+//            && (nextIntersectionX < nextIntersectionZ)) {
+//            nextIntersectionX += cellStepX;
+//            currentCellPosition.x -= 1;
+//        }
+//        else if ((nextIntersectionY < nextIntersectionX)
+//            && (nextIntersectionY < nextIntersectionZ)) {
+//            nextIntersectionY += cellStepY;
+//            currentCellPosition.y -= 1;
+//        }
+//        else {
+//            nextIntersectionZ += cellStepZ;
+//            currentCellPosition.z -= 1;
+//        }
+//    }
+//
+//    return false;
+//}
+
 void CollisionLocator::addCollisionVolumeToCells(Uint16 volumeIndex,
                                                  const CellExtent& cellExtent)
 {

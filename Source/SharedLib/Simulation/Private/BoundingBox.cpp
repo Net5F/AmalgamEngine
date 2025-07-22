@@ -4,6 +4,7 @@
 #include "Ray.h"
 #include "TileExtent.h"
 #include "MovementHelpers.h"
+#include "AMMath.h"
 #include <cmath>
 
 namespace AM
@@ -138,23 +139,74 @@ bool BoundingBox::intersects(const Cylinder& cylinder) const
     return (cornerDistanceSquared <= (cylinder.radius * cylinder.radius));
 }
 
-bool BoundingBox::intersects(const Ray& ray) const
-{
-    auto [tMin, tMax] = getIntersections(ray);
-
-    // If tMax is negative, the ray would have to go in the negative direction
-    // to intersect the rect.
-    // If tMin > tMax, no intersection.
-    if ((tMax < 0) || (tMin > tMax)) {
-        return false;
-    }
-
-    return true;
-}
-
 bool BoundingBox::intersects(const TileExtent& tileExtent) const
 {
     return intersects(BoundingBox(tileExtent));
+}
+
+bool BoundingBox::intersects(const Ray& ray) const
+{
+    Vector3 inverseRayDirection{ray.direction.reciprocal()};
+    return intersects(ray.origin, inverseRayDirection, 0.f,
+                      std::numeric_limits<float>::infinity())
+        .didIntersect;
+}
+
+bool BoundingBox::intersects(const Vector3& start, const Vector3& end) const
+{
+    Vector3 inverseRayDirection{(end - start).reciprocal()};
+    return intersects(start, inverseRayDirection, 0.f,
+                      std::numeric_limits<float>::infinity())
+        .didIntersect;
+}
+
+BoundingBox::RayIntersectReturn BoundingBox::intersects(const Ray& ray,
+                                                        float tMinBound,
+                                                        float tMaxBound) const
+{
+    Vector3 inverseRayDirection{ray.direction.reciprocal()};
+    return intersects(ray.origin, inverseRayDirection, tMinBound, tMaxBound);
+}
+
+BoundingBox::RayIntersectReturn
+    BoundingBox::intersects(const Vector3& rayOrigin,
+                            const Vector3& inverseRayDirection, float tMinBound,
+                            float tMaxBound) const
+{
+    // Slab Algorithm Ref: 
+    // https://medium.com/@bromanz/another-view-on-the-classic-ray-aabb-intersection-algorithm-for-bvh-traversal-41125138b525
+    // https://technik90.blogspot.com/2018/06/the-other-pathtracer-4-optimizing-aabb.html
+
+    Vector3 t0{(min - rayOrigin) * inverseRayDirection};
+    Vector3 t1{(max - rayOrigin) * inverseRayDirection};
+    
+    Vector3 tEnter{Math::min(t0, t1)};
+    Vector3 tExit{Math::max(t1, t0)};
+
+    // We compare against tMinBound/tMaxBound so that, if the intersecting time
+    // interval is not within [tMinBound, tMaxBound], either tMin will be 
+    // brought above tMax, or tMax will be brought below tMin, causing the 
+    // intersection check (tMax >= tMin) to return false.
+    //
+    // Example: Define tSlabMin = max(tEnter), tSlabMax = min(tExit).
+    //          Let [tSlabMin, tSlabMax]   = [2, 4], 
+    //              [tMinBound, tMaxBound] = [0, 1].
+    //          Note that the result ([2, 4]) is outside of the bounds.
+    //
+    //          tLastEnter = max(tMin, tSlabMin) = max(0, 2) = 2
+    //          tFirstExit = min(tMax, tSlabMax), = min(1, 4) = 1
+    //
+    //          We return (tFirstExit >= tLastEnter) -> return (1 >= 2) -> false.
+    //
+    // Note: There are also some cases where tMin/tMax get clamped to the 
+    //       bounds, such as when rayOrigin is inside this box, or when the 
+    //       bounds end before the exit is reached.
+    float tMin{
+        std::max(tMinBound, std::max(std::max(tEnter.x, tEnter.y), tEnter.z))};
+    float tMax{
+        std::min(tMaxBound, std::min(std::min(tExit.x, tExit.y), tExit.z))};
+
+    return {(tMax >= tMin), tMin, tMax};
 }
 
 bool BoundingBox::contains(const BoundingBox& boundingBox) const
@@ -175,62 +227,6 @@ bool BoundingBox::contains(const Vector3& worldPoint) const
     return (min.x <= worldPoint.x) && (max.x >= worldPoint.x)
            && (min.y <= worldPoint.y) && (max.y >= worldPoint.y)
            && (min.z <= worldPoint.z) && (max.z >= worldPoint.z);
-}
-
-float BoundingBox::getMinIntersection(const Ray& ray) const
-{
-    auto [tMin, tMax] = getIntersections(ray);
-
-    // If tMax is negative, the ray would have to go in the negative direction
-    // to intersect the rect.
-    // If tMin > tMax, no intersection.
-    if ((tMax < 0) || (tMin > tMax)) {
-        return -1;
-    }
-
-    // If tMin doesn't intersect in the forward direction, return tMax.
-    if (tMin < 0) {
-        return tMax;
-    }
-
-    return tMin;
-}
-
-float BoundingBox::getMaxIntersection(const Ray& ray) const
-{
-    auto [tMin, tMax] = getIntersections(ray);
-
-    // If tMax is negative, the ray would have to go in the negative direction
-    // to intersect the rect.
-    // If tMin > tMax, no intersection.
-    if ((tMax < 0) || (tMin > tMax)) {
-        return -1;
-    }
-
-    return tMax;
-}
-
-std::array<float, 2> BoundingBox::getIntersections(const Ray& ray) const
-{
-    // Find the constant t where intersection occurs for each direction.
-    float tX1{(min.x - ray.origin.x) / ray.direction.x};
-    float tX2{(max.x - ray.origin.x) / ray.direction.x};
-    float tY1{(min.y - ray.origin.y) / ray.direction.y};
-    float tY2{(max.y - ray.origin.y) / ray.direction.y};
-    float tZ1{(min.z - ray.origin.z) / ray.direction.z};
-    float tZ2{(max.z - ray.origin.z) / ray.direction.z};
-
-    // Find the min t in each direction, then find the max of those.
-    // This gives us the t where the ray first intersects the rect.
-    float tMin{std::max(std::max(std::min(tX1, tX2), std::min(tY1, tY2)),
-                        std::min(tZ1, tZ2))};
-
-    // Find the max t in each direction, then find the min of those.
-    // This gives us the t where the ray last intersects the rect.
-    float tMax{std::min(std::min(std::max(tX1, tX2), std::max(tY1, tY2)),
-                        std::max(tZ1, tZ2))};
-
-    return {tMin, tMax};
 }
 
 BoundingBox BoundingBox::moveTo(const Vector3& newMin) const

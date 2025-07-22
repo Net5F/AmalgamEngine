@@ -87,6 +87,11 @@ void Vector3::normalize()
     *this /= length;
 }
 
+Vector3 Vector3::reciprocal() const
+{
+    return {1.f / x, 1.f / y, 1.f / z};
+}
+
 float Vector3::dot(const Vector3& other) const
 {
     return (x * other.x) + (y * other.y) + (z * other.z);
