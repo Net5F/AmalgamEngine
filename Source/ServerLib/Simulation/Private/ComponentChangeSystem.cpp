@@ -98,12 +98,8 @@ void ComponentChangeSystem::onGraphicStateUpdated(entt::registry& registry,
         })};
 
     // Update their collision in the locator.
-    CollisionObjectType::Value objectType{
-        world.registry.all_of<IsClientEntity>(entity)
-            ? CollisionObjectType::ClientEntity
-            : CollisionObjectType::NonClientEntity};
     world.collisionLocator.updateEntity(entity, collision.worldBounds,
-                                        objectType);
+                                        CollisionObjectType::DynamicEntity);
 }
 
 } // namespace Server

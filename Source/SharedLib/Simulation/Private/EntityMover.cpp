@@ -68,11 +68,8 @@ void EntityMover::moveEntity(
     if (position != previousPosition) {
         entityLocator.updateEntity(entity, position);
 
-        CollisionObjectType::Value objectType{
-            registry.all_of<IsClientEntity>(entity)
-                ? CollisionObjectType::ClientEntity
-                : CollisionObjectType::NonClientEntity};
-        collisionLocator.updateEntity(entity, collision.worldBounds, objectType);
+        collisionLocator.updateEntity(entity, collision.worldBounds,
+                                      CollisionObjectType::DynamicEntity);
     }
 }
 
@@ -97,22 +94,12 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
     broadPhaseTileExtent
         = broadPhaseTileExtent.intersectWith(tileMap.getTileExtent());
 
-    // Collect the volumes of all non-client entities and tiles that intersect 
+    // Collect the volumes of all static entities and tiles that intersect 
     // the broad phase bounds.
     static constexpr CollisionObjectTypeMask COLLISION_MASK{
-        CollisionObjectType::NonClientEntity | CollisionObjectType::TileLayer};
+        CollisionObjectType::StaticEntity | CollisionObjectType::TileLayer};
     auto& broadPhaseMatches{
         collisionLocator.getCollisions(broadPhaseTileExtent, COLLISION_MASK)};
-
-    // Remove any entities that are movement-enabled (to avoid gameplay issues, 
-    // we never collide with entities that can move).
-    // This also handles removing the entity thats moving (only true for NCEs 
-    // since we don't search for client entities).
-    std::erase_if(broadPhaseMatches, [&](const auto* collisionInfo) {
-        return (collisionInfo->objectType
-                == CollisionObjectType::NonClientEntity)
-               && registry.all_of<Input>(collisionInfo->entity);
-    });
 
     // Perform the iterations of the narrow phase to resolve any collisions.
     Vector3 originalVelocity{movement.velocity};

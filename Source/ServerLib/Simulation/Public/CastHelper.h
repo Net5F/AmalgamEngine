@@ -100,6 +100,29 @@ public:
         SpellType spellType,
         std::function<void(const CastInfo&)> callback);
 
+    /**
+     * Returns true if the target entity is in LoS of the caster entity.
+     *
+     * Tries to use each entity's Collision. If it doesn't have one, falls back
+     * to its Position.
+     *
+     * @pre casterEntity and targetEntity must exist, casterPosition and 
+     *      targetPosition must be valid positions within the world.
+     */
+    bool isInLineOfSight(entt::entity casterEntity, entt::entity targetEntity,
+                         const Vector3& casterPosition,
+                         const Vector3& targetPosition);
+
+    /**
+     * Overload for position-based target types.
+     *
+     * @pre casterEntity must exist, casterPosition and targetPosition must be
+     *      valid positions within the world.
+     */
+    bool isInLineOfSight(entt::entity casterEntity,
+                         const Vector3& casterPosition,
+                         const Vector3& targetPosition);
+
     // Maps that hold handler callbacks for each type of cast. Only CastSystem 
     // should call these handlers, but we just set them as public to avoid 
     // overcomplication.
@@ -181,8 +204,8 @@ struct CastSpellParams {
     /** (Optional) The target entity. If the Castable's targetToolType is 
         Entity, this must be valid. */
     entt::entity targetEntity{entt::null};
-    /** (Optional) The client that requested this cast. If present, any
-        failure messages will be sent to this client. */
+    /** (Optional) The target position. If the Castable's targetToolType 
+        is Circle, this must be valid. */
     Vector3 targetPosition{std::numeric_limits<float>::max(),
                            std::numeric_limits<float>::max(),
                            std::numeric_limits<float>::max()};

@@ -36,6 +36,14 @@ static Vector3 max(const Vector3& a, const Vector3& b)
     return res;
 }
 
+/**
+ * Returns a component-wise maximum of the given vectors.
+ */
+static Vector3 abs(const Vector3& vector)
+{
+    return {std::abs(vector.x), std::abs(vector.y), std::abs(vector.z)};
+}
+
 };
 
 } // namespace AM

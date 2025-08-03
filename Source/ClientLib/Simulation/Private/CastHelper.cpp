@@ -193,14 +193,14 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     }
 
     // If this isn't an instant cast, check that the caster isn't moving.
+    const Position& casterPosition{registry.get<Position>(casterEntity)};
     if (castable.castTime != 0) {
         // Note: Since we compare to the previous tick's position, it takes an 
         //       extra tick after movement stops before we let casts go through.
         //       We consider this to be fine.
-        const Position& position{registry.get<Position>(casterEntity)};
         const PreviousPosition* previousPosition{
             registry.try_get<PreviousPosition>(casterEntity)};
-        if (previousPosition && (position != *previousPosition)) {
+        if (previousPosition && (casterPosition != *previousPosition)) {
             return CastFailureType::Movement;
         }
     }
@@ -223,36 +223,37 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     // If a target entity was provided or the Castable requires a target entity,
     // check that it exists.
     if ((targetEntity != entt::null)
-        || (castable.targetToolType == Castable::TargetToolType::Entity)) {
+        || (castable.targetType == Castable::TargetType::Entity)) {
         if (!(registry.valid(targetEntity))) {
             return CastFailureType::InvalidTargetEntity;
         }
     }
 
-    // If the Castable requires a target entity, check that the caster is 
-    // in range of it.
-    if (castable.targetToolType == Castable::TargetToolType::Entity) {
+    // If the Castable uses a target entity, validate it.
+    // Note: We only check LoS on the server, to avoid rejecting casts that 
+    //       may succeed.
+    if ((castable.targetType == Castable::TargetType::Entity)
+        || ((castable.targetType == Castable::TargetType::SelfOrEntity)
+            && (targetEntity != entt::null))) {
         // Check that the caster is in range of the target entity.
         // Note: We already checked that both entities exist above.
-        const Position& casterPosition{registry.get<Position>(casterEntity)};
-        const Position& targetPosition{registry.get<Position>(targetEntity)};
+        // Note: targetEntityPos is different than the targetPosition param.
+        const Position& targetEntityPos{registry.get<Position>(targetEntity)};
         float squaredRange{castable.range * castable.range};
-        if (casterPosition.squaredDistanceTo(targetPosition) > squaredRange) {
+        if (casterPosition.squaredDistanceTo(targetEntityPos) > squaredRange) {
             return CastFailureType::OutOfRange;
         }
     }
-
-    // If the Castable requires a target circle, check that it's within the map
-    // bounds and in range.
-    if (castable.targetToolType == Castable::TargetToolType::Circle) {
+    // If the Castable uses a target circle, validate it.
+    else if (castable.targetType == Castable::TargetType::Circle) {
+        // Check that the target position is within the map bounds.
         Cylinder targetCylinder{castable.getTargetCylinder(targetPosition)};
         if (!(world.tileMap.getTileExtent().contains(targetCylinder))) {
             return CastFailureType::InvalidTargetPosition;
         }
 
-        const Position& casterEntityPos{registry.get<Position>(casterEntity)};
-        float squaredDistance{
-            casterEntityPos.squaredDistanceTo(targetPosition)};
+        // Check that the caster is in range of the target position.
+        float squaredDistance{casterPosition.squaredDistanceTo(targetPosition)};
         if (squaredDistance > castable.range) {
             return CastFailureType::OutOfRange;
         }

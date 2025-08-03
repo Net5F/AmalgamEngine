@@ -124,12 +124,8 @@ void ComponentUpdateSystem::onGraphicStateUpdated(entt::registry& registry,
         })};
 
     // Update their collision in the locator.
-    CollisionObjectType::Value objectType{
-        world.registry.all_of<IsClientEntity>(entity)
-            ? CollisionObjectType::ClientEntity
-            : CollisionObjectType::NonClientEntity};
     world.collisionLocator.updateEntity(entity, collision.worldBounds,
-                                        objectType);
+                                        CollisionObjectType::DynamicEntity);
 
     // Default the entity's current graphic type to IdleSouth since it 
     // always must be valid and we don't know if the new graphic set has 

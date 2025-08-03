@@ -23,6 +23,10 @@ struct Vector3 {
 
     Vector3 operator*(float scalar) const;
 
+    Vector3 operator/(const Vector3& other) const;
+
+    Vector3 operator/(float scalar) const;
+
     Vector3& operator+=(const Vector3& other);
 
     Vector3& operator-=(const Vector3& other);
@@ -43,6 +47,11 @@ struct Vector3 {
      * Normalizes this vector.
      */
     void normalize();
+
+    /**
+     * Returns a normalized version of this vector.
+     */
+    [[nodiscard]] Vector3 normal() const;
 
     /**
      * Returns the per-component reciprocal of this vector (i.e. 

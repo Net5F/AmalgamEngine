@@ -34,7 +34,7 @@ private:
     /**
      * Adds the given castable to the appropriate map.
      */
-    void addCastable(CastableID castableID, const Castable& castable);
+    void addCastable(const Castable& castable);
 
     // Note: We use maps for these instead of arrays because the interaction 
     //       enums have big gaps (we reserve values since they get serialized 

@@ -11,6 +11,7 @@
 #include "CastStarted.h"
 #include "Position.h"
 #include "PreviousPosition.h"
+#include "Collision.h"
 #include "ClientSimData.h"
 #include "CastCooldown.h"
 #include "Cylinder.h"
@@ -181,14 +182,14 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     }
 
     // If this isn't an instant cast, check that the caster isn't moving.
+    const Position& casterPosition{registry.get<Position>(casterEntity)};
     if (castable.castTime != 0) {
         // Note: Since we compare to the previous tick's position, it takes an 
         //       extra tick after movement stops before we let casts go through.
         //       We consider this to be fine.
-        const Position& position{registry.get<Position>(casterEntity)};
         const PreviousPosition* previousPosition{
             registry.try_get<PreviousPosition>(casterEntity)};
-        if (previousPosition && (position != *previousPosition)) {
+        if (previousPosition && (casterPosition != *previousPosition)) {
             return CastFailureType::Movement;
         }
     }
@@ -209,38 +210,48 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     // If a target entity was provided or the Castable requires a target entity,
     // check that it exists.
     if ((targetEntity != entt::null)
-        || (castable.targetToolType == Castable::TargetToolType::Entity)) {
+        || (castable.targetType == Castable::TargetType::Entity)) {
         if (!(registry.valid(targetEntity))) {
             return CastFailureType::InvalidTargetEntity;
         }
     }
 
-    // If the Castable requires a target entity, check that the caster is 
-    // in range of it.
-    if (castable.targetToolType == Castable::TargetToolType::Entity) {
+    // If the Castable uses a target entity, validate it.
+    if ((castable.targetType == Castable::TargetType::Entity)
+        || ((castable.targetType == Castable::TargetType::SelfOrEntity)
+            && (targetEntity != entt::null))) {
         // Check that the caster is in range of the target entity.
         // Note: We already checked that both entities exist above.
-        const Position& casterPosition{registry.get<Position>(casterEntity)};
-        const Position& targetPosition{registry.get<Position>(targetEntity)};
+        // Note: targetEntityPos is different than the targetPosition param.
+        const Position& targetEntityPos{registry.get<Position>(targetEntity)};
         float squaredRange{castable.range * castable.range};
-        if (casterPosition.squaredDistanceTo(targetPosition) > squaredRange) {
+        if (casterPosition.squaredDistanceTo(targetEntityPos) > squaredRange) {
             return CastFailureType::OutOfRange;
         }
-    }
 
-    // If the Castable requires a target circle, check that it's within the map
-    // bounds and in range.
-    if (castable.targetToolType == Castable::TargetToolType::Circle) {
+        // Check that the target entity is in the caster's line of sight.
+        if (!isInLineOfSight(casterEntity, targetEntity, casterPosition,
+                             targetPosition)) {
+            return CastFailureType::LineOfSight;
+        }
+    }
+    // If the Castable uses a target circle, validate it.
+    else if (castable.targetType == Castable::TargetType::Circle) {
+        // Check that the target position is within the map bounds.
         Cylinder targetCylinder{castable.getTargetCylinder(targetPosition)};
         if (!(world.tileMap.getTileExtent().contains(targetCylinder))) {
             return CastFailureType::InvalidTargetPosition;
         }
 
-        const Position& casterEntityPos{registry.get<Position>(casterEntity)};
-        float squaredDistance{
-            casterEntityPos.squaredDistanceTo(targetPosition)};
+        // Check that the caster is in range of the target position.
+        float squaredDistance{casterPosition.squaredDistanceTo(targetPosition)};
         if (squaredDistance > castable.range) {
             return CastFailureType::OutOfRange;
+        }
+
+        // Check that the target position is in the caster's line of sight.
+        if (!isInLineOfSight(casterEntity, casterPosition, targetPosition)) {
+            return CastFailureType::LineOfSight;
         }
     }
 
@@ -253,6 +264,50 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
 
     return CastFailureType::None;
 };
+
+bool CastHelper::isInLineOfSight(entt::entity casterEntity,
+                                 entt::entity targetEntity,
+                                 const Vector3& casterPosition,
+                                 const Vector3& targetPosition)
+{
+    // Find the start/end points for a raycast. If the entities have a 
+    // Collision, use a point at the top of it to approximate their head.
+    // If not, fall back to their Position.
+    Vector3 casterPoint{casterPosition};
+    if (const Collision
+        * casterCollision{world.registry.try_get<Collision>(casterEntity)}) {
+        casterPoint = casterCollision->worldBounds.getTopCenterPoint();
+    }
+    Vector3 targetPoint{targetPosition};
+    if (const Collision
+        * targetCollision{world.registry.try_get<Collision>(targetEntity)}) {
+        targetPoint = targetCollision->worldBounds.getTopCenterPoint();
+    }
+
+    // If the ray hits anything, return false. If not, return true.
+    return !(world.collisionLocator.raycastAny(
+        casterPoint, targetPoint,
+        (CollisionObjectType::TileLayer | CollisionObjectType::StaticEntity)));
+}
+
+bool CastHelper::isInLineOfSight(entt::entity casterEntity,
+                                 const Vector3& casterPosition,
+                                 const Vector3& targetPosition)
+{
+    // Find the start/end points for a raycast. If the entity has a 
+    // Collision, use a point at the top of it to approximate their head.
+    // If not, fall back to their Position.
+    Vector3 casterPoint{casterPosition};
+    if (const Collision
+        * casterCollision{world.registry.try_get<Collision>(casterEntity)}) {
+        casterPoint = casterCollision->worldBounds.getTopCenterPoint();
+    }
+
+    // If the ray hits anything, return false. If not, return true.
+    return !(world.collisionLocator.raycastAny(
+        casterPoint, targetPosition,
+        (CollisionObjectType::TileLayer | CollisionObjectType::StaticEntity)));
+}
 
 } // namespace Server
 } // namespace AM

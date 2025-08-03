@@ -70,6 +70,12 @@ Vector3 BoundingBox::getBottomCenterPoint() const
             (min.y + ((max.y - min.y) / 2.f)), min.z};
 }
 
+Vector3 BoundingBox::getTopCenterPoint() const
+{
+    return {(min.x + ((max.x - min.x) / 2.f)),
+            (min.y + ((max.y - min.y) / 2.f)), max.z};
+}
+
 Vector3 BoundingBox::get3DCenterPoint() const
 {
     return {(min.x + ((max.x - min.x) / 2.f)),
@@ -155,9 +161,7 @@ bool BoundingBox::intersects(const Ray& ray) const
 bool BoundingBox::intersects(const Vector3& start, const Vector3& end) const
 {
     Vector3 inverseRayDirection{(end - start).reciprocal()};
-    return intersects(start, inverseRayDirection, 0.f,
-                      std::numeric_limits<float>::infinity())
-        .didIntersect;
+    return intersects(start, inverseRayDirection, 0.f, 1.f).didIntersect;
 }
 
 BoundingBox::RayIntersectReturn BoundingBox::intersects(const Ray& ray,

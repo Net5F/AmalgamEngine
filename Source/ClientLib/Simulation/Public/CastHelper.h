@@ -149,8 +149,8 @@ struct CastSpellParams {
     /** (Optional) The target entity. If the Castable's targetToolType is 
         Entity, this must be valid. */
     entt::entity targetEntity{entt::null};
-    /** (Optional) The client that requested this cast. If present, any
-        failure messages will be sent to this client. */
+    /** (Optional) The target position. If the Castable's targetToolType 
+        is Circle, this must be valid. */
     Vector3 targetPosition{std::numeric_limits<float>::max(),
                            std::numeric_limits<float>::max(),
                            std::numeric_limits<float>::max()};

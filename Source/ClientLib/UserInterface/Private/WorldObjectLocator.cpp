@@ -70,7 +70,7 @@ WorldObjectID
     }
     Ray& ray{rayOpt.value()};
 
-    // Calc the ratio of how long we have to travel along the ray to
+    // Calc the t values of how long we have to travel along the ray to
     // fully move through 1 cell in each direction.
     // Note: Since our ray is from our iso camera, X/Y will always be equal.
     const float unitStepX{std::abs(1 / ray.direction.x)};
@@ -79,8 +79,8 @@ WorldObjectID
     const float cellStepY{cellStepX};
     const float cellStepZ{unitStepZ * CELL_WORLD_HEIGHT};
 
-    // These hold the value (relative to stepX/Y/Z) where the next
-    // intersection occurs in each direction.
+    // These hold the t values where the next intersection occurs in each 
+    // direction.
     // Note: Dividing by CELL_WORLD_ gives us a ratio of total cell size, 
     //       which we can then multiply by cellStep to get "how much of a 
     //       step would we have to make along the ray to reach the next cell".

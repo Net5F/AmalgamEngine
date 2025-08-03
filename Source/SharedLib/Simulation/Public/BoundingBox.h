@@ -45,8 +45,8 @@ struct BoundingBox {
     float zLength() const;
 
     /**
-     * Returns the point centered on this bounding box in the X and Y axis,
-     * and at this box's minimum Z value.
+     * Returns a point centered on this bounding box in the X and Y axis, and
+     * at this box's minimum Z value.
      *
      * Note: This matches the placement of an entity's Position component, in 
      *       relation to the entity's bounding volume.
@@ -54,11 +54,17 @@ struct BoundingBox {
     Vector3 getBottomCenterPoint() const;
 
     /**
-     * Returns a position at the center of this bounding box.
+     * Returns a point centered on this bounding box in the X and Y axis, and 
+     * at this box's maximum Z value.
+     */
+    Vector3 getTopCenterPoint() const;
+
+    /**
+     * Returns a point at the center of this bounding box.
      *
-     * Note: This center position is different than an entity's Position
-     *       component. This one is centered in all axis, while an entity's
-     *       Position is centered in the X/Y but is at the minimum Z.
+     * Note: This center point is different than an entity's Position component.
+     *       This one is centered in all axis, while an entity's Position is 
+     *       centered in the X/Y but is at the minimum Z.
      */
     Vector3 get3DCenterPoint() const;
 

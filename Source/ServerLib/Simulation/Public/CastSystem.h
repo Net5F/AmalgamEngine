@@ -95,6 +95,14 @@ private:
      */
     void handleCast(const CastInfo& castInfo);
 
+    /**
+     * Returns true if the caster is in range and in LoS of the target.
+     *
+     * Note: CastHelper validates casts before they start, so we only use this 
+     *       before finishing a cast.
+     */
+    bool castIsValid(const CastInfo& castInfo, const Vector3& casterPosition);
+
     /** Used to get the current tick. */
     Simulation& simulation;
     /** Used to access entity data and castHelper. */

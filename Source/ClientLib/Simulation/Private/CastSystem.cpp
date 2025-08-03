@@ -183,6 +183,8 @@ void CastSystem::updateCasts()
         // If the cast has reached its finish time, finish it.
         if ((castState.state == ClientCastState::State::Casting)
             && (currentTick == castState.endTick)) {
+            // Note: We only check pre-finish cast validity on the server, to 
+            //       avoid rejecting casts that may succeed.
             finishCast(castState);
             continue;
         }

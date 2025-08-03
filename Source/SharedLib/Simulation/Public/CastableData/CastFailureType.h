@@ -20,6 +20,8 @@ enum class CastFailureType : Uint8 {
     OnCooldown,
     /** The target entity or position is out of range of the caster. */
     OutOfRange,
+    /** The target entity or position is out of the caster's line of sight. */
+    LineOfSight,
     /** The target item does not exist. */
     InvalidItem,
     /** The target item or entity doesn't support the requested interaction 
@@ -53,6 +55,8 @@ inline const char* getCastFailureString(CastFailureType failureType)
         //case CastFailureType::OnCooldown:
         case CastFailureType::OutOfRange:
             return "Out of range.";
+        case CastFailureType::LineOfSight: 
+            return "Target not in line of sight.";
         case CastFailureType::InvalidTargetEntity:
             return "You have no target.";
         case CastFailureType::Movement:

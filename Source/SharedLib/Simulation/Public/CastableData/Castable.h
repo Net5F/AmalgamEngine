@@ -34,22 +34,22 @@ namespace AM
  */
 struct Castable {
     /** This Castable's unique ID. */
-    CastableID castableID{};
+    CastableID castableID{ItemInteractionType::NotSet};
 
-    enum class TargetToolType {
-        /** No extra targeting required (likely self-cast). */
-        None,
-        /** Require another entity be targeted. */
+    enum class TargetType {
+        /** Always targets the caster. */
+        Self,
+        /** Targets another entity. */
         Entity,
-        /** Place a circle on the ground. */
+        /** Targets another entity if one is provided, otherwise targets
+            the caster. */
+        SelfOrEntity,
+        /** Targets an AoE circle on the ground. */
         Circle 
     };
-    /** The type of UI tool to present to the user when casting.
-        Determines what data will be packed into the "cast request" message.
-        The user's current targeted entity will always be provided (if there 
-        is one), but other data requires extra UI steps (e.g. placing an AoE  
-        circle). */
-    TargetToolType targetToolType{};
+    /** This castable's targeting behavior. Determines what data must be 
+        provided by the client in the "cast request" message. */
+    TargetType targetType{};
 
     /** How far away the target can be. */
     float range{0};

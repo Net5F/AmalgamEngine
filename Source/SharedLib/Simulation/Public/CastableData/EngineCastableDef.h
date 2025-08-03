@@ -15,16 +15,17 @@ namespace AM
  */
 class EngineCastableDef {
 public:
-    static void defineCastables(
-        const GraphicDataBase&,
-        std::function<void(CastableID, const Castable&)> addCastable)
+    static void
+        defineCastables(const GraphicDataBase&,
+                        std::function<void(const Castable&)> addCastable)
     {
-        addCastable(ItemInteractionType::Examine,
-                    Castable{.triggersGCD{false}, .isTickSynchronized{false}});
+        addCastable({.castableID{ItemInteractionType::Examine},
+                     .triggersGCD{false},
+                     .isTickSynchronized{false}});
 
         addCastable(
-            EntityInteractionType::Talk,
-            {.range{SharedConfig::CAST_ENTITY_INTERACTION_STANDARD_RANGE},
+            {.castableID{EntityInteractionType::Talk},
+             .range{SharedConfig::CAST_ENTITY_INTERACTION_STANDARD_RANGE},
              .triggersGCD{false},
              .isTickSynchronized{false}});
     }

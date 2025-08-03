@@ -175,9 +175,9 @@ void CastSystem::updateCasts()
         }
 
         // If the entity has moved, cancel the cast.
+        Position& position{world.registry.get<Position>(entity)};
         if (PreviousPosition* prevPosition{
                 world.registry.try_get<PreviousPosition>(entity)}) {
-            Position& position{world.registry.get<Position>(entity)};
             if (position != *prevPosition) {
                 cancelCast(castState);
                 continue;
@@ -186,6 +186,12 @@ void CastSystem::updateCasts()
 
         // If the cast has reached its finish time, finish it.
         if (currentTick == castState.endTick) {
+            // Check that the cast is still valid, cancel it if not.
+            if (!castIsValid(castState.castInfo, position)) {
+                cancelCast(castState);
+                continue;
+            }
+
             finishCast(castState);
             continue;
         }
@@ -372,6 +378,61 @@ void CastSystem::handleCast(const CastInfo& castInfo)
             it->second(castInfo);
         }
     }
+}
+
+bool CastSystem::castIsValid(const CastInfo& castInfo,
+                             const Vector3& casterPosition)
+{
+    const Castable& castable{*(castInfo.castable)};
+    Castable::TargetType targetType{castInfo.castable->targetType};
+    entt::entity targetEntity{castInfo.targetEntity};
+    if ((targetType == Castable::TargetType::Entity)
+        || ((targetType == Castable::TargetType::SelfOrEntity)
+            && (targetEntity != entt::null))) {
+        // Check that the target entity is still alive.
+        if (!(world.registry.valid(castInfo.targetEntity))) {
+            return false;
+        }
+
+        // Check that the caster is in range of the target entity.
+        const Position& targetPosition{
+            world.registry.get<Position>(targetEntity)};
+        float squaredRange{castable.range * castable.range};
+        if (casterPosition.squaredDistanceTo(targetPosition) > squaredRange) {
+            return false;
+        }
+
+        // Check that the target entity is in the caster's line of sight.
+        if (!world.castHelper.isInLineOfSight(castInfo.casterEntity,
+                                              targetEntity, casterPosition,
+                                              targetPosition)) {
+            return false;
+        }
+    }
+    else if (targetType == Castable::TargetType::Circle) {
+        // Check that the target position is within the map bounds.
+        Cylinder targetCylinder{
+            castable.getTargetCylinder(castInfo.targetPosition)};
+        if (!(world.tileMap.getTileExtent().contains(targetCylinder))) {
+            return false;
+        }
+
+        // Check that the caster is in range of the target position.
+        float squaredDistance{
+            casterPosition.squaredDistanceTo(castInfo.targetPosition)};
+        if (squaredDistance > castable.range) {
+            return false;
+        }
+
+        // Check that the target position is in the caster's line of sight.
+        if (!world.castHelper.isInLineOfSight(castInfo.casterEntity,
+                                              casterPosition,
+                                              castInfo.targetPosition)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 } // namespace Server

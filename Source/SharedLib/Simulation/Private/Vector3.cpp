@@ -23,6 +23,16 @@ Vector3 Vector3::operator*(float scalar) const
     return {(x * scalar), (y * scalar), (z * scalar)};
 }
 
+Vector3 Vector3::operator/(const Vector3& other) const
+{
+    return {(x / other.x), (y / other.y), (z / other.z)};
+}
+
+Vector3 Vector3::operator/(float scalar) const
+{
+    return {(x / scalar), (y / scalar), (z / scalar)};
+}
+
 Vector3& Vector3::operator+=(const Vector3& other)
 {
     x += other.x;
@@ -85,6 +95,12 @@ void Vector3::normalize()
 {
     const float length{std::sqrt((x * x) + (y * y) + (z * z))};
     *this /= length;
+}
+
+Vector3 Vector3::normal() const
+{
+    const float length{std::sqrt((x * x) + (y * y) + (z * z))};
+    return (*this / length);
 }
 
 Vector3 Vector3::reciprocal() const

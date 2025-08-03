@@ -24,8 +24,12 @@ struct BoundingBox;
 struct CollisionObjectType {
     enum Value : Uint8
     {
-        ClientEntity = 0b00000001,
-        NonClientEntity = 0b00000010,
+        // Note: If it's ever useful, we can add ClientEntity/NonClientEntity 
+        //       and let entities have more than one object type.
+        /* An entity that doesn't move. */
+        StaticEntity = 0b00000001,
+        /* A movement-enabled entity (e.g. has an Input component). */
+        DynamicEntity = 0b00000010,
         TileLayer = 0b00000100,
     };
 };
@@ -83,6 +87,42 @@ public:
     void removeEntity(entt::entity entity);
 
     /**
+     * Returns true if the given ray intersects any collision volume.
+     *
+     * @param objectTypeMask The bitmask to use when filtering objects. If an 
+     *                       object type is present in the mask, it will be 
+     *                       included in the results.
+     * @param ignoreInsideHits If true, volumes that this raycast starts inside 
+     *                         of will be ignored.
+     */
+    bool raycastAny(const Vector3& start, const Vector3& end,
+                    CollisionObjectTypeMask objectTypeMask,
+                    bool ignoreInsideHits = true);
+
+    /**
+     * Returns the first collision volume that the given ray intersects.
+     *
+     * @param objectTypeMask The bitmask to use when filtering objects. If an 
+     *                       object type is present in the mask, it will be 
+     *                       included in the results.
+     * @return Pointers to the info of each hit world object. These pointers 
+     *         are not stable, and may become invalid when any of this locator's 
+     *         functions are called.
+     */
+    //std::vector<const CollisionInfo*>&
+    //    raycastFirst(const Vector3& start, const Vector3& end,
+    //                 CollisionObjectTypeMask objectTypeMask);
+
+    /**
+     * Returns all collision volumes that the given ray intersects.
+     *
+     * See rayCastFirst() for more info.
+     */
+    //std::vector<const CollisionInfo*>&
+    //    raycastAll(const Vector3& start, const Vector3& end,
+    //               CollisionObjectTypeMask objectTypeMask);
+
+    /**
      * A world object's collision information.
      */
     struct CollisionInfo
@@ -136,39 +176,6 @@ public:
     std::vector<const CollisionInfo*>&
         getCollisions(const ChunkExtent& chunkExtent,
                       CollisionObjectTypeMask objectTypeMask);
-
-    /**
-     * Returns true if the given ray intersects any collision volume.
-     *
-     * @param objectTypeMask The bitmask to use when filtering objects. If an 
-     *                       object type is present in the mask, it will be 
-     *                       included in the results.
-     */
-    //bool raycastAny(const Vector3& start, const Vector3& end,
-    //                CollisionObjectTypeMask objectTypeMask);
-
-    /**
-     * Returns the first collision volume that the given ray intersects.
-     *
-     * @param objectTypeMask The bitmask to use when filtering objects. If an 
-     *                       object type is present in the mask, it will be 
-     *                       included in the results.
-     * @return Pointers to the info of each hit world object. These pointers 
-     *         are not stable, and may become invalid when any of this locator's 
-     *         functions are called.
-     */
-    //std::vector<const CollisionInfo*>&
-    //    raycastFirst(const Vector3& start, const Vector3& end,
-    //                 CollisionObjectTypeMask objectTypeMask);
-
-    /**
-     * Returns all collision volumes that the given ray intersects.
-     *
-     * See rayCastFirst() for more info.
-     */
-    //std::vector<const CollisionInfo*>&
-    //    raycastAll(const Vector3& start, const Vector3& end,
-    //               CollisionObjectTypeMask objectTypeMask);
 
     /**
      * Performs a broad phase to get all collision volumes in cells intersected
@@ -232,6 +239,10 @@ private:
         SharedConfig::COLLISION_LOCATOR_CELL_HEIGHT
         * SharedConfig::TILE_WORLD_HEIGHT};
 
+    /** The size of a grid cell in world units. */
+    static constexpr Vector3 CELL_WORLD_SIZE{CELL_WORLD_WIDTH, CELL_WORLD_WIDTH,
+                                             CELL_WORLD_HEIGHT};
+
     /** A value to use in terrainGrid to indicate that a tile has no terrain. */
     static constexpr Terrain::Value EMPTY_TERRAIN{SDL_MAX_UINT8};
 
@@ -254,6 +265,15 @@ private:
      */
     void addTileCollisionVolumes(const TilePosition& tilePosition,
                                  const Tile& tile);
+
+    /**
+     * Returns true if the given line intersects anything (that matches 
+     * objectTypeMask) in the given cell.
+     */
+    bool intersectsAny(const Vector3& start, const Vector3& inverseRayDirection,
+                       const CellPosition& cellPosition,
+                       CollisionObjectTypeMask objectTypeMask,
+                       bool ignoreInsideHits);
 
     /**
      * Performs a broad phase to get all collision volumes in cells intersected

@@ -199,11 +199,8 @@ void World::addGraphicsComponents(entt::entity entity,
         Transforms::modelToWorldEntity(modelBounds, position))};
 
     // Entities with Collision get added to the locator.
-    CollisionObjectType::Value objectType{
-        registry.all_of<IsClientEntity>(entity)
-            ? CollisionObjectType::ClientEntity
-            : CollisionObjectType::NonClientEntity};
-    collisionLocator.updateEntity(entity, collision.worldBounds, objectType);
+    collisionLocator.updateEntity(entity, collision.worldBounds,
+                                  CollisionObjectType::DynamicEntity);
 }
 
 void World::addMovementComponents(entt::entity entity, const Rotation& rotation)
