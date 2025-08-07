@@ -2,6 +2,7 @@ target_sources(SharedLib
     PRIVATE
         Private/BoundingBox.cpp
         Private/CollisionLocator.cpp
+        Private/CollisionLocatorRaycastStrategy.cpp
         Private/Cylinder.cpp
         Private/EntityLocator.cpp
         Private/EntityMover.cpp
@@ -40,6 +41,7 @@ target_sources(SharedLib
         Public/BoundingBox.h
         Public/BoundingBoxID.h
         Public/CollisionLocator.h
+        Public/CollisionLocatorRaycastStrategy.h
         Public/Cylinder.h
         Public/DialogueEvent.h
         Public/DiscreteExtent.h

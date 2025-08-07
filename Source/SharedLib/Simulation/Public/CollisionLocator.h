@@ -55,6 +55,22 @@ using CollisionObjectTypeMask = Uint16;
 class CollisionLocator
 {
 public:
+    /**
+     * A world object's collision information.
+     */
+    struct CollisionInfo
+    {
+        /** The world object's collision volume. */
+        BoundingBox collisionVolume{};
+
+        /** The type of world object that this volume belongs to. */
+        CollisionObjectType::Value objectType{};
+
+        /** If objectType is one of the entity types, this is the entity's 
+            ID. */
+        entt::entity entity{};
+    };
+
     CollisionLocator();
 
     /**
@@ -86,6 +102,15 @@ public:
      */
     void removeEntity(entt::entity entity);
 
+
+    struct RaycastHitInfo
+    {
+        /** The t value (along the ray) at which this object was hit. */
+        float hitT{};
+
+        /** The hit object's collision info. */
+        const CollisionInfo* collisionInfo{};
+    };
     /**
      * Returns true if the given ray intersects any collision volume.
      *
@@ -102,41 +127,28 @@ public:
     /**
      * Returns the first collision volume that the given ray intersects.
      *
-     * @param objectTypeMask The bitmask to use when filtering objects. If an 
-     *                       object type is present in the mask, it will be 
-     *                       included in the results.
-     * @return Pointers to the info of each hit world object. These pointers 
-     *         are not stable, and may become invalid when any of this locator's 
-     *         functions are called.
+     * See raycastAny() for parameter info.
+     * @return A pointer to the info of the first hit world object (if any). 
+     *         This pointer is not stable, and may become invalid when any of 
+     *         this locator's functions are called.
      */
-    //std::vector<const CollisionInfo*>&
-    //    raycastFirst(const Vector3& start, const Vector3& end,
-    //                 CollisionObjectTypeMask objectTypeMask);
+    std::optional<RaycastHitInfo>
+        raycastFirst(const Vector3& start, const Vector3& end,
+                     CollisionObjectTypeMask objectTypeMask,
+                     bool ignoreInsideHits = true);
 
     /**
      * Returns all collision volumes that the given ray intersects.
      *
-     * See rayCastFirst() for more info.
+     * See raycastAny() for parameter info.
+     * @return Pointers to the info of each hit world object, in no particular 
+     *         order. These pointers are not stable, and may become invalid 
+     *         when any of this locator's functions are called.
      */
-    //std::vector<const CollisionInfo*>&
-    //    raycastAll(const Vector3& start, const Vector3& end,
-    //               CollisionObjectTypeMask objectTypeMask);
-
-    /**
-     * A world object's collision information.
-     */
-    struct CollisionInfo
-    {
-        /** The world object's collision volume. */
-        BoundingBox collisionVolume{};
-
-        /** The type of world object that this volume belongs to. */
-        CollisionObjectType::Value objectType{};
-
-        /** If objectType is one of the entity types, this is the entity's 
-            ID. */
-        entt::entity entity{};
-    };
+    std::vector<RaycastHitInfo>&
+        raycastAll(const Vector3& start, const Vector3& end,
+                   CollisionObjectTypeMask objectTypeMask,
+                   bool ignoreInsideHits = true);
 
     /**
      * Returns all collision volumes that intersect the given cylinder.
@@ -213,22 +225,13 @@ public:
         getCollisionsBroad(const ChunkExtent& chunkExtent,
                            CollisionObjectTypeMask objectTypeMask);
 
-    /**
-     * Performs a broad phase to get all collision volumes in cells intersected
-     * by the given ray.
-     *
-     * Note: All volumes in the intersected cells are returned, which may
-     *       include volumes that aren't actually intersected by the ray.
-     *
-     * @param objectTypeMask The bitmask to use when filtering objects. If an
-     *                       object type is present in the mask, it will be
-     *                       included in the results.
-     */
-    //std::vector<const CollisionInfo*>&
-    //    rayCastBroad(const Vector3& start, const Vector3& end,
-    //                 CollisionObjectTypeMask objectTypeMask);
-
 private:
+    /** Raycast strategies. Defined here so they have access to the locator's 
+        private members. */
+    struct RaycastStrategyIntersectAny;
+    struct RaycastStrategyIntersectFirst;
+    struct RaycastStrategyIntersectAll;
+
     /** The width of a grid cell in world units. */
     static constexpr float CELL_WORLD_WIDTH{
         SharedConfig::COLLISION_LOCATOR_CELL_WIDTH
@@ -266,14 +269,16 @@ private:
     void addTileCollisionVolumes(const TilePosition& tilePosition,
                                  const Tile& tile);
 
-    /**
-     * Returns true if the given line intersects anything (that matches 
-     * objectTypeMask) in the given cell.
-     */
-    bool intersectsAny(const Vector3& start, const Vector3& inverseRayDirection,
-                       const CellPosition& cellPosition,
-                       CollisionObjectTypeMask objectTypeMask,
-                       bool ignoreInsideHits);
+    template<typename RaycastStrategy>
+    struct RaycastInternalParams {
+        RaycastStrategy& strategy;
+        const Vector3& start;
+        const Vector3& end;
+        CollisionObjectTypeMask objectTypeMask;
+        bool ignoreInsideHits;
+    };
+    template<typename RaycastStrategy>
+    void raycastInternal(RaycastInternalParams<RaycastStrategy> params);
 
     /**
      * Performs a broad phase to get all collision volumes in cells intersected
@@ -374,8 +379,11 @@ private:
     /** A scratch vector used for gathering results during the broad phase. */
     std::vector<Uint16> indexVector;
 
-    /** The vector that we use to return results. */
-    std::vector<const CollisionInfo*> returnVector;
+    /** The vector that we use to return collision results. */
+    std::vector<const CollisionInfo*> collisionReturnVector;
+
+    /** The vector that we use to return raycast results. */
+    std::vector<RaycastHitInfo> raycastReturnVector;
 };
 
 } // End namespace AM
