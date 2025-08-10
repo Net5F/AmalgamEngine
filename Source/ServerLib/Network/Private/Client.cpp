@@ -236,9 +236,8 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
             latestAdjIteration = expectedNextIteration;
             numFreshDiffs = 0;
         }
-        else if (receivedAdjIteration > expectedNextIteration) {
-            LOG_FATAL("Skipped an adjustment iteration. Logic must be flawed.");
-        }
+        AM_ASSERT(receivedAdjIteration <= expectedNextIteration,
+                  "Skipped an adjustment iteration. Logic must be flawed.");
 
         // Get the message.
         // Note: This is a blocking read, but the data should immediately be

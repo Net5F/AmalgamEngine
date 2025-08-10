@@ -199,8 +199,9 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
     ZoneScoped;
 
     // Update each client's internal socket isReady().
-    // Note: We check all clients regardless of whether this returns > 0
-    //       because, even if there's no activity, we need to check for
+    // Note: Client::receiveMessage() below will skip trying to receive bytes 
+    //       from the OS if the socket isn't ready. We still need to iterate 
+    //       every client in the map though, since receiveMessage checks for 
     //       timeouts.
     clientSet->checkSockets(0);
 
