@@ -104,6 +104,16 @@ NetworkResult Peer::send(const Uint8* buffer, std::size_t numBytesToSend)
     }
 }
 
+bool Peer::isReady(bool checkSockets)
+{
+    if (checkSockets) {
+        // Poll to see if there's data
+        set->checkSockets(0);
+    }
+
+    return socket.isReady();
+}
+
 NetworkResult Peer::receiveBytes(Uint8* buffer, std::size_t numBytes,
                                  bool checkSockets)
 {

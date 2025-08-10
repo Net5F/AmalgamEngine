@@ -59,7 +59,7 @@ public:
     ReceiveResult receiveMessage(Uint8* messageBuffer);
 
     /**
-     * @return True if the client is connected, else false.
+     * Returns true if the client is connected, else false.
      *
      * Note: There's 2 places where a disconnect can occur:
      *       If the client initiates a disconnect, the peer will internally set
@@ -68,6 +68,12 @@ public:
      *       Both cases are detected by this method.
      */
     bool isConnected();
+
+    /**
+     * Returns true if this socket has data waiting.
+     * Only valid if clientSet->checkSockets() is called prior.
+     */
+    bool isReady();
 
     /**
      * Records the given tick diff in tickDiffHistory.

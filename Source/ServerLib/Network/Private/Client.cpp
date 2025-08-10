@@ -236,9 +236,8 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
             latestAdjIteration = expectedNextIteration;
             numFreshDiffs = 0;
         }
-        else if (receivedAdjIteration > expectedNextIteration) {
-            LOG_FATAL("Skipped an adjustment iteration. Logic must be flawed.");
-        }
+        AM_ASSERT(receivedAdjIteration <= expectedNextIteration,
+                  "Skipped an adjustment iteration. Logic must be flawed.");
 
         // Get the message.
         // Note: This is a blocking read, but the data should immediately be
@@ -259,17 +258,6 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
             LOG_FATAL("Data was not present when expected.");
         }
     }
-    else if (headerResult == NetworkResult::NoWaitingData) {
-        // If we timed out, drop the connection.
-        double delta{receiveTimer.getTime()};
-        if (delta > Config::CLIENT_TIMEOUT_S) {
-            peer = nullptr;
-            LOG_INFO("Dropped connection, peer timed out. Time since last "
-                     "message: %.6f seconds. Timeout: %.6f, NetID: %u",
-                     delta, Config::CLIENT_TIMEOUT_S, netID);
-            return {NetworkResult::TimedOut};
-        }
-    }
     else if (headerResult == NetworkResult::Disconnected) {
         return {NetworkResult::Disconnected};
     }
@@ -279,9 +267,25 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
 
 bool Client::isConnected()
 {
-    // Peer might've been force-disconnected by dropping the reference.
+    // If we timed out, drop the connection.
+    double delta{receiveTimer.getTime()};
+    if (delta > Config::CLIENT_TIMEOUT_S) {
+        peer = nullptr;
+        LOG_INFO("Dropped connection, peer timed out. Time since last "
+                 "message: %.6f seconds. Timeout: %.6f, NetID: %u",
+                 delta, Config::CLIENT_TIMEOUT_S, netID);
+        return false;
+    }
+
+    // Peer might've been force-disconnected by dropping the pointer above.
     // It also could have internally detected a client-initiated disconnect.
     return (peer == nullptr) ? false : peer->isConnected();
+}
+
+bool Client::isReady()
+{
+    // Note: ClientHandler always checks all sockets before calling this.
+    return peer->isReady(false);
 }
 
 void Client::recordTickDiff(Sint64 tickDiff)
