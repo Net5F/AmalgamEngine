@@ -199,6 +199,9 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
     ZoneScoped;
 
     // Update each client's internal socket isReady().
+    // Note: We check all clients regardless of whether this returns > 0
+    //       because, even if there's no activity, we need to check for
+    //       timeouts.
     clientSet->checkSockets(0);
 
     /* Iterate through all clients. */
@@ -208,21 +211,19 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
     for (auto& pair : clientMap) {
         const std::shared_ptr<Client>& clientPtr{pair.second};
 
-        /* If there's data waiting, try to receive all messages from the 
-           client. */
-        if (clientPtr->isReady()) {
-            ReceiveResult result{
-                clientPtr->receiveMessage(messageRecBuffer.data())};
-            while (result.networkResult == NetworkResult::Success) {
-                numReceived++;
+        /* If there's potentially data waiting, try to receive all messages
+           from the client. */
+        ReceiveResult result{
+            clientPtr->receiveMessage(messageRecBuffer.data())};
+        while (result.networkResult == NetworkResult::Success) {
+            numReceived++;
 
-                // Process the message.
-                processReceivedMessage(*clientPtr, result.messageType,
-                                       result.messageSize);
+            // Process the message.
+            processReceivedMessage(*clientPtr, result.messageType,
+                                   result.messageSize);
 
-                // Try to receive the next message.
-                result = clientPtr->receiveMessage(messageRecBuffer.data());
-            }
+            // Try to receive the next message.
+            result = clientPtr->receiveMessage(messageRecBuffer.data());
         }
     }
 

@@ -80,15 +80,6 @@ public:
     NetworkResult send(const Uint8* buffer, std::size_t numBytesToSend);
 
     /**
-     * Returns true if this socket has data waiting.
-     *
-     * @param checkSockets  If true, will call checkSockets() before checking
-     *                      socketReady(). Set this to false if you're going to
-     *                      call checkSockets() yourself.
-     */
-    bool isReady(bool checkSockets);
-
-    /**
      * Tries to receive bytes over the network.
      *
      * @param buffer  The buffer to fill with data, if any was received.
