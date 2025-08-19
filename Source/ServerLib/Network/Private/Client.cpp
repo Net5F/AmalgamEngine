@@ -15,7 +15,9 @@ namespace Server
 {
 BinaryBuffer Client::batchBuffer(SharedConfig::MAX_BATCH_SIZE);
 // No default size since it's dynamically enlarged if too small.
-BinaryBuffer Client::compressedBatchBuffer;
+BinaryBuffer Client::compressedBatchBuffer{};
+BinaryBuffer Client::smallReceiveBuffer(ETHERNET_MTU);
+Client::LargeBufferPool Client::bufferPool{};
 
 Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 : netID{inNetID}
@@ -26,6 +28,23 @@ Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 , numFreshDiffs{0}
 , latestAdjIteration{0}
 {
+}
+
+bool Client::isConnected()
+{
+    // If we timed out, drop the connection.
+    double delta{receiveTimer.getTime()};
+    if (delta > Config::CLIENT_TIMEOUT_S) {
+        peer = nullptr;
+        LOG_INFO("Dropped connection, peer timed out. Time since last "
+                 "message: %.6f seconds. Timeout: %.6f, NetID: %u",
+                 delta, Config::CLIENT_TIMEOUT_S, netID);
+        return false;
+    }
+
+    // Peer might've been force-disconnected by dropping the pointer above.
+    // It also could have internally detected a client-initiated disconnect.
+    return (peer == nullptr) ? false : peer->isConnected();
 }
 
 void Client::queueMessage(const BinaryBufferSharedPtr& message,
@@ -86,7 +105,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
 
     // If the batch + header is too large, error.
     AM_ASSERT((currentIndex <= SharedConfig::MAX_BATCH_SIZE),
-              "Batch too large to fit into buffers. Increase MAX_BATCH_SIZE. "
+              "Batch too large to fit into buffer. Increase MAX_BATCH_SIZE. "
               "Size: %u, Max: %u",
               currentIndex, SharedConfig::MAX_BATCH_SIZE);
 
@@ -117,9 +136,9 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
         // Calc how many bytes we have left to send.
         std::size_t bytesToSend{totalSize - sendIndex};
 
-        // Only send up to MAX_WIRE_SIZE bytes per send() call.
-        if (bytesToSend > Peer::MAX_WIRE_SIZE) {
-            bytesToSend = Peer::MAX_WIRE_SIZE;
+        // Only send up to ETHERNET_MTU bytes per send() call.
+        if (bytesToSend > ETHERNET_MTU) {
+            bytesToSend = ETHERNET_MTU;
         }
 
         // Send the bytes.
@@ -132,6 +151,122 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     }
 
     return result;
+}
+
+bool Client::dataIsReady()
+{
+    // Note: ClientHandler always checks all sockets before calling this.
+    return peer->isReady(false);
+}
+
+Client::ReceiveResult Client::receiveMessage()
+{
+    if (peer == nullptr) {
+        return {NetworkResult::Disconnected};
+    }
+
+    // If we previously returned a large buffer, release it.
+    if (largeReceiveBuffer && (compositionIndex == messageSize)) {
+        bufferPool.release(std::move(largeReceiveBuffer));
+    }
+
+    // If we aren't currently composing a message, start receiving a new
+    // message.
+    Uint8* bufferToUse{nullptr};
+    if (!largeReceiveBuffer) {
+        // Receive the client header and message header.
+        Uint8 headerBuf[CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE];
+        int bytesReceived{peer->receiveBytesWait(
+            headerBuf, CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE)};
+        if (bytesReceived < 0) {
+            return {NetworkResult::Disconnected};
+        }
+
+        // Process the adjustment iteration.
+        Uint8 receivedAdjIteration{
+            headerBuf[ClientHeaderIndex::AdjustmentIteration]};
+        Uint8 expectedNextIteration{static_cast<Uint8>(latestAdjIteration + 1)};
+
+        // If we received the next expected iteration, save it.
+        if (receivedAdjIteration == expectedNextIteration) {
+            latestAdjIteration = expectedNextIteration;
+            numFreshDiffs = 0;
+        }
+        AM_ASSERT(receivedAdjIteration <= expectedNextIteration,
+                  "Skipped an adjustment iteration. Logic must be flawed.");
+
+        // Save the message type and size.
+        messageType = headerBuf[CLIENT_HEADER_SIZE +
+        MessageHeaderIndex::MessageType];
+        messageSize = ByteTools::read16(&(headerBuf[CLIENT_HEADER_SIZE +
+            MessageHeaderIndex::Size]));
+        AM_ASSERT(messageSize <= CLIENT_MAX_MESSAGE_SIZE,
+                  "Tried to receive too large of a message. messageSize: %u, "
+                  "CLIENT_MAX_MESSAGE_SIZE: %u",
+                  messageSize, CLIENT_MAX_MESSAGE_SIZE);
+        if (messageSize == 0) {
+            // We're receiving a "tag message" (0 bytes, type only).
+            return {NetworkResult::Success, messageType};
+        }
+
+        // Init our state machine.
+        compositionIndex = 0;
+        if (messageSize <= CLIENT_MAX_SMALL_MESSAGE_SIZE) {
+            // Small message, guaranteed to receive all at once.
+            bufferToUse = smallReceiveBuffer.data();
+        }
+        else {
+            // Large message, we may not receive it all at once. Acquire a 
+            // buffer to compose in.
+            largeReceiveBuffer = bufferPool.acquire();
+            bufferToUse = largeReceiveBuffer->data();
+        }
+    }
+
+    // Either start receiving the new message, or continue receiving the ongoing
+    // large message.
+    int bytesRemaining{messageSize - compositionIndex};
+    int bytesReceived{
+        peer->receiveBytesWait(bufferToUse + compositionIndex, bytesRemaining)};
+    compositionIndex += bytesReceived;
+
+    // If the message is complete, return it.
+    if (compositionIndex == messageSize) {
+        return {NetworkResult::Success, messageType, {bufferToUse, messageSize}};
+    }
+
+    return {NetworkResult::MessageNotComplete};
+}
+
+void Client::recordTickDiff(Sint64 tickDiff)
+{
+    // Acquire a lock so a getTickAdjustment() doesn't start while we're
+    // pushing.
+    std::unique_lock lock(tickDiffMutex);
+
+    // Add the new data.
+    if ((tickDiff >= Config::TICKDIFF_MAX_BOUND_LOWER)
+        && (tickDiff <= Config::TICKDIFF_MAX_BOUND_UPPER)) {
+        tickDiffHistory.push(static_cast<Sint8>(tickDiff));
+    }
+    else {
+        // Tickdiff out of max range, drop the connection.
+        peer = nullptr;
+        LOG_INFO("Dropped connection, tickDiff out of range. tickDiff: %d, "
+                 "NetID: %u",
+                 tickDiff, netID);
+        return;
+    }
+
+    // Note: This is safe, only this thread modifies numFreshDiffs.
+    if (numFreshDiffs < Config::TICKDIFF_HISTORY_LENGTH) {
+        numFreshDiffs++;
+    }
+}
+
+NetworkID Client::getNetID()
+{
+    return netID;
 }
 
 void Client::addExplicitConfirmation(std::size_t& currentIndex,
@@ -181,7 +316,7 @@ std::size_t Client::compressBatch(std::size_t batchSize)
             &(batchBuffer[ServerHeaderIndex::MessageHeaderStart]), batchSize,
             &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
             compressedBatchBuffer.size()))};
-    AM_ASSERT((compressedBatchSize <= MAX_BATCH_SIZE),
+    AM_ASSERT((compressedBatchSize <= MAX_BATCH_WIRE_SIZE),
               "Batch too large, even after compression. Size: %u",
               compressedBatchSize);
 
@@ -213,102 +348,6 @@ std::size_t Client::getWaitingMessageCount() const
     return sendQueue.size_approx();
 }
 
-ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
-{
-    if (peer == nullptr) {
-        return {NetworkResult::Disconnected};
-    }
-
-    // Receive the header.
-    Uint8 headerBuf[CLIENT_HEADER_SIZE];
-    NetworkResult headerResult{
-        peer->receiveBytes(headerBuf, CLIENT_HEADER_SIZE, false)};
-
-    // Receive the following message, or check for timeouts.
-    if (headerResult == NetworkResult::Success) {
-        // Process the adjustment iteration.
-        Uint8 receivedAdjIteration{
-            headerBuf[ClientHeaderIndex::AdjustmentIteration]};
-        Uint8 expectedNextIteration{static_cast<Uint8>(latestAdjIteration + 1)};
-
-        // If we received the next expected iteration, save it.
-        if (receivedAdjIteration == expectedNextIteration) {
-            latestAdjIteration = expectedNextIteration;
-            numFreshDiffs = 0;
-        }
-        AM_ASSERT(receivedAdjIteration <= expectedNextIteration,
-                  "Skipped an adjustment iteration. Logic must be flawed.");
-
-        // Get the message.
-        // Note: This is a blocking read, but the data should immediately be
-        //       available since we send it all in 1 packet.
-        ReceiveResult receiveResult{peer->receiveMessageWait(messageBuffer)};
-        if (receiveResult.networkResult == NetworkResult::Success) {
-            // Got a message, update the receiveTimer.
-            receiveTimer.reset();
-
-            // Record the number of received bytes.
-            NetworkStats::recordBytesReceived(CLIENT_HEADER_SIZE
-                                              + MESSAGE_HEADER_SIZE
-                                              + receiveResult.messageSize);
-
-            return receiveResult;
-        }
-        else {
-            LOG_FATAL("Data was not present when expected.");
-        }
-    }
-    else if (headerResult == NetworkResult::NoWaitingData) {
-        // If we timed out, drop the connection.
-        double delta{receiveTimer.getTime()};
-        if (delta > Config::CLIENT_TIMEOUT_S) {
-            peer = nullptr;
-            LOG_INFO("Dropped connection, peer timed out. Time since last "
-                     "message: %.6f seconds. Timeout: %.6f, NetID: %u",
-                     delta, Config::CLIENT_TIMEOUT_S, netID);
-            return {NetworkResult::TimedOut};
-        }
-    }
-    else if (headerResult == NetworkResult::Disconnected) {
-        return {NetworkResult::Disconnected};
-    }
-
-    return {NetworkResult::NoWaitingData};
-}
-
-bool Client::isConnected()
-{
-    // Peer might've been force-disconnected by dropping the reference.
-    // It also could have internally detected a client-initiated disconnect.
-    return (peer == nullptr) ? false : peer->isConnected();
-}
-
-void Client::recordTickDiff(Sint64 tickDiff)
-{
-    // Acquire a lock so a getTickAdjustment() doesn't start while we're
-    // pushing.
-    std::unique_lock lock(tickDiffMutex);
-
-    // Add the new data.
-    if ((tickDiff >= Config::TICKDIFF_MAX_BOUND_LOWER)
-        && (tickDiff <= Config::TICKDIFF_MAX_BOUND_UPPER)) {
-        tickDiffHistory.push(static_cast<Sint8>(tickDiff));
-    }
-    else {
-        // Tickdiff out of max range, drop the connection.
-        peer = nullptr;
-        LOG_INFO("Dropped connection, tickDiff out of range. tickDiff: %d, "
-                 "NetID: %u",
-                 tickDiff, netID);
-        return;
-    }
-
-    // Note: This is safe, only this thread modifies numFreshDiffs.
-    if (numFreshDiffs < Config::TICKDIFF_HISTORY_LENGTH) {
-        numFreshDiffs++;
-    }
-}
-
 Client::AdjustmentData Client::getTickAdjustment()
 {
     // Copy the history so we can work on it without staying locked.
@@ -322,11 +361,6 @@ Client::AdjustmentData Client::getTickAdjustment()
     Sint8 adjustment{calcAdjustment(tickDiffHistoryCopy, numFreshDiffsCopy)};
 
     return {adjustment, latestAdjIteration};
-}
-
-NetworkID Client::getNetID()
-{
-    return netID;
 }
 
 Sint8 Client::calcAdjustment(

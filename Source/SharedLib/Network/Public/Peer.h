@@ -19,13 +19,6 @@ namespace AM
 class Peer
 {
 public:
-    /** Largest number of bytes that we'll send over the wire.
-        Kept at 1450 for now to try to avoid IP fragmentation. Can rethink if
-        we need larger.
-        BE AWARE: Must be kept below 32768 (2^15) since we store it in a Uint16
-                  and use the high bit to indicate compression. */
-    static constexpr std::size_t MAX_WIRE_SIZE{1450};
-
     /**
      * Initiates a TCP connection that the other side can then accept.
      * (e.g. the client connecting to the server)
@@ -65,7 +58,7 @@ public:
      * Will error if the buffer size is larger than MAX_WIRE_SIZE.
      *
      * @return Disconnected if the peer was found to be disconnected, else
-     * Success.
+     *         Success.
      */
     NetworkResult send(const BinaryBufferSharedPtr& buffer);
 
@@ -75,23 +68,27 @@ public:
      * Will error if numBytes is larger than MAX_WIRE_SIZE.
      *
      * @return Disconnected if the peer was found to be disconnected, else
-     * Success.
+     *         Success.
      */
     NetworkResult send(const Uint8* buffer, std::size_t numBytesToSend);
 
     /**
+     * Returns true if this socket has data waiting.
+     *
+     * @param checkSockets If true, will call checkSockets() before checking
+     *                     socketReady(). Set this to false if you're going to
+     *                     call checkSockets() yourself.
+     */
+    bool isReady(bool checkSockets);
+
+    /**
      * Tries to receive bytes over the network.
      *
-     * @param buffer  The buffer to fill with data, if any was received.
-     * @param numBytes  The number of bytes to receive.
-     * @param checkSockets  If true, will call checkSockets() before checking
-     *                      socketReady(). Set this to false if you're going to
-     *                      call checkSockets() yourself.
-     * @return An appropriate NetworkResult. If return == Success,
-     *         buffer contains the received data.
+     * @param buffer The buffer to fill with data, if any was received.
+     * @param numBytes The number of bytes to receive.
+     * @return The number of received bytes, or -1 if this peer was disconnected.
      */
-    NetworkResult receiveBytes(Uint8* buffer, std::size_t numBytes,
-                               bool checkSockets);
+    int receiveBytes(Uint8* buffer, std::size_t numBytes);
 
     /**
      * Returns the requested number of bytes, waiting if they're not yet
@@ -99,44 +96,9 @@ public:
      *
      * @param buffer  The buffer to fill with data, if any was received.
      * @param numBytes  The number of bytes to receive.
-     * @return An appropriate NetworkResult. If return == Success,
-     *         buffer contains the received data.
+     * @return The number of received bytes, or -1 if this peer was disconnected.
      */
-    NetworkResult receiveBytesWait(Uint8* buffer, std::size_t numBytes);
-
-    /**
-     * Tries to receive a {size, message} pair over the network.
-     *
-     * @param messageBuffer  The buffer to fill with a message, if one was
-     * received.
-     * @param checkSockets  If true, will call checkSockets() before checking
-     *                      socketReady(). Set this to false if you're going to
-     * call checkSockets() yourself.
-     * @return An appropriate ReceiveResult. If return.networkResult == Success,
-     *         messageBuffer contains the received message.
-     */
-    ReceiveResult receiveMessage(Uint8* messageBuffer, bool checkSockets);
-
-    /**
-     * Receives a {size, message} pair and returns a message, waiting if the
-     * data is not yet available.
-     *
-     * @param messageBuffer  The buffer to fill with a message, if one was
-     *                       received.
-     * @return An appropriate ReceiveResult. If return.networkResult == Success,
-     *         messageBuffer contains the received message.
-     */
-    ReceiveResult receiveMessageWait(Uint8* messageBuffer);
-
-    /**
-     * Overload for allocating and filling a portable buffer.
-     * Useful if you'll need to move the message around before deserializing it.
-     *
-     * @param messageBuffer  A pointer to allocate the message at.
-     * @return An appropriate ReceiveResult. If return.networkResult == Success,
-     *         messageBuffer contains the received message.
-     */
-    ReceiveResult receiveMessageWait(BinaryBufferPtr& messageBuffer);
+    int receiveBytesWait(Uint8* buffer, std::size_t numBytes);
 
 private:
     /** The socket for this peer. Must be a unique_ptr so we can move without

@@ -52,13 +52,19 @@ private:
     void processTalkInteraction(const CastInfo& castInfo);
 
     /**
+     * Pairs a topic with its index so we don't need re-look it up in the map.
+     */
+    struct TopicPair {
+        const Dialogue::Topic* topic{nullptr};
+        Uint8 topicIndex{0};
+    };
+    /**
      * Runs the given topic's topicScript.
      * @return If the script contained a valid setNextTopic(), returns the next 
      *         topic. Else, returns nullptr.
      */
-    const Dialogue::Topic* runTopic(const Dialogue& dialogue,
-                                    const Dialogue::Topic& topic,
-                                    NetworkID clientID);
+    TopicPair runTopic(const Dialogue& dialogue, const Dialogue::Topic& topic,
+                       NetworkID clientID);
 
     /**
      * Processes a dialogue choice request, sending appropriate response 
@@ -72,10 +78,10 @@ private:
      * @return If the script contained a valid setNextTopic(), returns the next
      *         topic. Else, returns nullptr.
      */
-    const Dialogue::Topic* runChoice(const Dialogue& dialogue,
-                                     const Dialogue::Choice& choice,
-                                     std::string_view choiceTopicName,
-                                     Uint8 choiceIndex, NetworkID clientID);
+    TopicPair runChoice(const Dialogue& dialogue,
+                        const Dialogue::Choice& choice,
+                        std::string_view choiceTopicName, Uint8 choiceIndex,
+                        NetworkID clientID);
 
     /**
      * Validates that the given request has valid data and that the choice's 

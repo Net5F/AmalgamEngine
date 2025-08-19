@@ -64,17 +64,18 @@ void DialogueSystem::processTalkInteraction(const CastInfo& castInfo)
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
     std::size_t topicNavigationCount{0};
-    const Dialogue::Topic* lastTopic{&(dialogue->topics[0])};
-    const Dialogue::Topic* nextTopic{
+    TopicPair lastTopic{&(dialogue->topics[0]), 0};
+    TopicPair nextTopic{
         runTopic(*dialogue, dialogue->topics[0], castInfo.clientID)};
-    while (nextTopic && (topicNavigationCount < TOPIC_NAVIGATION_MAX)) {
+    while (nextTopic.topic && (topicNavigationCount < TOPIC_NAVIGATION_MAX)) {
         lastTopic = nextTopic;
-        nextTopic = runTopic(*dialogue, *nextTopic, castInfo.clientID);
+        nextTopic = runTopic(*dialogue, *(nextTopic.topic), castInfo.clientID);
         topicNavigationCount++;
     }
 
-    // Add the last topic's choices to the response.
-    addChoicesToResponse(lastTopic->choices, castInfo.casterEntity,
+    // Add the last topic's index and choices to the response.
+    dialogueResponse.topicIndex = lastTopic.topicIndex;
+    addChoicesToResponse(lastTopic.topic->choices, castInfo.casterEntity,
                          castInfo.targetEntity, castInfo.clientID,
                          dialogueResponse);
 
@@ -100,7 +101,7 @@ void DialogueSystem::processDialogueChoice(
     }
 
     // Get the choice that the request is asking to run.
-    // Note: These indices were already validated in validateChoice().
+    // Note: These indices were already validated in validateChoiceRequest().
     const Dialogue::Topic& choiceTopic{
         dialogue->topics[choiceRequest.topicIndex]};
     const Dialogue::Choice& choice{
@@ -113,23 +114,26 @@ void DialogueSystem::processDialogueChoice(
     dialogueLua.clientID = choiceRequest.netID;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
-    const Dialogue::Topic* nextTopic{
-        runChoice(*dialogue, choice, choiceTopic.name,
-                  choiceRequest.choiceIndex, choiceRequest.netID)};
+    TopicPair nextTopic{runChoice(*dialogue, choice, choiceTopic.name,
+                                  choiceRequest.choiceIndex,
+                                  choiceRequest.netID)};
 
     // If the choice contained a valid setNextTopic(), run the next topic script, 
     // following any setNextTopic and pushing dialogue events into the response.
     std::size_t topicNavigationCount{1};
-    const Dialogue::Topic* lastTopic{nullptr};
-    while (nextTopic && (topicNavigationCount < TOPIC_NAVIGATION_MAX)) {
+    TopicPair lastTopic{};
+    while (nextTopic.topic && (topicNavigationCount < TOPIC_NAVIGATION_MAX)) {
         lastTopic = nextTopic;
-        nextTopic = runTopic(*dialogue, *nextTopic, choiceRequest.netID);
+        nextTopic
+            = runTopic(*dialogue, *(nextTopic.topic), choiceRequest.netID);
         topicNavigationCount++;
     }
 
-    // If any topics were ran, add the last topic's choices to the response.
-    if (lastTopic) {
-        addChoicesToResponse(lastTopic->choices, clientEntity,
+    // If any topics were ran, add the last topic's index and choices to the 
+    // response.
+    if (lastTopic.topic) {
+        dialogueResponse.topicIndex = lastTopic.topicIndex;
+        addChoicesToResponse(lastTopic.topic->choices, clientEntity,
                              choiceRequest.targetEntity, choiceRequest.netID,
                              dialogueResponse);
     }
@@ -138,7 +142,7 @@ void DialogueSystem::processDialogueChoice(
     network.serializeAndSend(choiceRequest.netID, dialogueResponse);
 }
 
-const Dialogue::Topic*
+DialogueSystem::TopicPair
     DialogueSystem::runChoice(const Dialogue& dialogue,
                               const Dialogue::Choice& choice,
                               std::string_view choiceTopicName,
@@ -159,7 +163,7 @@ const Dialogue::Topic*
         workString.append(", error: ");
         workString.append(err.what());
         network.serializeAndSend(clientID, SystemMessage{workString});
-        return nullptr;
+        return {nullptr};
     }
 
     // If a setNextTopic() call occurred, check if it's valid.
@@ -168,7 +172,8 @@ const Dialogue::Topic*
             dialogue.topicIndices.find(dialogueLua.nextTopicName)};
         if (topicIndexIt != dialogue.topicIndices.end()) {
             // setNextTopic() is valid, return the next topic.
-            return &(dialogue.topics[topicIndexIt->second]);
+            return {&(dialogue.topics[topicIndexIt->second]),
+                    topicIndexIt->second};
         }
         else {
             workString.clear();
@@ -179,12 +184,12 @@ const Dialogue::Topic*
         }
     }
 
-    return nullptr;
+    return {nullptr};
 }
 
-const Dialogue::Topic* DialogueSystem::runTopic(const Dialogue& dialogue,
-                                                const Dialogue::Topic& topic,
-                                                NetworkID clientID)
+DialogueSystem::TopicPair
+    DialogueSystem::runTopic(const Dialogue& dialogue,
+                             const Dialogue::Topic& topic, NetworkID clientID)
 {
     // Run the topic script, pushing dialogue events into the response.
     dialogueLua.nextTopicName = "";
@@ -199,7 +204,7 @@ const Dialogue::Topic* DialogueSystem::runTopic(const Dialogue& dialogue,
         workString.append("\", error: ");
         workString.append(err.what());
         network.serializeAndSend(clientID, SystemMessage{workString});
-        return nullptr;
+        return {nullptr};
     }
 
     // If a setNextTopic() call occurred, check if it's valid.
@@ -208,7 +213,8 @@ const Dialogue::Topic* DialogueSystem::runTopic(const Dialogue& dialogue,
             dialogue.topicIndices.find(dialogueLua.nextTopicName)};
         if (topicIndexIt != dialogue.topicIndices.end()) {
             // setNextTopic() is valid, return the next topic.
-            return &(dialogue.topics[topicIndexIt->second]);
+            return {&(dialogue.topics[topicIndexIt->second]),
+                    topicIndexIt->second};
         }
         else {
             workString.clear();
@@ -219,7 +225,7 @@ const Dialogue::Topic* DialogueSystem::runTopic(const Dialogue& dialogue,
         }
     }
 
-    return nullptr;
+    return {nullptr};
 }
 
 const Dialogue* DialogueSystem::validateChoiceRequest(

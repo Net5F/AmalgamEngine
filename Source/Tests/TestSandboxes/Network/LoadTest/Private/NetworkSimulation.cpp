@@ -87,29 +87,24 @@ void NetworkSimulation::receiveAndProcess()
         return;
     }
 
+    // If there's no data waiting, return early.
+    if (!(server->isReady(true))) {
+        return;
+    }
+
     // Receive message batches from the server.
-    NetworkResult headerResult{
-        server->receiveBytes(headerRecBuffer.data(), SERVER_HEADER_SIZE, true)};
-    while (headerResult != NetworkResult::NoWaitingData) {
-        switch (headerResult) {
-            case NetworkResult::Success: {
-                processBatch();
-                break;
-            }
-            case NetworkResult::Disconnected: {
-                LOG_INFO("Found server to be disconnected while trying to "
-                         "receive header.");
-                eventDispatcher.emplace<Client::ConnectionError>(
-                    Client::ConnectionError::Type::Disconnected);
-                return;
-            }
-            default: {
-                break;
-            }
+    while (server->isReady(true)) {
+        int receivedBytes{
+            server->receiveBytes(headerRecBuffer.data(), SERVER_HEADER_SIZE)};
+        if (receivedBytes < 0) {
+            LOG_INFO("Found server to be disconnected while trying to "
+                     "receive header.");
+            eventDispatcher.emplace<Client::ConnectionError>(
+                Client::ConnectionError::Type::Disconnected);
+            break;
         }
 
-        headerResult = server->receiveBytes(headerRecBuffer.data(),
-                                            SERVER_HEADER_SIZE, true);
+        processBatch();
     }
 }
 
@@ -206,9 +201,9 @@ void NetworkSimulation::processBatch()
     /* Process the batch, if it contains any data. */
     if (batchSize > 0) {
         // Receive the expected bytes.
-        NetworkResult result{
+        int bytesReceived{
             server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
-        if (result != NetworkResult::Success) {
+        if (bytesReceived < 0) {
             LOG_INFO("Failed to receive expected bytes.");
         }
 

@@ -221,26 +221,24 @@ private:
 template<typename T>
 void Network::serializeAndSend(const T& messageStruct)
 {
-    // Allocate the buffer.
-    std::size_t totalMessageSize{CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE
-                                 + Serialize::measureSize(messageStruct)};
-    BinaryBufferSharedPtr messageBuffer{
-        std::make_shared<BinaryBuffer>(totalMessageSize)};
-
-    // Serialize the message struct into the buffer, leaving room for the
-    // headers.
-    std::size_t messageSize{Serialize::toBuffer(
-        messageBuffer->data(), messageBuffer->size(), messageStruct,
-        (CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE))};
-
     // Check that the message isn't too big.
     // Note: We don't compress messages on this side, so we know the final
     //       message size at this point.
-    if ((totalMessageSize > Peer::MAX_WIRE_SIZE)
-        || (messageSize > UINT16_MAX)) {
-        LOG_FATAL("Tried to send a too-large message. Size: %u, max: %u",
-                  totalMessageSize, Peer::MAX_WIRE_SIZE);
+    std::size_t totalMessageSize{CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE
+                                 + Serialize::measureSize(messageStruct)};
+    if (totalMessageSize > CLIENT_MAX_MESSAGE_SIZE) {
+        LOG_INFO("Tried to send a too-large message. Size: %u, max: %u",
+                  totalMessageSize, CLIENT_MAX_MESSAGE_SIZE);
+        return;
     }
+
+    // Serialize the message struct into a buffer, leaving room for the
+    // headers.
+    BinaryBufferSharedPtr messageBuffer{
+        std::make_shared<BinaryBuffer>(totalMessageSize)};
+    std::size_t messageSize{Serialize::toBuffer(
+        messageBuffer->data(), messageBuffer->size(), messageStruct,
+        (CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE))};
 
     // Copy the adjustment iteration into the client header.
     messageBuffer->at(ClientHeaderIndex::AdjustmentIteration)

@@ -23,7 +23,6 @@ ClientHandler::ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher,
 , clientCount{0}
 , clientSet{std::make_shared<SocketSet>(Config::MAX_CLIENTS)}
 , acceptor{Config::SERVER_PORT, clientSet}
-, messageRecBuffer(Peer::MAX_WIRE_SIZE)
 , receiveThreadObj{}
 , exitRequested{false}
 , sendRequested{false}
@@ -199,10 +198,6 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
     ZoneScoped;
 
     // Update each client's internal socket isReady().
-    // Note: Client::receiveMessage() below will skip trying to receive bytes 
-    //       from the OS if the socket isn't ready. We still need to iterate 
-    //       every client in the map though, since receiveMessage checks for 
-    //       timeouts.
     clientSet->checkSockets(0);
 
     /* Iterate through all clients. */
@@ -212,19 +207,20 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
     for (auto& pair : clientMap) {
         const std::shared_ptr<Client>& clientPtr{pair.second};
 
-        /* If there's potentially data waiting, try to receive all messages
-           from the client. */
-        ReceiveResult result{
-            clientPtr->receiveMessage(messageRecBuffer.data())};
-        while (result.networkResult == NetworkResult::Success) {
-            numReceived++;
+        /* If there's data waiting, try to receive all messages from the
+           client. */
+        if (clientPtr->dataIsReady()) {
+            Client::ReceiveResult result{clientPtr->receiveMessage()};
+            while (result.networkResult == NetworkResult::Success) {
+                numReceived++;
 
-            // Process the message.
-            processReceivedMessage(*clientPtr, result.messageType,
-                                   result.messageSize);
+                // Process the message.
+                processReceivedMessage(*clientPtr, result.messageType,
+                                       result.messageBuffer);
 
-            // Try to receive the next message.
-            result = clientPtr->receiveMessage(messageRecBuffer.data());
+                // Try to receive the next message.
+                result = clientPtr->receiveMessage();
+            }
         }
     }
 
@@ -232,12 +228,13 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
 }
 
 void ClientHandler::processReceivedMessage(Client& client, Uint8 messageType,
-                                           std::size_t messageSize)
+                                           std::span<Uint8> messageBuffer)
 {
     // Process the message.
     // Note: messageTick will be > -1 if the message contained a tick number.
     Sint64 messageTick{messageProcessor.processReceivedMessage(
-        client.getNetID(), messageType, messageRecBuffer.data(), messageSize)};
+        client.getNetID(), messageType, messageBuffer.data(),
+        messageBuffer.size())};
 
     // If the message carried a tick number, use it to calc a diff and give it
     // to the client.

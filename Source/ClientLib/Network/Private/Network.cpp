@@ -153,6 +153,7 @@ void Network::send(const BinaryBufferSharedPtr& message)
         LOG_INFO("Tried to send while server is disconnected.");
         return;
     }
+    // Note: serializeAndSend() is responsible for checking message size.
 
     // Send the message.
     NetworkResult result{server->send(message)};
@@ -197,31 +198,24 @@ void Network::connectAndReceive()
 
     // Receive message batches from the server.
     while (!exitRequested) {
-        NetworkResult headerResult{server->receiveBytes(
-            headerRecBuffer.data(), SERVER_HEADER_SIZE, true)};
-
-        switch (headerResult) {
-            case NetworkResult::Success: {
-                processBatch();
-                break;
-            }
-            case NetworkResult::Disconnected: {
-                LOG_INFO("Found server to be disconnected while trying to "
-                         "receive header.");
-                eventDispatcher.emplace<ConnectionError>(
-                    ConnectionError::Type::Disconnected);
-                return;
-            }
-            case NetworkResult::NoWaitingData: {
-                // There wasn't any activity, delay so we don't waste CPU
-                // spinning.
-                SDL_Delay(INACTIVE_DELAY_TIME_MS);
-                break;
-            }
-            default: {
-                break;
-            }
+        if (!(server->isReady(true))) {
+            // There wasn't any activity, delay so we don't waste CPU
+            // spinning.
+            SDL_Delay(INACTIVE_DELAY_TIME_MS);
         }
+
+        // Data is waiting. Receive it.
+        int bytesReceived{
+            server->receiveBytes(headerRecBuffer.data(), SERVER_HEADER_SIZE)};
+        if (bytesReceived < 0) {
+            LOG_INFO("Found server to be disconnected while trying to "
+                     "receive header.");
+            eventDispatcher.emplace<ConnectionError>(
+                ConnectionError::Type::Disconnected);
+            return;
+        }
+
+        processBatch();
     }
 }
 
@@ -247,10 +241,10 @@ void Network::processBatch()
     /* Process the batch, if it contains any data. */
     if (batchSize > 0) {
         // Receive the expected bytes.
-        NetworkResult result{
-            server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
-        if (result != NetworkResult::Success) {
+        int result{server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
+        if (result < 0) {
             LOG_INFO("Failed to receive expected bytes.");
+            return;
         }
 
         // Track the number of bytes we've received.

@@ -361,7 +361,8 @@ void EngineLuaBindings::wait(float timeS)
 
 void EngineLuaBindings::setNextTopic(std::string_view topicName)
 {
-    // Note: The name's validity is checked after the script is finished.
+    // Note: The name's validity is checked by DialogueSystem::runChoice, after
+    //       the script is ran.
     dialogueLua.nextTopicName = topicName;
 }
 

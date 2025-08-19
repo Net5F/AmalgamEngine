@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <atomic>
 #include <mutex>
+#include <span>
 #include <condition_variable>
 
 namespace AM
@@ -104,10 +105,10 @@ private:
      *
      * @param client  The client that we received this message from.
      * @param messageType  The type of the received message.
-     * @param messageSize  The length in bytes of the message in messageBuffer.
+     * @param messageBuffer The buffer that holds the message.
      */
     void processReceivedMessage(Client& client, Uint8 messageType,
-                                std::size_t messageSize);
+                                std::span<Uint8> messageBuffer);
 
     /** Used to get the client map and current tick. */
     Network& network;
@@ -130,9 +131,6 @@ private:
 
     /** The listener that we use to accept new clients. */
     Acceptor acceptor;
-
-    /** Holds a received message while we pass it to MessageProcessor. */
-    BinaryBuffer messageRecBuffer;
 
     /** Calls serviceClients(). */
     std::thread receiveThreadObj;
