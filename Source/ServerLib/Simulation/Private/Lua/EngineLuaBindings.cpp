@@ -53,7 +53,8 @@ EngineLuaBindings::EngineLuaBindings(
     dialogueChoiceConditionLua.luaState.open_libraries(sol::lib::base);
 
     // Add the GLOBAL Lua constant to the non-init environments.
-    // Note: GLOBAL can be used instead an entity ID when setting stored values.
+    // Note: GLOBAL can be used instead of an entity ID when setting stored 
+    //       values.
     Uint32 nullEntityID{entt::to_integral(entt::entity{entt::null})};
     entityItemHandlerLua.luaState["GLOBAL"] = nullEntityID;
     dialogueLua.luaState["GLOBAL"] = nullEntityID;
