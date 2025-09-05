@@ -2,6 +2,7 @@
 
 #include "SaveTimestamp.h"
 #include "Name.h"
+#include "Input.h"
 #include "Position.h"
 #include "Rotation.h"
 #include "GraphicState.h"
@@ -37,12 +38,12 @@ static constexpr unsigned int ENGINE_COMPONENTS_VERSION{0};
  * Note: If you change this list in any way, or change the fields of any included
  *       types in a way that breaks serialization, you must increment 
  *       ENGINE_COMPONENTS_VERSION and run a migration.
- * Note: Rotation implies Input, PreviousPosition, Movement, and 
+ * Note: Input implies PreviousPosition, Movement, Rotation, and 
  *       MovementModifiers (movement components).
- *       GraphicState implies Collision (graphics components).
+ *       GraphicState implies Rotation and Collision (graphics components).
  */
 using EnginePersistedComponentTypes
-    = boost::mp11::mp_list<SaveTimestamp, Name, Position, Rotation,
+    = boost::mp11::mp_list<SaveTimestamp, Name, Input, Position, Rotation,
                            GraphicState, Interaction, ItemHandlers, Dialogue,
                            EntityInitScript, StoredValues, CastCooldown>;
 

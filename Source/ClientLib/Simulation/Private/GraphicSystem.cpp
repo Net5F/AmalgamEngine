@@ -26,6 +26,8 @@ GraphicSystem::GraphicSystem(World& inWorld, GraphicData& inGraphicData)
 void GraphicSystem::updateAnimations()
 {
     // Update all entity sprites to match their current rotation.
+    // Note: This iterates static entities, even though most don't change state
+    //       very often. If this becomes a performance issue, we can revisit.
     auto view{world.registry.view<Rotation, GraphicState, ClientGraphicState>()};
     for (auto [entity, rotation, graphicState, clientGraphicState] :
          view.each()) {

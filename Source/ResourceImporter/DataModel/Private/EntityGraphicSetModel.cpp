@@ -49,6 +49,11 @@ void EntityGraphicSetModel::save(nlohmann::json& json)
     json["entities"] = nlohmann::json::array();
 
     // Fill the json with each entity graphic set in the model.
+    // Note: We encourage people to always have an Idle South graphic (since 
+    //       that's what we use in any situation that needs a default), but 
+    //       we don't require it. If they end up with an unclickable entity 
+    //       because they didn't add any graphics to a set, they can easily fix
+    //       it.
     int i{0};
     for (auto& graphicSetPair : entityMap) {
         EditorEntityGraphicSet& graphicSet{graphicSetPair.second};

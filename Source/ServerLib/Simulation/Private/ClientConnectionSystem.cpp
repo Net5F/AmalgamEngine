@@ -75,7 +75,7 @@ void ClientConnectionSystem::processConnectEvent(
     registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
                                     std::vector<entt::entity>());
 
-    world.addMovementComponents(newEntity, Rotation{});
+    world.addMovementComponents(newEntity);
 
     const EntityGraphicSet& graphicSet{graphicData.getEntityGraphicSet(
         SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET)};

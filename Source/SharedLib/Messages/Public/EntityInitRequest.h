@@ -3,6 +3,7 @@
 #include "EngineMessageType.h"
 #include "Name.h"
 #include "Position.h"
+#include "Rotation.h"
 #include "GraphicState.h"
 #include "EntityInitScript.h"
 #include "NetworkID.h"
@@ -31,6 +32,7 @@ struct EntityInitRequest {
     /** The entity's components. */
     Name name{};
     Position position{};
+    Rotation rotation{};
     GraphicState graphicState{};
 
     /** The script to run on this entity after creation. */
@@ -54,6 +56,7 @@ void serialize(S& serializer, EntityInitRequest& entityInitRequest)
     serializer.value4b(entityInitRequest.entity);
     serializer.object(entityInitRequest.name);
     serializer.object(entityInitRequest.position);
+    serializer.object(entityInitRequest.rotation);
     serializer.object(entityInitRequest.graphicState);
     serializer.object(entityInitRequest.initScript);
 }

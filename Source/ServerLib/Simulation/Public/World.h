@@ -122,10 +122,8 @@ public:
 
     /**
      * Adds the components needed for movement to the given entity.
-     * @param rotation The rotation to apply. Only used if the entity doesn't 
-     *                 already have a Rotation component.
      */
-    void addMovementComponents(entt::entity entity, const Rotation& rotation);
+    void addMovementComponents(entt::entity entity);
 
     /**
      * Runs the given init script on the given entity. If successful, adds it

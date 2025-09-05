@@ -198,12 +198,16 @@ void World::addGraphicsComponents(entt::entity entity,
         entity, modelBounds,
         Transforms::modelToWorldEntity(modelBounds, position))};
 
+    if (!(registry.all_of<Rotation>(entity))) {
+        registry.emplace<Rotation>(entity);
+    }
+
     // Entities with Collision get added to the locator.
     collisionLocator.updateEntity(entity, collision.worldBounds,
                                   CollisionObjectType::DynamicEntity);
 }
 
-void World::addMovementComponents(entt::entity entity, const Rotation& rotation)
+void World::addMovementComponents(entt::entity entity)
 {
     if (!(registry.all_of<Input>(entity))) {
         registry.emplace<Input>(entity);
@@ -224,10 +228,7 @@ void World::addMovementComponents(entt::entity entity, const Rotation& rotation)
     }
 
     if (!(registry.all_of<Rotation>(entity))) {
-        // Note: We normally derive rotation from inputs, but we know the inputs
-        //       are default here, and we may be constructing a persisted entity 
-        //       that's facing a non-default direction.
-        registry.emplace<Rotation>(entity, rotation);
+        registry.emplace<Rotation>(entity);
     }
 
     // Note: Entities also need Collision for the movement systems to pick 
@@ -469,10 +470,11 @@ void World::loadNonClientEntities()
                 [&](const Position&) {
                     // Do nothing, we already added the position above.
                 },
-                [&](const Rotation& rotation) {
-                    // Note: We only persist Rotation, but it implies the 
-                    //       rest of the movement components.
-                    addMovementComponents(newEntity, rotation);
+                [&](const Input&) {
+                    // Note: We don't use the persisted Input state, but we 
+                    //       persist it to flag that the entity is movement-
+                    //       enabled.
+                    addMovementComponents(newEntity);
                 },
                 [&](const GraphicState& graphicState) {
                     // Note: We only persist GraphicState, but it implies 

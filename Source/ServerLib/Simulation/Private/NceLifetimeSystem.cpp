@@ -112,8 +112,9 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
     entt::entity newEntity{world.createEntity(entityInitRequest.position,
                                               entityInitRequest.entity)};
     world.registry.emplace<Name>(newEntity, entityInitRequest.name);
+    world.registry.emplace<Rotation>(newEntity, entityInitRequest.rotation);
 
-    // Add the graphic state and collision components.
+    // Add the graphic components.
     world.addGraphicsComponents(newEntity, entityInitRequest.graphicState);
 
     // Run the init script. If there was an error, tell the user.
