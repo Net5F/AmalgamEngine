@@ -182,7 +182,7 @@ void EntityLifetimeSystem::processEntityData(
 
         // Entities with Collision get added to the locator.
         world.collisionLocator.updateEntity(newEntity, collision.worldBounds,
-                                            CollisionObjectType::DynamicEntity);
+                                            registry.all_of<Input>(newEntity));
 
         // Entities with GraphicState also get a ClientGraphicState.
         // Set it to match the entity's Rotation, or South if it has none.

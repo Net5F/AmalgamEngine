@@ -4,6 +4,7 @@
 #include "GraphicData.h"
 #include "Position.h"
 #include "Collision.h"
+#include "Input.h"
 #include "ClientSimData.h"
 #include "IsClientEntity.h"
 #include "ISimulationExtension.h"
@@ -99,7 +100,7 @@ void ComponentChangeSystem::onGraphicStateUpdated(entt::registry& registry,
 
     // Update their collision in the locator.
     world.collisionLocator.updateEntity(entity, collision.worldBounds,
-                                        CollisionObjectType::DynamicEntity);
+                                        registry.all_of<Input>(entity));
 }
 
 } // namespace Server

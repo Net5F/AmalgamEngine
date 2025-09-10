@@ -48,8 +48,12 @@ void CollisionLocator::setGridSize(const TileExtent& mapTileExtent)
 
 void CollisionLocator::updateEntity(entt::entity entity,
                                     const BoundingBox& collisionVolume,
-                                    CollisionObjectType::Value objectType)
+                                    bool hasInputComponent)
 {
+    CollisionObjectType::Value objectType{
+        hasInputComponent ? CollisionObjectType::DynamicEntity
+                          : CollisionObjectType::StaticEntity};
+
     // Find the cells that the collision volume intersects.
     CellExtent cellExtent(collisionVolume, CELL_WORLD_WIDTH, CELL_WORLD_HEIGHT);
     if (!(gridCellExtent.contains(cellExtent))) {

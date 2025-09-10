@@ -167,7 +167,7 @@ void ServerConnectionSystem::initMockSimState()
 
     // Entities with Collision get added to the locator.
     world.collisionLocator.updateEntity(newEntity, collision.worldBounds,
-                                        CollisionObjectType::DynamicEntity);
+                                        registry.all_of<Input>(newEntity));
 
     // Entities with GraphicState also get a ClientGraphicState.
     registry.emplace<ClientGraphicState>(newEntity, EntityGraphicType::Idle,

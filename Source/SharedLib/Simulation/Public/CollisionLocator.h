@@ -84,10 +84,11 @@ public:
      *
      * @param entity The entity to add.
      * @param collisionVolume The entity's collision volume.
-     * @param objectType Must be one of the entity types.
+     * @param hasInputComponent If true, the entity will be registered as a 
+     *                          dynamic entity. Else, as a static entity.
      */
     void updateEntity(entt::entity entity, const BoundingBox& collisionVolume,
-                      CollisionObjectType::Value objectType);
+                      bool hasInputComponent);
 
     /**
      * Adds the given tile to this locator, or updates it if it's already added.

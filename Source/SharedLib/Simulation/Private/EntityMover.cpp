@@ -68,8 +68,7 @@ void EntityMover::moveEntity(
     if (position != previousPosition) {
         entityLocator.updateEntity(entity, position);
 
-        collisionLocator.updateEntity(entity, collision.worldBounds,
-                                      CollisionObjectType::DynamicEntity);
+        collisionLocator.updateEntity(entity, collision.worldBounds, true);
     }
 }
 

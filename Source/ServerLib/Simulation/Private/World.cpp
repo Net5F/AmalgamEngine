@@ -204,7 +204,7 @@ void World::addGraphicsComponents(entt::entity entity,
 
     // Entities with Collision get added to the locator.
     collisionLocator.updateEntity(entity, collision.worldBounds,
-                                  CollisionObjectType::DynamicEntity);
+                                  registry.all_of<Input>(entity));
 }
 
 void World::addMovementComponents(entt::entity entity)
@@ -231,9 +231,10 @@ void World::addMovementComponents(entt::entity entity)
         registry.emplace<Rotation>(entity);
     }
 
-    // Note: Entities also need Collision for the movement systems to pick 
-    //       them up, but that's considered a "graphics" component because it's 
-    //       dependent on GraphicState.
+    if (Collision* collision{registry.try_get<Collision>(entity)}) {
+        collisionLocator.updateEntity(entity, collision->worldBounds,
+                                      registry.all_of<Input>(entity));
+    }
 }
 
 std::string World::runEntityInitScript(entt::entity entity,
@@ -475,6 +476,12 @@ void World::loadNonClientEntities()
                     //       persist it to flag that the entity is movement-
                     //       enabled.
                     addMovementComponents(newEntity);
+                },
+                [&](const Rotation& rotation) {
+                    // Note: If movement or graphics components are added first,
+                    //       this will be a replace.
+                    using T = std::decay_t<decltype(rotation)>;
+                    registry.emplace_or_replace<T>(newEntity, rotation);
                 },
                 [&](const GraphicState& graphicState) {
                     // Note: We only persist GraphicState, but it implies 
