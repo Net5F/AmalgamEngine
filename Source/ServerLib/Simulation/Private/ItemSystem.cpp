@@ -363,8 +363,8 @@ void ItemSystem::runEntityItemHandlerScript(
 {
     // Run the given handler script.
     entityItemHandlerLua.clientID = clientID;
-    entityItemHandlerLua.luaState["user"] = clientEntity;
     entityItemHandlerLua.luaState["self"] = targetEntity;
+    entityItemHandlerLua.luaState["target"] = clientEntity;
     auto result{entityItemHandlerLua.luaState.script(
         itemHandlerScript.script, &sol::script_pass_on_error)};
 
