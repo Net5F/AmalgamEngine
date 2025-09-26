@@ -6,6 +6,7 @@
 #include "Position.h"
 #include "Rotation.h"
 #include "GraphicState.h"
+#include "CollisionBitSets.h"
 #include "Interaction.h"
 #include "ItemHandlers.h"
 #include "Dialogue.h"
@@ -40,12 +41,14 @@ static constexpr unsigned int ENGINE_COMPONENTS_VERSION{0};
  *       ENGINE_COMPONENTS_VERSION and run a migration.
  * Note: Input implies PreviousPosition, Movement, Rotation, and 
  *       MovementModifiers (movement components).
- *       GraphicState implies Rotation and Collision (graphics components).
+ *       GraphicState implies Rotation, Collision, and CollisionBitSets 
+ *       (graphics components).
  */
 using EnginePersistedComponentTypes
     = boost::mp11::mp_list<SaveTimestamp, Name, Input, Position, Rotation,
-                           GraphicState, Interaction, ItemHandlers, Dialogue,
-                           EntityInitScript, StoredValues, CastCooldown>;
+                           GraphicState, CollisionBitSets, Interaction,
+                           ItemHandlers, Dialogue, EntityInitScript,
+                           StoredValues, CastCooldown>;
 
 /**
  * A variant that holds a persisted engine component.

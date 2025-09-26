@@ -27,54 +27,54 @@ EntityMover::EntityMover(const entt::registry& inRegistry,
 {
 }
 
-void EntityMover::moveEntity(
-    entt::entity entity, const Input::StateArr& inputStates, Position& position,
-    const PreviousPosition& previousPosition, Movement& movement,
-    const MovementModifiers& movementMods, Rotation& rotation,
-    Collision& collision, double deltaSeconds)
+void EntityMover::moveEntity(const MoveEntityParams& params)
 {
     // If no inputs are pressed and they aren't falling, nothing needs to 
     // be done.
-    if (inputStates.none() && !(movement.isFalling)) {
-        movement.velocity = {0, 0, 0};
+    if (params.inputStates.none() && !(params.movement.isFalling)) {
+        params.movement.velocity = {0, 0, 0};
         return;
     }
 
     // Calculate their updated velocity.
-    movement.velocity
-        = MovementHelpers::calcVelocity(inputStates, movement, movementMods);
+    params.movement.velocity = MovementHelpers::calcVelocity(
+        params.inputStates, params.movement, params.movementMods);
 
     // Resolve any collisions with the surrounding bounding boxes.
-    BoundingBox resolvedBounds{
-        resolveCollisions(collision.worldBounds, movement, deltaSeconds)};
+    BoundingBox resolvedBounds{resolveCollisions(
+        params.collision.worldBounds, params.movement,
+        params.collisionBitSets.getCollisionMask(), params.deltaSeconds)};
 
     // Update their bounding box and position.
     // Note: The entity's position is relative to the model bounds stage, not 
     //       the model bounds directly. Because of this, we can't just get 
     //       the X/Y position from the center of the resolved bounds.
     //       We can get the Z position directly from it, though.
-    position += (resolvedBounds.min - collision.worldBounds.min);
-    position.z = resolvedBounds.min.z;
+    params.position += (resolvedBounds.min - params.collision.worldBounds.min);
+    params.position.z = resolvedBounds.min.z;
     // Note: Since clients calc bounds from the replicated position, we need to 
     //       use the same math here (instead of using resolvedBounds directly) 
     //       or the float result may end up slightly different.
-    collision.worldBounds
-        = Transforms::modelToWorldEntity(collision.modelBounds, position);
+    params.collision.worldBounds = Transforms::modelToWorldEntity(
+        params.collision.modelBounds, params.position);
 
     // Update the direction they're facing, based on their current inputs.
-    rotation = MovementHelpers::calcRotation(rotation, inputStates);
+    params.rotation
+        = MovementHelpers::calcRotation(params.rotation, params.inputStates);
 
     // If they did actually move, update their position in the locators.
-    if (position != previousPosition) {
-        entityLocator.updateEntity(entity, position);
+    if (params.position != params.previousPosition) {
+        entityLocator.updateEntity(params.entity, params.position);
 
-        collisionLocator.updateEntity(entity, collision.worldBounds, true);
+        collisionLocator.updateEntity(
+            params.entity, params.collision.worldBounds,
+            params.collisionBitSets.getCollisionLayers());
     }
 }
 
-BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
-                                           Movement& movement,
-                                           double deltaSeconds)
+BoundingBox EntityMover::resolveCollisions(
+    const BoundingBox& currentBounds, Movement& movement,
+    const CollisionLayerBitSet& collisionMask, double deltaSeconds)
 {
     // Calc where the bounds will end up if there are no collisions.
     BoundingBox desiredBounds{currentBounds.translateBy(
@@ -95,10 +95,8 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
 
     // Collect the volumes of all static entities and tiles that intersect 
     // the broad phase bounds.
-    static constexpr CollisionObjectTypeMask COLLISION_MASK{
-        CollisionObjectType::StaticEntity | CollisionObjectType::TileLayer};
     auto& broadPhaseMatches{
-        collisionLocator.getCollisions(broadPhaseTileExtent, COLLISION_MASK)};
+        collisionLocator.getCollisions(broadPhaseTileExtent, collisionMask)};
 
     // Perform the iterations of the narrow phase to resolve any collisions.
     Vector3 originalVelocity{movement.velocity};

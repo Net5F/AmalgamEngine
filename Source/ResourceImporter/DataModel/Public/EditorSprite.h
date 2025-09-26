@@ -41,8 +41,7 @@ struct EditorSprite {
     SDL_Point stageOrigin{0, 0};
 
     /** If true, this sprite's modelBounds will be used in collision checks.
-        Most sprites will want collision enabled, but things like floors and
-        carpets usually don't need collision. */
+        Floors never have collision, regardless of this setting. */
     bool collisionEnabled{false};
 
     /** If non-null, this is the ID of this sprite's model-space bounding box.

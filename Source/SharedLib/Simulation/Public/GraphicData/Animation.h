@@ -55,8 +55,7 @@ struct Animation {
     std::vector<Frame> frames;
 
     /** If true, this animation's modelBounds will be used in collision checks.
-        Most animations will want collision enabled, but things like floors and
-        carpets usually don't need collision. */
+        Floors never have collision, regardless of this setting. */
     bool collisionEnabled{false};
 
     /** This animation's model-space bounding volume.

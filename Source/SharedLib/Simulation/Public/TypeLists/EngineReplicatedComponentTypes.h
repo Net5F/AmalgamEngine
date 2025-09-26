@@ -7,6 +7,7 @@
 #include "MovementModifiers.h"
 #include "Rotation.h"
 #include "GraphicState.h"
+#include "CollisionBitSets.h"
 #include "Interaction.h"
 #include "boost/mp11/list.hpp"
 
@@ -37,6 +38,6 @@ namespace AM
 using EngineReplicatedComponentTypes
     = boost::mp11::mp_list<IsClientEntity, Name, Input, Movement,
                            MovementModifiers, Rotation, GraphicState,
-                           Interaction>;
+                           CollisionBitSets, Interaction>;
 
 } // End namespace AM

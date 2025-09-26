@@ -6,6 +6,7 @@
 #include "DialogueChoiceConditionLua.h"
 #include "GraphicData.h"
 #include "ItemData.h"
+#include "CollisionBitSets.h"
 #include "World.h"
 #include "Network.h"
 #include "Interaction.h"
@@ -71,6 +72,18 @@ EngineLuaBindings::EngineLuaBindings(
 
 void EngineLuaBindings::addEntityInitBindings()
 {
+    entityInitLua.luaState.set_function(
+        "setCollisionLayers", &EngineLuaBindings::setCollisionLayers, this);
+    entityInitLua.luaState.set_function(
+        "setCollisionMask", &EngineLuaBindings::setCollisionMask, this);
+    // Note: TerrainWall, ClientEntity, NonClientEntity are handled 
+    //       automatically.
+    //       Object is only useful in setCollisionMask
+    entityInitLua.luaState["CLT_OBJECT"] = CollisionLayerType::Object;
+    entityInitLua.luaState["CLT_BLOCK_COLLISION"]
+        = CollisionLayerType::BlockCollision;
+    entityInitLua.luaState["CLT_BLOCK_LOS"] = CollisionLayerType::BlockLoS;
+
     entityInitLua.luaState.set_function(
         "addTalkInteraction", &EngineLuaBindings::addTalkInteraction, this);
     entityInitLua.luaState.set_function(
@@ -239,6 +252,39 @@ void EngineLuaBindings::addDialogueChoiceBindings()
     dialogueChoiceLua->set_function("choice", &EngineLuaBindings::choice, this);
     dialogueChoiceLua->set_function("choiceIf", &EngineLuaBindings::choiceIf,
                                     this);
+}
+
+void EngineLuaBindings::setCollisionLayers(CollisionLayerBitSet collisionLayers)
+{
+    entt::entity selfEntity{entityInitLua.selfEntity};
+    if (world.registry.all_of<CollisionBitSets>(selfEntity))
+    {
+        world.registry.patch<CollisionBitSets>(
+            selfEntity, [&](CollisionBitSets& collisionBitSets) {
+                collisionBitSets.setCollisionLayers(collisionLayers, selfEntity,
+                                                    world.registry);
+            });
+    }
+    else {
+        throw std::runtime_error{"Failed to set collision mask: Entity does "
+                                 "not have graphics components."};
+    }
+}
+
+void EngineLuaBindings::setCollisionMask(CollisionLayerBitSet collisionMask)
+{
+    entt::entity selfEntity{entityInitLua.selfEntity};
+    if (world.registry.all_of<CollisionBitSets>(selfEntity))
+    {
+        world.registry.patch<CollisionBitSets>(
+            selfEntity, [&](CollisionBitSets& collisionBitSets) {
+                collisionBitSets.setCollisionMask(collisionMask);
+            });
+    }
+    else {
+        throw std::runtime_error{"Failed to set collision mask: Entity does "
+                                 "not have graphics components."};
+    }
 }
 
 void EngineLuaBindings::addTalkInteraction()

@@ -18,6 +18,7 @@
 #include "MovementModifiers.h"
 #include "GraphicState.h"
 #include "Collision.h"
+#include "CollisionBitSets.h"
 #include "CastCooldown.h"
 #include "EntityInitScript.h"
 #include "Deserialize.h"
@@ -197,6 +198,8 @@ void World::addGraphicsComponents(entt::entity entity,
     const Collision& collision{registry.emplace<Collision>(
         entity, modelBounds,
         Transforms::modelToWorldEntity(modelBounds, position))};
+    const CollisionBitSets& collisionBitSets{
+        registry.emplace<CollisionBitSets>(entity, entity, registry)};
 
     if (!(registry.all_of<Rotation>(entity))) {
         registry.emplace<Rotation>(entity);
@@ -204,7 +207,7 @@ void World::addGraphicsComponents(entt::entity entity,
 
     // Entities with Collision get added to the locator.
     collisionLocator.updateEntity(entity, collision.worldBounds,
-                                  registry.all_of<Input>(entity));
+                                  collisionBitSets.getCollisionLayers());
 }
 
 void World::addMovementComponents(entt::entity entity)
@@ -232,8 +235,10 @@ void World::addMovementComponents(entt::entity entity)
     }
 
     if (Collision* collision{registry.try_get<Collision>(entity)}) {
+        const CollisionBitSets& collisionBitSets{
+            registry.get<CollisionBitSets>(entity)};
         collisionLocator.updateEntity(entity, collision->worldBounds,
-                                      registry.all_of<Input>(entity));
+                                      collisionBitSets.getCollisionLayers());
     }
 }
 

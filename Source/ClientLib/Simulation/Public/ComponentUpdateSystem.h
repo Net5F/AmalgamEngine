@@ -38,6 +38,12 @@ private:
      */
     void onGraphicStateUpdated(entt::registry& registry, entt::entity entity);
 
+    /**
+     * Updates the entity's collision in CollisionLocator.
+     */
+    void onCollisionBitSetsUpdated(entt::registry& registry,
+                                   entt::entity entity);
+
     /** Used to get the current replication tick. */
     Simulation& simulation;
     /** Used to access the components we need to update. */

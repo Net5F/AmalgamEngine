@@ -7,6 +7,7 @@
 #include "MovementModifiers.h"
 #include "Rotation.h"
 #include "Collision.h"
+#include "CollisionBitSets.h"
 #include "InputHistory.h"
 #include "GraphicState.h"
 #include "entt/entity/registry.hpp"
@@ -38,9 +39,10 @@ public:
      */
     static auto getMovementGroup(entt::registry& registry)
     {
-        return registry.group<Input, Position, PreviousPosition, Movement,
-                              MovementModifiers, Rotation, Collision>(
-            entt::get<GraphicState>, entt::exclude<InputHistory>);
+        return registry
+            .group<Input, Position, PreviousPosition, Movement,
+                   MovementModifiers, Rotation, Collision, CollisionBitSets>(
+                entt::get<GraphicState>, entt::exclude<InputHistory>);
     }
 
     /**

@@ -16,7 +16,8 @@ struct CollisionLocator::RaycastStrategyIntersectAny
     void intersectObjectsInCell(const Vector3& start,
                                 const Vector3& inverseRayDirection,
                                 const CellPosition& cellPosition,
-                                CollisionObjectTypeMask objectTypeMask,
+                                CollisionLayerBitSet collisionMask,
+                                std::span<entt::entity> entitiesToExclude,
                                 bool ignoreInsideHits);
 
     bool hasIntersected;
@@ -34,7 +35,8 @@ struct CollisionLocator::RaycastStrategyIntersectFirst
     void intersectObjectsInCell(const Vector3& start,
                                 const Vector3& inverseRayDirection,
                                 const CellPosition& cellPosition,
-                                CollisionObjectTypeMask objectTypeMask,
+                                CollisionLayerBitSet collisionMask,
+                                std::span<entt::entity> entitiesToExclude,
                                 bool ignoreInsideHits);
 
     bool hasIntersected;
@@ -54,7 +56,8 @@ struct CollisionLocator::RaycastStrategyIntersectAll
     void intersectObjectsInCell(const Vector3& start,
                                 const Vector3& inverseRayDirection,
                                 const CellPosition& cellPosition,
-                                CollisionObjectTypeMask objectTypeMask,
+                                CollisionLayerBitSet collisionMask,
+                                std::span<entt::entity> entitiesToExclude,
                                 bool ignoreInsideHits);
 
 private:

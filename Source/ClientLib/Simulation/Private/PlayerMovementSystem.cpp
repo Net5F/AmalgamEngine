@@ -141,15 +141,22 @@ void PlayerMovementSystem::replayInputs(Uint32 lastUpdateTick)
 void PlayerMovementSystem::movePlayerEntity(const Input::StateArr& inputStates)
 {
     auto [position, previousPosition, movement, movementMods, rotation,
-          collision]
-        = world.registry.get<Position, PreviousPosition, Movement,
-                             MovementModifiers, Rotation, Collision>(
-            world.playerEntity);
+          collision, collisionBitSets]
+        = world.registry
+              .get<Position, PreviousPosition, Movement, MovementModifiers,
+                   Rotation, Collision, CollisionBitSets>(world.playerEntity);
 
     // Move the entity.
-    entityMover.moveEntity(world.playerEntity, inputStates, position,
-                           previousPosition, movement, movementMods, rotation,
-                           collision, SharedConfig::SIM_TICK_TIMESTEP_S);
+    entityMover.moveEntity({.entity{world.playerEntity},
+                            .inputStates{inputStates},
+                            .position{position},
+                            .previousPosition{previousPosition},
+                            .movement{movement},
+                            .movementMods{movementMods},
+                            .rotation{rotation},
+                            .collision{collision},
+                            .collisionBitSets{collisionBitSets},
+                            .deltaSeconds{SharedConfig::SIM_TICK_TIMESTEP_S}});
 }
 
 void PlayerMovementSystem::emitUpdateSignals()

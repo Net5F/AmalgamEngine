@@ -164,10 +164,12 @@ void ServerConnectionSystem::initMockSimState()
         newEntity, modelBounds,
         Transforms::modelToWorldEntity(modelBounds,
                                        registry.get<Position>(newEntity)))};
+    const CollisionBitSets& collisionBitSets{
+        registry.emplace<CollisionBitSets>(newEntity)};
 
     // Entities with Collision get added to the locator.
     world.collisionLocator.updateEntity(newEntity, collision.worldBounds,
-                                        registry.all_of<Input>(newEntity));
+                                        collisionBitSets.getCollisionLayers());
 
     // Entities with GraphicState also get a ClientGraphicState.
     registry.emplace<ClientGraphicState>(newEntity, EntityGraphicType::Idle,

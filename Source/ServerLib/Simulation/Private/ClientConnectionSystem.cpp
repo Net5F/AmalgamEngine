@@ -67,6 +67,8 @@ void ClientConnectionSystem::processConnectEvent(
     //       are added to the same group, the ref will be invalidated.
     entt::entity newEntity{world.createEntity(world.getSpawnPoint())};
 
+    // TODO: When player accounts are added, a lot of this should be changed to
+    //       load the persisted data from the account.
     registry.emplace<IsClientEntity>(newEntity);
     registry.emplace<Name>(
         newEntity, "Player " + std::to_string(static_cast<Uint32>(newEntity)));
@@ -81,6 +83,16 @@ void ClientConnectionSystem::processConnectEvent(
         SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET)};
     GraphicState graphicState{graphicSet.numericID};
     world.addGraphicsComponents(newEntity, graphicState);
+
+    // Set the default client entity collision.
+    registry.patch<CollisionBitSets>(
+        newEntity, [&](CollisionBitSets& collisionBitSets) {
+            collisionBitSets.setCollisionLayers(
+                CollisionLayerType::ClientEntity, newEntity, registry);
+            collisionBitSets.setCollisionMask(
+                CollisionLayerType::TerrainWall
+                | CollisionLayerType::BlockCollision);
+        });
 
     // Add the new client entity to the network ID map.
     world.netIDMap[clientConnected.clientID] = newEntity;

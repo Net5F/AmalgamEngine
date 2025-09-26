@@ -28,8 +28,7 @@ struct Sprite {
     SpriteID numericID{NULL_SPRITE_ID};
 
     /** If true, this sprite's modelBounds will be used in collision checks.
-        Most sprites will want collision enabled, but things like floors and
-        carpets usually don't need collision. */
+        Floors never have collision, regardless of this setting. */
     bool collisionEnabled{false};
 
     /** This sprite's model-space bounding volume.

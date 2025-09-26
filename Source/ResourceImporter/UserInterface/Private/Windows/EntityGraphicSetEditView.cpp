@@ -50,14 +50,11 @@ EntityGraphicSetEditView::EntityGraphicSetEditView(
     styleText(descText);
     descText.setText(
         "Entity Graphic Sets determine which graphics are shown when an entity "
-        "enters its various states.\n\nThe Idle graphic type is required, the "
-        "rest are optional. It's best practice to always have an Idle S "
-        "graphic: if an entity enters a state that it doesn't have a graphic "
-        "for, Idle S will be used. If no Idle S is set, the entity will not be "
-        "clickable in build mode.\n\nThe engine defaults each entity's "
-        "collision box to the Idle S graphic of "
-        "SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET. Project systems can change "
-        "this if desired.");
+        "enters its various states.\n\nThe Idle S graphic is required, the "
+        "rest are optional.\n\nThe Idle S graphic's collision box will be used "
+        "for all graphics in the set. This avoids jittery collision behavior "
+        "while changing graphics. It's also less work--you only need to set "
+        "the one graphic's collision box.");
 
     /* Container */
     graphicContainer.setNumColumns(8);

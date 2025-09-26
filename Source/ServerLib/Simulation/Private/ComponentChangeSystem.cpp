@@ -2,6 +2,7 @@
 #include "World.h"
 #include "Network.h"
 #include "GraphicData.h"
+#include "CollisionBitSets.h"
 #include "Position.h"
 #include "Collision.h"
 #include "Input.h"
@@ -27,6 +28,8 @@ ComponentChangeSystem::ComponentChangeSystem(World& inWorld, Network& inNetwork,
 {
     world.registry.on_update<GraphicState>()
         .connect<&ComponentChangeSystem::onGraphicStateUpdated>(this);
+    world.registry.on_update<CollisionBitSets>()
+        .connect<&ComponentChangeSystem::onCollisionBitSetsUpdated>(this);
 }
 
 void ComponentChangeSystem::processChangeRequests()
@@ -82,14 +85,13 @@ void ComponentChangeSystem::onGraphicStateUpdated(entt::registry& registry,
 {
     // Since the graphic state was updated, we need to update the entity's
     // collision.
-    // Note: Entity collision always comes from its IdleSouth graphic.
     auto [position, graphicState]
         = registry.get<Position, GraphicState>(entity);
     const EntityGraphicSet& graphicSet{
         graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
 
     // Note: We assume that an entity with GraphicState always has a
-    //       Collision.
+    //       Collision and CollisionBitSets.
     const BoundingBox& modelBounds{graphicSet.getCollisionModelBounds()};
     const Collision& collision{
         registry.patch<Collision>(entity, [&](Collision& collision) {
@@ -99,8 +101,21 @@ void ComponentChangeSystem::onGraphicStateUpdated(entt::registry& registry,
         })};
 
     // Update their collision in the locator.
+    const CollisionBitSets& collisionBitSets{
+        registry.get<CollisionBitSets>(entity)};
     world.collisionLocator.updateEntity(entity, collision.worldBounds,
-                                        registry.all_of<Input>(entity));
+                                        collisionBitSets.getCollisionLayers());
+}
+
+void ComponentChangeSystem::onCollisionBitSetsUpdated(entt::registry& registry,
+                                                      entt::entity entity)
+{
+    // Note: We assume that an entity with a CollisionBitSets always has a 
+    //       Collision.
+    const auto [collision, collisionBitSets]
+        = registry.get<Collision, CollisionBitSets>(entity);
+    world.collisionLocator.updateEntity(entity, collision.worldBounds,
+                                        collisionBitSets.getCollisionLayers());
 }
 
 } // namespace Server

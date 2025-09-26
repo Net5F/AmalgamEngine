@@ -7,6 +7,7 @@
 #include "MovementModifiers.h"
 #include "Rotation.h"
 #include "Collision.h"
+#include "CollisionBitSets.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
@@ -34,8 +35,9 @@ public:
      */
     static auto getMovementGroup(entt::registry& registry)
     {
-        return registry.group<Input, Position, PreviousPosition, Movement,
-                              MovementModifiers, Rotation, Collision>();
+        return registry
+            .group<Input, Position, PreviousPosition, Movement,
+                   MovementModifiers, Rotation, Collision, CollisionBitSets>();
     }
 
     /**

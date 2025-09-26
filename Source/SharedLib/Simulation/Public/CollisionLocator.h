@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CollisionBitsets.h"
 #include "CellExtent.h"
 #include "CellPosition.h"
 #include "TilePosition.h"
@@ -8,7 +9,9 @@
 #include "Terrain.h"
 #include "SharedConfig.h"
 #include "entt/fwd.hpp"
+#include "entt/entity/entity.hpp"
 #include <vector>
+#include <span>
 
 namespace AM
 {
@@ -17,39 +20,18 @@ struct Cylinder;
 struct BoundingBox;
 
 /**
- * The types of world objects that can be collided with.
- * Note: If desired, we can switch this to use our engine/project enum 
- *       pattern and let the project add custom types.
- */
-struct CollisionObjectType {
-    enum Value : Uint8
-    {
-        // Note: If it's ever useful, we can add ClientEntity/NonClientEntity 
-        //       and let entities have more than one object type.
-        /* An entity that doesn't move. */
-        StaticEntity = 0b00000001,
-        /* A movement-enabled entity (e.g. has an Input component). */
-        DynamicEntity = 0b00000010,
-        TileLayer = 0b00000100,
-    };
-};
-
-/** A bitmask made from CollisionObjectType values. */
-using CollisionObjectTypeMask = Uint16;
-
-/**
  * A spatial partitioning grid that tracks where collision volumes are located.
  *
- * Used to quickly determine which collision volumes are located within a given 
+ * Used to quickly determine which collision volumes are located within a given
  * extent of the world.
  *
- * This locator tracks both entities and tile layers, and it tracks them by 
- * their bounding volume (i.e. collision). Not all entities and tile layers 
+ * This locator tracks both entities and tile layers, and it tracks them by
+ * their bounding volume (i.e. collision). Not all entities and tile layers
  * have collision, so they may not be tracked by this locator.
  * For Position-related entity queries, see EntityLocator.h.
  *
- * Internally, collision volumes are organized into "cells", each of which has 
- * a size corresponding to SharedConfig::COLLISION_LOCATOR_CELL_WIDTH. These 
+ * Internally, collision volumes are organized into "cells", each of which has
+ * a size corresponding to SharedConfig::COLLISION_LOCATOR_CELL_WIDTH. These
  * values can be tweaked to affect performance.
  */
 class CollisionLocator
@@ -58,17 +40,15 @@ public:
     /**
      * A world object's collision information.
      */
-    struct CollisionInfo
-    {
+    struct CollisionInfo {
         /** The world object's collision volume. */
         BoundingBox collisionVolume{};
 
-        /** The type of world object that this volume belongs to. */
-        CollisionObjectType::Value objectType{};
+        /** The collision layers that this world object appears in. */
+        CollisionLayerBitSet collisionLayers{};
 
-        /** If objectType is one of the entity types, this is the entity's 
-            ID. */
-        entt::entity entity{};
+        /** If non-null, this object is an entity and this is its ID. */
+        entt::entity entity{entt::null};
     };
 
     CollisionLocator();
@@ -79,20 +59,19 @@ public:
     void setGridSize(const TileExtent& tileExtent);
 
     /**
-     * Adds the given entity to this locator, or updates it if it's already 
+     * Adds the given entity to this locator, or updates it if it's already
      * added.
      *
      * @param entity The entity to add.
      * @param collisionVolume The entity's collision volume.
-     * @param hasInputComponent If true, the entity will be registered as a 
-     *                          dynamic entity. Else, as a static entity.
+     * @param collisionLayers The layers that this entity should appear in.
      */
     void updateEntity(entt::entity entity, const BoundingBox& collisionVolume,
-                      bool hasInputComponent);
+                      CollisionLayerBitSet collisionLayers);
 
     /**
      * Adds the given tile to this locator, or updates it if it's already added.
-     * 
+     *
      * @param tilePosition The tile's position.
      * @param tile The tile to add.
      */
@@ -103,9 +82,25 @@ public:
      */
     void removeEntity(entt::entity entity);
 
+    struct RaycastParams {
+        const Vector3& start;
+        const Vector3& end;
+        CollisionLayerBitSet collisionMask{};
+        std::span<entt::entity> entitiesToExclude{};
+        bool ignoreInsideHits{true};
+    };
+    /**
+     * Returns true if the given ray intersects any collision volume.
+     *
+     * @param collisionMask The bitmask to use when filtering world objects. If
+     *                      a layer is present in the mask, objects in that
+     *                      layer will be included in the results.
+     * @param ignoreInsideHits If true, volumes that this raycast starts inside
+     *                         of will be ignored.
+     */
+    bool raycastAny(const RaycastParams& params);
 
-    struct RaycastHitInfo
-    {
+    struct RaycastHitInfo {
         /** The t value (along the ray) at which this object was hit. */
         float hitT{};
 
@@ -113,43 +108,24 @@ public:
         const CollisionInfo* collisionInfo{};
     };
     /**
-     * Returns true if the given ray intersects any collision volume.
-     *
-     * @param objectTypeMask The bitmask to use when filtering objects. If an 
-     *                       object type is present in the mask, it will be 
-     *                       included in the results.
-     * @param ignoreInsideHits If true, volumes that this raycast starts inside 
-     *                         of will be ignored.
-     */
-    bool raycastAny(const Vector3& start, const Vector3& end,
-                    CollisionObjectTypeMask objectTypeMask,
-                    bool ignoreInsideHits = true);
-
-    /**
      * Returns the first collision volume that the given ray intersects.
      *
      * See raycastAny() for parameter info.
-     * @return A pointer to the info of the first hit world object (if any). 
-     *         This pointer is not stable, and may become invalid when any of 
-     *         this locator's functions are called.
+     * @return The info of the first hit world object (if any).
+     *         The contained pointer is not stable, and may become invalid when
+     *         any of this locator's functions are called.
      */
-    std::optional<RaycastHitInfo>
-        raycastFirst(const Vector3& start, const Vector3& end,
-                     CollisionObjectTypeMask objectTypeMask,
-                     bool ignoreInsideHits = true);
+    std::optional<RaycastHitInfo> raycastFirst(const RaycastParams& params);
 
     /**
      * Returns all collision volumes that the given ray intersects.
      *
      * See raycastAny() for parameter info.
-     * @return Pointers to the info of each hit world object, in no particular 
-     *         order. These pointers are not stable, and may become invalid 
+     * @return The info of each hit world object, in no particular order.
+     *         The contained pointers are not stable, and may become invalid
      *         when any of this locator's functions are called.
      */
-    std::vector<RaycastHitInfo>&
-        raycastAll(const Vector3& start, const Vector3& end,
-                   CollisionObjectTypeMask objectTypeMask,
-                   bool ignoreInsideHits = true);
+    std::vector<RaycastHitInfo>& raycastAll(const RaycastParams& params);
 
     /**
      * Returns all collision volumes that intersect the given cylinder.
@@ -158,37 +134,37 @@ public:
      *       (if a cylinder centered on volumeA intersects volumeB, the reverse
      *       may not be true).
      *
-     * @param objectTypeMask The bitmask to use when filtering objects. If an 
-     *                       object type is present in the mask, it will be 
-     *                       included in the results.
-     * @return Pointers to the info of each hit world object. These pointers 
-     *         are not stable, and may become invalid when any of this locator's 
+     * @param collisionMask The bitmask to use when filtering world objects. If
+     *                      a layer is present in the mask, objects in that
+     *                      layer will be included in the results.
+     * @return Pointers to the info of each hit world object. These pointers
+     *         are not stable, and may become invalid when any of this locator's
      *         functions are called.
      */
     std::vector<const CollisionInfo*>&
         getCollisions(const Cylinder& cylinder,
-                      CollisionObjectTypeMask objectTypeMask);
+                      CollisionLayerBitSet collisionMask);
 
     /**
      * Overload for BoundingBox.
      */
     std::vector<const CollisionInfo*>&
         getCollisions(const BoundingBox& boundingBox,
-                      CollisionObjectTypeMask objectTypeMask);
+                      CollisionLayerBitSet collisionMask);
 
     /**
      * Overload for TileExtent.
      */
     std::vector<const CollisionInfo*>&
         getCollisions(const TileExtent& tileExtent,
-                      CollisionObjectTypeMask objectTypeMask);
+                      CollisionLayerBitSet collisionMask);
 
     /**
      * Overload for ChunkExtent.
      */
     std::vector<const CollisionInfo*>&
         getCollisions(const ChunkExtent& chunkExtent,
-                      CollisionObjectTypeMask objectTypeMask);
+                      CollisionLayerBitSet collisionMask);
 
     /**
      * Performs a broad phase to get all collision volumes in cells intersected
@@ -197,37 +173,37 @@ public:
      * Note: All volumes in the intersected cells are returned, which may
      *       include volumes that aren't actually within the radius.
      *
-     * @param objectTypeMask The bitmask to use when filtering objects. If an
-     *                       object type is present in the mask, it will be
-     *                       included in the results.
+     * @param collisionMask The bitmask to use when filtering world objects. If
+     *                      a layer is present in the mask, objects in that
+     *                      layer will be included in the results.
      */
     std::vector<const CollisionInfo*>&
         getCollisionsBroad(const Cylinder& cylinder,
-                           CollisionObjectTypeMask objectTypeMask);
+                           CollisionLayerBitSet collisionMask);
 
     /**
      * Overload for BoundingBox.
      */
     std::vector<const CollisionInfo*>&
         getCollisionsBroad(const BoundingBox& boundingBox,
-                           CollisionObjectTypeMask objectTypeMask);
+                           CollisionLayerBitSet collisionMask);
 
     /**
      * Overload for TileExtent.
      */
     std::vector<const CollisionInfo*>&
         getCollisionsBroad(const TileExtent& tileExtent,
-                           CollisionObjectTypeMask objectTypeMask);
+                           CollisionLayerBitSet collisionMask);
 
     /**
      * Overload for ChunkExtent.
      */
     std::vector<const CollisionInfo*>&
         getCollisionsBroad(const ChunkExtent& chunkExtent,
-                           CollisionObjectTypeMask objectTypeMask);
+                           CollisionLayerBitSet collisionMask);
 
 private:
-    /** Raycast strategies. Defined here so they have access to the locator's 
+    /** Raycast strategies. Defined here so they have access to the locator's
         private members. */
     struct RaycastStrategyIntersectAny;
     struct RaycastStrategyIntersectFirst;
@@ -257,29 +233,21 @@ private:
                                    const CellExtent& cellExtent);
 
     /**
-     * Removes the given index from the collisionGrid cells within the given 
+     * Removes the given index from the collisionGrid cells within the given
      * extent.
      */
     void clearCollisionVolumeFromCells(Uint16 volumeIndex,
                                        const CellExtent& clearExtent);
 
     /**
-     * Adds the given tile's collision volumes to the collision and terrain 
+     * Adds the given tile's collision volumes to the collision and terrain
      * grids.
      */
     void addTileCollisionVolumes(const TilePosition& tilePosition,
                                  const Tile& tile);
 
     template<typename RaycastStrategy>
-    struct RaycastInternalParams {
-        RaycastStrategy& strategy;
-        const Vector3& start;
-        const Vector3& end;
-        CollisionObjectTypeMask objectTypeMask;
-        bool ignoreInsideHits;
-    };
-    template<typename RaycastStrategy>
-    void raycastInternal(RaycastInternalParams<RaycastStrategy> params);
+    void raycastInternal(RaycastStrategy& strategy, const RaycastParams& params);
 
     /**
      * Performs a broad phase to get all collision volumes in cells intersected
@@ -288,22 +256,22 @@ private:
      * Note: All volumes in the intersected cells are returned, which may
      *       include volumes that aren't actually within the radius.
      *
-     * @param tileExtent A tile extent matching cellExtent. Used to generate 
+     * @param tileExtent A tile extent matching cellExtent. Used to generate
      *                   terrain.
-     * @param objectTypeMask The bitmask to use when filtering objects. If an
-     *                       object type is present in the mask, it will be
-     *                       included in the results.
+     * @param collisionMask The bitmask to use when filtering world objects. If
+     *                      a layer is present in the mask, objects in that
+     *                      layer will be included in the results.
      *
-     * @pre tileExtent and cellExtent must be pre-clipped to this locator's 
+     * @pre tileExtent and cellExtent must be pre-clipped to this locator's
      *      bounds.
      */
     std::vector<const CollisionInfo*>&
         getCollisionsBroad(const TileExtent& tileExtent,
                            const CellExtent& cellExtent,
-                           CollisionObjectTypeMask objectTypeMask);
+                           CollisionLayerBitSet collisionMask);
 
     /**
-     * Returns the index in the collisionGrid vector where the cell with the 
+     * Returns the index in the collisionGrid vector where the cell with the
      * given coordinates can be found.
      */
     inline std::size_t
@@ -322,7 +290,7 @@ private:
     }
 
     /**
-     * Returns the index in the terrainGrid vector where the tile with the 
+     * Returns the index in the terrainGrid vector where the tile with the
      * given coordinates can be found.
      */
     inline std::size_t
@@ -346,7 +314,7 @@ private:
     /** The grid's extent, with cells as the unit. */
     CellExtent gridCellExtent;
 
-    /** The collision volume and related info for each world object that this 
+    /** The collision volume and related info for each world object that this
         locator is tracking. */
     std::vector<CollisionInfo> collisionVolumes;
 
@@ -356,20 +324,20 @@ private:
     /** The outer vector is a 3D grid stored in row-major order, holding the
         grid's cells.
         Each element in the grid is a vector of volumes--the volumes that
-        currently intersect with that cell (represented by their index in 
+        currently intersect with that cell (represented by their index in
         collisionVolumes). */
     std::vector<std::vector<Uint16>> collisionGrid;
 
-    /** A map of entities -> the index of their collision volumes in 
+    /** A map of entities -> the index of their collision volumes in
         collisionVolumes. */
     std::unordered_map<entt::entity, Uint16> entityMap;
-    /** A map of tiles -> the indices of their layer's collision volumes in 
+    /** A map of tiles -> the indices of their layer's collision volumes in
         collisionVolumes. */
     std::unordered_map<TilePosition, std::vector<Uint16>> tileMap;
 
     /** A 3D grid where each element holds the terrain of the associated tile.
-        Since terrain can be fully described by its 1B value, it's more 
-        efficient to store the value and construct the bounding box as needed 
+        Since terrain can be fully described by its 1B value, it's more
+        efficient to store the value and construct the bounding box as needed
         instead of storing it in collisionGrid. */
     std::vector<Terrain::Value> terrainGrid;
 

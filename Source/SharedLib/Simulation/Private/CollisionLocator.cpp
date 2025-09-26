@@ -48,12 +48,8 @@ void CollisionLocator::setGridSize(const TileExtent& mapTileExtent)
 
 void CollisionLocator::updateEntity(entt::entity entity,
                                     const BoundingBox& collisionVolume,
-                                    bool hasInputComponent)
+                                    CollisionLayerBitSet collisionLayers)
 {
-    CollisionObjectType::Value objectType{
-        hasInputComponent ? CollisionObjectType::DynamicEntity
-                          : CollisionObjectType::StaticEntity};
-
     // Find the cells that the collision volume intersects.
     CellExtent cellExtent(collisionVolume, CELL_WORLD_WIDTH, CELL_WORLD_HEIGHT);
     if (!(gridCellExtent.contains(cellExtent))) {
@@ -71,11 +67,11 @@ void CollisionLocator::updateEntity(entt::entity entity,
         CollisionInfo& volumeInfo{collisionVolumes[entityIt->second]};
         CellExtent oldCellExtent(volumeInfo.collisionVolume, CELL_WORLD_WIDTH,
                                  CELL_WORLD_HEIGHT);
-        
+
         // Update their collision volume.
         volumeIndex = entityIt->second;
         collisionVolumes[volumeIndex].collisionVolume = collisionVolume;
-        collisionVolumes[volumeIndex].objectType = objectType;
+        collisionVolumes[volumeIndex].collisionLayers = collisionLayers;
         collisionVolumes[volumeIndex].entity = entity;
 
         // If the cell extent hasn't changed, exit early.
@@ -95,12 +91,13 @@ void CollisionLocator::updateEntity(entt::entity entity,
             freeCollisionVolumesIndices.pop_back();
 
             collisionVolumes[volumeIndex].collisionVolume = collisionVolume;
-            collisionVolumes[volumeIndex].objectType = objectType;
+            collisionVolumes[volumeIndex].collisionLayers = collisionLayers;
             collisionVolumes[volumeIndex].entity = entity;
         }
         else {
             // No free indices, add the volume to the back.
-            collisionVolumes.emplace_back(collisionVolume, objectType, entity);
+            collisionVolumes.emplace_back(collisionVolume, collisionLayers,
+                                          entity);
             volumeIndex = static_cast<Uint16>(collisionVolumes.size() - 1);
         }
 
@@ -119,7 +116,7 @@ void CollisionLocator::updateTile(const TilePosition& tilePosition,
     auto tileIt{tileMap.find(tilePosition)};
     if (tileIt != tileMap.end()) {
         // For each layer that was in the tile.
-        // Note: Terrain layers will never be present in this loop, since 
+        // Note: Terrain layers will never be present in this loop, since
         //       they aren't added to collisionVolumes or tileMap.
         for (Uint16 volumeIndex : tileIt->second) {
             CollisionInfo& volumeInfo{collisionVolumes[volumeIndex]};
@@ -128,7 +125,7 @@ void CollisionLocator::updateTile(const TilePosition& tilePosition,
             CellExtent cellExtent(volumeInfo.collisionVolume, CELL_WORLD_WIDTH,
                                   CELL_WORLD_HEIGHT);
             clearCollisionVolumeFromCells(volumeIndex, cellExtent);
-            
+
             // Mark its index as now being free.
             freeCollisionVolumesIndices.push_back(volumeIndex);
         }
@@ -144,7 +141,7 @@ void CollisionLocator::updateTile(const TilePosition& tilePosition,
         }
     }
 
-    // Add the tile to tileMap, and add all of its collidable layers to 
+    // Add the tile to tileMap, and add all of its collidable layers to
     // collisionGrid and terrainGrid.
     addTileCollisionVolumes(tilePosition, tile);
 }
@@ -154,14 +151,13 @@ void CollisionLocator::removeEntity(entt::entity entity)
     // If we aren't already tracking this entity, do nothing.
     auto entityIt{entityMap.find(entity)};
     if (entityIt == entityMap.end()) {
-        // Note: Entities may not have collision, so it's fine to not find 
+        // Note: Entities may not have collision, so it's fine to not find
         //       them in this locator.
         return;
     }
 
     // Remove the entity from the cells that it's located in.
-    const CollisionInfo& volumeInfo{
-        collisionVolumes[entityIt->second]};
+    const CollisionInfo& volumeInfo{collisionVolumes[entityIt->second]};
     CellExtent cellExtent(volumeInfo.collisionVolume, CELL_WORLD_WIDTH,
                           CELL_WORLD_HEIGHT);
     clearCollisionVolumeFromCells(entityIt->second, cellExtent);
@@ -173,26 +169,20 @@ void CollisionLocator::removeEntity(entt::entity entity)
     entityMap.erase(entityIt);
 }
 
-bool CollisionLocator::raycastAny(const Vector3& start, const Vector3& end,
-                                  CollisionObjectTypeMask objectTypeMask,
-                                  bool ignoreInsideHits)
+bool CollisionLocator::raycastAny(const RaycastParams& params)
 {
     RaycastStrategyIntersectAny strategy(*this);
-    raycastInternal<RaycastStrategyIntersectAny>(
-        {strategy, start, end, objectTypeMask, ignoreInsideHits});
+    raycastInternal<RaycastStrategyIntersectAny>(strategy, params);
     return strategy.hasIntersected;
 }
 
 std::optional<CollisionLocator::RaycastHitInfo>
-    CollisionLocator::raycastFirst(const Vector3& start, const Vector3& end,
-                                   CollisionObjectTypeMask objectTypeMask,
-                                   bool ignoreInsideHits)
+    CollisionLocator::raycastFirst(const RaycastParams& params)
 {
     RaycastStrategyIntersectFirst strategy(*this);
     raycastReturnVector.clear();
     terrainCollisionVolumes.clear();
-    raycastInternal<RaycastStrategyIntersectFirst>(
-        {strategy, start, end, objectTypeMask, ignoreInsideHits});
+    raycastInternal<RaycastStrategyIntersectFirst>(strategy, params);
 
     // If we hit anything, return it.
     if (strategy.hasIntersected) {
@@ -203,27 +193,24 @@ std::optional<CollisionLocator::RaycastHitInfo>
 }
 
 std::vector<CollisionLocator::RaycastHitInfo>&
-    CollisionLocator::raycastAll(const Vector3& start, const Vector3& end,
-                                 CollisionObjectTypeMask objectTypeMask,
-                                 bool ignoreInsideHits)
+    CollisionLocator::raycastAll(const RaycastParams& params)
 {
     RaycastStrategyIntersectAll strategy(*this);
     raycastReturnVector.clear();
     terrainCollisionVolumes.clear();
-    raycastInternal<RaycastStrategyIntersectAll>(
-        {strategy, start, end, objectTypeMask, ignoreInsideHits});
+    raycastInternal<RaycastStrategyIntersectAll>(strategy, params);
 
     return raycastReturnVector;
 }
 
 std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisions(const Cylinder& cylinder,
-                                    CollisionObjectTypeMask objectTypeMask)
+                                    CollisionLayerBitSet collisionMask)
 {
     AM_ASSERT(cylinder.radius >= 0, "Cylinder can't have negative radius.");
 
     // Perform a broad phase.
-    getCollisionsBroad(cylinder, objectTypeMask);
+    getCollisionsBroad(cylinder, collisionMask);
 
     // Erase any volumes that don't actually intersect the extent.
     std::erase_if(collisionReturnVector,
@@ -236,10 +223,10 @@ std::vector<const CollisionLocator::CollisionInfo*>&
 
 std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisions(const BoundingBox& boundingBox,
-                                    CollisionObjectTypeMask objectTypeMask)
+                                    CollisionLayerBitSet collisionMask)
 {
     // Perform a broad phase.
-    getCollisionsBroad(boundingBox, objectTypeMask);
+    getCollisionsBroad(boundingBox, collisionMask);
 
     // Erase any volumes that don't actually intersect the extent.
     std::erase_if(collisionReturnVector, [this, &boundingBox](
@@ -252,10 +239,10 @@ std::vector<const CollisionLocator::CollisionInfo*>&
 
 std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisions(const TileExtent& tileExtent,
-                                    CollisionObjectTypeMask objectTypeMask)
+                                    CollisionLayerBitSet collisionMask)
 {
     // Perform a broad phase.
-    getCollisionsBroad(tileExtent, objectTypeMask);
+    getCollisionsBroad(tileExtent, collisionMask);
 
     // Erase any volumes that don't actually intersect the extent.
     BoundingBox tileExtentBox(tileExtent);
@@ -269,15 +256,15 @@ std::vector<const CollisionLocator::CollisionInfo*>&
 
 std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisions(const ChunkExtent& chunkExtent,
-                                    CollisionObjectTypeMask objectTypeMask)
+                                    CollisionLayerBitSet collisionMask)
 {
     // Convert to TileExtent.
-    return getCollisions(TileExtent(chunkExtent), objectTypeMask);
+    return getCollisions(TileExtent(chunkExtent), collisionMask);
 }
 
 std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisionsBroad(const Cylinder& cylinder,
-                                         CollisionObjectTypeMask objectTypeMask)
+                                         CollisionLayerBitSet collisionMask)
 {
     // Calc the cell extent that is intersected by the cylinder.
     CellExtent cylinderCellExtent(cylinder, CELL_WORLD_WIDTH,
@@ -290,20 +277,20 @@ std::vector<const CollisionLocator::CollisionInfo*>&
                                   SharedConfig::COLLISION_LOCATOR_CELL_WIDTH,
                                   SharedConfig::COLLISION_LOCATOR_CELL_HEIGHT);
     return getCollisionsBroad(cylinderTileExtent, cylinderCellExtent,
-                              objectTypeMask);
+                              collisionMask);
 }
 
 std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisionsBroad(const BoundingBox& boundingBox,
-                                         CollisionObjectTypeMask objectTypeMask)
+                                         CollisionLayerBitSet collisionMask)
 {
     // Convert to TileExtent.
-    return getCollisionsBroad(TileExtent(boundingBox), objectTypeMask);
+    return getCollisionsBroad(TileExtent(boundingBox), collisionMask);
 }
 
 std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisionsBroad(const TileExtent& tileExtent,
-                                         CollisionObjectTypeMask objectTypeMask)
+                                         CollisionLayerBitSet collisionMask)
 {
     // Calc the cell extent that is intersected by the tile extent.
     CellExtent tileCellExtent(tileExtent,
@@ -314,16 +301,15 @@ std::vector<const CollisionLocator::CollisionInfo*>&
     tileCellExtent = tileCellExtent.intersectWith(gridCellExtent);
     TileExtent clippedTileExtent{tileExtent.intersectWith(gridTileExtent)};
 
-    return getCollisionsBroad(clippedTileExtent, tileCellExtent,
-                              objectTypeMask);
+    return getCollisionsBroad(clippedTileExtent, tileCellExtent, collisionMask);
 }
 
 std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisionsBroad(const ChunkExtent& chunkExtent,
-                                         CollisionObjectTypeMask objectTypeMask)
+                                         CollisionLayerBitSet collisionMask)
 {
     // Convert to TileExtent.
-    return getCollisionsBroad(TileExtent(chunkExtent), objectTypeMask);
+    return getCollisionsBroad(TileExtent(chunkExtent), collisionMask);
 }
 
 void CollisionLocator::addCollisionVolumeToCells(Uint16 volumeIndex,
@@ -376,15 +362,16 @@ void CollisionLocator::addTileCollisionVolumes(const TilePosition& tilePosition,
     for (const TileLayer& layer : tile.getAllLayers()) {
         GraphicRef graphic{layer.getGraphic()};
 
-        // Note: Tile layers are sorted, so they will always appear in this 
+        // Note: Tile layers are sorted, so they will always appear in this
         //       order (if present).
         // If it's terrain, add it to the terrain grid.
         BoundingBox collisionVolume{};
+        CollisionLayerType::Value layerType{};
         if (layer.type == TileLayer::Type::Terrain) {
             terrainGrid[linearizeTileIndex(tilePosition)]
                 = static_cast<Terrain::Value>(layer.graphicValue);
 
-            // Generate a temporary collision volume so we can get a height 
+            // Generate a temporary collision volume so we can get a height
             // offset for the other layers.
             collisionVolume = Terrain::calcWorldBounds(
                 tilePosition, static_cast<Terrain::Value>(layer.graphicValue));
@@ -392,6 +379,7 @@ void CollisionLocator::addTileCollisionVolumes(const TilePosition& tilePosition,
 
             // Continue to the next layer, to avoid this terrain being added to
             // the collisionGrid.
+            layerType = CollisionLayerType::TerrainWall;
             continue;
         }
         // If it's a floor, skip it (they never have collision).
@@ -407,6 +395,10 @@ void CollisionLocator::addTileCollisionVolumes(const TilePosition& tilePosition,
             if (layer.type == TileLayer::Type::Wall) {
                 collisionVolume.min.z += terrainHeight;
                 collisionVolume.max.z += terrainHeight;
+                layerType = CollisionLayerType::TerrainWall;
+            }
+            else {
+                layerType = CollisionLayerType::Object;
             }
         }
 
@@ -417,25 +409,23 @@ void CollisionLocator::addTileCollisionVolumes(const TilePosition& tilePosition,
             freeCollisionVolumesIndices.pop_back();
 
             collisionVolumes[volumeIndex].collisionVolume = collisionVolume;
-            collisionVolumes[volumeIndex].objectType
-                = CollisionObjectType::TileLayer;
+            collisionVolumes[volumeIndex].collisionLayers = layerType;
         }
         else {
             // No free indices, add the volume to the back.
-            collisionVolumes.emplace_back(collisionVolume,
-                                          CollisionObjectType::TileLayer);
+            collisionVolumes.emplace_back(collisionVolume, layerType);
             volumeIndex = static_cast<Uint16>(collisionVolumes.size() - 1);
         }
 
-        // Convert the volume to a cell extent and make sure each length is 
-        // non-zero (it's fine for the volume to be a plane, but if the cell 
+        // Convert the volume to a cell extent and make sure each length is
+        // non-zero (it's fine for the volume to be a plane, but if the cell
         // extent has any zero lengths, this layer won't be added to any cells).
         CellExtent cellExtent(collisionVolume, CELL_WORLD_WIDTH,
                               CELL_WORLD_HEIGHT);
         cellExtent.xLength = std::max(cellExtent.xLength, 1);
         cellExtent.yLength = std::max(cellExtent.yLength, 1);
         cellExtent.zLength = std::max(cellExtent.zLength, 1);
-        
+
         // Add this layer's collision volume to the grid.
         addCollisionVolumeToCells(volumeIndex, cellExtent);
 
@@ -445,13 +435,13 @@ void CollisionLocator::addTileCollisionVolumes(const TilePosition& tilePosition,
 }
 
 template<typename RaycastStrategy>
-void CollisionLocator::raycastInternal(
-    RaycastInternalParams<RaycastStrategy> params)
+void CollisionLocator::raycastInternal(RaycastStrategy& strategy,
+                                       const RaycastParams& params)
 {
     // DDA Algorithm Ref: https://lodev.org/cgtutor/raycasting.html
     //                    https://www.youtube.com/watch?v=NbSee-XM7WA
 
-    // Calc the t values of how long we have to travel along the ray to fully 
+    // Calc the t values of how long we have to travel along the ray to fully
     // move through 1 cell in each direction.
     Vector3 rayDirection{params.end - params.start};
     Vector3 inverseRayDirection{rayDirection.reciprocal()};
@@ -466,7 +456,7 @@ void CollisionLocator::raycastInternal(
                                  SharedConfig::COLLISION_LOCATOR_CELL_WIDTH,
                                  SharedConfig::COLLISION_LOCATOR_CELL_HEIGHT};
 
-    // Determine whether we're walking in the positive or negative direction 
+    // Determine whether we're walking in the positive or negative direction
     // along each axis (also start calc'ing next intersections).
     int stepDirectionX{};
     int stepDirectionY{};
@@ -504,8 +494,8 @@ void CollisionLocator::raycastInternal(
     }
 
     // Calc the t values where the next intersection occurs in each direction.
-    // Note: Dividing by CELL_WORLD_ gives us a ratio of total cell size, 
-    //       which we can then multiply by cellStep to get "how much of a 
+    // Note: Dividing by CELL_WORLD_ gives us a ratio of total cell size,
+    //       which we can then multiply by cellStep to get "how much of a
     //       step would we have to make along the ray to reach the next cell".
     nextIntersection /= CELL_WORLD_SIZE;
     nextIntersection *= cellStep;
@@ -530,10 +520,11 @@ void CollisionLocator::raycastInternal(
         }
 
         // Intersect with the objects in this cell.
-        params.strategy.intersectObjectsInCell(
+        strategy.intersectObjectsInCell(
             params.start, inverseRayDirection, currentCellPosition,
-            params.objectTypeMask, params.ignoreInsideHits);
-        if (params.strategy.isDone()) {
+            params.collisionMask, params.entitiesToExclude,
+            params.ignoreInsideHits);
+        if (strategy.isDone()) {
             break;
         }
 
@@ -544,7 +535,7 @@ void CollisionLocator::raycastInternal(
             currentCellPosition.x += stepDirectionX;
         }
         else if ((nextIntersection.y < nextIntersection.x)
-            && (nextIntersection.y < nextIntersection.z)) {
+                 && (nextIntersection.y < nextIntersection.z)) {
             nextIntersection.y += cellStep.y;
             currentCellPosition.y += stepDirectionY;
         }
@@ -558,12 +549,12 @@ void CollisionLocator::raycastInternal(
 std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisionsBroad(const TileExtent& tileExtent,
                                          const CellExtent& cellExtent,
-                                         CollisionObjectTypeMask objectTypeMask)
+                                         CollisionLayerBitSet collisionMask)
 {
-    // Generate any intersected terrain and add it to the temporary terrain 
+    // Generate any intersected terrain and add it to the temporary terrain
     // vector.
     // Note: We ignore modelBounds and collisionEnabled on terrain, all terrain
-    //       gets generated collision. 
+    //       gets generated collision.
     terrainCollisionVolumes.clear();
     for (int z{tileExtent.z}; z <= tileExtent.zMax(); ++z) {
         for (int y{tileExtent.y}; y <= tileExtent.yMax(); ++y) {
@@ -578,7 +569,7 @@ std::vector<const CollisionLocator::CollisionInfo*>&
                 BoundingBox collisionVolume{
                     Terrain::calcWorldBounds(tilePosition, terrainValue)};
                 terrainCollisionVolumes.emplace_back(
-                    collisionVolume, CollisionObjectType::TileLayer);
+                    collisionVolume, CollisionLayerType::TerrainWall);
             }
         }
     }
@@ -589,7 +580,7 @@ std::vector<const CollisionLocator::CollisionInfo*>&
         collisionReturnVector.emplace_back(&(collisionInfo));
     }
 
-    // Add the indices in every intersected collisionGrid cell to the scratch 
+    // Add the indices in every intersected collisionGrid cell to the scratch
     // index vector.
     indexVector.clear();
     for (int z{cellExtent.z}; z <= cellExtent.zMax(); ++z) {
@@ -612,7 +603,7 @@ std::vector<const CollisionLocator::CollisionInfo*>&
         const CollisionInfo& volumeInfo{collisionVolumes[volumeIndex]};
 
         // Filter out any objects that don't match the mask.
-        if (volumeInfo.objectType & objectTypeMask) {
+        if (volumeInfo.collisionLayers & collisionMask) {
             collisionReturnVector.push_back(&volumeInfo);
         }
     }

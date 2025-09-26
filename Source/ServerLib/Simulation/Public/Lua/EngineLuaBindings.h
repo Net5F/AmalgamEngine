@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ItemID.h"
+#include "EngineCollisionLayerType.h"
 #include "Dialogue.h"
 #include "NetworkID.h"
 #include "entt/fwd.hpp"
@@ -55,6 +56,10 @@ private:
     //-------------------------------------------------------------------------
     // Entity init
     //-------------------------------------------------------------------------
+    void setCollisionLayers(CollisionLayerBitSet collisionLayers);
+
+    void setCollisionMask(CollisionLayerBitSet collisionMask);
+
     /**
      * Adds the "Talk" interaction to the entity.
      * Use the topic() Lua function to add dialogue.

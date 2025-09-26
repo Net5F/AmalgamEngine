@@ -14,6 +14,7 @@ target_sources(SharedLib
         Private/CastableData/CastableData.cpp
         Private/Components/Camera.cpp
         Private/Components/CastCooldown.cpp
+        Private/Components/CollisionBitSets.cpp
         Private/Components/Interaction.cpp
         Private/Components/Inventory.cpp
         Private/GraphicData/Animation.cpp
@@ -47,6 +48,7 @@ target_sources(SharedLib
         Public/DiscreteExtent.h
         Public/DiscreteImpl.h
         Public/DiscretePosition.h
+        Public/EngineCollisionLayerType.h
         Public/EngineEntityGraphicType.h
         Public/EngineEntityInteractionType.h
         Public/EngineItemInteractionType.h
@@ -69,6 +71,7 @@ target_sources(SharedLib
         Public/Components/Camera.h
         Public/Components/CastCooldown.h
         Public/Components/Collision.h
+        Public/Components/CollisionBitSets.h
         Public/Components/EntityInitScript.h
         Public/Components/GraphicState.h
         Public/Components/Input.h

@@ -168,12 +168,13 @@ void EntityLifetimeSystem::processEntityData(
     // When entities have a GraphicState, the server gives them a Collision.
     // It isn't replicated, so we add it manually.
     if (const auto* graphicState{registry.try_get<GraphicState>(newEntity)}) {
-        // Note: Entity collision always comes from its IdleSouth graphic.
+        // Note: Entity collision always comes from its Idle South graphic.
         const EntityGraphicSet& graphicSet{
             graphicData.getEntityGraphicSet(graphicState->graphicSetID)};
         const auto& graphicArr{graphicSet.graphics.at(EntityGraphicType::Idle)};
         const GraphicRef& graphic{graphicArr.at(Rotation::Direction::South)};
 
+        // Add the Collision.
         const BoundingBox& modelBounds{graphic.getModelBounds()};
         const Position& position{registry.get<Position>(newEntity)};
         const Collision& collision{registry.emplace<Collision>(
@@ -181,8 +182,13 @@ void EntityLifetimeSystem::processEntityData(
             Transforms::modelToWorldEntity(modelBounds, position))};
 
         // Entities with Collision get added to the locator.
-        world.collisionLocator.updateEntity(newEntity, collision.worldBounds,
-                                            registry.all_of<Input>(newEntity));
+        // Note: We assume that an entity with GraphicState always has a
+        //       Collision and CollisionBitSets.
+        const CollisionBitSets& collisionBitSets{
+            registry.get<CollisionBitSets>(newEntity)};
+        world.collisionLocator.updateEntity(
+            newEntity, collision.worldBounds,
+            collisionBitSets.getCollisionLayers());
 
         // Entities with GraphicState also get a ClientGraphicState.
         // Set it to match the entity's Rotation, or South if it has none.

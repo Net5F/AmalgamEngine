@@ -32,10 +32,15 @@ public:
 
 private:
     /**
-     * Updates Sprite and Collision components when a GraphicState is
-     * updated.
+     * Updates the entity's collision (since collision is based on graphic set).
      */
     void onGraphicStateUpdated(entt::registry& registry, entt::entity entity);
+
+    /**
+     * Updates the entity's collision in CollisionLocator.
+     */
+    void onCollisionBitSetsUpdated(entt::registry& registry,
+                                   entt::entity entity);
 
     /** Used for fetching component data. */
     World& world;

@@ -284,10 +284,17 @@ bool CastHelper::isInLineOfSight(entt::entity casterEntity,
         targetPoint = targetCollision->worldBounds.getTopCenterPoint();
     }
 
-    // If the ray hits anything, return false. If not, return true.
-    return !(world.collisionLocator.raycastAny(
-        casterPoint, targetPoint,
-        (CollisionObjectType::TileLayer | CollisionObjectType::StaticEntity)));
+    // If the ray hits anything besides the target, return false. If not, 
+    // return true.
+    std::array<entt::entity, 1> entitiesToExclude{targetEntity};
+    bool objectWasHit{world.collisionLocator.raycastAny(
+        {.start{casterPoint},
+         .end{targetPoint},
+         .collisionMask{CollisionLayerType::TerrainWall
+                        | CollisionLayerType::BlockLoS},
+         .entitiesToExclude{entitiesToExclude}})};
+
+    return !objectWasHit;
 }
 
 bool CastHelper::isInLineOfSight(entt::entity casterEntity,
@@ -304,9 +311,12 @@ bool CastHelper::isInLineOfSight(entt::entity casterEntity,
     }
 
     // If the ray hits anything, return false. If not, return true.
-    return !(world.collisionLocator.raycastAny(
-        casterPoint, targetPosition,
-        (CollisionObjectType::TileLayer | CollisionObjectType::StaticEntity)));
+    bool objectWasHit{world.collisionLocator.raycastAny(
+        {.start{casterPoint},
+         .end{targetPosition},
+         .collisionMask{CollisionLayerType::TerrainWall
+                        | CollisionLayerType::BlockLoS}})};
+    return !objectWasHit;
 }
 
 } // namespace Server

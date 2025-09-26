@@ -92,16 +92,24 @@ void NpcMovementSystem::moveAllNpcs()
 {
     auto movementGroup{EnttGroups::getMovementGroup(world.registry)};
     for (auto [entity, input, position, previousPosition, movement,
-               movementMods, rotation, collision, graphicState] :
+               movementMods, rotation, collision, collisionBitSets,
+               graphicState] :
          movementGroup.each()) {
         // Save their old position.
         previousPosition = position;
 
         // Move the entity.
-        entityMover.moveEntity(world.playerEntity, input.inputStates, position,
-                               previousPosition, movement, movementMods,
-                               rotation, collision,
-                               SharedConfig::SIM_TICK_TIMESTEP_S);
+        entityMover.moveEntity(
+            {.entity{entity},
+             .inputStates{input.inputStates},
+             .position{position},
+             .previousPosition{previousPosition},
+             .movement{movement},
+             .movementMods{movementMods},
+             .rotation{rotation},
+             .collision{collision},
+             .collisionBitSets{collisionBitSets},
+             .deltaSeconds{SharedConfig::SIM_TICK_TIMESTEP_S}});
     }
 }
 

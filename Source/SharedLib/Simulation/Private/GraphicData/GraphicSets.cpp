@@ -7,10 +7,10 @@ namespace AM
 
 BoundingBox EntityGraphicSet::getCollisionModelBounds() const
 {
-    // Note: Every entity graphic set must have a valid Idle.
     AM_ASSERT(graphics.contains(EntityGraphicType::Idle),
               "Entity graphic set is missing Idle: %s.", displayName.c_str());
 
+    // Note: Entity collision always comes from its Idle South graphic.
     const auto& idleGraphicArray{graphics.at(EntityGraphicType::Idle)};
     const GraphicRef& idleSouthGraphicRef{
         idleGraphicArray[Rotation::Direction::South]};

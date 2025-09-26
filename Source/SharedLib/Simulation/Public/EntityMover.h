@@ -35,16 +35,24 @@ public:
                 EntityLocator& inEntityLocator,
                 CollisionLocator& inCollisionLocator);
 
+    struct MoveEntityParams
+    {   
+        entt::entity entity;
+        const Input::StateArr& inputStates;
+        Position& position;
+        const PreviousPosition& previousPosition;
+        Movement& movement;
+        const MovementModifiers& movementMods;
+        Rotation& rotation;
+        Collision& collision;
+        const CollisionBitSets& collisionBitSets;
+        double deltaSeconds;
+    };
     /**
      * Processes a tick of entity movement, updating the given components 
      * appropriately.
      */
-    void moveEntity(entt::entity entity, const Input::StateArr& inputStates,
-                    Position& position,
-                    const PreviousPosition& previousPosition,
-                    Movement& movement, const MovementModifiers& movementMods,
-                    Rotation& rotation, Collision& collision,
-                    double deltaSeconds);
+    void moveEntity(const MoveEntityParams& params);
 
 private:
     /**
@@ -59,11 +67,14 @@ private:
      *
      * @param currentBounds The bounding box, at its current position.
      * @param movement The entity's movement component.
+     * @param collisionMask The entity's collision mask.
      *
      * @return The desired bounding box, moved to resolve collisions.
      */
     BoundingBox resolveCollisions(const BoundingBox& currentBounds,
-                                  Movement& movement, double deltaSeconds);
+                                  Movement& movement,
+                                  const CollisionLayerBitSet& collisionMask,
+                                  double deltaSeconds);
 
     struct NarrowPhaseResult {
         BoundingBox resolvedBounds{};

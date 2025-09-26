@@ -51,8 +51,7 @@ struct EditorAnimation {
     std::vector<Frame> frames;
 
     /** If true, this animation's modelBounds will be used in collision checks.
-        Most animations will want collision enabled, but things like floors and
-        carpets usually don't need collision. */
+        Floors never have collision, regardless of this setting. */
     bool collisionEnabled{false};
 
     /** If non-null, this is the ID of this animation's model-space bounding box.
