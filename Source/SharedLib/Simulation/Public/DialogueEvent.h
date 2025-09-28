@@ -25,16 +25,8 @@ struct NarrateEvent
     std::string text{};
 };
 
-/**
- * Describes how long to wait, in seconds, before handling the next event.
- */
-struct WaitEvent
-{
-    float waitTimeS{1};
-};
-
 /** A dialogue event. */
-using DialogueEvent = std::variant<SayEvent, NarrateEvent, WaitEvent>;
+using DialogueEvent = std::variant<SayEvent, NarrateEvent>;
 
 
 template<typename S>
@@ -47,12 +39,6 @@ template<typename S>
 void serialize(S& serializer, NarrateEvent& narrateEvent)
 {
     serializer.text1b(narrateEvent.text, MAX_DIALOGUE_LINE_TEXT_LENGTH);
-}
-
-template<typename S>
-void serialize(S& serializer, WaitEvent& waitEvent)
-{
-    serializer.value4b(waitEvent.waitTimeS);
 }
 
 } // namespace AM

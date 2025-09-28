@@ -485,8 +485,13 @@ void World::loadNonClientEntities()
                 [&](const Rotation& rotation) {
                     // Note: If movement or graphics components are added first,
                     //       this will be a replace.
-                    using T = std::decay_t<decltype(rotation)>;
-                    registry.emplace_or_replace<T>(newEntity, rotation);
+                    registry.emplace_or_replace<Rotation>(newEntity, rotation);
+                },
+                [&](const CollisionBitSets& collisionBitSets) {
+                    // Note: If graphics components are added first, this will
+                    //       be a replace.
+                    registry.emplace_or_replace<CollisionBitSets>(newEntity, 
+                        collisionBitSets);
                 },
                 [&](const GraphicState& graphicState) {
                     // Note: We only persist GraphicState, but it implies 

@@ -164,7 +164,6 @@ void EngineLuaBindings::addDialogueBindings()
     dialogueLua.luaState.set_function("say", &EngineLuaBindings::say, this);
     dialogueLua.luaState.set_function("narrate", &EngineLuaBindings::narrate,
                                       this);
-    dialogueLua.luaState.set_function("wait", &EngineLuaBindings::wait, this);
     dialogueLua.luaState.set_function("setNextTopic",
                                       &EngineLuaBindings::setNextTopic, this);
     dialogueLua.luaState.set_function(
@@ -399,11 +398,6 @@ void EngineLuaBindings::say(std::string_view text)
 void EngineLuaBindings::narrate(std::string_view text)
 {
     dialogueLua.dialogueEvents->emplace_back(NarrateEvent{std::string{text}});
-}
-
-void EngineLuaBindings::wait(float timeS)
-{
-    dialogueLua.dialogueEvents->emplace_back(WaitEvent{timeS});
 }
 
 void EngineLuaBindings::setNextTopic(std::string_view topicName)

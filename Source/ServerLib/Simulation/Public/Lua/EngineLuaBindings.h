@@ -120,13 +120,6 @@ private:
     void narrate(std::string_view text);
 
     /**
-     * Adds a wait to the dialogue event list.
-     * Note: The client will automatically add a wait between every say command.
-     *       This command is to add an additional wait.
-     */
-    void wait(float timeS);
-
-    /**
      * Sets the given topic as the next topic to navigate to.
      * Does not immediately jump--the rest of the current script will finish.
      * Calling this multiple times will overwrite previous calls.
