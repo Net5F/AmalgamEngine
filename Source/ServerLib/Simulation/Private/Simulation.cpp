@@ -207,7 +207,9 @@ void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
 {
     extension = std::move(inExtension);
     nceLifetimeSystem.setExtension(extension.get());
+    componentChangeSystem.setExtension(extension.get());
     tileUpdateSystem.setExtension(extension.get());
+    itemSystem.setExtension(extension.get());
 }
 
 } // namespace Server

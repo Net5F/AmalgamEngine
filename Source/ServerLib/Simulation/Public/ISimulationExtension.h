@@ -11,6 +11,8 @@ struct EntityInitRequest;
 struct EntityDeleteRequest;
 struct EntityNameChangeRequest;
 struct GraphicStateChangeRequest;
+struct ItemInitRequest;
+struct ItemChangeRequest;
 
 namespace Server
 {
@@ -87,6 +89,12 @@ public:
     virtual bool isGraphicStateChangeRequestValid(
         const GraphicStateChangeRequest& graphicStateChangeRequest)
         const = 0;
+    virtual bool
+        isItemInitRequestValid(const ItemInitRequest& itemInitRequest) const
+        = 0;
+    virtual bool isItemChangeRequestValid(
+        const ItemChangeRequest& itemChangeRequest) const
+        = 0;
 };
 
 } // namespace Server

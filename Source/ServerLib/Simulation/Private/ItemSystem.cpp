@@ -212,14 +212,24 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
 
 void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 {
-    // If the string ID is already in use, send an error.
+    // Check that the string ID isn't taken by another item.
+    ItemError::Type errorType{ItemError::NotSet};
     if (itemData.getItem(itemInitRequest.displayName)) {
+        errorType = ItemError::StringIDInUse;
+    }
+    // Check that the project says the request is valid.
+    else if ((extension != nullptr)
+             && !(extension->isItemInitRequestValid(itemInitRequest))) {
+        errorType = ItemError::PermissionFailure;
+    }
+
+    // If we found an error, send it to the requesting client.
+    if (errorType != ItemError::NotSet) {
         std::string stringID{};
         StringTools::deriveStringID(itemInitRequest.displayName, stringID);
         network.serializeAndSend(itemInitRequest.netID,
                                  ItemError{itemInitRequest.displayName,
-                                           stringID, NULL_ITEM_ID,
-                                           ItemError::StringIDInUse});
+                                           stringID, NULL_ITEM_ID, errorType});
         return;
     }
 
@@ -259,6 +269,11 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
                  item{itemData.getItem(itemChangeRequest.displayName)};
              item && (item->numericID != itemChangeRequest.itemID)) {
         errorType = ItemError::StringIDInUse;
+    }
+    // Check that the project says the request is valid.
+    else if ((extension != nullptr)
+             && !(extension->isItemChangeRequestValid(itemChangeRequest))) {
+        errorType = ItemError::PermissionFailure;
     }
 
     // If we found an error, send it to the requesting client.
