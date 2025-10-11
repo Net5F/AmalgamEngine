@@ -12,6 +12,7 @@
 #include "entt/entity/entity.hpp"
 #include <vector>
 #include <span>
+#include <optional>
 
 namespace AM
 {

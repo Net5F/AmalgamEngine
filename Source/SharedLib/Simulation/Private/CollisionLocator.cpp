@@ -503,19 +503,22 @@ void CollisionLocator::raycastInternal(RaycastStrategy& strategy,
     // Walk along the ray, checking each cell for a hit collision object.
     // (We iterate until we walk past the end position along some axis).
     while (true) {
-        if (((stepDirectionX > 0) && (currentCellPosition.x > endCellPosition.x)
-             || (stepDirectionX < 0)
-                    && (currentCellPosition.x < endCellPosition.x))) {
+        if ((((stepDirectionX > 0)
+              && (currentCellPosition.x > endCellPosition.x))
+             || ((stepDirectionX < 0)
+                 && (currentCellPosition.x < endCellPosition.x)))) {
             break;
         }
-        if (((stepDirectionY > 0) && (currentCellPosition.y > endCellPosition.y)
-             || (stepDirectionY < 0)
-                    && (currentCellPosition.y < endCellPosition.y))) {
+        if ((((stepDirectionY > 0)
+              && (currentCellPosition.y > endCellPosition.y))
+             || ((stepDirectionY < 0)
+                 && (currentCellPosition.y < endCellPosition.y)))) {
             break;
         }
-        if (((stepDirectionZ > 0) && (currentCellPosition.z > endCellPosition.z)
-             || (stepDirectionZ < 0)
-                    && (currentCellPosition.z < endCellPosition.z))) {
+        if ((((stepDirectionZ > 0)
+              && (currentCellPosition.z > endCellPosition.z))
+             || ((stepDirectionZ < 0)
+                 && (currentCellPosition.z < endCellPosition.z)))) {
             break;
         }
 
