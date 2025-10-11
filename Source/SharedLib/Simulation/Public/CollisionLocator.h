@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CollisionBitsets.h"
+#include "CollisionBitSets.h"
 #include "CellExtent.h"
 #include "CellPosition.h"
 #include "TilePosition.h"
