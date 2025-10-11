@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <chrono>
 #include <functional>
-#include <format>
 #include <variant>
 #include <algorithm>
 #include <filesystem>
