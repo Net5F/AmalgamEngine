@@ -76,10 +76,9 @@ public:
         std::span<Uint8> messageBuffer{};
     };
     /**
-     * Tries to receive a message from this client.
+     * Blocks until a message is received from this client.
      *
-     * Note: It's expected that you called SDLNet_CheckSockets() on the
-     *       outside-managed socket set before calling this.
+     * Note: Use dataIsReady() to check for data before calling this.
      *
      * @return An appropriate ReceiveResult. If return.networkResult == Success,
      *         messageBuffer contains the received message.

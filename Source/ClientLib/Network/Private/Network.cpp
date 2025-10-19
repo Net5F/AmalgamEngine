@@ -208,8 +208,8 @@ void Network::connectAndReceive()
         int bytesReceived{
             server->receiveBytes(headerRecBuffer.data(), SERVER_HEADER_SIZE)};
         if (bytesReceived < 0) {
-            LOG_INFO("Found server to be disconnected while trying to "
-                     "receive header.");
+            LOG_INFO("Found server to be disconnected while trying to receive "
+                     "header.");
             eventDispatcher.emplace<ConnectionError>(
                 ConnectionError::Type::Disconnected);
             return;
@@ -243,7 +243,8 @@ void Network::processBatch()
         // Receive the expected bytes.
         int result{server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
         if (result < 0) {
-            LOG_INFO("Failed to receive expected bytes.");
+            LOG_INFO("Found server to be disconnected while trying to receive "
+                     "batch.");
             return;
         }
 

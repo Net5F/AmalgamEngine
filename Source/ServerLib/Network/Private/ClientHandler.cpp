@@ -207,19 +207,18 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
     for (auto& pair : clientMap) {
         const std::shared_ptr<Client>& clientPtr{pair.second};
 
-        /* If there's data waiting, try to receive all messages from the
-           client. */
+        // If there's data waiting, try to receive all messages from the
+        // client.
+        // Note: We can only receive one message at a time, since select() 
+        //       (checkSockets) only tells us data is available, not how much.
         if (clientPtr->dataIsReady()) {
             Client::ReceiveResult result{clientPtr->receiveMessage()};
-            while (result.networkResult == NetworkResult::Success) {
+            if (result.networkResult == NetworkResult::Success) {
                 numReceived++;
 
                 // Process the message.
                 processReceivedMessage(*clientPtr, result.messageType,
                                        result.messageBuffer);
-
-                // Try to receive the next message.
-                result = clientPtr->receiveMessage();
             }
         }
     }

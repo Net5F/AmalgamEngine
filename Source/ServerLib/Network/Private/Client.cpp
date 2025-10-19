@@ -228,10 +228,19 @@ Client::ReceiveResult Client::receiveMessage()
     int bytesRemaining{messageSize - compositionIndex};
     int bytesReceived{
         peer->receiveBytesWait(bufferToUse + compositionIndex, bytesRemaining)};
+    if (bytesReceived >= 0) {
+        receiveTimer.reset();
+    }
+    else {
+        return {NetworkResult::Disconnected};
+    }
+
     compositionIndex += bytesReceived;
 
     // If the message is complete, return it.
     if (compositionIndex == messageSize) {
+        NetworkStats::recordBytesReceived(CLIENT_HEADER_SIZE
+                                          + MESSAGE_HEADER_SIZE + messageSize);
         return {NetworkResult::Success, messageType, {bufferToUse, messageSize}};
     }
 
