@@ -38,6 +38,18 @@ bool DataModel::open(std::string_view resourcesPath)
         return false;
     }
 
+    // Check that the asset directories exist.
+    std::string texturesDir{resourcesPath};
+    texturesDir.append("/Client/Common/Assets/Textures/");
+    if (std::filesystem::exists(texturesDir)) {
+        workingTexturesDir = texturesDir;
+    }
+    else {
+        errorString = "Textures directory does not exist. Please adopt the "
+                      "expected project layout.";
+        return false;
+    }
+
     // If there's already a ResourceData.json, load it.
     workingJsonPath = resourcesPath;
     workingJsonPath += "/Shared/Common/ResourceData.json";
@@ -55,18 +67,6 @@ bool DataModel::open(std::string_view resourcesPath)
     // If the operation failed, return early.
     if (!result) {
         workingJsonPath = "";
-        return false;
-    }
-
-    // Check that the asset directories exist.
-    std::string texturesDir{resourcesPath};
-    texturesDir.append("/Client/Common/Assets/Textures/");
-    if (std::filesystem::exists(texturesDir)) {
-        workingTexturesDir = texturesDir;
-    }
-    else {
-        errorString = "Textures directory does not exist. Please adopt the "
-                      "expected project layout.";
         return false;
     }
 

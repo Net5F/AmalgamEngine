@@ -166,8 +166,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             break;
         }
         case EngineMessageType::InventoryOperation: {
-            dispatchMessage<InventoryOperation>(messageBuffer, messageSize,
-                                                networkEventDispatcher);
+            dispatchWithNetID<InventoryOperation>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         default: {

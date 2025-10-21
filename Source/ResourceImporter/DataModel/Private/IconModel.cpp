@@ -278,6 +278,8 @@ bool IconModel::parseIconSheet(const nlohmann::json& sheetJson)
     // Add this sheet's relative path.
     iconSheet.relPath = sheetJson.at("relPath").get<std::string>();
     if (!(dataModel.validateRelPath(iconSheet.relPath))) {
+        errorString = "Failed to find icon sheet at path: ";
+        errorString += iconSheet.relPath;
         return false;
     }
 
