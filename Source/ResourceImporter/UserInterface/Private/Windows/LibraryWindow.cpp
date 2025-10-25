@@ -452,7 +452,7 @@ void LibraryWindow::onIconSheetAdded(int sheetID, const EditorIconSheet& sheet)
 
 void LibraryWindow::onSpriteSheetRemoved(SpriteSheetID sheetID)
 {
-    auto sheetListItemMap{listItemMaps[LibraryListItem::Type::SpriteSheet]};
+    auto& sheetListItemMap{listItemMaps[LibraryListItem::Type::SpriteSheet]};
     auto sheetIt{sheetListItemMap.find(sheetID)};
     if (sheetIt == sheetListItemMap.end()) {
         LOG_FATAL("Failed to find sprite sheet during removal.");
@@ -476,7 +476,7 @@ void LibraryWindow::onSpriteSheetRemoved(SpriteSheetID sheetID)
 void LibraryWindow::onSpriteRemoved(SpriteID spriteID,
                                     SpriteSheetID parentSheetID)
 {
-    auto spriteListItemMap{listItemMaps[LibraryListItem::Type::Sprite]};
+    auto& spriteListItemMap{listItemMaps[LibraryListItem::Type::Sprite]};
     auto spriteIt{spriteListItemMap.find(spriteID)};
     if (spriteIt == spriteListItemMap.end()) {
         LOG_FATAL("Failed to find sprite during removal.");
@@ -499,7 +499,7 @@ void LibraryWindow::onSpriteRemoved(SpriteID spriteID,
 
 void LibraryWindow::onAnimationRemoved(AnimationID animationID)
 {
-    auto animationListItemMap{listItemMaps[LibraryListItem::Type::Animation]};
+    auto& animationListItemMap{listItemMaps[LibraryListItem::Type::Animation]};
     auto animationIt{animationListItemMap.find(animationID)};
     if (animationIt == animationListItemMap.end()) {
         LOG_FATAL("Failed to find animation during removal.");
@@ -522,7 +522,7 @@ void LibraryWindow::onAnimationRemoved(AnimationID animationID)
 
 void LibraryWindow::onBoundingBoxRemoved(BoundingBoxID boundingBoxID)
 {
-    auto boundsListItemMap{listItemMaps[LibraryListItem::Type::BoundingBox]};
+    auto& boundsListItemMap{listItemMaps[LibraryListItem::Type::BoundingBox]};
     auto boundsIt{boundsListItemMap.find(boundingBoxID)};
     if (boundsIt == boundsListItemMap.end()) {
         LOG_FATAL("Failed to find bounding box during removal.");
@@ -545,7 +545,7 @@ void LibraryWindow::onBoundingBoxRemoved(BoundingBoxID boundingBoxID)
 
 void LibraryWindow::onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID)
 {
-    auto listItemMap{listItemMaps[toListItemType(type)]};
+    auto& listItemMap{listItemMaps[toListItemType(type)]};
     auto graphicSetIt{listItemMap.find(graphicSetID)};
     if (graphicSetIt == listItemMap.end()) {
         LOG_FATAL("Failed to find graphic set during removal.");
@@ -568,7 +568,7 @@ void LibraryWindow::onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSet
 
 void LibraryWindow::onEntityRemoved(EntityGraphicSetID graphicSetID)
 {
-    auto listItemMap{listItemMaps[LibraryListItem::Type::Entity]};
+    auto& listItemMap{listItemMaps[LibraryListItem::Type::Entity]};
     auto graphicSetIt{listItemMap.find(graphicSetID)};
     if (graphicSetIt == listItemMap.end()) {
         LOG_FATAL("Failed to find graphic set during removal.");
@@ -591,7 +591,7 @@ void LibraryWindow::onEntityRemoved(EntityGraphicSetID graphicSetID)
 
 void LibraryWindow::onIconSheetRemoved(int sheetID)
 {
-    auto sheetListItemMap{listItemMaps[LibraryListItem::Type::IconSheet]};
+    auto& sheetListItemMap{listItemMaps[LibraryListItem::Type::IconSheet]};
     auto sheetIt{sheetListItemMap.find(sheetID)};
     if (sheetIt == sheetListItemMap.end()) {
         LOG_FATAL("Failed to find icon sheet during removal.");
@@ -615,7 +615,7 @@ void LibraryWindow::onIconSheetRemoved(int sheetID)
 void LibraryWindow::onSpriteSheetDisplayNameChanged(
     SpriteSheetID spriteSheetID, const std::string& newDisplayName)
 {
-    auto spriteSheetListItemMap{
+    auto& spriteSheetListItemMap{
         listItemMaps[LibraryListItem::Type::SpriteSheet]};
     auto spriteSheetListItemIt{spriteSheetListItemMap.find(spriteSheetID)};
     if (spriteSheetListItemIt == spriteSheetListItemMap.end()) {
@@ -632,7 +632,7 @@ void LibraryWindow::onSpriteSheetDisplayNameChanged(
 void LibraryWindow::onSpriteDisplayNameChanged(
     SpriteID spriteID, const std::string& newDisplayName)
 {
-    auto spriteListItemMap{listItemMaps[LibraryListItem::Type::Sprite]};
+    auto& spriteListItemMap{listItemMaps[LibraryListItem::Type::Sprite]};
     auto spriteListItemIt{spriteListItemMap.find(spriteID)};
     if (spriteListItemIt == spriteListItemMap.end()) {
         LOG_FATAL("Failed to find a list item for the given sprite.");
@@ -646,7 +646,7 @@ void LibraryWindow::onSpriteDisplayNameChanged(
 void LibraryWindow::onAnimationDisplayNameChanged(AnimationID animationID,
     const std::string& newDisplayName)
 {
-    auto animationListItemMap{listItemMaps[LibraryListItem::Type::Animation]};
+    auto& animationListItemMap{listItemMaps[LibraryListItem::Type::Animation]};
     auto animationListItemIt{animationListItemMap.find(animationID)};
     if (animationListItemIt == animationListItemMap.end()) {
         LOG_FATAL("Failed to find a list item for the given animation.");
@@ -660,7 +660,7 @@ void LibraryWindow::onAnimationDisplayNameChanged(AnimationID animationID,
 void LibraryWindow::onBoundingBoxDisplayNameChanged(
     BoundingBoxID boundingBoxID, const std::string& newDisplayName)
 {
-    auto boundsListItemMap{listItemMaps[LibraryListItem::Type::BoundingBox]};
+    auto& boundsListItemMap{listItemMaps[LibraryListItem::Type::BoundingBox]};
     auto boundsListItemIt{boundsListItemMap.find(boundingBoxID)};
     if (boundsListItemIt == boundsListItemMap.end()) {
         LOG_FATAL("Failed to find a list item for the given bounding box.");
@@ -675,7 +675,7 @@ void LibraryWindow::onGraphicSetDisplayNameChanged(
     GraphicSet::Type type, Uint16 graphicSetID, const std::string& newDisplayName)
 {
     LibraryListItem::Type graphicSetListItemType{toListItemType(type)};
-    auto graphicSetListItemMap{listItemMaps[graphicSetListItemType]};
+    auto& graphicSetListItemMap{listItemMaps[graphicSetListItemType]};
     auto graphicSetListItemIt{graphicSetListItemMap.find(graphicSetID)};
     if (graphicSetListItemIt == graphicSetListItemMap.end()) {
         LOG_FATAL("Failed to find a list item for the given graphic set.");
@@ -689,7 +689,7 @@ void LibraryWindow::onGraphicSetDisplayNameChanged(
 void LibraryWindow::onEntityDisplayNameChanged(
     EntityGraphicSetID graphicSetID, const std::string& newDisplayName)
 {
-    auto graphicSetListItemMap{listItemMaps[LibraryListItem::Type::Entity]};
+    auto& graphicSetListItemMap{listItemMaps[LibraryListItem::Type::Entity]};
     auto graphicSetListItemIt{graphicSetListItemMap.find(graphicSetID)};
     if (graphicSetListItemIt == graphicSetListItemMap.end()) {
         LOG_FATAL("Failed to find a list item for the given graphic set.");
@@ -703,7 +703,7 @@ void LibraryWindow::onEntityDisplayNameChanged(
 void LibraryWindow::onIconDisplayNameChanged(IconID iconID,
                                              const std::string& newDisplayName)
 {
-    auto iconListItemMap{listItemMaps[LibraryListItem::Type::Icon]};
+    auto& iconListItemMap{listItemMaps[LibraryListItem::Type::Icon]};
     auto iconListItemIt{iconListItemMap.find(iconID)};
     if (iconListItemIt == iconListItemMap.end()) {
         LOG_FATAL("Failed to find a list item for the given icon.");

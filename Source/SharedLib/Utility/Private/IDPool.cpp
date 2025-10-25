@@ -51,7 +51,7 @@ void IDPool::markIDAsReserved(unsigned int ID)
 {
     // If the ID isn't allocated, resize.
     if (ID >= IDs.size()) {
-        IDs.resize(ID);
+        IDs.resize(ID + 1);
     }
 
     IDs[ID] = true;
