@@ -64,6 +64,20 @@ GraphicHelpers::GraphicReturn GraphicHelpers::getGraphicOrFallback(
         return {EntityGraphicType::Idle, desiredDirection};
     }
 
+    // #### Idle With Ordinal -> Cardinal ####
+    // If the new rotation is an ordinal direction, try to use a cardinal 
+    // direction with an Idle graphic.
+    if ((isDesiredSW || isDesiredSE)
+        && graphicSet.contains(EntityGraphicType::Idle,
+                               Rotation::Direction::South)) {
+        return {EntityGraphicType::Idle, Rotation::Direction::South};
+    }
+    else if ((isDesiredNW || isDesiredNE)
+             && graphicSet.contains(EntityGraphicType::Idle,
+                                    Rotation::Direction::North)) {
+        return {EntityGraphicType::Idle, Rotation::Direction::North};
+    }
+
     // #### Default: Idle South ####
     return {EntityGraphicType::Idle, Rotation::Direction::South};
 }

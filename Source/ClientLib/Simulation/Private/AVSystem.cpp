@@ -199,6 +199,12 @@ bool AVSystem::updateAVEntity(const AVEntityState& avEntityState,
     auto& [desiredGraphicType, desiredGraphicDirection]
         = graphicStateOpt.value();
 
+    // If the desired direction is None, getGraphicState is telling us to use 
+    // the previous direction.
+    if (desiredGraphicDirection == Rotation::Direction::None) {
+        desiredGraphicDirection = clientGraphicState.graphicDirection;
+    }
+
     // Set the new graphic, accounting for missing graphics in the set.
     graphicState.graphicSetID = phase.graphicSetID;
     const EntityGraphicSet& graphicSet{

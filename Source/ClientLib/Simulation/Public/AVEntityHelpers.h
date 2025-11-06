@@ -52,6 +52,10 @@ public:
     };
     /**
      * Returns the appropriate graphic state for the given behavior.
+     *
+     * If behavior is one of the types that points towards targetPosition, and 
+     * casterPosition == targetPosition, returns Rotation::Direction::None.
+     * This lets the caller know to use the previous direction.
      */
     static std::optional<GraphicStateReturn>
         getGraphicState(AVEntity::Behavior behavior,

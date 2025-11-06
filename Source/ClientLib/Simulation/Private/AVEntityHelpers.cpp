@@ -93,6 +93,14 @@ std::optional<AVEntityHelpers::GraphicStateReturn>
         case AVEntity::Behavior::FollowEntityStartCaster:
         case AVEntity::Behavior::MoveToPosition:
         case AVEntity::Behavior::FollowDirection: {
+            // If the entity has reached the target position, we don't know 
+            // which direction to face. Return None so the caller knows to use
+            // the previous direction.
+            if (casterPosition == targetPosition) {
+                return GraphicStateReturn{EntityGraphicType::Run,
+                                          Rotation::Direction::None};
+            }
+
             Vector3 directionVec{targetPosition - casterPosition};
             directionVec.normalize();
             return GraphicStateReturn{EntityGraphicType::Run,
