@@ -26,9 +26,11 @@ struct ItemChangeRequest {
     /** The ID of the item to change. */
     ItemID itemID{NULL_ITEM_ID};
 
-    /** The item's display name.
-        The item's stringID will be derived from this. */
-    std::string displayName{""};
+    /** The item's display name. Not guaranteed to be unique. Shown in the UI. */
+    std::string displayName{"Null"};
+
+    /** The item's unique string ID.  */
+    std::string stringID{""};
 
     /** The ID of this item's icon. */
     IconID iconID{NULL_ICON_ID};
@@ -54,6 +56,7 @@ void serialize(S& serializer, ItemChangeRequest& itemChangeRequest)
     serializer.value2b(itemChangeRequest.itemID);
     serializer.text1b(itemChangeRequest.displayName,
                       Item::MAX_DISPLAY_NAME_LENGTH);
+    serializer.text1b(itemChangeRequest.stringID, Item::MAX_STRING_ID_LENGTH);
     serializer.value2b(itemChangeRequest.iconID);
     serializer.object(itemChangeRequest.initScript);
 }

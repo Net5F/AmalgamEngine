@@ -39,11 +39,11 @@ void ItemSystem::processItemUpdates()
         // Load the given item definition into ItemData, overwriting any 
         // existing item if present.
         Item item{.displayName = itemUpdate.displayName,
+                  .stringID = itemUpdate.stringID,
                   .numericID = itemUpdate.numericID,
                   .iconID = itemUpdate.iconID,
                   .maxStackSize = itemUpdate.maxStackSize,
                   .supportedInteractions = itemUpdate.supportedInteractions};
-        StringTools::deriveStringID(itemUpdate.displayName, item.stringID);
         itemData.loadItem(item, itemUpdate.version);
     }
 

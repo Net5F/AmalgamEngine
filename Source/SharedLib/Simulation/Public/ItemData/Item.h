@@ -36,15 +36,14 @@ namespace AM
  * will be ran.
  */
 struct Item {
-    /** Unique display name, shown in the UI.  */
+    /** The item's display name. Not guaranteed to be unique. Shown in the UI. */
     std::string displayName{"Null"};
 
-    /** The item's unique string ID. Derived from displayName by replacing
-        spaces with underscores and making everything lowercase.
-        This ID will be consistent, and can be used for persistent state. */
+    /** The item's unique string ID. This ID will be consistent, and can be 
+        used for persistent state. */
     std::string stringID{"null"};
 
-    /** This item's unique numeric identifier.
+    /** The item's unique numeric identifier.
         This ID will be consistent, and can be used for persistent state. */
     ItemID numericID{NULL_ITEM_ID};
 
@@ -155,9 +154,11 @@ struct Item {
         return nullptr;
     }
 
-    /** The max length of a display name. Also the max for string IDs, since
-        they're derived from display name. */
+    /** The max length of a display name. */
     static constexpr std::size_t MAX_DISPLAY_NAME_LENGTH{50};
+
+    /** The max length of a string ID. */
+    static constexpr std::size_t MAX_STRING_ID_LENGTH{20};
 
     /** The max length of an item's description text. */
     static constexpr std::size_t MAX_DESCRIPTION_LENGTH{500};

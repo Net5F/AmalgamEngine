@@ -1,15 +1,7 @@
 #include "ItemDataBase.h"
 #include "ItemID.h"
-#include "StringTools.h"
 #include "Log.h"
 #include "AMAssert.h"
-
-namespace
-{
-/** A scratch buffer used while processing string IDs.
-    Must be file-local so it can be accessed by const functions. */
-std::string workStringID{};
-}
 
 namespace AM
 {
@@ -59,11 +51,8 @@ const Item* ItemDataBase::loadItem(const Item& referenceItem,
 
 const Item* ItemDataBase::getItem(std::string_view stringID) const
 {
-    // Derive string ID in case the user accidentally passed a display name.
-    StringTools::deriveStringID(stringID, workStringID);
-
     // Attempt to find the string ID.
-    auto it{itemStringMap.find(workStringID)};
+    auto it{itemStringMap.find(stringID)};
     if (it == itemStringMap.end()) {
         return nullptr;
     }

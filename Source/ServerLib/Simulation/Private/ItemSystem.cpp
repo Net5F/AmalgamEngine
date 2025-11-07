@@ -98,10 +98,11 @@ void ItemSystem::processItemUpdates()
                     const Item& item{*(itemData.getItem(itemSlot.ID))};
                     network.serializeAndSend(
                         client.netID,
-                        ItemUpdate{
-                            item.displayName, item.numericID, item.iconID,
-                            item.maxStackSize, item.supportedInteractions,
-                            itemData.getItemVersion(item.numericID)});
+                        ItemUpdate{item.displayName, item.stringID,
+                                   item.numericID, item.iconID,
+                                   item.maxStackSize,
+                                   item.supportedInteractions,
+                                   itemData.getItemVersion(item.numericID)});
                 }
             }
         }
@@ -212,9 +213,13 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
 
 void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 {
-    // Check that the string ID isn't taken by another item.
+    // Check that a string ID was provided.
     ItemError::Type errorType{ItemError::NotSet};
-    if (itemData.getItem(itemInitRequest.displayName)) {
+    if (itemInitRequest.stringID == "") {
+        errorType = ItemError::StringIDMissing;
+    }
+    // Check that the string ID isn't taken by another item.
+    else if (itemData.getItem(itemInitRequest.stringID)) {
         errorType = ItemError::StringIDInUse;
     }
     // Check that the project says the request is valid.
@@ -225,17 +230,17 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 
     // If we found an error, send it to the requesting client.
     if (errorType != ItemError::NotSet) {
-        std::string stringID{};
-        StringTools::deriveStringID(itemInitRequest.displayName, stringID);
         network.serializeAndSend(itemInitRequest.netID,
                                  ItemError{itemInitRequest.displayName,
-                                           stringID, NULL_ITEM_ID, errorType});
+                                           itemInitRequest.stringID,
+                                           NULL_ITEM_ID, errorType});
         return;
     }
 
     // Build the new item.
     Item item{};
     item.displayName = itemInitRequest.displayName;
+    item.stringID = itemInitRequest.stringID;
     item.iconID = itemInitRequest.iconID;
 
     // Run the init script. If there was an error, return early.
@@ -252,8 +257,9 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
     // Send the requester the new item's definition.
     network.serializeAndSend(
         itemInitRequest.netID,
-        ItemUpdate{newItem->displayName, newItem->numericID, newItem->iconID,
-                   newItem->maxStackSize, newItem->supportedInteractions,
+        ItemUpdate{newItem->displayName, newItem->stringID, newItem->numericID,
+                   newItem->iconID, newItem->maxStackSize,
+                   newItem->supportedInteractions,
                    itemData.getItemVersion(newItem->numericID)});
 }
 
@@ -264,9 +270,13 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     if (!(itemData.getItem(itemChangeRequest.itemID))) {
         errorType = ItemError::NumericIDNotFound;
     }
+    // Check that a string ID was provided.
+    else if (itemChangeRequest.stringID == "") {
+        errorType = ItemError::StringIDMissing;
+    }
     // Check that the string ID isn't taken by another item.
     else if (const Item*
-                 item{itemData.getItem(itemChangeRequest.displayName)};
+                 item{itemData.getItem(itemChangeRequest.stringID)};
              item && (item->numericID != itemChangeRequest.itemID)) {
         errorType = ItemError::StringIDInUse;
     }
@@ -278,18 +288,17 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
 
     // If we found an error, send it to the requesting client.
     if (errorType != ItemError::NotSet) {
-        std::string stringID{};
-        StringTools::deriveStringID(itemChangeRequest.displayName, stringID);
-        network.serializeAndSend(itemChangeRequest.netID,
-                                 ItemError{itemChangeRequest.displayName,
-                                           stringID, itemChangeRequest.itemID,
-                                           errorType});
+        network.serializeAndSend(
+            itemChangeRequest.netID,
+            ItemError{itemChangeRequest.displayName, itemChangeRequest.stringID,
+                      itemChangeRequest.itemID, errorType});
         return;
     }
 
     // Build the updated item.
     Item item{};
     item.displayName = itemChangeRequest.displayName;
+    item.stringID = itemChangeRequest.stringID;
     item.numericID = itemChangeRequest.itemID;
     item.iconID = itemChangeRequest.iconID;
 
@@ -309,8 +318,9 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     //       them this update, which isn't a big deal.
     network.serializeAndSend(
         itemChangeRequest.netID,
-        ItemUpdate{updatedItem->displayName, updatedItem->numericID,
-                   updatedItem->iconID, updatedItem->maxStackSize,
+        ItemUpdate{updatedItem->displayName, updatedItem->stringID,
+                   updatedItem->numericID, updatedItem->iconID,
+                   updatedItem->maxStackSize,
                    updatedItem->supportedInteractions,
                    itemData.getItemVersion(updatedItem->numericID)});
 }
@@ -325,7 +335,8 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
                 itemWasFound = true;
                 network.serializeAndSend(
                     itemDataRequest.netID,
-                    ItemUpdate{item->displayName, item->numericID, item->iconID,
+                    ItemUpdate{item->displayName, item->stringID,
+                               item->numericID, item->iconID,
                                item->maxStackSize, item->supportedInteractions,
                                itemData.getItemVersion(item->numericID)});
             }

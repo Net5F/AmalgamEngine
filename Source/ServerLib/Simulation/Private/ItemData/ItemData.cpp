@@ -3,13 +3,6 @@
 #include "Log.h"
 #include <algorithm>
 
-namespace
-{
-/** A scratch buffer used while processing string IDs.
-    Must be file-local so it can be accessed by const functions. */
-std::string workStringID{};
-}
-
 namespace AM
 {
 namespace Server
@@ -18,6 +11,7 @@ ItemData::ItemData()
 : ItemDataBase()
 , itemInitScriptMap{}
 , defaultInitScript{}
+, workStringID{}
 {
 }
 
@@ -28,10 +22,22 @@ const Item* ItemData::createItem(const Item& referenceItem,
     if (itemMap.find(referenceItem.numericID) != itemMap.end()) {
         return nullptr;
     }
+    // If the display name is too long, do nothing.
+    else if (referenceItem.displayName.size() > Item::MAX_DISPLAY_NAME_LENGTH) {
+        return nullptr;
+    }
 
-    // Derive the string ID. If it's taken, do nothing.
-    StringTools::deriveStringID(referenceItem.displayName, workStringID);
-    if (itemStringMap.find(workStringID) != itemStringMap.end()) {
+    // If no string ID was given, derive it from displayName.
+    if (referenceItem.stringID == "") {
+        StringTools::deriveStringID(referenceItem.displayName, workStringID);
+    }
+    else {
+        workStringID = referenceItem.stringID;
+    }
+
+    // If the string ID is too long or taken, do nothing.
+    if ((workStringID.size() > Item::MAX_STRING_ID_LENGTH)
+        || (itemStringMap.find(workStringID) != itemStringMap.end())) {
         return nullptr;
     }
 
@@ -71,9 +77,25 @@ const Item* ItemData::updateItem(const Item& referenceItem,
     if (itemIt == itemMap.end()) {
         return nullptr;
     }
+    // If the display name is too long, do nothing.
+    else if (referenceItem.displayName.size() > Item::MAX_DISPLAY_NAME_LENGTH) {
+        return nullptr;
+    }
 
-    // If the new derived string ID doesn't match the old one.
-    StringTools::deriveStringID(referenceItem.displayName, workStringID);
+    // If no string ID was given, derive it from displayName.
+    if (referenceItem.stringID == "") {
+        StringTools::deriveStringID(referenceItem.displayName, workStringID);
+    }
+    else {
+        workStringID = referenceItem.stringID;
+    }
+
+    // If the string ID is too long, do nothing.
+    if (workStringID.size() > Item::MAX_STRING_ID_LENGTH) {
+        return nullptr;
+    }
+
+    // If the new string ID doesn't match the old one.
     Item& item{itemIt->second};
     if (workStringID != item.stringID) {
         // If the new ID is taken, do nothing.

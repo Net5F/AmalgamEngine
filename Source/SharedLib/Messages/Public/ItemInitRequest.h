@@ -22,9 +22,11 @@ struct ItemInitRequest {
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The item's display name.
-        The item's stringID will be derived from this. */
-    std::string displayName{""};
+    /** The item's display name. Not guaranteed to be unique. Shown in the UI. */
+    std::string displayName{"Null"};
+
+    /** The item's unique string ID.  */
+    std::string stringID{""};
 
     /** The ID of this item's icon. */
     IconID iconID{NULL_ICON_ID};
@@ -49,6 +51,7 @@ void serialize(S& serializer, ItemInitRequest& itemInitRequest)
 {
     serializer.text1b(itemInitRequest.displayName,
                       Item::MAX_DISPLAY_NAME_LENGTH);
+    serializer.text1b(itemInitRequest.stringID, Item::MAX_STRING_ID_LENGTH);
     serializer.value2b(itemInitRequest.iconID);
     serializer.object(itemInitRequest.initScript);
 }

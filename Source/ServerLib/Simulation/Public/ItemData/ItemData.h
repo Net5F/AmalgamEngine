@@ -24,8 +24,8 @@ public:
      * Creates a new item with the given data.
      * If referenceItem.numericID == NULL_ITEM_ID, uses the next sequential ID.
      *
-     * Note: The new item's stringID will be derived from referenceItem's 
-     *       displayName, regardless of what referenceItem's stringID is.
+     * Note: If no stringID is given, it will be derived from referenceItem's 
+     *       displayName.
      *
      * @param referenceItem The item to copy when creating the new item.
      * @return If an item with the given ID or displayName exists, does nothing
@@ -38,8 +38,8 @@ public:
      * Updates the item at referenceItem.numericID to match the given item, 
      * then increments its version number.
      *
-     * Note: The updated item's stringID will be derived from referenceItem's
-     *       displayName, regardless of what referenceItem's stringID is.
+     * Note: If no stringID is given, it will be derived from referenceItem's 
+     *       displayName.
      *
      * @param referenceItem The item to copy when creating the new item.
      * @return If no item with the given ID exists or referenceItem's 
@@ -78,6 +78,9 @@ private:
 
     /** Used as a default to return if getItemInitScript() fails. */
     ItemInitScript defaultInitScript;
+
+    /** A scratch buffer used while processing string IDs. */
+    std::string workStringID{};
 };
 
 } // End namespace Server

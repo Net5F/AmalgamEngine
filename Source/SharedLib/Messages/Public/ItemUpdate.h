@@ -20,8 +20,11 @@ struct ItemUpdate {
 
     // Note: See Item.h for more info on all of these.
 
-    /** Unique display name, shown in the UI.  */
+    /** The item's display name. Not guaranteed to be unique. Shown in the UI. */
     std::string displayName{"Null"};
+
+    /** The item's unique string ID.  */
+    std::string stringID{"null"};
 
     /** This item's unique numeric identifier. */
     ItemID numericID{NULL_ITEM_ID};
@@ -46,6 +49,7 @@ template<typename S>
 void serialize(S& serializer, ItemUpdate& itemUpdate)
 {
     serializer.text1b(itemUpdate.displayName, Item::MAX_DISPLAY_NAME_LENGTH);
+    serializer.text1b(itemUpdate.stringID, Item::MAX_STRING_ID_LENGTH);
     serializer.value2b(itemUpdate.numericID);
     serializer.value2b(itemUpdate.iconID);
     serializer.value1b(itemUpdate.maxStackSize);
