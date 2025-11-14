@@ -30,7 +30,7 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData,
 , itemInitLua{std::make_unique<ItemInitLua>()}
 , dialogueLua{std::make_unique<DialogueLua>()}
 , dialogueChoiceConditionLua{std::make_unique<DialogueChoiceConditionLua>()}
-, world{*this,        inGraphicData,  inItemData,
+, world{*this,        network,        inGraphicData, inItemData,
         castableData, *entityInitLua, *itemInitLua}
 , currentTick{0}
 , engineLuaBindings{*entityInitLua,

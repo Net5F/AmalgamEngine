@@ -11,7 +11,7 @@ target_sources(ServerLib
         Private/Database.cpp
         Private/DialogueSystem.cpp
         Private/InputSystem.cpp
-        Private/InventoryHelpers.cpp
+        Private/InventoryHelper.cpp
         Private/InventorySystem.cpp
         Private/ItemSystem.cpp
         Private/MovementSyncSystem.cpp
@@ -47,7 +47,7 @@ target_sources(ServerLib
         Public/EventSorter.h
         Public/GlobalStoredValueMap.h
         Public/InputSystem.h
-        Public/InventoryHelpers.h
+        Public/InventoryHelper.h
         Public/InventorySystem.h
         Public/ISimulationExtension.h
         Public/ItemSystem.h

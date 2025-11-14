@@ -7,6 +7,7 @@
 #include "EntityStoredValueID.h"
 #include "EntityStoredValueIDMap.h"
 #include "GlobalStoredValueMap.h"
+#include "InventoryHelper.h"
 #include "CastHelper.h"
 #include "SpawnStrategy.h"
 #include "entt/entity/registry.hpp"
@@ -26,6 +27,7 @@ struct Item;
 namespace Server
 {
 class Simulation;
+class Network;
 class GraphicData;
 class ItemData;
 class Database;
@@ -50,9 +52,10 @@ struct ItemInitLua;
 class World
 {
 public:
-    World(Simulation& inSimulation, const GraphicData& inGraphicData,
-          ItemData& inItemData, const CastableData& inCastableData,
-          EntityInitLua& inEntityInitLua, ItemInitLua& inItemInitLua);
+    World(Simulation& inSimulation, Network& inNetwork,
+          const GraphicData& inGraphicData, ItemData& inItemData,
+          const CastableData& inCastableData, EntityInitLua& inEntityInitLua,
+          ItemInitLua& inItemInitLua);
 
     ~World();
 
@@ -81,6 +84,9 @@ public:
               underlying type is always Uint32. */
     GlobalStoredValueMap globalStoredValueMap;
 
+    /** Helper class for managing entity inventories. */
+    InventoryHelper inventoryHelper;
+
     /** Helper class for casting Castables. */
     CastHelper castHelper;
 
@@ -101,6 +107,14 @@ public:
      *         remain at its original position.
      */
     bool teleportEntity(entt::entity entity, const Vector3& newPosition);
+
+    /**
+     * Adds the given item to the given entity.
+     *
+     * If we fail to add the item (inventory full, item not found), sends an 
+     * appropriate error message to the client.
+     */
+    void addItemToEntity(entt::entity entity, ItemID itemID, Uint8 count);
 
     /**
      * Creates an entity with the given position.

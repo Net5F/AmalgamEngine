@@ -61,6 +61,11 @@ inline const char* getCastFailureString(CastFailureType failureType)
             return "You have no target.";
         case CastFailureType::Movement:
             return "Can't do that while moving.";
+        // Note: This occurs client-side when you use a cast type that doesn't 
+        //       have an associated Castable object.
+        case CastFailureType::InvalidCastable:
+            return "Cast failed: Please set a Castable object for this cast "
+                   "type.";
         default:
             break;
     }

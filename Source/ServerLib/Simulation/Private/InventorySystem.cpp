@@ -6,7 +6,6 @@
 #include "ClientSimData.h"
 #include "Inventory.h"
 #include "InventoryInit.h"
-#include "InventoryHelpers.h"
 #include "SystemMessage.h"
 #include "Log.h"
 #include <algorithm>
@@ -86,18 +85,11 @@ void InventorySystem::processOperation(NetworkID clientID,
         return;
     }
 
+    // TODO: Check that the client has sufficient permission to create items.
+
     // Try to add the item, sending messages appropriately.
-    auto result{InventoryHelpers::addItem(inventoryAddItem.itemID,
-                                          inventoryAddItem.count, entityToAddTo,
-                                          itemData, world, network)};
-    if (result == InventoryHelpers::AddResult::InventoryFull) {
-        network.serializeAndSend(
-            clientID, SystemMessage{"Failed to add item: Inventory is full."});
-    }
-    else if (result == InventoryHelpers::AddResult::ItemNotFound) {
-        network.serializeAndSend(
-            clientID, SystemMessage{"Failed to add item: Item not found."});
-    }
+    world.inventoryHelper.addItemToEntity(
+        inventoryAddItem.itemID, inventoryAddItem.count, entityToAddTo);
 }
 
 void InventorySystem::processOperation(
@@ -111,19 +103,9 @@ void InventorySystem::processOperation(
         entt::entity clientEntity{it->second};
 
         // Try to remove the item, sending messages appropriately.
-        auto result{InventoryHelpers::removeItem(inventoryRemoveItem.slotIndex,
-                                                 inventoryRemoveItem.count,
-                                                 clientEntity, world, network)};
-        if (result == InventoryHelpers::RemoveResult::InvalidSlotIndex) {
-            network.serializeAndSend(
-                clientID,
-                SystemMessage{"Failed to remove item: Invalid slot index."});
-        }
-        else if (result == InventoryHelpers::RemoveResult::InventoryNotFound) {
-            network.serializeAndSend(
-                clientID, SystemMessage{"Failed to remove item: Entity has no "
-                                        "Inventory component."});
-        }
+        world.inventoryHelper.removeItemFromEntity(
+            inventoryRemoveItem.slotIndex, inventoryRemoveItem.count,
+            clientEntity);
     }
 }
 

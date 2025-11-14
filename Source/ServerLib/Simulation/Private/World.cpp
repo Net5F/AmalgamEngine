@@ -1,5 +1,6 @@
 #include "World.h"
 #include "Simulation.h"
+#include "Network.h"
 #include "GraphicData.h"
 #include "ItemData.h"
 #include "CastableData.h"
@@ -65,15 +66,17 @@ void onComponentDestroyed(entt::registry& registry, entt::entity entity)
     }
 }
 
-World::World(Simulation& inSimulation, const GraphicData& inGraphicData,
-             ItemData& inItemData, const CastableData& inCastableData,
-             EntityInitLua& inEntityInitLua, ItemInitLua& inItemInitLua)
+World::World(Simulation& inSimulation, Network& inNetwork,
+             const GraphicData& inGraphicData, ItemData& inItemData,
+             const CastableData& inCastableData, EntityInitLua& inEntityInitLua,
+             ItemInitLua& inItemInitLua)
 : registry{}
 , entityLocator{registry}
 , collisionLocator{}
 , tileMap{inGraphicData, collisionLocator}
 , entityStoredValueIDMap{}
 , globalStoredValueMap{}
+, inventoryHelper{*this, inNetwork, inItemData}
 , castHelper{inSimulation, inItemData, inCastableData}
 , database{std::make_unique<Database>()}
 , netIDMap{}

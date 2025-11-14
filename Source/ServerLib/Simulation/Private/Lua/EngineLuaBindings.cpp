@@ -15,7 +15,6 @@
 #include "StoredValues.h"
 #include "SystemMessage.h"
 #include "ItemProperty.h"
-#include "InventoryHelpers.h"
 #include "sol/sol.hpp"
 #include <time.h>
 
@@ -431,12 +430,12 @@ bool EngineLuaBindings::addItem(entt::entity entityToAddTo,
     }
 
     // Try to add the item, sending update messages appropriately.
-    auto result{InventoryHelpers::addItem(itemID, count, entityToAddTo,
-                                          itemData, world, network)};
-    if (result == InventoryHelpers::AddResult::InventoryFull) {
+    auto result{world.inventoryHelper.addItemToEntity(itemID, count,
+                                                      entityToAddTo, false)};
+    if (result == InventoryHelper::AddResult::InventoryFull) {
         throw std::runtime_error{"Failed to add item: Inventory is full."};
     }
-    else if (result == InventoryHelpers::AddResult::ItemNotFound) {
+    else if (result == InventoryHelper::AddResult::ItemNotFound) {
         workString.clear();
         workString.append("Failed to add item: Item \"");
         workString.append(itemID);
@@ -444,7 +443,7 @@ bool EngineLuaBindings::addItem(entt::entity entityToAddTo,
         throw std::runtime_error{workString};
     }
 
-    return (result == InventoryHelpers::AddResult::Success);
+    return (result == InventoryHelper::AddResult::Success);
 }
 
 bool EngineLuaBindings::removeItem(entt::entity entityToRemoveFrom,
@@ -457,17 +456,17 @@ bool EngineLuaBindings::removeItem(entt::entity entityToRemoveFrom,
     // Try to remove the item, sending update messages appropriately.
     // Note: This will walk the whole inventory, looking for enough copies of
     //       the item to satisfy the given count.
-    auto result{InventoryHelpers::removeItem(itemID, count, entityToRemoveFrom,
-                                             world, network, itemData)};
-    if (result == InventoryHelpers::RemoveResult::InsufficientItemCount) {
+    auto result{world.inventoryHelper.removeItemFromEntity(
+        itemID, count, entityToRemoveFrom, false)};
+    if (result == InventoryHelper::RemoveResult::InsufficientItemCount) {
         throw std::runtime_error{
             "Failed to remove item: Insufficient item count."};
     }
-    else if (result == InventoryHelpers::RemoveResult::InventoryNotFound) {
+    else if (result == InventoryHelper::RemoveResult::InventoryNotFound) {
         throw std::runtime_error{"Failed to remove item: Entity has no "
                                  "Inventory component."};
     }
-    else if (result == InventoryHelpers::RemoveResult::ItemNotFound) {
+    else if (result == InventoryHelper::RemoveResult::ItemNotFound) {
         workString.clear();
         workString.append("Failed to remove item: Item \"");
         workString.append(itemID);
@@ -475,7 +474,7 @@ bool EngineLuaBindings::removeItem(entt::entity entityToRemoveFrom,
         throw std::runtime_error{workString};
     }
 
-    return (result == InventoryHelpers::RemoveResult::Success);
+    return (result == InventoryHelper::RemoveResult::Success);
 }
 
 std::size_t EngineLuaBindings::getItemCount(entt::entity entityToCount,

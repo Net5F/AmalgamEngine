@@ -97,7 +97,6 @@ CastFailureType
         simulation.getCurrentTick(), castable->castableID, params.slotIndex,
         params.targetEntity, params.targetPosition});
 
-
     return CastFailureType::None;
 }
 
