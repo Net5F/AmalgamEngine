@@ -4,6 +4,8 @@
 
 namespace AM
 {
+namespace Server
+{
 
 /**
  * Tracks the tick number when this entity was last saved.
@@ -24,4 +26,5 @@ void serialize(S& serializer, SaveTimestamp& saveTimestamp)
     serializer.value4b(saveTimestamp.lastSavedTick);
 }
 
+} // namespace Server
 } // namespace AM

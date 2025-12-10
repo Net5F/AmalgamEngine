@@ -4,7 +4,6 @@
 
 namespace AM
 {
-// Note: Observed components are server-only.
 namespace Server
 {
 /**

@@ -44,11 +44,11 @@ public:
      * Sends bytes over the network.
      * Equivalent to calling serialize() and send().
      *
-     * @param networkID  The client to send the message to.
-     * @param messageStruct  A structure that defines MESSAGE_TYPE and has an
-     *                       associated serialize() function.
-     * @param messageTick  Optional, used in certain cases to update the
-     *                     Client's latestSentSimTick.
+     * @param networkID The client to send the message to.
+     * @param messageStruct A structure that defines MESSAGE_TYPE and has an
+     *                      associated serialize() function.
+     * @param messageTick Optional, used in certain cases to update the
+     *                    Client's latestSentSimTick.
      */
     template<typename T>
     void serializeAndSend(NetworkID networkID, const T& messageStruct,
@@ -57,8 +57,8 @@ public:
     /**
      * Serializes and frames the given message.
      *
-     * @param messageStruct  A structure that defines MESSAGE_TYPE and has an
-     *                       associated serialize() function.
+     * @param messageStruct A structure that defines MESSAGE_TYPE and has an
+     *                      associated serialize() function.
      * @return A message that's ready to be passed to send().
      */
     template<typename T>
@@ -68,10 +68,10 @@ public:
      * Queues a message to be sent the next time sendWaitingMessages is called.
      * @throws std::out_of_range if id is not in the clients map.
      *
-     * @param networkID  The client to send the message to.
-     * @param message  The message to send.
-     * @param messageTick  Optional, used when sending entity movement updates
-     *                     to update the Client's latestSentSimTick.
+     * @param networkID The client to send the message to.
+     * @param message The message to send.
+     * @param messageTick Optional, used when sending entity movement updates
+     *                    to update the Client's latestSentSimTick.
      */
     void send(NetworkID networkID, const BinaryBufferSharedPtr& message,
               Uint32 messageTick = 0);

@@ -54,6 +54,7 @@ target_sources(ServerLib
         Public/MovementSyncSystem.h
         Public/MovementSystem.h
         Public/NceLifetimeSystem.h
+        Public/PersistedComponent.h
         Public/SaveSystem.h
         Public/ScriptDataSystem.h
         Public/Simulation.h
@@ -64,8 +65,9 @@ target_sources(ServerLib
         Public/Components/CastState.h
         Public/Components/ClientSimData.h
         Public/Components/Dialogue.h
-        Public/Components/ItemHandlers.h
+        Public/Components/ItemHandler.h
         Public/Components/ReplicatedComponentList.h
+        Public/Components/SaveTimestamp.h
         Public/Components/StoredValues.h
         Public/GraphicData/GraphicData.h
         Public/IconData/IconData.h

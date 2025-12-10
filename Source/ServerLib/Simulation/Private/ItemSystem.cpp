@@ -8,7 +8,7 @@
 #include "ClientSimData.h"
 #include "Inventory.h"
 #include "Castable.h"
-#include "ItemHandlers.h"
+#include "ItemHandler.h"
 #include "ItemUpdate.h"
 #include "ItemError.h"
 #include "CombineItems.h"
@@ -185,23 +185,15 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
             return;
         }
 
-        // Try to find a handler for the item.
-        const EntityItemHandlerScript* handlerScript{nullptr};
-        if (const ItemHandlers* itemHandlers{
-                world.registry.try_get<ItemHandlers>(targetEntity)}) {
-            for (const ItemHandlers::HandlerPair& handlerPair :
-                 itemHandlers->handlerPairs) {
-                if (handlerPair.itemToHandleID == sourceItemID) {
-                    handlerScript = &(handlerPair.handlerScript);
-                    break;
-                }
-            }
-        }
+        // Note: We assume the item exists since it's present in an inventory.
+        const Item* item{itemData.getItem(sourceItemID)};
 
-        // If we found a handler, run it.
-        if (handlerScript) {
+        // If the entity has a non-empty handler, run it.
+        if (const ItemHandler* itemHandler{
+                world.registry.try_get<ItemHandler>( targetEntity)};
+            itemHandler && !(itemHandler->handlerScript.script.empty())) {
             runEntityItemHandlerScript(clientID, clientEntity, targetEntity,
-                                       *handlerScript);
+                                       item, itemHandler->handlerScript);
         }
         else {
             // No handler for the item. Give the user feedback.
@@ -385,12 +377,14 @@ bool ItemSystem::runItemInitScript(NetworkID clientID,
 
 void ItemSystem::runEntityItemHandlerScript(
     NetworkID clientID, entt::entity clientEntity, entt::entity targetEntity,
-    const EntityItemHandlerScript& itemHandlerScript)
+    const Item* item, const EntityItemHandlerScript& itemHandlerScript)
 {
     // Run the given handler script.
     entityItemHandlerLua.clientID = clientID;
+    entityItemHandlerLua.item = item;
     entityItemHandlerLua.luaState["self"] = targetEntity;
     entityItemHandlerLua.luaState["target"] = clientEntity;
+    entityItemHandlerLua.luaState["itemID"] = item->stringID;
     auto result{entityItemHandlerLua.luaState.script(
         itemHandlerScript.script, &sol::script_pass_on_error)};
 

@@ -106,10 +106,11 @@ private:
      * @param clientID The client that initiated this interaction.
      * @param clientEntity The client's entity.
      * @param targetEntity The entity that the item is being used on.
+     * @param item The item that's being used.
      */
     void runEntityItemHandlerScript(
         NetworkID clientID, entt::entity clientEntity,
-        entt::entity targetEntity,
+        entt::entity targetEntity, const Item* item,
         const EntityItemHandlerScript& itemHandlerScript);
 
     /** Used for accessing item and inventory data. */

@@ -9,7 +9,6 @@
 #include "Collision.h"
 #include "SystemMessage.h"
 #include "ISimulationExtension.h"
-#include "ItemHandlers.h"
 #include "Log.h"
 
 namespace AM

@@ -95,7 +95,9 @@ public:
     std::unique_ptr<Database> database;
 
     /** Maps network IDs to entity IDs.
-        Used for interfacing with the Network. */
+        Used for interfacing with the Network.
+        Note: To go the other way (entt::entity -> NetworkID), use 
+              ClientSimData. */
     std::unordered_map<NetworkID, entt::entity> netIDMap;
 
     //-------------------------------------------------------------------------

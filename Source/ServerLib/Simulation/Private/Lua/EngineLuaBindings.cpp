@@ -10,7 +10,7 @@
 #include "World.h"
 #include "Network.h"
 #include "Interaction.h"
-#include "ItemHandlers.h"
+#include "ItemHandler.h"
 #include "Inventory.h"
 #include "StoredValues.h"
 #include "SystemMessage.h"
@@ -86,7 +86,7 @@ void EngineLuaBindings::addEntityInitBindings()
     entityInitLua.luaState.set_function(
         "addTalkInteraction", &EngineLuaBindings::addTalkInteraction, this);
     entityInitLua.luaState.set_function(
-        "addItemHandler", &EngineLuaBindings::addItemHandler, this);
+        "setItemHandler", &EngineLuaBindings::setItemHandler, this);
     entityInitLua.luaState.set_function("topic", &EngineLuaBindings::topic,
                                         this);
 }
@@ -295,17 +295,13 @@ void EngineLuaBindings::addTalkInteraction()
     }
 }
 
-void EngineLuaBindings::addItemHandler(std::string_view itemID,
-                                       std::string_view handlerScript)
+void EngineLuaBindings::setItemHandler(std::string_view handlerScript)
 {
-    // If the given item exists, add the given handler.
-    if (const Item * item{itemData.getItem(itemID)}) {
-        entt::entity entity{entityInitLua.selfEntity};
-        ItemHandlers& itemHandlers{
-            world.registry.get_or_emplace<ItemHandlers>(entity)};
-
-        itemHandlers.add(item->numericID, handlerScript);
-    }
+    // Set the handler.
+    entt::entity entity{entityInitLua.selfEntity};
+    ItemHandler& itemHandler{
+        world.registry.get_or_emplace<ItemHandler>(entity)};
+    itemHandler.handlerScript.script = handlerScript;
 }
 
 void EngineLuaBindings::topic(std::string_view topicName,

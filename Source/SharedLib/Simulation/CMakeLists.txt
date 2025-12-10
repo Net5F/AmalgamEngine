@@ -84,7 +84,6 @@ target_sources(SharedLib
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
         Public/Components/Rotation.h
-        Public/Components/SaveTimestamp.h
         Public/GraphicData/Animation.h
         Public/GraphicData/AnimationID.h
         Public/GraphicData/GraphicDataBase.h

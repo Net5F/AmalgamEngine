@@ -69,8 +69,8 @@ public:
      * Sends bytes over the network.
      * Errors if the server is disconnected.
      *
-     * @param messageStruct  A structure that defines MESSAGE_TYPE and has an
-     *                       associated serialize() function.
+     * @param messageStruct A structure that defines MESSAGE_TYPE and has an
+     *                      associated serialize() function.
      */
     template<typename T>
     void serializeAndSend(const T& messageStruct);
@@ -152,9 +152,9 @@ private:
     /**
      * Checks if we need to process the received adjustment, does so if
      * necessary.
-     * @param receivedTickAdj  The received tick adjustment.
-     * @param receivedAdjIteration  The adjustment iteration for the received
-     *                              adjustment.
+     * @param receivedTickAdj The received tick adjustment.
+     * @param receivedAdjIteration The adjustment iteration for the received
+     *                             adjustment.
      */
     void adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration);
 

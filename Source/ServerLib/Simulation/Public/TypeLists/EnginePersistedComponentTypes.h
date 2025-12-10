@@ -8,15 +8,12 @@
 #include "GraphicState.h"
 #include "CollisionBitSets.h"
 #include "Interaction.h"
-#include "ItemHandlers.h"
+#include "ItemHandler.h"
 #include "Dialogue.h"
 #include "EntityInitScript.h"
 #include "StoredValues.h"
 #include "CastCooldown.h"
 #include "boost/mp11/list.hpp"
-#include "bitsery/traits/vector.h"
-#include "bitsery/ext/std_variant.h"
-#include <variant>
 
 namespace AM
 {
@@ -47,31 +44,8 @@ static constexpr unsigned int ENGINE_COMPONENTS_VERSION{0};
 using EnginePersistedComponentTypes
     = boost::mp11::mp_list<SaveTimestamp, Name, Input, Position, Rotation,
                            GraphicState, CollisionBitSets, Interaction,
-                           ItemHandlers, Dialogue, EntityInitScript,
+                           ItemHandler, Dialogue, EntityInitScript,
                            StoredValues, CastCooldown>;
-
-/**
- * A variant that holds a persisted engine component.
- *
- * Used by the server to save entity state to the database.
- */
-using EnginePersistedComponent
-    = boost::mp11::mp_rename<EnginePersistedComponentTypes, std::variant>;
-
-template<typename S>
-void serialize(S& serializer,
-               std::vector<EnginePersistedComponent>& engineComponents)
-{
-    serializer.enableBitPacking([&](typename S::BPEnabledType& sbp) {
-        sbp.container(
-            engineComponents,
-            boost::mp11::mp_size<EnginePersistedComponentTypes>::value,
-            [](typename S::BPEnabledType& serializer,
-               EnginePersistedComponent& component) {
-                serializer.ext(component, bitsery::ext::StdVariant{});
-            });
-    });
-}
 
 } // End namespace Server
 } // End namespace AM

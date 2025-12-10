@@ -67,11 +67,9 @@ private:
     void addTalkInteraction();
 
     /**
-     * Sets the given handler to be called when the given item is used on the
-     * entity.
+     * Sets the given handler to be called when an item is used on the entity.
      */
-    void addItemHandler(std::string_view itemID,
-                        std::string_view handlerScript);
+    void setItemHandler(std::string_view handlerScript);
 
     /**
      * Adds a new topic to the entity's dialogue tree.

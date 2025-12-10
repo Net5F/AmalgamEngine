@@ -2,10 +2,11 @@
 
 #include "NetworkID.h"
 #include "sol/sol.hpp"
-#include "entt/fwd.hpp"
 
 namespace AM
 {
+struct Item;
+
 namespace Server
 {
 /**
@@ -20,11 +21,17 @@ struct EntityItemHandlerLua {
           "user": The ID of the entity that used the item.
                   May be a non-player entity.
           "self": The ID of the entity that the item is being used on.
+          "target": The ID of the entity that used the item.
+          "itemID": The string ID of the item that's being used.
           "GLOBAL": A constant used to identify the global value store. */
     sol::state luaState{};
 
     /** The network ID of the client that used the item. */
     NetworkID clientID{0};
+
+    /** The item that's being used.
+        Will always be non-nullptr while a script is running. */
+    const Item* item{};
 };
 
 } // namespace Server

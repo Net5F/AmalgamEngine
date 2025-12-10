@@ -21,7 +21,7 @@ struct ItemInitLua {
     sol::state luaState{};
 
     /** The item that the init script is being ran on.
-        Will always be non-nullptr. */
+        Will always be non-nullptr while a script is running. */
     Item* selfItem{};
 };
 
