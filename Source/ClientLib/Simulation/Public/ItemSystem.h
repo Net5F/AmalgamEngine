@@ -8,6 +8,7 @@ namespace AM
 {
 namespace Client
 {
+struct SimulationContext;
 class World;
 class Network;
 class ItemData;
@@ -18,7 +19,7 @@ class ItemData;
 class ItemSystem
 {
 public:
-    ItemSystem(World& inWorld, Network& inNetwork, ItemData& inItemData);
+    ItemSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes item update messages.

@@ -22,7 +22,7 @@ class ISimulationExtension : public OSEventHandler
 {
 public:
     // Canonical constructor (derived class must implement):
-    // SimulationExtension(const SimulationExDependencies& deps)
+    // SimulationExtension(const SimulationContext& context)
 
     /**
      * Initializes or re-initializes our simulation systems.

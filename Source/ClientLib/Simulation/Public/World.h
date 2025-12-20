@@ -15,6 +15,7 @@ class CastableData;
 
 namespace Client
 {
+struct SimulationContext;
 class Simulation;
 class Network;
 class GraphicData;
@@ -34,9 +35,7 @@ class ItemData;
 class World
 {
 public:
-    World(Simulation& inSimulation, Network& inNetwork,
-          const GraphicData& inGraphicData, const ItemData& inItemData,
-          const CastableData& inCastableData);
+    World(const SimulationContext& inSimContext);
 
     /** Server-synchronized entity data registry. For entity state that we try
         to keep in sync with the server. */

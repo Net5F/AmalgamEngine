@@ -14,14 +14,16 @@
 #include "QueuedEvents.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
+#include "MessageProcessorContext.h"
+#include "RendererContext.h"
+#include "SimulationContext.h"
+#include "UserInterfaceContext.h"
 #include "IMessageProcessorExtension.h"
-#include "MessageProcessorExDependencies.h"
 #include "IRendererExtension.h"
-#include "RendererExDependencies.h"
 #include "ISimulationExtension.h"
-#include "SimulationExDependencies.h"
 #include "IUserInterfaceExtension.h"
-#include "UserInterfaceExDependencies.h"
+
+#include "entt/signal/dispatcher.hpp"
 
 #include "SDL2pp/SDL.hh"
 #include "SDL2pp/Window.hh"
@@ -51,6 +53,9 @@ public:
     /**
      * Begins the application. Assumes control of the thread until the
      * application exits.
+     * 
+     * Note: All extension classes must be registered before calling this 
+     *       function.
      */
     void start();
 
@@ -150,35 +155,67 @@ private:
     SDL2pp::Renderer sdlRenderer;
 
     //-------------------------------------------------------------------------
-    // Modules, Dependencies, PeriodicCallers
+    // Event Busses
+    //-------------------------------------------------------------------------
+    /** Used for Sim -> UI events. */
+    entt::dispatcher simEventDispatcher;
+
+    /** Used for UI -> Sim events. */
+    entt::dispatcher uiEventDispatcher;
+
+    /** Used for Network -> Sim/UI message events. */
+    EventDispatcher networkEventDispatcher;
+
+    //-------------------------------------------------------------------------
+    // Data, Modules, Contexts
     //-------------------------------------------------------------------------
     AssetCache assetCache;
-
     ResourceData resourceData;
-
     GraphicData graphicData;
-
     IconData iconData;
-
     ItemData itemData;
-
     CastableData castableData;
 
+    MessageProcessorContext messageProcessorContext;
     Network network;
+
+    SimulationContext simulationContext;
+    Simulation simulation;
+
+    UserInterfaceContext uiContext;
+    UserInterface userInterface;
+
+    RendererContext rendererContext;
+    Renderer renderer;
+
+    //-------------------------------------------------------------------------
+    // PeriodicCallers
+    //-------------------------------------------------------------------------
     /** Calls network.tick() at the network tick rate. */
     PeriodicCaller networkCaller;
 
-    UserInterface userInterface;
     /** Calls userInterface.tick() at our UI tick rate. */
     PeriodicCaller uiCaller;
 
-    Simulation simulation;
     /** Calls simulation.tick() at the sim tick rate. */
     PeriodicCaller simCaller;
 
-    Renderer renderer;
     /** Calls renderer.render() at our frame rate. */
     PeriodicCaller rendererCaller;
+
+    //-------------------------------------------------------------------------
+    // Module Extensions
+    //-------------------------------------------------------------------------
+    /** Contains the project's extension functions.
+        Allows the project to provide code and have it be called at the 
+        appropriate time.
+        Note: This class guarantees that these extensions will be set and non-
+              null before the loop starts running. This means we don't need to 
+              null check the extension pointers in any class. */
+    std::unique_ptr<IMessageProcessorExtension> messageProcessorExtension;
+    std::unique_ptr<IRendererExtension> rendererExtension;
+    std::unique_ptr<ISimulationExtension> simulationExtension;
+    std::unique_ptr<IUserInterfaceExtension> userInterfaceExtension;
 
     //-------------------------------------------------------------------------
     // Additional, used during the loop
@@ -193,47 +230,26 @@ private:
 template<typename T>
 void Application::registerMessageProcessorExtension()
 {
-    MessageProcessorExDependencies messageProcessorDeps{
-        network.getEventDispatcher()};
-
     network.setMessageProcessorExtension(
-        std::make_unique<T>(messageProcessorDeps));
+        std::make_unique<T>(messageProcessorContext));
 }
 
 template<typename T>
 void Application::registerRendererExtension()
 {
-    RendererExDependencies rendererDeps{
-        sdlRenderer.Get(), simulation.getWorld(), userInterface,
-        std::bind_front(&PeriodicCaller::getProgress, &simCaller)};
-
-    renderer.setExtension(std::make_unique<T>(rendererDeps));
+    renderer.setExtension(std::make_unique<T>(rendererContext));
 }
 
 template<typename T>
 void Application::registerSimulationExtension()
 {
-    SimulationExDependencies simulationDeps{
-        simulation, userInterface.getEventDispatcher(),
-        network,    graphicData,
-        iconData,   itemData, castableData};
-
-    simulation.setExtension(std::make_unique<T>(simulationDeps));
+    simulation.setExtension(std::make_unique<T>(simulationContext));
 }
 
 template<typename T>
 void Application::registerUserInterfaceExtension()
 {
-    UserInterfaceExDependencies uiDeps{simulation,
-                                       userInterface.getWorldObjectLocator(),
-                                       userInterface.getEventDispatcher(),
-                                       network,
-                                       sdlRenderer.Get(),
-                                       graphicData,
-                                       iconData,
-                                       itemData};
-
-    userInterface.setExtension(std::make_unique<T>(uiDeps));
+    userInterface.setExtension(std::make_unique<T>(uiContext));
 }
 
 } // End namespace Client

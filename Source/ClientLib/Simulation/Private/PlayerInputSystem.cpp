@@ -1,4 +1,5 @@
 #include "PlayerInputSystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -14,11 +15,10 @@ namespace AM
 {
 namespace Client
 {
-PlayerInputSystem::PlayerInputSystem(Simulation& inSimulation, World& inWorld,
-                                     Network& inNetwork)
-: simulation{inSimulation}
-, world{inWorld}
-, network{inNetwork}
+PlayerInputSystem::PlayerInputSystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
 , currentZoomLevelIndex{Config::DEFAULT_ZOOM_LEVEL_INDEX}
 {
 }

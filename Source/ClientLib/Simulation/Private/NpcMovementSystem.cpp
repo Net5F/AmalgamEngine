@@ -1,4 +1,5 @@
 #include "NpcMovementSystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -17,14 +18,13 @@ namespace AM
 {
 namespace Client
 {
-NpcMovementSystem::NpcMovementSystem(Simulation& inSimulation, World& inWorld,
-                                     Network& inNetwork)
-: simulation{inSimulation}
-, world{inWorld}
-, network{inNetwork}
+NpcMovementSystem::NpcMovementSystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
 , entityMover{world.registry, world.tileMap, world.entityLocator,
               world.collisionLocator}
-, npcMovementUpdateQueue{network.getEventDispatcher()}
+, npcMovementUpdateQueue{inSimContext.networkEventDispatcher}
 , lastProcessedTick{0}
 {
 }

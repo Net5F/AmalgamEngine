@@ -1,4 +1,5 @@
 #include "MessageProcessor.h"
+#include "MessageProcessorContext.h"
 #include "QueuedEvents.h"
 #include "Deserialize.h"
 #include "DispatchMessage.h"
@@ -33,10 +34,12 @@ namespace AM
 {
 namespace Client
 {
-MessageProcessor::MessageProcessor(EventDispatcher& inNetworkEventDispatcher)
-: networkEventDispatcher{inNetworkEventDispatcher}
+MessageProcessor::MessageProcessor(
+    const MessageProcessorContext& inMessageProcessorContext)
+: networkEventDispatcher{inMessageProcessorContext.networkEventDispatcher}
 , playerEntity{entt::null}
 , lastReceivedTick{0}
+, extension{nullptr}
 {
 }
 
@@ -162,10 +165,8 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         default: {
             // If we don't have a handler for this message type, pass it to
             // the project.
-            if (extension != nullptr) {
-                extension->processReceivedMessage(messageType, messageBuffer,
-                                                  messageSize);
-            }
+            extension->processReceivedMessage(messageType, messageBuffer,
+                                              messageSize);
             break;
         }
     }

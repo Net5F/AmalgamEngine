@@ -1,4 +1,6 @@
 #include "ItemSystem.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "World.h"
 #include "Network.h"
 #include "ItemData.h"
@@ -16,12 +18,12 @@ namespace AM
 {
 namespace Client
 {
-ItemSystem::ItemSystem(World& inWorld, Network& inNetwork, ItemData& inItemData)
-: world{inWorld}
-, network{inNetwork}
-, itemData{inItemData}
-, itemUpdateQueue{network.getEventDispatcher()}
-, combineItemsQueue{network.getEventDispatcher()}
+ItemSystem::ItemSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, itemData{inSimContext.itemData}
+, itemUpdateQueue{inSimContext.networkEventDispatcher}
+, combineItemsQueue{inSimContext.networkEventDispatcher}
 {
     // Load all items from ItemCache.bin into ItemData.
     loadItemCache();

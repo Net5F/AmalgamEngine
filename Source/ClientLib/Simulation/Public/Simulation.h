@@ -5,18 +5,17 @@
 #include "ServerConnectionSystem.h"
 #include "ReplicationTickOffset.h"
 #include "ConnectionError.h"
-#include "entt/signal/sigh.hpp"
 #include <atomic>
 
 namespace AM
 {
-class EventDispatcher;
 class CastableData;
 struct Item;
 struct CastFailed;
 
 namespace Client
 {
+struct SimulationContext;
 class Network;
 class GraphicData;
 class ItemData;
@@ -49,9 +48,7 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S{.001};
 
-    Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
-               GraphicData& inGraphicData, ItemData& inItemData,
-               CastableData& inCastableData);
+    Simulation(const SimulationContext& inSimContext);
 
     ~Simulation();
 
@@ -59,6 +56,7 @@ public:
      * Returns a reference to the simulation's world state.
      */
     World& getWorld();
+    const World& getWorld() const;
 
     /**
      * Returns our current tick.
@@ -98,24 +96,6 @@ public:
      */
     void setExtension(std::unique_ptr<ISimulationExtension> inExtension);
 
-    //-------------------------------------------------------------------------
-    // System Signals
-    //-------------------------------------------------------------------------
-    /** We've established a connection with the server and the simulation has
-        started running. */
-    entt::sink<entt::sigh<void()>>& getSimulationStartedSink();
-
-    /** Our connection to the server has encountered an error and the
-        simulation has stopped running. */
-    entt::sink<entt::sigh<void(ConnectionError)>>&
-        getServerConnectionErrorSink();
-
-    /** The server has told us that a player entity cast failed.
-        If the client rejects a cast locally, it'll tell you through the 
-        return value of e.g. CastHelper::castSpell(). */
-    entt::sink<entt::sigh<void(const CastFailed&)>>&
-        getCastFailedSink();
-
 private:
     /**
      * Initializes or re-initializes our simulation systems.
@@ -124,6 +104,10 @@ private:
      * account for disconnects/reconnects.
      */
     void initializeSystems();
+
+    /** Note: We save this since we need to pass it to the systems at deferred-
+              initialization time. */
+    const SimulationContext& simContext;
 
     /** Used to receive events (through the Network's dispatcher) and to
         send messages. */
@@ -142,7 +126,7 @@ private:
     /** How far into the past to replicate non-predicted state at. */
     ReplicationTickOffset replicationTickOffset;
 
-    /** If non-nullptr, contains the project's simulation extension functions.
+    /** Contains the project's simulation extension functions.
         Allows the project to provide simulation code and have it be called at
         the appropriate time. */
     std::unique_ptr<ISimulationExtension> extension;

@@ -2,10 +2,9 @@
 
 namespace AM
 {
-class EventDispatcher;
 class CastableData;
 
-namespace Client
+namespace Server
 {
 class Simulation;
 class Network;
@@ -17,12 +16,12 @@ class ItemData;
  * Defines the dependencies that will be provided to the project's
  * SimulationExtension class.
  */
-struct SimulationExDependencies {
+struct SimulationContext {
 public:
+    /** World state, current tick. */
     Simulation& simulation;
 
-    EventDispatcher& uiEventDispatcher;
-
+    /** Client messaging. */
     Network& network;
 
     GraphicData& graphicData;
@@ -34,5 +33,5 @@ public:
     CastableData& castableData;
 };
 
-} // namespace Client
+} // namespace Server
 } // namespace AM

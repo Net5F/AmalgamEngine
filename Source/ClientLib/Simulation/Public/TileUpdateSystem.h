@@ -10,6 +10,7 @@ namespace AM
 {
 namespace Client
 {
+struct SimulationContext;
 class World;
 class Network;
 
@@ -26,7 +27,7 @@ class Network;
 class TileUpdateSystem
 {
 public:
-    TileUpdateSystem(World& inWorld, Network& inNetwork);
+    TileUpdateSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes received tile updates, applying them to the tile map.

@@ -3,7 +3,6 @@
 #include "SharedConfig.h"
 #include "NetworkDefs.h"
 #include "MessageProcessor.h"
-#include "QueuedEvents.h"
 #include "Serialize.h"
 #include "Peer.h"
 #include "Deserialize.h"
@@ -22,6 +21,7 @@ struct EntityUpdate;
 
 namespace Client
 {
+struct MessageProcessorContext;
 class IMessageProcessorExtension;
 /**
  * Provides a convenient interface for connecting to the server, sending
@@ -34,7 +34,7 @@ class IMessageProcessorExtension;
 class Network
 {
 public:
-    Network();
+    Network(const MessageProcessorContext& inMessageProcessorContext);
 
     ~Network();
 
@@ -74,12 +74,6 @@ public:
      */
     template<typename T>
     void serializeAndSend(const T& messageStruct);
-
-    /**
-     * Returns the Network event dispatcher. All messages that we receive
-     * from the server are pushed into this dispatcher.
-     */
-    EventDispatcher& getEventDispatcher();
 
     /**
      * Returns the latest tick that we've received an update message for.
@@ -166,7 +160,7 @@ private:
     std::shared_ptr<Peer> server;
 
     /** Used to dispatch events from the network to the simulation. */
-    EventDispatcher eventDispatcher;
+    EventDispatcher& networkEventDispatcher;
 
     /** Deserializes messages, does any network-layer message handling, and
         pushes messages into the eventDispatcher. */

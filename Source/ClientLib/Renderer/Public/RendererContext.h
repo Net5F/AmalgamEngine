@@ -8,15 +8,15 @@ namespace AM
 {
 class World;
 class UserInterface;
+class GraphicData;
 
 namespace Client
 {
 
 /**
- * Defines the dependencies that will be provided to the project's
- * RendererExtension class.
+ * Provides the dependencies that Renderer objects may use.
  */
-struct RendererExDependencies {
+struct RendererContext {
 public:
     SDL_Renderer* sdlRenderer;
 
@@ -24,7 +24,11 @@ public:
 
     UserInterface& userInterface;
 
+    /** Returns how far the sim tick is towards its next call, as a 
+        percentage from 0 - 1. */
     std::function<double(void)> getSimTickProgress;
+
+    GraphicData& graphicData;
 };
 
 } // namespace Client

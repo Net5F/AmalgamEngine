@@ -8,6 +8,7 @@ namespace AM
 {
 namespace Client
 {
+struct SimulationContext;
 class World;
 class Network;
 class ItemData;
@@ -18,8 +19,7 @@ class ItemData;
 class InventorySystem
 {
 public:
-    InventorySystem(World& inWorld, Network& inNetwork,
-                    const ItemData& inItemData);
+    InventorySystem(const SimulationContext& inSimContext);
 
     /**
      * Processes inventory update messages.

@@ -14,6 +14,8 @@ class EventDispatcher;
 
 namespace Client
 {
+struct MessageProcessorContext;
+
 /**
  * Processes received messages.
  *
@@ -29,7 +31,7 @@ namespace Client
 class MessageProcessor
 {
 public:
-    MessageProcessor(EventDispatcher& inNetworkEventDispatcher);
+    MessageProcessor(const MessageProcessorContext& inMessageProcessorContext);
 
     /**
      * Deserializes and handles received messages.

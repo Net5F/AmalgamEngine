@@ -1,6 +1,7 @@
 #include "PlayerMovementSystem.h"
-#include "MovementHelpers.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
+#include "MovementHelpers.h"
 #include "World.h"
 #include "Network.h"
 #include "Position.h"
@@ -23,14 +24,13 @@ namespace AM
 {
 namespace Client
 {
-PlayerMovementSystem::PlayerMovementSystem(Simulation& inSimulation,
-                                           World& inWorld, Network& inNetwork)
-: simulation{inSimulation}
-, world{inWorld}
-, network{inNetwork}
+PlayerMovementSystem::PlayerMovementSystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
 , entityMover{world.registry, world.tileMap, world.entityLocator,
               world.collisionLocator}
-, playerMovementUpdateQueue{inNetwork.getEventDispatcher()}
+, playerMovementUpdateQueue{inSimContext.networkEventDispatcher}
 {
 }
 

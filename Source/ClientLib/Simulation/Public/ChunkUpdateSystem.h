@@ -11,6 +11,7 @@ struct ChunkWireSnapshot;
 
 namespace Client
 {
+struct SimulationContext;
 class World;
 class Network;
 class SpriteData;
@@ -22,7 +23,7 @@ class TileMap;
 class ChunkUpdateSystem
 {
 public:
-    ChunkUpdateSystem(World& inWorld, Network& inNetwork);
+    ChunkUpdateSystem(const SimulationContext& inSimContext);
 
     /**
      * Requests any needed chunk data and applies received chunk updates.

@@ -6,14 +6,16 @@
 #include "ConnectionError.h"
 #include "Timer.h"
 #include "entt/fwd.hpp"
-#include "entt/signal/sigh.hpp"
 #include "SDL_stdinc.h"
+#include <queue>
 #include <atomic>
 
 namespace AM
 {
 namespace Client
 {
+struct SimulationContext;
+class Simulation;
 class World;
 class Network;
 class GraphicData;
@@ -27,8 +29,7 @@ class ServerConnectionSystem
 public:
     enum class ConnectionState { Disconnected, AwaitingResponse, Connected };
 
-    ServerConnectionSystem(World& inWorld, EventDispatcher& inUiEventDispatcher,
-                           Network& inNetwork, GraphicData& inGraphicData,
+    ServerConnectionSystem(const SimulationContext& inSimContext,
                            std::atomic<Uint32>& inCurrentTick);
 
     /**
@@ -46,6 +47,8 @@ private:
     /** How long the sim should wait for the server to send a connection
         response, in seconds. */
     static constexpr double CONNECTION_RESPONSE_WAIT_S{5};
+
+    void onUIConnectionRequest(ConnectionRequest& connectionRequest);
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,
@@ -67,17 +70,20 @@ private:
     Network& network;
     GraphicData& graphicData;
 
+    /** Used to send connection events to the UI. */
+    entt::dispatcher& simEventDispatcher;
+
     /** The sim's current tick. Set when we receive a connection response.
         Note: This is the only system that should have a mutable reference. */
     std::atomic<Uint32>& currentTick;
 
     /** Connection requests, received from the UI. */
-    EventQueue<ConnectionRequest> connectionRequestQueue;
+    std::queue<ConnectionRequest> connectionRequestQueue;
 
     /** Connection responses, received from the server. */
     EventQueue<ConnectionResponse> connectionResponseQueue;
 
-    /** Connection error events, received from the Network. */
+    /** Connection error events, received from the server. */
     EventQueue<ConnectionError> connectionErrorQueue;
 
     /** Tracks the state of our connection with the server. */
@@ -85,18 +91,6 @@ private:
 
     /** Times our connection attempt, so we can time out if necessary. */
     Timer connectionAttemptTimer;
-
-    entt::sigh<void()> simulationStartedSig;
-    entt::sigh<void(ConnectionError)> serverConnectionErrorSig;
-
-public:
-    /** We've established a connection with the server and the simulation has
-        started running. */
-    entt::sink<entt::sigh<void()>> simulationStarted;
-
-    /** Our connection to the server has encountered an error and the
-        simulation has stopped running. */
-    entt::sink<entt::sigh<void(ConnectionError)>> serverConnectionError;
 };
 
 } // namespace Client

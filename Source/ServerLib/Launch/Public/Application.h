@@ -11,9 +11,9 @@
 #include "PeriodicCaller.h"
 #include "SDLNetInitializer.h"
 #include "IMessageProcessorExtension.h"
-#include "MessageProcessorExDependencies.h"
+#include "MessageProcessorContext.h"
 #include "ISimulationExtension.h"
-#include "SimulationExDependencies.h"
+#include "SimulationContext.h"
 
 #include "SDL2pp/SDL.hh"
 
@@ -115,20 +115,20 @@ private:
 template<typename T>
 void Application::registerMessageProcessorExtension()
 {
-    MessageProcessorExDependencies messageProcessorDeps{
+    MessageProcessorContext messageProcessorContext{
         network.getEventDispatcher()};
 
     network.setMessageProcessorExtension(
-        std::make_unique<T>(messageProcessorDeps));
+        std::make_unique<T>(messageProcessorContext));
 }
 
 template<typename T>
 void Application::registerSimulationExtension()
 {
-    SimulationExDependencies simulationDeps{simulation, network,  graphicData,
-                                            iconData,   itemData, castableData};
+    SimulationContext simulationContext{simulation, network,  graphicData,
+                                        iconData,   itemData, castableData};
 
-    simulation.setExtension(std::make_unique<T>(simulationDeps));
+    simulation.setExtension(std::make_unique<T>(simulationContext));
 }
 
 } // End namespace Server

@@ -1,4 +1,5 @@
 #include "Simulation.h"
+#include "SimulationContext.h"
 #include "Network.h"
 #include "GraphicData.h"
 #include "ItemData.h"
@@ -28,18 +29,16 @@ namespace AM
 {
 namespace Client
 {
-Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
-                       GraphicData& inGraphicData, ItemData& inItemData,
-                       CastableData& inCastableData)
-: network{inNetwork}
-, graphicData{inGraphicData}
-, itemData{inItemData}
-, castableData{inCastableData}
-, world{*this, network, inGraphicData, inItemData, inCastableData}
+Simulation::Simulation(const SimulationContext& inSimContext)
+: simContext{inSimContext}
+, network{inSimContext.network}
+, graphicData{inSimContext.graphicData}
+, itemData{inSimContext.itemData}
+, castableData{inSimContext.castableData}
+, world{inSimContext}
 , currentTick{0}
 , extension{nullptr}
-, serverConnectionSystem{world, inUiEventDispatcher, network, inGraphicData,
-                         currentTick}
+, serverConnectionSystem{inSimContext, currentTick}
 {
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
@@ -52,6 +51,11 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 Simulation::~Simulation() = default;
 
 World& Simulation::getWorld()
+{
+    return world;
+}
+
+const World& Simulation::getWorld() const
 {
     return world;
 }
@@ -116,9 +120,7 @@ void Simulation::tick()
     while (currentTick < targetTick) {
         /* Run all systems. */
         // Call the project's pre-everything logic.
-        if (extension != nullptr) {
-            extension->beforeAll();
-        }
+        extension->beforeAll();
 
         // Process entities that need to be constructed or destructed.
         entityLifetimeSystem->processUpdates();
@@ -130,9 +132,7 @@ void Simulation::tick()
         tileUpdateSystem->updateTiles();
 
         // Call the project's pre-movement logic.
-        if (extension != nullptr) {
-            extension->afterMapAndConnectionUpdates();
-        }
+        extension->afterMapAndConnectionUpdates();
 
         // Process the held user input state and send change requests to the
         // server.
@@ -159,9 +159,7 @@ void Simulation::tick()
         castSystem->processCasts();
 
         // Call the project's post-sim-update logic.
-        if (extension != nullptr) {
-            extension->afterSimUpdate();
-        }
+        extension->afterSimUpdate();
 
         // Process component updates from the server.
         // Note: We do this last because the state that we receive is the
@@ -178,9 +176,7 @@ void Simulation::tick()
         cameraSystem->moveCameras();
 
         // Call the project's post-everything logic.
-        if (extension != nullptr) {
-            extension->afterAll();
-        }
+        extension->afterAll();
 
         currentTick++;
     }
@@ -204,59 +200,33 @@ bool Simulation::handleOSEvent(SDL_Event& event)
 
 void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
 {
+    if (inExtension == nullptr) {
+        LOG_FATAL("Extension must be non-null.");
+    }
+
     extension = std::move(inExtension);
     graphicSystem->setExtension(extension.get());
 
-    if (extension != nullptr) {
-        // Tell the project to initialize its systems.
-        extension->initializeSystems();
-    }
-}
-
-entt::sink<entt::sigh<void()>>& Simulation::getSimulationStartedSink()
-{
-    return serverConnectionSystem.simulationStarted;
-}
-
-entt::sink<entt::sigh<void(ConnectionError)>>&
-    Simulation::getServerConnectionErrorSink()
-{
-    return serverConnectionSystem.serverConnectionError;
-}
-
-entt::sink<entt::sigh<void(const CastFailed&)>>&
-    Simulation::getCastFailedSink()
-{
-    if (!castSystem) {
-        LOG_FATAL("Tried to subscribe to a system signal before the sim was "
-                  "fully constructed.");
-    }
-    return castSystem->castFailed;
+    // Tell the project to initialize its systems.
+    extension->initializeSystems();
 }
 
 void Simulation::initializeSystems()
 {
     // Initialize our engine systems.
-    chunkUpdateSystem = std::make_unique<ChunkUpdateSystem>(world, network);
-    tileUpdateSystem = std::make_unique<TileUpdateSystem>(world, network);
-    entityLifetimeSystem = std::make_unique<EntityLifetimeSystem>(
-        *this, world, network, graphicData);
-    playerInputSystem
-        = std::make_unique<PlayerInputSystem>(*this, world, network);
-    playerMovementSystem
-        = std::make_unique<PlayerMovementSystem>(*this, world, network);
-    npcMovementSystem
-        = std::make_unique<NpcMovementSystem>(*this, world, network);
-    itemSystem = std::make_unique<ItemSystem>(world, network, itemData);
-    inventorySystem
-        = std::make_unique<InventorySystem>(world, network, itemData);
-    castSystem = std::make_unique<CastSystem>(*this, network, graphicData,
-                                              castableData);
-    componentUpdateSystem = std::make_unique<ComponentUpdateSystem>(
-        *this, world, network, graphicData);
-    graphicSystem = std::make_unique<GraphicSystem>(world, graphicData);
-    avSystem = std::make_unique<AVSystem>(world, graphicData);
-    cameraSystem = std::make_unique<CameraSystem>(world);
+    chunkUpdateSystem = std::make_unique<ChunkUpdateSystem>(simContext);
+    tileUpdateSystem = std::make_unique<TileUpdateSystem>(simContext);
+    entityLifetimeSystem = std::make_unique<EntityLifetimeSystem>(simContext);
+    playerInputSystem = std::make_unique<PlayerInputSystem>(simContext);
+    playerMovementSystem = std::make_unique<PlayerMovementSystem>(simContext);
+    npcMovementSystem = std::make_unique<NpcMovementSystem>(simContext);
+    itemSystem = std::make_unique<ItemSystem>(simContext);
+    inventorySystem = std::make_unique<InventorySystem>(simContext);
+    castSystem = std::make_unique<CastSystem>(simContext);
+    componentUpdateSystem = std::make_unique<ComponentUpdateSystem>(simContext);
+    graphicSystem = std::make_unique<GraphicSystem>(simContext);
+    avSystem = std::make_unique<AVSystem>(simContext);
+    cameraSystem = std::make_unique<CameraSystem>(simContext);
 
     // Tell the project to initialize its systems.
     if (extension != nullptr) {

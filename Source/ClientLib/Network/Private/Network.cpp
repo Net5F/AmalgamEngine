@@ -1,4 +1,6 @@
 #include "Network.h"
+#include "MessageProcessorContext.h"
+#include "QueuedEvents.h"
 #include "Heartbeat.h"
 #include "ConnectionError.h"
 #include "Config.h"
@@ -12,10 +14,10 @@ namespace AM
 {
 namespace Client
 {
-Network::Network()
+Network::Network(const MessageProcessorContext& inMessageProcessorContext)
 : server{nullptr}
-, eventDispatcher{}
-, messageProcessor{eventDispatcher}
+, networkEventDispatcher{inMessageProcessorContext.networkEventDispatcher}
+, messageProcessor{inMessageProcessorContext}
 , tickAdjustment{0}
 , adjustmentIteration{0}
 , isApplyingTickAdjustment{false}
@@ -89,11 +91,6 @@ void Network::tick()
             }
         }
     }
-}
-
-EventDispatcher& Network::getEventDispatcher()
-{
-    return eventDispatcher;
 }
 
 Uint32 Network::getLastReceivedTick()
@@ -192,7 +189,8 @@ void Network::connectAndReceive()
         //       the login server here.
     }
     else {
-        eventDispatcher.emplace<ConnectionError>(ConnectionError::Type::Failed);
+        networkEventDispatcher.emplace<ConnectionError>(
+            ConnectionError::Type::Failed);
         return;
     }
 
@@ -210,7 +208,7 @@ void Network::connectAndReceive()
         if (bytesReceived < 0) {
             LOG_INFO("Found server to be disconnected while trying to receive "
                      "header.");
-            eventDispatcher.emplace<ConnectionError>(
+            networkEventDispatcher.emplace<ConnectionError>(
                 ConnectionError::Type::Disconnected);
             return;
         }

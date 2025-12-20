@@ -5,7 +5,6 @@
 #include "SpriteColorModInfo.h"
 #include "SpriteSortInfo.h"
 #include "WorldObjectLocator.h"
-#include "QueuedEvents.h"
 #include <memory>
 
 namespace AM
@@ -14,6 +13,7 @@ struct Camera;
 
 namespace Client
 {
+struct UserInterfaceContext;
 class World;
 class IUserInterfaceExtension;
 
@@ -27,7 +27,7 @@ class IUserInterfaceExtension;
 class UserInterface : public OSEventHandler
 {
 public:
-    UserInterface();
+    UserInterface(const UserInterfaceContext& inUIContext);
 
     /**
      * Returns all of the project UI's phantom sprites.
@@ -68,27 +68,13 @@ public:
     const WorldObjectLocator& getWorldObjectLocator();
 
     /**
-     * Returns the UI event dispatcher. Used to send events to the simulation.
-     */
-    EventDispatcher& getEventDispatcher();
-
-    /**
      * See extension member comment.
      */
     void setExtension(std::unique_ptr<IUserInterfaceExtension> inExtension);
 
-    /**
-     * Separate setter to avoid a circular dependency during construction
-     * (Simulation needs our eventDispatcher, we need Simulation's World).
-     */
-    void setWorld(const World& inWorld);
-
 private:
     /** Used to get tile map info for the locator. */
-    const World* world;
-
-    /** Used to dispatch events from the UI to the simulation. */
-    EventDispatcher eventDispatcher;
+    const World& world;
 
     /** If non-nullptr, contains the project's UI extension functions.
         Allows the project to provide UI code and have it be called at the

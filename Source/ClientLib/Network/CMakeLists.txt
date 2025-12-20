@@ -6,7 +6,7 @@ target_sources(ClientLib
 		Public/ConnectionError.h
 		Public/IMessageProcessorExtension.h
 		Public/MessageProcessor.h
-		Public/MessageProcessorExDependencies.h
+		Public/MessageProcessorContext.h
 		Public/Network.h
 		Public/PlayerMovementUpdate.h
 )

@@ -1,4 +1,5 @@
 #include "EntityLifetimeSystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -28,16 +29,13 @@ namespace AM
 namespace Client
 {
 
-EntityLifetimeSystem::EntityLifetimeSystem(Simulation& inSimulation,
-                                           World& inWorld,
-                                           Network& inNetwork,
-                                           GraphicData& inGraphicData)
-: simulation{inSimulation}
-, world{inWorld}
-, graphicData{inGraphicData}
+EntityLifetimeSystem::EntityLifetimeSystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, graphicData{inSimContext.graphicData}
 , entityInitSecondaryQueue{}
-, entityInitQueue{inNetwork.getEventDispatcher()}
-, entityDeleteQueue{inNetwork.getEventDispatcher()}
+, entityInitQueue{inSimContext.networkEventDispatcher}
+, entityDeleteQueue{inSimContext.networkEventDispatcher}
 {
 }
 

@@ -8,6 +8,7 @@ namespace AM
 {
 namespace Client
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class Network;
@@ -19,8 +20,7 @@ class GraphicData;
 class ComponentUpdateSystem
 {
 public:
-    ComponentUpdateSystem(Simulation& inSimulation, World& inWorld,
-                          Network& inNetwork, GraphicData& inGraphicData);
+    ComponentUpdateSystem(const SimulationContext& inSimContext);
 
     ~ComponentUpdateSystem();
 

@@ -1,7 +1,10 @@
 #include "ServerConnectionSystem.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "World.h"
 #include "Network.h"
 #include "GraphicData.h"
+#include "SimulationStarted.h"
 #include "Name.h"
 #include "Inventory.h"
 #include "PreviousPosition.h"
@@ -21,36 +24,37 @@
 #include "Transforms.h"
 #include "Config.h"
 #include "Log.h"
+#include "entt/signal/dispatcher.hpp"
 
 namespace AM
 {
 namespace Client
 {
 ServerConnectionSystem::ServerConnectionSystem(
-    World& inWorld, EventDispatcher& inUiEventDispatcher, Network& inNetwork,
-    GraphicData& inGraphicData, std::atomic<Uint32>& inCurrentTick)
-: world{inWorld}
-, network{inNetwork}
-, graphicData{inGraphicData}
+    const SimulationContext& inSimContext, std::atomic<Uint32>& inCurrentTick)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, graphicData{inSimContext.graphicData}
+, simEventDispatcher{inSimContext.simEventDispatcher}
 , currentTick{inCurrentTick}
-, connectionRequestQueue{inUiEventDispatcher}
-, connectionResponseQueue{network.getEventDispatcher()}
-, connectionErrorQueue{network.getEventDispatcher()}
+, connectionRequestQueue{}
+, connectionResponseQueue{inSimContext.networkEventDispatcher}
+, connectionErrorQueue{inSimContext.networkEventDispatcher}
 , connectionState{ConnectionState::Disconnected}
 , connectionAttemptTimer{}
-, simulationStartedSig{}
-, serverConnectionErrorSig{}
-, simulationStarted{simulationStartedSig}
-, serverConnectionError{serverConnectionErrorSig}
 {
+    // Listen for UI connection requests.
+    inSimContext.uiEventDispatcher.sink<ConnectionRequest>()
+        .connect<&ServerConnectionSystem::onUIConnectionRequest>(*this);
 }
 
 void ServerConnectionSystem::processConnectionEvents()
 {
     if (connectionState == ConnectionState::Disconnected) {
         // Check for a connection request from the UI.
-        ConnectionRequest connectionRequest;
-        if (connectionRequestQueue.pop(connectionRequest)) {
+        if (!(connectionRequestQueue.empty())) {
+            ConnectionRequest connectionRequest{connectionRequestQueue.front()};
+            connectionRequestQueue.pop();
             if (Config::RUN_OFFLINE) {
                 // No need to connect if we're running offline. Just mock up
                 // the player data.
@@ -73,12 +77,13 @@ void ServerConnectionSystem::processConnectionEvents()
         if (connectionResponseQueue.pop(connectionResponse)) {
             initSimState(connectionResponse);
             connectionState = ConnectionState::Connected;
-            simulationStartedSig.publish();
+            simEventDispatcher.trigger<SimulationStarted>();
         }
 
         // If we've timed out, send a failure signal.
         if (connectionAttemptTimer.getTime() >= CONNECTION_RESPONSE_WAIT_S) {
-            serverConnectionErrorSig.publish({ConnectionError::Type::Failed});
+            simEventDispatcher.trigger<ConnectionError>(
+                {ConnectionError::Type::Failed});
             connectionState = ConnectionState::Disconnected;
         }
     }
@@ -86,7 +91,7 @@ void ServerConnectionSystem::processConnectionEvents()
     // If the connection is lost, reset all network and sim state.
     ConnectionError connectionError;
     if (connectionErrorQueue.pop(connectionError)) {
-        serverConnectionErrorSig.publish(connectionError);
+        simEventDispatcher.trigger(connectionError);
         network.disconnect();
         clearSimState();
         connectionState = ConnectionState::Disconnected;
@@ -97,6 +102,12 @@ ServerConnectionSystem::ConnectionState
     ServerConnectionSystem::getConnectionState()
 {
     return connectionState;
+}
+
+void ServerConnectionSystem::onUIConnectionRequest(
+    ConnectionRequest& connectionRequest)
+{
+    connectionRequestQueue.emplace(connectionRequest);
 }
 
 void ServerConnectionSystem::initSimState(

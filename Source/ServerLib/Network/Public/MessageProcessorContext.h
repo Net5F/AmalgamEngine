@@ -8,10 +8,9 @@ namespace Server
 {
 
 /**
- * Defines the dependencies that will be provided to the project's
- * MessageProcessorExtension class.
+ * Provides the dependencies that MessageProcessor logic may use.
  */
-struct MessageProcessorExDependencies {
+struct MessageProcessorContext {
 public:
     EventDispatcher& networkEventDispatcher;
 };

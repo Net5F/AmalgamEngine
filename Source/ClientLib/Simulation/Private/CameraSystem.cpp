@@ -1,4 +1,6 @@
 #include "CameraSystem.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "World.h"
 #include "Camera.h"
 #include "Position.h"
@@ -8,8 +10,8 @@ namespace AM
 {
 namespace Client
 {
-CameraSystem::CameraSystem(World& inWorld)
-: world{inWorld}
+CameraSystem::CameraSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
 {
 }
 

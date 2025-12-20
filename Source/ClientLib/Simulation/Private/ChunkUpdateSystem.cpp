@@ -1,4 +1,6 @@
 #include "ChunkUpdateSystem.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "MovementHelpers.h"
 #include "World.h"
 #include "Network.h"
@@ -18,10 +20,10 @@ namespace AM
 {
 namespace Client
 {
-ChunkUpdateSystem::ChunkUpdateSystem(World& inWorld, Network& inNetwork)
-: world{inWorld}
-, network{inNetwork}
-, chunkUpdateQueue{network.getEventDispatcher()}
+ChunkUpdateSystem::ChunkUpdateSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, chunkUpdateQueue{inSimContext.networkEventDispatcher}
 {
 }
 

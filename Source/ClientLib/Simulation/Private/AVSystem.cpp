@@ -1,5 +1,6 @@
 #include "AVSystem.h"
-#include "World.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "GraphicData.h"
 #include "ClientGraphicState.h"
 #include "GraphicHelpers.h"
@@ -14,9 +15,9 @@ namespace AM
 namespace Client
 {
 
-AVSystem::AVSystem(World& inWorld, const GraphicData& inGraphicData)
-: world{inWorld}
-, graphicData{inGraphicData}
+AVSystem::AVSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, graphicData{inSimContext.graphicData}
 {
 }
 

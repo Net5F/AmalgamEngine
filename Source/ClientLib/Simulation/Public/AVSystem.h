@@ -13,6 +13,7 @@ struct GraphicState;
 
 namespace Client
 {
+struct SimulationContext;
 class World;
 class GraphicData;
 struct VisualEffectState;
@@ -31,7 +32,7 @@ struct ClientGraphicState;
 class AVSystem
 {
 public:
-    AVSystem(World& inWorld, const GraphicData& inGraphicData);
+    AVSystem(const SimulationContext& inSimContext);
 
     /**
      * Updates A/V effects and entities.

@@ -13,6 +13,7 @@ struct BoundingBox;
 struct Camera;
 namespace Client
 {
+struct RendererContext;
 class World;
 class UserInterface;
 class GraphicData;
@@ -27,13 +28,7 @@ class IRendererExtension;
 class Renderer : public OSEventHandler
 {
 public:
-    /**
-     * @param getSimTickProgress  A function that returns how far between sim
-     *                            ticks we are in decimal percent.
-     */
-    Renderer(SDL_Renderer* inSdlRenderer, World& inWorld, UserInterface& inUI,
-             GraphicData& inGraphicData,
-             std::function<double(void)> inGetSimTickProgress);
+    Renderer(const RendererContext& inRendererContext);
 
     /**
      * Renders the player's view of the world, then kicks off the UI rendering.
@@ -88,7 +83,7 @@ private:
     World& world;
 
     /** Used to begin the UI rendering. */
-    UserInterface& ui;
+    UserInterface& userInterface;
 
     /** Used for getting graphics render data. */
     GraphicData& graphicData;

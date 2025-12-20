@@ -1,4 +1,6 @@
 #include "TileUpdateSystem.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "World.h"
 #include "Network.h"
 #include "AMAssert.h"
@@ -8,13 +10,13 @@ namespace AM
 {
 namespace Client
 {
-TileUpdateSystem::TileUpdateSystem(World& inWorld, Network& inNetwork)
-: world{inWorld}
-, network{inNetwork}
-, addLayerQueue{network.getEventDispatcher()}
-, removeLayerQueue{network.getEventDispatcher()}
-, clearLayersQueue{network.getEventDispatcher()}
-, extentClearLayersQueue{network.getEventDispatcher()}
+TileUpdateSystem::TileUpdateSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, addLayerQueue{inSimContext.networkEventDispatcher}
+, removeLayerQueue{inSimContext.networkEventDispatcher}
+, clearLayersQueue{inSimContext.networkEventDispatcher}
+, extentClearLayersQueue{inSimContext.networkEventDispatcher}
 {
 }
 

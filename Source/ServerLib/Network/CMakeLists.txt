@@ -12,7 +12,7 @@ target_sources(ServerLib
         Public/ClientHandler.h
         Public/IMessageProcessorExtension.h
         Public/MessageProcessor.h
-        Public/MessageProcessorExDependencies.h
+        Public/MessageProcessorContext.h
         Public/Network.h
         Public/SDLNetInitializer.h
 )

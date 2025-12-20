@@ -5,7 +5,6 @@
 #include "CastCooldownInit.h"
 #include "Rotation.h"
 #include "QueuedEvents.h"
-#include "entt/signal/sigh.hpp"
 
 namespace AM
 {
@@ -15,6 +14,7 @@ struct Castable;
 
 namespace Client
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class Network;
@@ -27,9 +27,7 @@ struct ClientCastState;
 class CastSystem
 {
 public:
-    CastSystem(Simulation& inSimulation, Network& inNetwork,
-               const GraphicData& inGraphicData,
-               const CastableData& inCastableData);
+    CastSystem(const SimulationContext& inSimContext);
 
     /**
      * Handles received cast messages, and updates ongoing casts.
@@ -104,17 +102,12 @@ private:
     const GraphicData& graphicData;
     const CastableData& castableData;
 
+    /** Used to send cast failure events to the UI. */
+    entt::dispatcher& simEventDispatcher;
+
     EventQueue<CastStarted> castStartedQueue;
     EventQueue<CastFailed> castFailedQueue;
     EventQueue<CastCooldownInit> castCooldownInitQueue;
-
-    entt::sigh<void(const CastFailed&)> castFailedSig;
-
-public:
-    /** The server has told us that a player entity cast failed.
-        If the client rejects a cast locally, it'll tell you through the 
-        return value of e.g. CastHelper::castSpell(). */
-    entt::sink<entt::sigh<void(const CastFailed&)>> castFailed;
 };
 
 } // End namespace Client

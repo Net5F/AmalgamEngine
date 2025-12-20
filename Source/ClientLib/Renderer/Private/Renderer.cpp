@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "RendererContext.h"
 #include "World.h"
 #include "UserInterface.h"
 #include "GraphicData.h"
@@ -18,15 +19,13 @@ namespace AM
 {
 namespace Client
 {
-Renderer::Renderer(SDL_Renderer* inSdlRenderer, World& inWorld,
-                   UserInterface& inUI, GraphicData& inGraphicData,
-                   std::function<double(void)> inGetSimTickProgress)
-: sdlRenderer{inSdlRenderer}
-, world{inWorld}
-, ui{inUI}
-, graphicData{inGraphicData}
-, getSimTickProgress{inGetSimTickProgress}
-, worldSpriteSorter{world, graphicData, ui}
+Renderer::Renderer(const RendererContext& inRendererContext)
+: sdlRenderer{inRendererContext.sdlRenderer}
+, world{inRendererContext.world}
+, userInterface{inRendererContext.userInterface}
+, graphicData{inRendererContext.graphicData}
+, getSimTickProgress{inRendererContext.getSimTickProgress}
+, worldSpriteSorter{world, graphicData, userInterface}
 , extension{nullptr}
 {
 }
@@ -50,22 +49,18 @@ void Renderer::render()
     SDL_RenderClear(sdlRenderer);
 
     // Call the project's pre-world-rendering logic.
-    if (extension != nullptr) {
-        extension->beforeWorld(lerpedCamera, alpha);
-    }
+    extension->beforeWorld(lerpedCamera, alpha);
 
     // Draw tiles and entities.
     // Note: As part of this, the sorter's sorted sprites vector is updated.
     renderWorld(lerpedCamera, alpha);
 
     // Call the project's post-world-rendering logic.
-    if (extension != nullptr) {
-        extension->afterWorld(lerpedCamera, alpha);
-    }
+    extension->afterWorld(lerpedCamera, alpha);
 
     // Draw UI elements.
     // Note: We pass the sorted sprites list so the UI can update its locator.
-    ui.render(lerpedCamera, worldSpriteSorter.getSortedSprites());
+    userInterface.render(lerpedCamera, worldSpriteSorter.getSortedSprites());
 
     // Render the finished buffer to the screen.
     SDL_RenderPresent(sdlRenderer);
@@ -74,10 +69,8 @@ void Renderer::render()
 bool Renderer::handleOSEvent(SDL_Event& event)
 {
     // Check if the project wants to handle the event.
-    if (extension != nullptr) {
-        if (extension->handleOSEvent(event)) {
-            return true;
-        }
+    if (extension->handleOSEvent(event)) {
+        return true;
     }
 
     // The project didn't handle the event. Handle it ourselves.

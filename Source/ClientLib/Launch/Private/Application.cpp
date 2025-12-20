@@ -22,35 +22,56 @@ Application::Application()
             UserConfig::get().getWindowSize().h,
             SDL_WINDOW_SHOWN}
 , sdlRenderer{sdlWindow, -1, SDL_RENDERER_ACCELERATED}
+, simEventDispatcher{}
+, uiEventDispatcher{}
+, networkEventDispatcher{}
 , assetCache{sdlRenderer.Get()}
 , resourceData{}
 , graphicData{resourceData.get(), assetCache}
 , iconData{resourceData.get()}
 , itemData{}
 , castableData{graphicData}
-, network{}
+, messageProcessorContext{networkEventDispatcher}
+, network{messageProcessorContext}
+, simulationContext{simulation,
+                    network,
+                    simEventDispatcher,
+                    uiEventDispatcher,
+                    networkEventDispatcher,
+                    graphicData,
+                    iconData,
+                    itemData,
+                    castableData}
+, simulation{simulationContext}
+, uiContext{simulation,
+            userInterface.getWorldObjectLocator(),
+            network,
+            uiEventDispatcher,
+            simEventDispatcher,
+            networkEventDispatcher,
+            sdlRenderer.Get(),
+            graphicData,
+            iconData,
+            itemData}
+, userInterface{uiContext}
+, rendererContext{sdlRenderer.Get(), simulation.getWorld(), userInterface,
+                  [&]() { return simCaller.getProgress(); }, graphicData}
+, renderer{rendererContext}
 , networkCaller{std::bind_front(&Network::tick, &network),
                 SharedConfig::CLIENT_NETWORK_TICK_TIMESTEP_S, "Network", true}
-// Note: Since the UI and sim subscribe to the network's event queues, they
-//       need to be destructed before it.
-, userInterface{}
 , uiCaller{std::bind_front(&UserInterface::tick, &userInterface),
            Config::UI_TICK_TIMESTEP_S, "UserInterface", true}
-, simulation{userInterface.getEventDispatcher(), network, graphicData,
-             itemData, castableData}
 , simCaller{std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
-, renderer{sdlRenderer.Get(), simulation.getWorld(), userInterface, graphicData,
-           std::bind_front(&PeriodicCaller::getProgress, &simCaller)}
 , rendererCaller{std::bind_front(&Renderer::render, &renderer),
                  UserConfig::get().getFrameTimestepS(), "Renderer", true}
+, messageProcessorExtension{}
+, rendererExtension{}
+, simulationExtension{}
+, userInterfaceExtension{}
 , eventHandlers{this, &renderer, &userInterface, &simulation}
 , exitRequested{false}
 {
-    // Note: We pass this separately from the above initialization to avoid a
-    //       circular dependency between Simulation and UserInterface.
-    userInterface.setWorld(simulation.getWorld());
-
     // Initialize the global timer.
     Timer::getGlobalTime();
 
@@ -83,6 +104,12 @@ Application::Application()
 
 void Application::start()
 {
+    // If any of the extensions aren't registered, exit early.
+    if (!messageProcessorExtension || !rendererExtension || !simulationExtension
+        || !userInterfaceExtension) {
+        LOG_FATAL("All extensions must be registered before calling start()");
+    }
+
     // Prime the timers so they don't start at 0.
     simCaller.initTimer();
     uiCaller.initTimer();

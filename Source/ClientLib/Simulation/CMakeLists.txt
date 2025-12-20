@@ -46,7 +46,7 @@ target_sources(ClientLib
         Public/ReplicationTickOffset.h
         Public/ServerConnectionSystem.h
         Public/Simulation.h
-        Public/SimulationExDependencies.h
+        Public/SimulationContext.h
         Public/TileUpdateSystem.h
         Public/World.h
         Public/WorldObjectID.h
@@ -57,6 +57,7 @@ target_sources(ClientLib
         Public/Components/ClientGraphicState.h
         Public/Components/InputHistory.h
         Public/Components/NeedsAdjacentChunks.h
+        Public/Events/SimulationStarted.h
         Public/GraphicData/AnimationRenderData.h
         Public/GraphicData/GraphicData.h
         Public/GraphicData/SpriteRenderData.h
@@ -78,6 +79,7 @@ target_include_directories(ClientLib
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/CastableData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Events
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/GraphicData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/IconData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData

@@ -7,7 +7,7 @@ target_sources(ClientLib
         Public/PhantomSpriteInfo.h
         Public/SpriteColorModInfo.h
         Public/UserInterface.h
-        Public/UserInterfaceExDependencies.h
+        Public/UserInterfaceContext.h
         Public/WorldObjectLocator.h
 )
 

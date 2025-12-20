@@ -10,6 +10,7 @@ struct MovementUpdate;
 
 namespace Client
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class Network;
@@ -24,8 +25,7 @@ class Network;
 class NpcMovementSystem
 {
 public:
-    NpcMovementSystem(Simulation& inSimulation, World& inWorld,
-                      Network& inNetwork);
+    NpcMovementSystem(const SimulationContext& inSimContext);
 
     /**
      * If we've received data for the appropriate ticks, updates all NPCs.

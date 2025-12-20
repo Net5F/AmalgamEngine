@@ -58,7 +58,7 @@ target_sources(ServerLib
         Public/SaveSystem.h
         Public/ScriptDataSystem.h
         Public/Simulation.h
-        Public/SimulationExDependencies.h
+        Public/SimulationContext.h
         Public/SpawnStrategy.h
         Public/TileUpdateSystem.h
         Public/World.h

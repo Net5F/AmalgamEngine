@@ -25,7 +25,7 @@ class IUserInterfaceExtension : public OSEventHandler
 {
 public:
     // Canonical constructor (derived class must implement):
-    // UserInterfaceExtension(const UserInterfaceExDependencies& deps)
+    // UserInterfaceExtension(const UserInterfaceContext& uiContext)
 
     /**
      * Returns all of the project UI's phantom sprites.

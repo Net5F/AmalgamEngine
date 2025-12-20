@@ -7,7 +7,7 @@ namespace AM
 {
 namespace Client
 {
-
+struct SimulationContext;
 class World;
 class GraphicData;
 class ISimulationExtension;
@@ -21,7 +21,7 @@ class ISimulationExtension;
 class GraphicSystem
 {
 public:
-    GraphicSystem(World& inWorld, GraphicData& inGraphicData);
+    GraphicSystem(const SimulationContext& inSimContext);
 
     /**
      * Updates each entity's sprite to reflect their current state.

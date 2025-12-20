@@ -7,6 +7,7 @@ namespace AM
 {
 namespace Client
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class Network;
@@ -21,8 +22,7 @@ class Network;
 class PlayerInputSystem
 {
 public:
-    PlayerInputSystem(Simulation& inSimulation, World& inWorld,
-                      Network& inNetwork);
+    PlayerInputSystem(const SimulationContext& inSimContext);
 
     /**
      * Updates the player's input state with the given event.

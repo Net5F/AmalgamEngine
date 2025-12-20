@@ -9,6 +9,7 @@ namespace AM
 {
 namespace Client
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class Network;
@@ -32,8 +33,7 @@ class Network;
 class PlayerMovementSystem
 {
 public:
-    PlayerMovementSystem(Simulation& inSimulation, World& inWorld,
-                         Network& inNetwork);
+    PlayerMovementSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes the player entity's movement for this tick.

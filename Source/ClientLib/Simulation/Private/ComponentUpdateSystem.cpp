@@ -1,4 +1,5 @@
 #include "ComponentUpdateSystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -15,14 +16,12 @@ namespace AM
 namespace Client
 {
 
-ComponentUpdateSystem::ComponentUpdateSystem(Simulation& inSimulation,
-                                             World& inWorld, Network& inNetwork,
-                                             GraphicData& inGraphicData)
-: simulation{inSimulation}
-, world{inWorld}
-, network{inNetwork}
-, graphicData{inGraphicData}
-, componentUpdateQueue{network.getEventDispatcher()}
+ComponentUpdateSystem::ComponentUpdateSystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, graphicData{inSimContext.graphicData}
+, componentUpdateQueue{inSimContext.networkEventDispatcher}
 {
     world.registry.on_update<GraphicState>()
         .connect<&ComponentUpdateSystem::onGraphicStateUpdated>(this);

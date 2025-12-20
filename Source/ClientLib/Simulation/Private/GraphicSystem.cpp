@@ -1,5 +1,6 @@
 #include "GraphicSystem.h"
-#include "World.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "GraphicData.h"
 #include "ISimulationExtension.h"
 #include "Rotation.h"
@@ -16,9 +17,9 @@ namespace AM
 namespace Client
 {
 
-GraphicSystem::GraphicSystem(World& inWorld, GraphicData& inGraphicData)
-: world{inWorld}
-, graphicData{inGraphicData}
+GraphicSystem::GraphicSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, graphicData{inSimContext.graphicData}
 , extension{nullptr}
 {
 }
@@ -32,14 +33,12 @@ void GraphicSystem::updateAnimations()
     for (auto [entity, rotation, graphicState, clientGraphicState] :
          view.each()) {
         // Give the project a chance to update the graphic type.
-        if (extension) {
-            EntityGraphicType graphicType{
-                extension->getUpdatedGraphicType(entity)};
-            if (graphicType != EntityGraphicType::NotSet) {
-                clientGraphicState.graphicType = graphicType;
-                clientGraphicState.setStartTime = true;
-                continue;
-            }
+        EntityGraphicType graphicType{
+            extension->getUpdatedGraphicType(entity)};
+        if (graphicType != EntityGraphicType::NotSet) {
+            clientGraphicState.graphicType = graphicType;
+            clientGraphicState.setStartTime = true;
+            continue;
         }
 
         // Determine which graphic type is desired, based on the current 

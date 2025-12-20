@@ -1,4 +1,5 @@
 #include "CastSystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -14,24 +15,23 @@
 #include "GraphicHelpers.h"
 #include "AVEntityState.h"
 #include "AVEntityHelpers.h"
+#include "entt/signal/dispatcher.hpp"
 
 namespace AM
 {
 namespace Client
 {
 
-CastSystem::CastSystem(Simulation& inSimulation, Network& inNetwork,
-                       const GraphicData& inGraphicData,
-                       const CastableData& inCastableData)
-: simulation{inSimulation}
-, world{simulation.getWorld()}
-, network{inNetwork}
-, graphicData{inGraphicData}
-, castableData{inCastableData}
-, castStartedQueue{network.getEventDispatcher()}
-, castFailedQueue{network.getEventDispatcher()}
-, castCooldownInitQueue{network.getEventDispatcher()}
-, castFailed{castFailedSig}
+CastSystem::CastSystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, graphicData{inSimContext.graphicData}
+, castableData{inSimContext.castableData}
+, simEventDispatcher{inSimContext.simEventDispatcher}
+, castStartedQueue{inSimContext.networkEventDispatcher}
+, castFailedQueue{inSimContext.networkEventDispatcher}
+, castCooldownInitQueue{inSimContext.networkEventDispatcher}
 {
 }
 
@@ -74,7 +74,7 @@ void CastSystem::processUICasts()
         const auto& params{castItemInteractionQueue.front()};
         CastFailureType failureType{castHelper.castItemInteraction(params)};
         if (failureType != CastFailureType::None) {
-            castFailedSig.publish(CastFailed{
+            simEventDispatcher.trigger(CastFailed{
                 world.playerEntity, params.interactionType, failureType});
         }
     }
@@ -85,7 +85,7 @@ void CastSystem::processUICasts()
         const auto& params{castEntityInteractionQueue.front()};
         CastFailureType failureType{castHelper.castEntityInteraction(params)};
         if (failureType != CastFailureType::None) {
-            castFailedSig.publish(CastFailed{
+            simEventDispatcher.trigger(CastFailed{
                 world.playerEntity, params.interactionType, failureType});
         }
     }
@@ -95,7 +95,7 @@ void CastSystem::processUICasts()
         const auto& params{castSpellQueue.front()};
         CastFailureType failureType{castHelper.castSpell(params)};
         if (failureType != CastFailureType::None) {
-            castFailedSig.publish(CastFailed{
+            simEventDispatcher.trigger(CastFailed{
                 world.playerEntity, params.interactionType, failureType});
         }
     }
@@ -136,7 +136,7 @@ void CastSystem::handleCastFailed(const CastFailed& castFailed)
 
             // If this is for the player entity, signal it to the UI.
             if (castFailed.casterEntity == world.playerEntity) {
-                castFailedSig.publish(castFailed);
+                simEventDispatcher.trigger(castFailed);
             }
         }
     }
@@ -241,9 +241,9 @@ void CastSystem::cancelCast(ClientCastState& castState)
     // server doesn't send failure messages for the player entity, since we 
     // can detect them ourself).
     if (castInfo.casterEntity == world.playerEntity) {
-        castFailedSig.publish({castInfo.casterEntity,
-                               castState.castInfo.castable->castableID,
-                               CastFailureType::Movement});
+        simEventDispatcher.trigger(CastFailed{
+            castInfo.casterEntity, castState.castInfo.castable->castableID,
+            CastFailureType::Movement});
     }
 
     // Cancel the cast.

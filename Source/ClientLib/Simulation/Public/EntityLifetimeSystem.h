@@ -12,6 +12,7 @@ struct EntityGraphicSet;
 
 namespace Client
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class Network;
@@ -24,8 +25,7 @@ class GraphicData;
 class EntityLifetimeSystem
 {
 public:
-    EntityLifetimeSystem(Simulation& inSimulation, World& inWorld,
-                         Network& inNetwork, GraphicData& inGraphicData);
+    EntityLifetimeSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes any waiting EntityInit or EntityDelete messages.

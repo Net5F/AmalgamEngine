@@ -1,4 +1,5 @@
 #include "NetworkSimulation.h"
+#include "MessageProcessorContext.h"
 #include "Heartbeat.h"
 #include "ConnectionError.h"
 #include "Config.h"
@@ -14,7 +15,7 @@ NetworkSimulation::NetworkSimulation()
 : server{nullptr}
 , serverConnected{false}
 , eventDispatcher{}
-, messageProcessor{eventDispatcher}
+, messageProcessor{Client::MessageProcessorContext{eventDispatcher}}
 , tickAdjustment{0}
 , adjustmentIteration{0}
 , isApplyingTickAdjustment{false}

@@ -1,5 +1,6 @@
 #include "InventorySystem.h"
-#include "World.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "Network.h"
 #include "ItemData.h"
 #include "Inventory.h"
@@ -12,13 +13,12 @@ namespace AM
 {
 namespace Client
 {
-InventorySystem::InventorySystem(World& inWorld, Network& inNetwork,
-                                 const ItemData& inItemData)
-: world{inWorld}
-, network{inNetwork}
-, itemData{inItemData}
-, inventoryInitQueue{network.getEventDispatcher()}
-, inventoryOperationQueue{network.getEventDispatcher()}
+InventorySystem::InventorySystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, itemData{inSimContext.itemData}
+, inventoryInitQueue{inSimContext.networkEventDispatcher}
+, inventoryOperationQueue{inSimContext.networkEventDispatcher}
 {
 }
 
