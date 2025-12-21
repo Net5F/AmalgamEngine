@@ -14,5 +14,7 @@ We use this mechanism for a few things, such as:
 * Type lists and Components
   * We tested an alternative using type erasure, but it performed significantly worse than providing type definitions to the engine and using a variant.
 
-** Note: Since these files are built as part of the engine, they can't depend on any project files. **
+**Note: Since these files are built as part of the engine, if they depend on
+        a project file, that file must also be made visible to the relevant 
+        engine CMake target.**
 ```
