@@ -1,4 +1,6 @@
 #include "TileUpdateSystem.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "World.h"
 #include "Network.h"
 #include "ISimulationExtension.h"
@@ -61,9 +63,9 @@ struct UpdateSender {
     }
 };
 
-TileUpdateSystem::TileUpdateSystem(World& inWorld, Network& inNetwork)
-: world{inWorld}
-, network{inNetwork}
+TileUpdateSystem::TileUpdateSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
 , extension{nullptr}
 , addLayerRequestQueue{network.getEventDispatcher()}
 , removeLayerRequestQueue{network.getEventDispatcher()}
@@ -134,14 +136,13 @@ void TileUpdateSystem::sendTileUpdates()
 
 void TileUpdateSystem::setExtension(ISimulationExtension* inExtension)
 {
-    extension = std::move(inExtension);
+    extension = inExtension;
 }
 
 void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
 {
     // If the project says the tile isn't editable, skip this request.
-    if ((extension != nullptr)
-        && !(extension->isTileExtentEditable(
+    if (!(extension->isTileExtentEditable(
             addLayerRequest.netID,
             {addLayerRequest.tilePosition.x, addLayerRequest.tilePosition.y,
              addLayerRequest.tilePosition.z, 1, 1, 1}))) {
@@ -175,8 +176,7 @@ void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
 void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
 {
     // If the project says the tile isn't editable, skip this request.
-    if ((extension != nullptr)
-        && !(extension->isTileExtentEditable(
+    if (!(extension->isTileExtentEditable(
             remLayerRequest.netID,
             {remLayerRequest.tilePosition.x, remLayerRequest.tilePosition.y,
              remLayerRequest.tilePosition.z, 1, 1, 1}))) {
@@ -209,12 +209,11 @@ void TileUpdateSystem::clearTileLayers(
     const TileClearLayers& clearLayersRequest)
 {
     // If the project says the tile isn't editable, skip this request.
-    if ((extension != nullptr)
-        && !(extension->isTileExtentEditable(clearLayersRequest.netID,
-                                             {clearLayersRequest.tilePosition.x,
-                                              clearLayersRequest.tilePosition.y,
-                                              clearLayersRequest.tilePosition.z,
-                                              1, 1, 1}))) {
+    if (!(extension->isTileExtentEditable(clearLayersRequest.netID,
+                                          {clearLayersRequest.tilePosition.x,
+                                           clearLayersRequest.tilePosition.y,
+                                           clearLayersRequest.tilePosition.z, 1,
+                                           1, 1}))) {
         return;
     }
 
@@ -226,8 +225,7 @@ void TileUpdateSystem::clearExtentLayers(
     const TileExtentClearLayers& clearExtentLayersRequest)
 {
     // If the project says the extent isn't editable, skip this request.
-    if ((extension != nullptr)
-        && !(extension->isTileExtentEditable(
+    if (!(extension->isTileExtentEditable(
             clearExtentLayersRequest.netID,
             clearExtentLayersRequest.tileExtent))) {
         return;

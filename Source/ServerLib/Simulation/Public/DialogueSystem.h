@@ -11,6 +11,7 @@ struct CastInfo;
 
 namespace Server
 {
+struct SimulationContext;
 class World;
 class Network;
 struct DialogueLua;
@@ -27,9 +28,7 @@ struct DialogueChoiceConditionLua;
 class DialogueSystem
 {
 public:
-    DialogueSystem(World& inWorld, Network& inNetwork,
-                   DialogueLua& inDialogueLua,
-                   DialogueChoiceConditionLua& inDialogueChoiceConditionLua);
+    DialogueSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes Talk interactions and dialogue choice requests, sending 

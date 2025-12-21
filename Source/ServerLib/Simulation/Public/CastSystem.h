@@ -21,6 +21,7 @@ struct Castable;
 
 namespace Server
 {
+struct SimulationContext;
 class ItemData;
 class Simulation;
 class World;
@@ -33,8 +34,7 @@ struct CastState;
 class CastSystem
 {
 public:
-    CastSystem(Simulation& inSimulation, Network& inNetwork,
-               const ItemData& inItemData, const CastableData& inCastableData);
+    CastSystem(const SimulationContext& inSimContext);
 
     /**
      * Sends initial cast cooldown state to newly-logged-on clients.

@@ -9,7 +9,7 @@ namespace AM
 {
 namespace Server
 {
-
+struct SimulationContext;
 class World;
 class Network;
 class ISimulationExtension;
@@ -23,7 +23,7 @@ class ISimulationExtension;
 class NceLifetimeSystem
 {
 public:
-    NceLifetimeSystem(World& inWorld, Network& inNetwork);
+    NceLifetimeSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes any waiting EntityInitRequest or EntityDelete messages.
@@ -54,7 +54,7 @@ private:
     World& world;
     /** Used to send error messages if entity creation fails. */
     Network& network;
-    /** If non-nullptr, contains the project's simulation extension functions.
+    /** Contains the project's simulation extension functions.
         Used for checking if entity creation requests are valid. */
     ISimulationExtension* extension;
 

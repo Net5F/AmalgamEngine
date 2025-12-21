@@ -4,7 +4,7 @@ namespace AM
 {
 namespace Server
 {
-
+struct SimulationContext;
 class World;
 
 /**
@@ -13,7 +13,7 @@ class World;
 class AISystem
 {
 public:
-    AISystem(World& inWorld);
+    AISystem(const SimulationContext& inSimContext);
 
     /**
      * Calls tick() on all AI components.

@@ -1,5 +1,6 @@
 #include "ComponentChangeSystem.h"
-#include "World.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "Network.h"
 #include "GraphicData.h"
 #include "CollisionBitSets.h"
@@ -17,14 +18,13 @@ namespace AM
 {
 namespace Server
 {
-ComponentChangeSystem::ComponentChangeSystem(World& inWorld, Network& inNetwork,
-                                             GraphicData& inGraphicData)
-: world{inWorld}
-, network{inNetwork}
-, graphicData{inGraphicData}
+ComponentChangeSystem::ComponentChangeSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, graphicData{inSimContext.graphicData}
 , extension{nullptr}
-, entityNameChangeRequestQueue{inNetwork.getEventDispatcher()}
-, graphicStateChangeRequestQueue{inNetwork.getEventDispatcher()}
+, entityNameChangeRequestQueue{inSimContext.networkEventDispatcher}
+, graphicStateChangeRequestQueue{inSimContext.networkEventDispatcher}
 {
     world.registry.on_update<GraphicState>()
         .connect<&ComponentChangeSystem::onGraphicStateUpdated>(this);
@@ -46,8 +46,7 @@ void ComponentChangeSystem::processChangeRequests()
             continue;
         }
         // If the project says the request isn't valid, skip it.
-        else if ((extension != nullptr)
-                 && !(extension->isEntityNameChangeRequestValid(
+        else if (!(extension->isEntityNameChangeRequestValid(
                      nameChangeRequest))) {
             continue;
         }
@@ -63,8 +62,7 @@ void ComponentChangeSystem::processChangeRequests()
             continue;
         }
         // If the project says the request isn't valid, skip it.
-        else if ((extension != nullptr)
-                 && !(extension->isGraphicStateChangeRequestValid(
+        else if (!(extension->isGraphicStateChangeRequestValid(
                      graphicStateChangeRequest))) {
             continue;
         }

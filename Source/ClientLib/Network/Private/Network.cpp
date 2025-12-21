@@ -138,9 +138,9 @@ void Network::setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled)
 }
 
 void Network::setMessageProcessorExtension(
-    std::unique_ptr<IMessageProcessorExtension> extension)
+    IMessageProcessorExtension* extension)
 {
-    messageProcessor.setExtension(std::move(extension));
+    messageProcessor.setExtension(extension);
 }
 
 void Network::send(const BinaryBufferSharedPtr& message)

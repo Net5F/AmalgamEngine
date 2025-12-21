@@ -1,6 +1,6 @@
 #include "ComponentSyncSystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
-#include "World.h"
 #include "Network.h"
 #include "GraphicData.h"
 #include "EngineObservedComponentTypes.h"
@@ -37,13 +37,11 @@ std::array<EnttObserver, boost::mp11::mp_size<ObservedComponentTypes>::value>
 std::array<EnttObserver, boost::mp11::mp_size<ObservedComponentTypes>::value>
     destroyObservers{};
 
-ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
-                                         World& inWorld, Network& inNetwork,
-                                         GraphicData& inGraphicData)
-: simulation{inSimulation}
-, world{inWorld}
-, network{inNetwork}
-, graphicData{inGraphicData}
+ComponentSyncSystem::ComponentSyncSystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, graphicData{inSimContext.graphicData}
 {
     boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
         using ComponentType = decltype(I);

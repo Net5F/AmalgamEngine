@@ -9,6 +9,7 @@ namespace AM
 {
 namespace Server
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class Network;
@@ -20,7 +21,7 @@ class Network;
 class InputSystem
 {
 public:
-    InputSystem(Simulation& inSimulation, World& inWorld, Network& inNetwork);
+    InputSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes incoming InputChangeRequest messages.

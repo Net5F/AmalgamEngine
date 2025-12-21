@@ -83,9 +83,9 @@ bool Renderer::handleOSEvent(SDL_Event& event)
     return false;
 }
 
-void Renderer::setExtension(std::unique_ptr<IRendererExtension> inExtension)
+void Renderer::setExtension(IRendererExtension* inExtension)
 {
-    extension = std::move(inExtension);
+    extension = inExtension;
 }
 
 Camera Renderer::getLerpedCamera(double alpha)

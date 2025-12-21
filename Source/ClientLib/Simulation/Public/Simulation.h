@@ -94,7 +94,7 @@ public:
     /**
      * See extension member comment.
      */
-    void setExtension(std::unique_ptr<ISimulationExtension> inExtension);
+    void setExtension(ISimulationExtension* inExtension);
 
 private:
     /**
@@ -129,7 +129,7 @@ private:
     /** Contains the project's simulation extension functions.
         Allows the project to provide simulation code and have it be called at
         the appropriate time. */
-    std::unique_ptr<ISimulationExtension> extension;
+    ISimulationExtension* extension;
 
     //-------------------------------------------------------------------------
     // Systems

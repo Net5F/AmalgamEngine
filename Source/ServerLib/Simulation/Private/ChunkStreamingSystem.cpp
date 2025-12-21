@@ -1,5 +1,6 @@
 #include "ChunkStreamingSystem.h"
-#include "World.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "Network.h"
 #include "ClientSimData.h"
 #include "Sprite.h"
@@ -18,10 +19,10 @@ namespace AM
 {
 namespace Server
 {
-ChunkStreamingSystem::ChunkStreamingSystem(World& inWorld, Network& inNetwork)
-: world{inWorld}
-, network{inNetwork}
-, chunkDataRequestQueue{inNetwork.getEventDispatcher()}
+ChunkStreamingSystem::ChunkStreamingSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, chunkDataRequestQueue{inSimContext.networkEventDispatcher}
 {
 }
 

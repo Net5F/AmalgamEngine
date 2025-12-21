@@ -43,7 +43,7 @@ public:
     /**
      * See extension member comment.
      */
-    void setExtension(std::unique_ptr<IRendererExtension> inExtension);
+    void setExtension(IRendererExtension* inExtension);
 
 private:
     /**
@@ -92,10 +92,10 @@ private:
 
     WorldSpriteSorter worldSpriteSorter;
 
-    /** If non-nullptr, contains the project's rendering extension functions.
-        Allows the project to provide rendering code and have it be called at
+    /** Contains the project's rendering extension functions.
+        Allows the project to provide rendering code and have it be called at 
         the appropriate time. */
-    std::unique_ptr<IRendererExtension> extension;
+    IRendererExtension* extension;
 };
 
 } // namespace Client

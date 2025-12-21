@@ -1,6 +1,6 @@
 #include "ClientAOISystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
-#include "World.h"
 #include "Network.h"
 #include "Serialize.h"
 #include "ClientSimData.h"
@@ -51,11 +51,10 @@ void addComponentsToVector(entt::registry& registry, entt::entity entity,
     }
 }
 
-ClientAOISystem::ClientAOISystem(Simulation& inSimulation, World& inWorld,
-                                 Network& inNetwork)
-: simulation{inSimulation}
-, world{inWorld}
-, network{inNetwork}
+ClientAOISystem::ClientAOISystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
 , entitiesThatLeft{}
 , entitiesThatEntered{}
 {

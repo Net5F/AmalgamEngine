@@ -14,16 +14,21 @@ namespace Server
 Application::Application()
 : sdl{0}
 , sdlNetInit{}
+, networkEventDispatcher{}
 , userConfigInitializer{}
 , resourceData{}
 , graphicData{resourceData.get()}
 , iconData{resourceData.get()}
 , itemData{}
 , castableData{graphicData}
-, network{}
+, messageProcessorContext{networkEventDispatcher}
+, network{messageProcessorContext}
+, simulationContext{simulation,  network,  networkEventDispatcher,
+                    graphicData, iconData, itemData,
+                    castableData}
+, simulation{simulationContext}
 , networkCaller{std::bind_front(&Network::tick, &network),
                 SharedConfig::SERVER_NETWORK_TICK_TIMESTEP_S, "Network", true}
-, simulation{network, graphicData, itemData, castableData}
 , simCaller{std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
 , exitRequested{false}
@@ -38,6 +43,11 @@ Application::Application()
 void Application::start()
 {
     tracy::SetThreadName("ServerMain");
+
+    // If any of the extensions aren't registered, exit early.
+    if (!messageProcessorExtension || !simulationExtension) {
+        LOG_FATAL("All extensions must be registered before calling start()");
+    }
 
     LOG_INFO("Starting main loop.");
 

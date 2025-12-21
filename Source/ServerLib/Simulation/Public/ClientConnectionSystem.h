@@ -9,6 +9,7 @@ namespace AM
 {
 namespace Server
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class Network;
@@ -21,8 +22,7 @@ class GraphicData;
 class ClientConnectionSystem
 {
 public:
-    ClientConnectionSystem(Simulation& inSimulation, World& inWorld,
-                           Network& inNetwork, GraphicData& inGraphicData);
+    ClientConnectionSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes new connections and disconnections, updating the sim state

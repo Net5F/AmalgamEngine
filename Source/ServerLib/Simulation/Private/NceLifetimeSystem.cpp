@@ -1,5 +1,6 @@
 #include "NceLifetimeSystem.h"
-#include "World.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "Database.h"
 #include "Network.h"
 #include "Name.h"
@@ -16,13 +17,13 @@ namespace AM
 namespace Server
 {
 
-NceLifetimeSystem::NceLifetimeSystem(World& inWorld, Network& inNetwork)
-: world{inWorld}
-, network{inNetwork}
+NceLifetimeSystem::NceLifetimeSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
 , extension{nullptr}
 , entityReInitQueue{}
-, entityInitRequestQueue{inNetwork.getEventDispatcher()}
-, entityDeleteRequestQueue{inNetwork.getEventDispatcher()}
+, entityInitRequestQueue{inSimContext.networkEventDispatcher}
+, entityDeleteRequestQueue{inSimContext.networkEventDispatcher}
 {
 }
 
@@ -50,15 +51,14 @@ void NceLifetimeSystem::processUpdateRequests()
 
 void NceLifetimeSystem::setExtension(ISimulationExtension* inExtension)
 {
-    extension = std::move(inExtension);
+    extension = inExtension;
 }
 
 void NceLifetimeSystem::handleInitRequest(
     const EntityInitRequest& entityInitRequest)
 {
     // If the project says the request isn't valid, do nothing.
-    if ((extension != nullptr)
-        && !(extension->isEntityInitRequestValid(entityInitRequest))) {
+    if (!(extension->isEntityInitRequestValid(entityInitRequest))) {
         return;
     }
 
@@ -97,8 +97,7 @@ void NceLifetimeSystem::handleDeleteRequest(
         return;
     }
     // If the project says the request isn't valid, skip it.
-    else if ((extension != nullptr)
-             && !(extension->isEntityDeleteRequestValid(entityDeleteRequest))) {
+    else if (!(extension->isEntityDeleteRequestValid(entityDeleteRequest))) {
         return;
     }
 

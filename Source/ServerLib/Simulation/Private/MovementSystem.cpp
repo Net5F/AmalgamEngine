@@ -1,6 +1,7 @@
 #include "MovementSystem.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "MovementHelpers.h"
-#include "World.h"
 #include "EnttGroups.h"
 #include "SharedConfig.h"
 #include "Transforms.h"
@@ -11,8 +12,8 @@ namespace AM
 {
 namespace Server
 {
-MovementSystem::MovementSystem(World& inWorld)
-: world(inWorld)
+MovementSystem::MovementSystem(const SimulationContext& inSimContext)
+: world(inSimContext.simulation.getWorld())
 , entityMover{world.registry, world.tileMap, world.entityLocator,
               world.collisionLocator}
 {

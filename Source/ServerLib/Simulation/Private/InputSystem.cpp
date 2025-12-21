@@ -1,4 +1,5 @@
 #include "InputSystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -13,11 +14,10 @@ namespace AM
 {
 namespace Server
 {
-InputSystem::InputSystem(Simulation& inSimulation, World& inWorld,
-                         Network& inNetwork)
-: simulation{inSimulation}
-, world{inWorld}
-, inputChangeRequestQueue{inNetwork.getEventDispatcher()}
+InputSystem::InputSystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, inputChangeRequestQueue{inSimContext.networkEventDispatcher}
 , inputChangeRequestSorter{}
 {
 }

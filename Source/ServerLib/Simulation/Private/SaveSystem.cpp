@@ -1,4 +1,5 @@
 #include "SaveSystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
 #include "World.h"
 #include "ItemData.h"
@@ -42,10 +43,10 @@ void addComponentsToVector(entt::registry& registry, entt::entity entity,
     });
 }
 
-SaveSystem::SaveSystem(Simulation& inSimulation, ItemData& inItemData)
-: simulation{inSimulation}
-, world{simulation.getWorld()}
-, itemData{inItemData}
+SaveSystem::SaveSystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, itemData{inSimContext.itemData}
 , updatedItems{}
 , saveTimer{}
 , workBuffer1{}

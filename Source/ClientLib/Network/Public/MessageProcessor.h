@@ -1,6 +1,5 @@
 #pragma once
 
-#include "IMessageProcessorExtension.h"
 #include "entt/fwd.hpp"
 #include <SDL_stdinc.h>
 #include <memory>
@@ -14,6 +13,7 @@ class EventDispatcher;
 
 namespace Client
 {
+class IMessageProcessorExtension;
 struct MessageProcessorContext;
 
 /**
@@ -54,7 +54,7 @@ public:
     /**
      * See extension member comment.
      */
-    void setExtension(std::unique_ptr<IMessageProcessorExtension> inExtension);
+    void setExtension(IMessageProcessorExtension* inExtension);
 
 private:
     //-------------------------------------------------------------------------
@@ -87,11 +87,10 @@ private:
     /** The latest tick that we've received a message or confirmation for. */
     std::atomic<Uint32> lastReceivedTick;
 
-    /** If non-nullptr, contains the project's message processing extension
-        functions.
+    /** Contains the project's message processing extension functions.
         Allows the project to provide message processing code and have it be
         called at the appropriate time. */
-    std::unique_ptr<IMessageProcessorExtension> extension;
+    IMessageProcessorExtension* extension;
 };
 
 } // End namespace Client

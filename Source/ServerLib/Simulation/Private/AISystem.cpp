@@ -1,5 +1,6 @@
 #include "AISystem.h"
-#include "World.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "ProjectAITypes.h"
 #include "Log.h"
 #include "boost/mp11/algorithm.hpp"
@@ -9,8 +10,8 @@ namespace AM
 namespace Server
 {
 
-AISystem::AISystem(World& inWorld)
-: world{inWorld}
+AISystem::AISystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
 {
 }
 

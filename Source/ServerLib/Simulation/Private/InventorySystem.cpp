@@ -1,5 +1,6 @@
 #include "InventorySystem.h"
-#include "World.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "Network.h"
 #include "ItemData.h"
 #include "ISimulationExtension.h"
@@ -14,14 +15,13 @@ namespace AM
 {
 namespace Server
 {
-InventorySystem::InventorySystem(World& inWorld, Network& inNetwork,
-                                 const ItemData& inItemData)
-: world{inWorld}
-, network{inNetwork}
-, itemData{inItemData}
+InventorySystem::InventorySystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, itemData{inSimContext.itemData}
 , extension{nullptr}
 , playerInventoryObserver{}
-, inventoryOperationQueue{inNetwork.getEventDispatcher()}
+, inventoryOperationQueue{inSimContext.networkEventDispatcher}
 {
     // Observe player Inventory construction events.
     playerInventoryObserver.bind(world.registry);

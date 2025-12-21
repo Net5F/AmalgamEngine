@@ -6,6 +6,7 @@ namespace AM
 {
 namespace Server
 {
+struct SimulationContext;
 class World;
 
 /**
@@ -14,7 +15,7 @@ class World;
 class MovementSystem
 {
 public:
-    MovementSystem(World& inWorld);
+    MovementSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes 1 tick of entity movement.

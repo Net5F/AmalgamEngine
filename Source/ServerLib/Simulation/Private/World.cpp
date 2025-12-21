@@ -1,4 +1,5 @@
 #include "World.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
 #include "Network.h"
 #include "GraphicData.h"
@@ -65,24 +66,22 @@ void onComponentDestroyed(entt::registry& registry, entt::entity entity)
     }
 }
 
-World::World(Simulation& inSimulation, Network& inNetwork,
-             const GraphicData& inGraphicData, ItemData& inItemData,
-             const CastableData& inCastableData, EntityInitLua& inEntityInitLua,
-             ItemInitLua& inItemInitLua)
+World::World(const SimulationContext& inSimContext)
 : registry{}
 , entityLocator{registry}
 , collisionLocator{}
-, tileMap{inGraphicData, collisionLocator}
+, tileMap{inSimContext.graphicData, collisionLocator}
 , entityStoredValueIDMap{}
 , globalStoredValueMap{}
-, inventoryHelper{*this, inNetwork, inItemData}
-, castHelper{inSimulation, inItemData, inCastableData}
+, inventoryHelper{*this, inSimContext.network, inSimContext.itemData}
+, castHelper{inSimContext.simulation, inSimContext.itemData,
+             inSimContext.castableData}
 , database{std::make_unique<Database>()}
 , netIDMap{}
-, simulation{inSimulation}
-, graphicData{inGraphicData}
-, entityInitLua{inEntityInitLua}
-, itemInitLua{inItemInitLua}
+, simulation{inSimContext.simulation}
+, graphicData{inSimContext.graphicData}
+, entityInitLua{inSimContext.simulation.getEntityInitLua()}
+, itemInitLua{inSimContext.simulation.getItemInitLua()}
 , nextStoredValueID{NULL_ENTITY_STORED_VALUE_ID + 1}
 , workStringID{}
 , randomDevice{}
@@ -131,7 +130,7 @@ World::World(Simulation& inSimulation, Network& inNetwork,
     loadNonClientEntities();
 
     // Load our saved item definitions.
-    loadItems(inItemData);
+    loadItems(inSimContext.itemData);
 
     // Load our saved stored value data.
     loadStoredValues();

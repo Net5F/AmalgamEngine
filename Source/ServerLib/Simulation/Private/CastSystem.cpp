@@ -1,6 +1,6 @@
 #include "CastSystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
-#include "World.h"
 #include "Network.h"
 #include "ItemData.h"
 #include "CastableData.h"
@@ -23,16 +23,14 @@ namespace AM
 namespace Server
 {
 
-CastSystem::CastSystem(Simulation& inSimulation, Network& inNetwork,
-                       const ItemData& inItemData,
-                       const CastableData& inCastableData)
-: simulation{inSimulation}
-, world{simulation.getWorld()}
-, network{inNetwork}
-, itemData{inItemData}
-, castableData{inCastableData}
+CastSystem::CastSystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, itemData{inSimContext.itemData}
+, castableData{inSimContext.castableData}
 , playerCastCooldownObserver{}
-, castRequestQueue{inNetwork.getEventDispatcher()}
+, castRequestQueue{inSimContext.networkEventDispatcher}
 , castRequestSorter{}
 {
     // Observe player CastCooldown construction events.

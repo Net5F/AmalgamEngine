@@ -15,6 +15,8 @@
 #include "ISimulationExtension.h"
 #include "SimulationContext.h"
 
+#include "entt/signal/dispatcher.hpp"
+
 #include "SDL2pp/SDL.hh"
 
 #include <atomic>
@@ -22,8 +24,6 @@
 
 namespace AM
 {
-class EventDispatcher;
-
 namespace Server
 {
 /**
@@ -83,27 +83,48 @@ private:
     SDLNetInitializer sdlNetInit;
 
     //-------------------------------------------------------------------------
-    // Modules, Dependencies, PeriodicCallers
+    // Event Busses
+    //-------------------------------------------------------------------------
+    /** Used for Network -> Sim message events. */
+    EventDispatcher networkEventDispatcher;
+
+    //-------------------------------------------------------------------------
+    // Data, Modules, Contexts
     //-------------------------------------------------------------------------
     UserConfigInitializer userConfigInitializer;
 
     ResourceData resourceData;
-
     GraphicData graphicData;
-
     IconData iconData;
-
     ItemData itemData;
-
     CastableData castableData;
 
+    MessageProcessorContext messageProcessorContext;
     Network network;
+
+    SimulationContext simulationContext;
+    Simulation simulation;
+
+    //-------------------------------------------------------------------------
+    // PeriodicCallers
+    //-------------------------------------------------------------------------
     /** Calls network.tick() at the network tick rate. */
     PeriodicCaller networkCaller;
 
-    Simulation simulation;
     /** Calls simulation.tick() at the sim tick rate. */
     PeriodicCaller simCaller;
+
+    //-------------------------------------------------------------------------
+    // Module Extensions
+    //-------------------------------------------------------------------------
+    /** Contains the project's extension functions.
+        Allows the project to provide code and have it be called at the 
+        appropriate time.
+        Note: This class guarantees that these extensions will be set and non-
+              null before the loop starts running. This means we don't need to 
+              null check the extension pointers in any class. */
+    std::unique_ptr<IMessageProcessorExtension> messageProcessorExtension;
+    std::unique_ptr<ISimulationExtension> simulationExtension;
 
     //-------------------------------------------------------------------------
     // Additional, used during the loop
@@ -115,20 +136,15 @@ private:
 template<typename T>
 void Application::registerMessageProcessorExtension()
 {
-    MessageProcessorContext messageProcessorContext{
-        network.getEventDispatcher()};
-
-    network.setMessageProcessorExtension(
-        std::make_unique<T>(messageProcessorContext));
+    messageProcessorExtension = std::make_unique<T>(messageProcessorContext);
+    network.setMessageProcessorExtension(messageProcessorExtension.get());
 }
 
 template<typename T>
 void Application::registerSimulationExtension()
 {
-    SimulationContext simulationContext{simulation, network,  graphicData,
-                                        iconData,   itemData, castableData};
-
-    simulation.setExtension(std::make_unique<T>(simulationContext));
+    simulationExtension = std::make_unique<T>(simulationContext);
+    simulation.setExtension(simulationExtension.get());
 }
 
 } // End namespace Server

@@ -10,6 +10,7 @@ struct EntityUpdate;
 
 namespace Server
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class Network;
@@ -33,8 +34,7 @@ struct ClientSimData;
 class MovementSyncSystem
 {
 public:
-    MovementSyncSystem(Simulation& inSimulation, World& inWorld,
-                       Network& inNetwork);
+    MovementSyncSystem(const SimulationContext& inSimContext);
 
     /**
      * Updates all connected clients with relevant entity movement state.

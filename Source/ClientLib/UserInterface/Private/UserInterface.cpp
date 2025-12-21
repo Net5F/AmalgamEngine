@@ -73,10 +73,9 @@ const WorldObjectLocator& UserInterface::getWorldObjectLocator()
     return worldObjectLocator;
 }
 
-void UserInterface::setExtension(
-    std::unique_ptr<IUserInterfaceExtension> inExtension)
+void UserInterface::setExtension(IUserInterfaceExtension* inExtension)
 {
-    extension = std::move(inExtension);
+    extension = inExtension;
 }
 
 } // End namespace Client

@@ -1,4 +1,5 @@
 #include "MessageProcessor.h"
+#include "MessageProcessorContext.h"
 #include "QueuedEvents.h"
 #include "Deserialize.h"
 #include "DispatchMessage.h"
@@ -47,8 +48,9 @@ void dispatchWithNetID(NetworkID netID, std::span<Uint8> messageBuffer,
     dispatcher.push<T>(message);
 }
 
-MessageProcessor::MessageProcessor(EventDispatcher& inNetworkEventDispatcher)
-: networkEventDispatcher{inNetworkEventDispatcher}
+MessageProcessor::MessageProcessor(
+    const MessageProcessorContext& inMessageProcessorContext)
+: networkEventDispatcher{inMessageProcessorContext.networkEventDispatcher}
 {
 }
 
@@ -184,10 +186,9 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
     return messageTick;
 }
 
-void MessageProcessor::setExtension(
-    std::unique_ptr<IMessageProcessorExtension> inExtension)
+void MessageProcessor::setExtension(IMessageProcessorExtension* inExtension)
 {
-    extension = std::move(inExtension);
+    extension = inExtension;
 }
 
 Uint32 MessageProcessor::handleHeartbeat(Uint8* messageBuffer,

@@ -14,6 +14,7 @@ struct ChunkWireSnapshot;
 
 namespace Server
 {
+struct SimulationContext;
 class World;
 class Network;
 
@@ -29,7 +30,7 @@ class Network;
 class ChunkStreamingSystem
 {
 public:
-    ChunkStreamingSystem(World& inWorld, Network& inNetwork);
+    ChunkStreamingSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes chunk update requests, sending chunk data if the request is

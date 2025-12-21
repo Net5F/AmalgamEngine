@@ -230,26 +230,29 @@ private:
 template<typename T>
 void Application::registerMessageProcessorExtension()
 {
-    network.setMessageProcessorExtension(
-        std::make_unique<T>(messageProcessorContext));
+    messageProcessorExtension = std::make_unique<T>(messageProcessorContext);
+    network.setMessageProcessorExtension(messageProcessorExtension.get());
 }
 
 template<typename T>
 void Application::registerRendererExtension()
 {
-    renderer.setExtension(std::make_unique<T>(rendererContext));
+    rendererExtension = std::make_unique<T>(rendererContext);
+    renderer.setExtension(rendererExtension.get());
 }
 
 template<typename T>
 void Application::registerSimulationExtension()
 {
-    simulation.setExtension(std::make_unique<T>(simulationContext));
+    simulationExtension = std::make_unique<T>(simulationContext);
+    simulation.setExtension(simulationExtension.get());
 }
 
 template<typename T>
 void Application::registerUserInterfaceExtension()
 {
-    userInterface.setExtension(std::make_unique<T>(uiContext));
+    userInterfaceExtension = std::make_unique<T>(uiContext);
+    userInterface.setExtension(userInterfaceExtension.get());
 }
 
 } // End namespace Client

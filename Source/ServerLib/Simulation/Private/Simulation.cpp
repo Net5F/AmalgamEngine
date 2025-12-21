@@ -1,4 +1,5 @@
 #include "Simulation.h"
+#include "SimulationContext.h"
 #include "Network.h"
 #include "ItemData.h"
 #include "CastableData.h"
@@ -22,44 +23,42 @@ namespace AM
 {
 namespace Server
 {
-Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData,
-                       ItemData& inItemData, CastableData& castableData)
-: network{inNetwork}
+Simulation::Simulation(const SimulationContext& inSimContext)
+: network{inSimContext.network}
 , entityInitLua{std::make_unique<EntityInitLua>()}
 , entityItemHandlerLua{std::make_unique<EntityItemHandlerLua>()}
 , itemInitLua{std::make_unique<ItemInitLua>()}
 , dialogueLua{std::make_unique<DialogueLua>()}
 , dialogueChoiceConditionLua{std::make_unique<DialogueChoiceConditionLua>()}
-, world{*this,        network,        inGraphicData, inItemData,
-        castableData, *entityInitLua, *itemInitLua}
+, world{inSimContext}
 , currentTick{0}
 , engineLuaBindings{*entityInitLua,
                     *entityItemHandlerLua,
                     *itemInitLua,
                     *dialogueLua,
                     *dialogueChoiceConditionLua,
-                    inGraphicData,
-                    inItemData,
+                    inSimContext.graphicData,
+                    inSimContext.itemData,
                     world,
                     network}
 , extension{nullptr}
-, clientConnectionSystem{*this, world, network, inGraphicData}
-, nceLifetimeSystem{world, network}
-, componentChangeSystem{world, network, inGraphicData}
-, tileUpdateSystem{world, network}
-, inputSystem{*this, world, network}
-, movementSystem{world}
-, aiSystem{world}
-, castSystem{*this, network, inItemData, castableData}
-, itemSystem{world, network, inItemData, *entityItemHandlerLua}
-, inventorySystem{world, network, inItemData}
-, dialogueSystem{world, network, *dialogueLua, *dialogueChoiceConditionLua}
-, clientAOISystem{*this, world, network}
-, movementSyncSystem{*this, world, network}
-, componentSyncSystem{*this, world, network, inGraphicData}
-, chunkStreamingSystem{world, network}
-, scriptDataSystem{world, network, inItemData}
-, saveSystem{*this, inItemData}
+, clientConnectionSystem{inSimContext}
+, nceLifetimeSystem{inSimContext}
+, componentChangeSystem{inSimContext}
+, tileUpdateSystem{inSimContext}
+, inputSystem{inSimContext}
+, movementSystem{inSimContext}
+, aiSystem{inSimContext}
+, castSystem{inSimContext}
+, itemSystem{inSimContext}
+, inventorySystem{inSimContext}
+, dialogueSystem{inSimContext}
+, clientAOISystem{inSimContext}
+, movementSyncSystem{inSimContext}
+, componentSyncSystem{inSimContext}
+, chunkStreamingSystem{inSimContext}
+, scriptDataSystem{inSimContext}
+, saveSystem{inSimContext}
 {
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
@@ -109,9 +108,7 @@ void Simulation::tick()
 
     /* Run all systems. */
     // Call the project's pre-everything logic.
-    if (extension != nullptr) {
-        extension->beforeAll();
-    }
+    extension->beforeAll();
 
     // Process client connections and disconnections.
     clientConnectionSystem.processConnectionEvents();
@@ -126,9 +123,7 @@ void Simulation::tick()
     tileUpdateSystem.updateTiles();
 
     // Call the project's pre-movement logic.
-    if (extension != nullptr) {
-        extension->afterMapAndConnectionUpdates();
-    }
+    extension->afterMapAndConnectionUpdates();
 
     // Send updated tile state to nearby clients.
     tileUpdateSystem.sendTileUpdates();
@@ -159,9 +154,7 @@ void Simulation::tick()
     dialogueSystem.processDialogueInteractions();
 
     // Call the project's post-sim-update logic.
-    if (extension != nullptr) {
-        extension->afterSimUpdate();
-    }
+    extension->afterSimUpdate();
 
     // Update each client entity's "entities in my AOI" list and send Init/
     // Delete messages.
@@ -180,9 +173,7 @@ void Simulation::tick()
     componentSyncSystem.sendUpdates();
 
     // Call the project's post-movement-sync logic.
-    if (extension != nullptr) {
-        extension->afterClientSync();
-    }
+    extension->afterClientSync();
 
     // Respond to chunk data requests.
     chunkStreamingSystem.sendChunks();
@@ -194,22 +185,20 @@ void Simulation::tick()
     saveSystem.saveIfNecessary();
 
     // Call the project's post-everything logic.
-    if (extension != nullptr) {
-        extension->afterAll();
-    }
+    extension->afterAll();
 
     currentTick++;
 
     FrameMark;
 }
 
-void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
+void Simulation::setExtension(ISimulationExtension* inExtension)
 {
-    extension = std::move(inExtension);
-    nceLifetimeSystem.setExtension(extension.get());
-    componentChangeSystem.setExtension(extension.get());
-    tileUpdateSystem.setExtension(extension.get());
-    itemSystem.setExtension(extension.get());
+    extension = inExtension;
+    nceLifetimeSystem.setExtension(extension);
+    componentChangeSystem.setExtension(extension);
+    tileUpdateSystem.setExtension(extension);
+    itemSystem.setExtension(extension);
 }
 
 } // namespace Server

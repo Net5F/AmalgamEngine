@@ -3,6 +3,7 @@
 #include "QueuedEvents.h"
 #include "Deserialize.h"
 #include "DispatchMessage.h"
+#include "IMessageProcessorExtension.h"
 #include "ExplicitConfirmation.h"
 #include "ConnectionResponse.h"
 #include "SystemMessage.h"
@@ -177,10 +178,9 @@ Uint32 MessageProcessor::getLastReceivedTick()
     return lastReceivedTick;
 }
 
-void MessageProcessor::setExtension(
-    std::unique_ptr<IMessageProcessorExtension> inExtension)
+void MessageProcessor::setExtension(IMessageProcessorExtension* inExtension)
 {
-    extension = std::move(inExtension);
+    extension = inExtension;
 }
 
 void MessageProcessor::handleExplicitConfirmation(Uint8* messageBuffer,

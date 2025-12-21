@@ -10,6 +10,7 @@ namespace AM
 {
 namespace Server
 {
+struct SimulationContext;
 class World;
 class Network;
 class ISimulationExtension;
@@ -23,7 +24,7 @@ class ISimulationExtension;
 class TileUpdateSystem
 {
 public:
-    TileUpdateSystem(World& inWorld, Network& inNetwork);
+    TileUpdateSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes tile updates and updates the world's tile map.

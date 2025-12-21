@@ -1,6 +1,6 @@
 #include "ClientConnectionSystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
-#include "World.h"
 #include "Network.h"
 #include "GraphicData.h"
 #include "SharedConfig.h"
@@ -23,14 +23,11 @@ namespace AM
 {
 namespace Server
 {
-ClientConnectionSystem::ClientConnectionSystem(Simulation& inSimulation,
-                                               World& inWorld,
-                                               Network& inNetwork,
-                                               GraphicData& inGraphicData)
-: simulation{inSimulation}
-, world{inWorld}
-, network{inNetwork}
-, graphicData{inGraphicData}
+ClientConnectionSystem::ClientConnectionSystem(const SimulationContext& inSimContext)
+: simulation{inSimContext.simulation}
+, world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, graphicData{inSimContext.graphicData}
 , clientConnectionEventQueue{network.getEventDispatcher()}
 {
 }

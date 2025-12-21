@@ -21,6 +21,9 @@ class Acceptor;
 
 namespace Server
 {
+struct MessageProcessorContext;
+class IMessageProcessorExtension;
+
 /**
  * Provides a convenient interface for sending and receiving messages, and
  * other network-related functionality.
@@ -31,7 +34,7 @@ namespace Server
 class Network
 {
 public:
-    Network();
+    Network(const MessageProcessorContext& inMessageProcessorContext);
 
     /**
      * Sends all queued messages over the network.
@@ -100,8 +103,7 @@ public:
     /**
      * See MessageProcessor::extension member comment.
      */
-    void setMessageProcessorExtension(
-        std::unique_ptr<IMessageProcessorExtension> extension);
+    void setMessageProcessorExtension(IMessageProcessorExtension* extension);
 
 private:
     /**

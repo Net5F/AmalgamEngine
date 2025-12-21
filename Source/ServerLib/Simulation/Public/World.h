@@ -26,6 +26,7 @@ struct Item;
 
 namespace Server
 {
+struct SimulationContext;
 class Simulation;
 class Network;
 class GraphicData;
@@ -52,10 +53,7 @@ struct ItemInitLua;
 class World
 {
 public:
-    World(Simulation& inSimulation, Network& inNetwork,
-          const GraphicData& inGraphicData, ItemData& inItemData,
-          const CastableData& inCastableData, EntityInitLua& inEntityInitLua,
-          ItemInitLua& inItemInitLua);
+    World(const SimulationContext& inSimContext);
 
     ~World();
 

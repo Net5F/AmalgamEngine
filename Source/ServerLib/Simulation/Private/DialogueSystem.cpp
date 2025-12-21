@@ -1,6 +1,6 @@
 #include "DialogueSystem.h"
+#include "SimulationContext.h"
 #include "Simulation.h"
-#include "World.h"
 #include "Network.h"
 #include "DialogueLua.h"
 #include "DialogueChoiceConditionLua.h"
@@ -14,15 +14,14 @@ namespace AM
 {
 namespace Server
 {
-DialogueSystem::DialogueSystem(
-    World& inWorld, Network& inNetwork, DialogueLua& inDialogueLua,
-    DialogueChoiceConditionLua& inDialogueChoiceConditionLua)
-: world{inWorld}
-, network{inNetwork}
-, dialogueLua{inDialogueLua}
-, dialogueChoiceConditionLua{inDialogueChoiceConditionLua}
+DialogueSystem::DialogueSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, dialogueLua{inSimContext.simulation.getDialogueLua()}
+, dialogueChoiceConditionLua{inSimContext.simulation
+                                 .getDialogueChoiceConditionLua()}
 , workString{}
-, dialogueChoiceRequestQueue{inNetwork.getEventDispatcher()}
+, dialogueChoiceRequestQueue{inSimContext.networkEventDispatcher}
 {
     // Register a callback for entity Talk interactions.
     world.castHelper.setOnEntityInteractionCompleted(

@@ -29,6 +29,7 @@ class CastableData;
 
 namespace Server
 {
+struct SimulationContext;
 class Network;
 class GraphicData;
 class ItemData;
@@ -53,8 +54,7 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S{.001};
 
-    Simulation(Network& inNetwork, GraphicData& inGraphicData,
-               ItemData& inItemData, CastableData& inCastableData);
+    Simulation(const SimulationContext& inSimContext);
 
     ~Simulation();
 
@@ -86,7 +86,7 @@ public:
     /**
      * See extension member comment.
      */
-    void setExtension(std::unique_ptr<ISimulationExtension> inExtension);
+    void setExtension(ISimulationExtension* inExtension);
 
 private:
     /** Used to receive events (through the Network's dispatcher) and to
@@ -119,10 +119,10 @@ private:
     /** The engine's Lua bindings. */
     EngineLuaBindings engineLuaBindings;
 
-    /** If non-nullptr, contains the project's simulation extension functions.
+    /** Contains the project's simulation extension functions.
         Allows the project to provide simulation code and have it be called at
         the appropriate time. */
-    std::unique_ptr<ISimulationExtension> extension;
+    ISimulationExtension* extension;
 
     //-------------------------------------------------------------------------
     // Systems

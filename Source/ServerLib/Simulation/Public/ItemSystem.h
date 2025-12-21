@@ -15,6 +15,7 @@ struct CastInfo;
 
 namespace Server
 {
+struct SimulationContext;
 class World;
 class Network;
 class ItemData;
@@ -28,8 +29,7 @@ struct EntityItemHandlerScript;
 class ItemSystem
 {
 public:
-    ItemSystem(World& inWorld, Network& inNetwork, ItemData& inItemData,
-               EntityItemHandlerLua& inEntityItemHandlerLua);
+    ItemSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes the "Use On" item interactions (combine items, use item on 

@@ -8,6 +8,7 @@ namespace AM
 {
 namespace Server
 {
+struct SimulationContext;
 class World;
 class Network;
 class ItemData;
@@ -19,8 +20,7 @@ class ISimulationExtension;
 class InventorySystem
 {
 public:
-    InventorySystem(World& inWorld, Network& inNetwork,
-                    const ItemData& itemData);
+    InventorySystem(const SimulationContext& inSimContext);
 
     /**
      * Sends initial inventory state to newly-logged-on clients.

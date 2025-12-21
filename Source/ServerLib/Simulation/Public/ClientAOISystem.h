@@ -8,6 +8,7 @@ namespace AM
 {
 namespace Server
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class Network;
@@ -37,8 +38,7 @@ struct ClientSimData;
 class ClientAOISystem
 {
 public:
-    ClientAOISystem(Simulation& inSimulation, World& inWorld,
-                    Network& inNetwork);
+    ClientAOISystem(const SimulationContext& inSimContext);
 
     /**
      * Updates the peersInAOI list in any client entities that have recently

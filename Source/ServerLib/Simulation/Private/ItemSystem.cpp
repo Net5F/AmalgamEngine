@@ -1,5 +1,6 @@
 #include "ItemSystem.h"
-#include "World.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
 #include "Network.h"
 #include "ItemData.h"
 #include "Database.h"
@@ -22,20 +23,18 @@ namespace AM
 {
 namespace Server
 {
-ItemSystem::ItemSystem(World& inWorld, Network& inNetwork,
-                       ItemData& inItemData,
-                       EntityItemHandlerLua& inEntityItemHandlerLua)
-: world{inWorld}
-, network{inNetwork}
-, itemData{inItemData}
-, entityItemHandlerLua{inEntityItemHandlerLua}
+ItemSystem::ItemSystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, itemData{inSimContext.itemData}
+, entityItemHandlerLua{inSimContext.simulation.getEntityItemHandlerLua()}
 , extension{nullptr}
 , updatedItems{}
-, itemInitRequestQueue{inNetwork.getEventDispatcher()}
-, itemChangeRequestQueue{inNetwork.getEventDispatcher()}
-, combineItemsRequestQueue{inNetwork.getEventDispatcher()}
-, useItemOnEntityRequestQueue{inNetwork.getEventDispatcher()}
-, itemDataRequestQueue{inNetwork.getEventDispatcher()}
+, itemInitRequestQueue{inSimContext.networkEventDispatcher}
+, itemChangeRequestQueue{inSimContext.networkEventDispatcher}
+, combineItemsRequestQueue{inSimContext.networkEventDispatcher}
+, useItemOnEntityRequestQueue{inSimContext.networkEventDispatcher}
+, itemDataRequestQueue{inSimContext.networkEventDispatcher}
 {
     // When an item is updated, add it to updatedItems.
     itemData.itemUpdated.connect<&ItemSystem::itemUpdated>(this);
@@ -215,8 +214,7 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
         errorType = ItemError::StringIDInUse;
     }
     // Check that the project says the request is valid.
-    else if ((extension != nullptr)
-             && !(extension->isItemInitRequestValid(itemInitRequest))) {
+    else if (!(extension->isItemInitRequestValid(itemInitRequest))) {
         errorType = ItemError::PermissionFailure;
     }
 
@@ -273,8 +271,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
         errorType = ItemError::StringIDInUse;
     }
     // Check that the project says the request is valid.
-    else if ((extension != nullptr)
-             && !(extension->isItemChangeRequestValid(itemChangeRequest))) {
+    else if (!(extension->isItemChangeRequestValid(itemChangeRequest))) {
         errorType = ItemError::PermissionFailure;
     }
 

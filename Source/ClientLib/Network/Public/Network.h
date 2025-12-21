@@ -106,8 +106,7 @@ public:
     /**
      * See MessageProcessor::extension member comment.
      */
-    void setMessageProcessorExtension(
-        std::unique_ptr<IMessageProcessorExtension> extension);
+    void setMessageProcessorExtension(IMessageProcessorExtension* extension);
 
 private:
     /**

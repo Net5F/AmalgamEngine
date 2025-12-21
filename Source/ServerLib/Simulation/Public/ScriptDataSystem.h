@@ -8,6 +8,7 @@ namespace AM
 {
 namespace Server
 {
+struct SimulationContext;
 class World;
 class Network;
 class ItemData;
@@ -22,8 +23,7 @@ class ItemData;
 class ScriptDataSystem
 {
 public:
-    ScriptDataSystem(World& inWorld, Network& inNetwork,
-                     const ItemData& itemData);
+    ScriptDataSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes script data requests, sending script data if the request is

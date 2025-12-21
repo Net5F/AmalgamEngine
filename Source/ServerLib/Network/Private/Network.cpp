@@ -15,9 +15,8 @@ namespace AM
 namespace Server
 {
 
-Network::Network()
-: eventDispatcher{}
-, messageProcessor{eventDispatcher}
+Network::Network(const MessageProcessorContext& inMessageProcessorContext)
+: messageProcessor{inMessageProcessorContext}
 , clientHandler{*this, eventDispatcher, messageProcessor}
 , ticksSinceNetstatsLog{0}
 , currentTickPtr{nullptr}
@@ -88,7 +87,7 @@ Uint32 Network::getCurrentTick()
 }
 
 void Network::setMessageProcessorExtension(
-    std::unique_ptr<IMessageProcessorExtension> extension)
+    IMessageProcessorExtension* extension)
 {
     messageProcessor.setExtension(std::move(extension));
 }

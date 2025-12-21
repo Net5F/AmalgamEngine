@@ -10,6 +10,7 @@ namespace AM
 {
 namespace Server
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class Network;
@@ -25,8 +26,7 @@ class GraphicData;
 class ComponentSyncSystem
 {
 public:
-    ComponentSyncSystem(Simulation& inSimulation, World& inWorld,
-                        Network& inNetwork, GraphicData& inGraphicData);
+    ComponentSyncSystem(const SimulationContext& inSimContext);
 
     /**
      * Sends updates for any observed components that were modified.

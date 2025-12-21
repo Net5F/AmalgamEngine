@@ -198,14 +198,10 @@ bool Simulation::handleOSEvent(SDL_Event& event)
     return false;
 }
 
-void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
+void Simulation::setExtension(ISimulationExtension* inExtension)
 {
-    if (inExtension == nullptr) {
-        LOG_FATAL("Extension must be non-null.");
-    }
-
-    extension = std::move(inExtension);
-    graphicSystem->setExtension(extension.get());
+    extension = inExtension;
+    graphicSystem->setExtension(extension);
 
     // Tell the project to initialize its systems.
     extension->initializeSystems();

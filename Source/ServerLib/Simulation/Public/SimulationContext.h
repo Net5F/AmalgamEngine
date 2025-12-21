@@ -2,6 +2,7 @@
 
 namespace AM
 {
+class EventDispatcher;
 class CastableData;
 
 namespace Server
@@ -23,6 +24,9 @@ public:
 
     /** Client messaging. */
     Network& network;
+
+    /** Network -> Sim/UI message events. */
+    EventDispatcher& networkEventDispatcher;
 
     GraphicData& graphicData;
 

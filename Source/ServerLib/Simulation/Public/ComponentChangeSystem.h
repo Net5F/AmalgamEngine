@@ -8,6 +8,7 @@ namespace AM
 {
 namespace Server
 {
+struct SimulationContext;
 class World;
 class Network;
 class GraphicData;
@@ -20,8 +21,7 @@ class ISimulationExtension;
 class ComponentChangeSystem
 {
 public:
-    ComponentChangeSystem(World& inWorld, Network& inNetwork,
-                          GraphicData& inGraphicData);
+    ComponentChangeSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes any waiting component change request messages.

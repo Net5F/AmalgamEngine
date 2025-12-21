@@ -70,16 +70,16 @@ public:
     /**
      * See extension member comment.
      */
-    void setExtension(std::unique_ptr<IUserInterfaceExtension> inExtension);
+    void setExtension(IUserInterfaceExtension* inExtension);
 
 private:
     /** Used to get tile map info for the locator. */
     const World& world;
 
-    /** If non-nullptr, contains the project's UI extension functions.
+    /** Contains the project's UI extension functions.
         Allows the project to provide UI code and have it be called at the
         appropriate time. */
-    std::unique_ptr<IUserInterfaceExtension> extension;
+    IUserInterfaceExtension* extension;
 
     /** Used in hit testing for mouse events. */
     WorldObjectLocator worldObjectLocator;

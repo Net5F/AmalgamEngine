@@ -9,6 +9,7 @@ namespace AM
 {
 namespace Server
 {
+struct SimulationContext;
 class Simulation;
 class World;
 class ItemData;
@@ -22,7 +23,7 @@ class ItemData;
 class SaveSystem
 {
 public:
-    SaveSystem(Simulation& inSimulation, ItemData& inItemData);
+    SaveSystem(const SimulationContext& inSimContext);
 
     /**
      * If data is due for saving, saves it.
