@@ -33,6 +33,8 @@ ComponentUpdateSystem::~ComponentUpdateSystem()
 {
     world.registry.on_update<GraphicState>()
         .disconnect<&ComponentUpdateSystem::onGraphicStateUpdated>(this);
+    world.registry.on_update<CollisionBitSets>()
+        .disconnect<&ComponentUpdateSystem::onCollisionBitSetsUpdated>(this);
 }
 
 void ComponentUpdateSystem::processUpdates()
@@ -92,13 +94,16 @@ void ComponentUpdateSystem::processComponentUpdate(
     }
 
     // Destroy any destroyed components.
+    // Note: We use remove instead of erase, since it's possible to receive a 
+    //       destroy message without ever receiving a construct message (the 
+    //       component was constructed and destroyed on the same tick).
     for (Uint8 componentIndex : componentUpdate.destroyedComponents) {
         boost::mp11::mp_with_index<
             boost::mp11::mp_size<ReplicatedComponentTypes>>(
             componentIndex, [&](auto I) {
                 using ComponentType
                     = boost::mp11::mp_at_c<ReplicatedComponentTypes, I>;
-                registry.erase<ComponentType>(componentUpdate.entity);
+                registry.remove<ComponentType>(componentUpdate.entity);
             });
     }
 }

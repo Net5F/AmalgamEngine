@@ -5,7 +5,7 @@
 #include "ConnectionResponse.h"
 #include "ConnectionError.h"
 #include "Timer.h"
-#include "entt/fwd.hpp"
+#include "entt/signal/fwd.hpp"
 #include "SDL_stdinc.h"
 #include <queue>
 #include <atomic>

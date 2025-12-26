@@ -26,11 +26,21 @@ ItemSystem::ItemSystem(const SimulationContext& inSimContext)
 , combineItemsQueue{inSimContext.networkEventDispatcher}
 {
     // Load all items from ItemCache.bin into ItemData.
-    loadItemCache();
+    // Note: We need to check that the items aren't already loaded, since this 
+    //       system will be re-constructed by Simulation when we disconnect.
+    if (itemData.getAllItems().empty()) {
+        loadItemCache();
+    }
 
     // When an item is created or updated, save it to the cache.
     itemData.itemCreated.connect<&ItemSystem::saveItemCache>(this);
     itemData.itemUpdated.connect<&ItemSystem::saveItemCache>(this);
+}
+
+ItemSystem::~ItemSystem()
+{
+    itemData.itemCreated.disconnect<&ItemSystem::saveItemCache>(this);
+    itemData.itemUpdated.disconnect<&ItemSystem::saveItemCache>(this);
 }
 
 void ItemSystem::processItemUpdates()

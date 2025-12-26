@@ -147,6 +147,14 @@ bool World::teleportEntity(entt::entity entity, const Vector3& newPosition)
     collision.worldBounds
         = Transforms::modelToWorldEntity(collision.modelBounds, position);
 
+    // If the entity is movement-enabled, update its previous position.
+    // This will make it teleport straight to the new position instead of 
+    // lerping there.
+    if (PreviousPosition
+        * prevPosition{registry.try_get<PreviousPosition>(entity)}) {
+        *prevPosition = position;
+    }
+
     // Flag that the entity's movement state needs to be synced.
     // (movement state is auto-synced when Input is dirtied).
     registry.patch<Input>(entity, [](auto&) {});

@@ -20,6 +20,7 @@ class ItemSystem
 {
 public:
     ItemSystem(const SimulationContext& inSimContext);
+    ~ItemSystem();
 
     /**
      * Processes item update messages.

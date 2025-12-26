@@ -87,6 +87,12 @@ void ComponentSyncSystem::sendUpdates()
         // For each entity that has a constructed or updated component of this 
         // type, push the component into the entity's message.
         for (entt::entity entity : updateObservers[observedTypeIndex]) {
+            // If the entity no longer has this component (it was constructed/
+            // destructed on the same tick), don't send it.
+            if (!registry.all_of<ComponentType>(entity)) {
+                continue;
+            }
+
             if constexpr (std::is_empty_v<ComponentType>) {
                 // Note: Can't registry.get() empty types.
                 componentUpdateMap[entity].updatedComponents.push_back(
