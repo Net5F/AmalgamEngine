@@ -32,6 +32,11 @@ public:
     IconData(const nlohmann::json& resourceDataJson);
 
     /**
+     * Get a icon's render data, using its string ID.
+     */
+    const IconRenderData& getRenderData(std::string_view stringID) const;
+
+    /**
      * Get a icon's render data, using its numeric ID.
      */
     const IconRenderData& getRenderData(IconID numericID) const;

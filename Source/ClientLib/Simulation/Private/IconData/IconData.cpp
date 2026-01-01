@@ -1,7 +1,15 @@
 #include "IconData.h"
+#include "StringTools.h"
 #include "Paths.h"
 #include "Log.h"
 #include "nlohmann/json.hpp"
+
+namespace
+{
+/** A scratch buffer used while processing string IDs.
+    Must be file-local so it can be accessed by const functions. */
+std::string workStringID{};
+}
 
 namespace AM
 {
@@ -12,6 +20,12 @@ IconData::IconData(const nlohmann::json& resourceDataJson)
 {
     // Parse the json structure to construct our icon render data.
     parseJson(resourceDataJson);
+}
+
+const IconRenderData& IconData::getRenderData(std::string_view stringID) const
+{
+    const Icon& icon{getIcon(stringID)};
+    return getRenderData(icon.numericID);
 }
 
 const IconRenderData& IconData::getRenderData(IconID numericID) const

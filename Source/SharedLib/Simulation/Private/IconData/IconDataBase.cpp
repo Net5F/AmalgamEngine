@@ -21,7 +21,7 @@ IconDataBase::IconDataBase(const nlohmann::json& resourceDataJson)
     parseJson(resourceDataJson);
 }
 
-const Icon& IconDataBase::getIcon(const std::string& stringID) const
+const Icon& IconDataBase::getIcon(std::string_view stringID) const
 {
     // Derive string ID in case the user accidentally passed a display name.
     StringTools::deriveStringID(stringID, workStringID);

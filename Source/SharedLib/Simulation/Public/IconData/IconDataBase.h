@@ -4,6 +4,7 @@
 #include "nlohmann/json_fwd.hpp"
 #include <vector>
 #include <unordered_map>
+#include <string_view>
 #include <string>
 
 namespace AM
@@ -33,7 +34,7 @@ public:
      * Returns the icon with the given string ID.
      * Errors if the given ID doesn't exist.
      */
-    const Icon& getIcon(const std::string& stringID) const;
+    const Icon& getIcon(std::string_view stringID) const;
 
     /**
      * Returns the icon with the given numeric ID.
