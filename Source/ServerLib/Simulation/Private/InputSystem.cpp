@@ -66,13 +66,11 @@ void InputSystem::processInputMessages()
             break;
         }
 
-        // Find the entity associated with the given NetID.
-        auto clientEntityIt{world.netIDMap.find(inputChangeRequest.netID)};
-
         // Update the client entity's inputs.
-        if (clientEntityIt != world.netIDMap.end()) {
+        entt::entity clientEntity{
+            world.getClientEntity(inputChangeRequest.netID)};
+        if (clientEntity != entt::null) {
             // Update the entity's Input component.
-            entt::entity clientEntity{clientEntityIt->second};
             world.registry.replace<Input>(clientEntity,
                                           inputChangeRequest.input);
         }
@@ -88,20 +86,20 @@ void InputSystem::processInputMessages()
 
 void InputSystem::handleDroppedMessage(NetworkID clientID)
 {
-    // Find the entity ID of the client that we dropped a message from.
-    auto clientEntityIt{world.netIDMap.find(clientID)};
-    if (clientEntityIt == world.netIDMap.end()) {
+    // Find the entity ID of the client that sent this request.
+    entt::entity clientEntity{world.getClientEntity(clientID)};
+    if (clientEntity == entt::null) {
         // The entity is gone, we don't need to process this drop.
         return;
     }
 
     entt::registry& registry{world.registry};
-    Input& entityInput{registry.get<Input>(clientEntityIt->second)};
+    Input& entityInput{registry.get<Input>(clientEntity)};
 
     // Default the entity's inputs so they don't run off a cliff.
     Input defaultInput{};
     if (entityInput.inputStates != defaultInput.inputStates) {
-        registry.replace<Input>(clientEntityIt->second, defaultInput);
+        registry.replace<Input>(clientEntity, defaultInput);
     }
 }
 

@@ -46,7 +46,7 @@ void CollisionLocator::setGridSize(const TileExtent& mapTileExtent)
     std::ranges::fill(terrainGrid, EMPTY_TERRAIN);
 }
 
-void CollisionLocator::updateEntity(entt::entity entity,
+bool CollisionLocator::updateEntity(entt::entity entity,
                                     const BoundingBox& collisionVolume,
                                     CollisionLayerBitSet collisionLayers)
 {
@@ -57,7 +57,7 @@ void CollisionLocator::updateEntity(entt::entity entity,
                   "grid: (%d, %d, %d, %d, %d, %d)ce.",
                   cellExtent.x, cellExtent.y, cellExtent.z, cellExtent.xLength,
                   cellExtent.yLength, cellExtent.zLength);
-        return;
+        return false;
     }
 
     // If we're already tracking this entity.
@@ -76,7 +76,7 @@ void CollisionLocator::updateEntity(entt::entity entity,
 
         // If the cell extent hasn't changed, exit early.
         if (cellExtent == oldCellExtent) {
-            return;
+            return true;
         }
         else {
             // Cell extent isn't the same. Remove the entity from the old
@@ -107,6 +107,8 @@ void CollisionLocator::updateEntity(entt::entity entity,
 
     // Add the entity's collision volume to the grid.
     addCollisionVolumeToCells(volumeIndex, cellExtent);
+
+    return true;
 }
 
 void CollisionLocator::updateTile(const TilePosition& tilePosition,

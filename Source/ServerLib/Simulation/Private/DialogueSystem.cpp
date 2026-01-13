@@ -85,14 +85,14 @@ void DialogueSystem::processTalkInteraction(const CastInfo& castInfo)
 void DialogueSystem::processDialogueChoice(
     const DialogueChoiceRequest& choiceRequest)
 {
-    auto clientEntityIt{world.netIDMap.find(choiceRequest.netID)};
-    if (clientEntityIt == world.netIDMap.end()) {
-        // Client doesn't exist (may have disconnected), do nothing.
+    // Find the entity ID of the client that sent this request.
+    entt::entity clientEntity{world.getClientEntity(choiceRequest.netID)};
+    if (clientEntity == entt::null) {
+        // Client doesn't exist (may have disconnected), skip this request.
         return;
     }
 
     // Validate the request.
-    entt::entity clientEntity{clientEntityIt->second};
     const Dialogue* dialogue{
         validateChoiceRequest(choiceRequest, clientEntity)};
     if (!dialogue) {

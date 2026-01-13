@@ -106,14 +106,28 @@ void NceLifetimeSystem::handleDeleteRequest(
 
 void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
 {
-    // Create the entity.
+    // Try to create the entity.
     entt::entity newEntity{world.createEntity(entityInitRequest.position,
                                               entityInitRequest.entity)};
+    if (newEntity == entt::null) {
+        network.serializeAndSend(
+            entityInitRequest.netID,
+            SystemMessage{"Failed to create entity: Invalid position"});
+        return;
+    }
+
+    // Try to add the graphic components.
+    if (!(world.addGraphicsComponents(newEntity,
+                                      entityInitRequest.graphicState))) {
+        network.serializeAndSend(
+            entityInitRequest.netID,
+            SystemMessage{"Failed to create entity: Invalid position"});
+        return;
+    }
+
+    // Add the rest of its components.
     world.registry.emplace<Name>(newEntity, entityInitRequest.name);
     world.registry.emplace<Rotation>(newEntity, entityInitRequest.rotation);
-
-    // Add the graphic components.
-    world.addGraphicsComponents(newEntity, entityInitRequest.graphicState);
 
     // Run the init script. If there was an error, tell the user.
     std::string resultString{

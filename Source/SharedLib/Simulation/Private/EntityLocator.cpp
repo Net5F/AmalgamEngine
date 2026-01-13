@@ -34,7 +34,7 @@ void EntityLocator::setGridSize(const TileExtent& mapTileExtent)
     entityGrid.resize(linearizeCellIndex(gridCellExtent.max()) + 1);
 }
 
-void EntityLocator::updateEntity(entt::entity entity, const Position& position)
+bool EntityLocator::updateEntity(entt::entity entity, const Position& position)
 {
     // Find the cell that the entity's position intersects.
     CellPosition cellPosition(position, CELL_WORLD_WIDTH, CELL_WORLD_HEIGHT);
@@ -42,7 +42,7 @@ void EntityLocator::updateEntity(entt::entity entity, const Position& position)
         LOG_ERROR("Tried to track entity that is outside of the locator's "
                   "grid: (%d, %d, %d)ce.",
                   cellPosition.x, cellPosition.y, cellPosition.z);
-        return;
+        return false;
     }
 
     // If we're already tracking this entity.
@@ -50,7 +50,7 @@ void EntityLocator::updateEntity(entt::entity entity, const Position& position)
     if (entityIt != entityMap.end()) {
         // If the cell position hasn't changed, exit early.
         if (cellPosition == entityIt->second) {
-            return;
+            return true;
         }
         else {
             // Cell position isn't the same. Remove the entity from the old 
@@ -67,6 +67,8 @@ void EntityLocator::updateEntity(entt::entity entity, const Position& position)
 
     // Update the entity map.
     entityMap[entity] = cellPosition;
+
+    return true;
 }
 
 void EntityLocator::removeEntity(entt::entity entity)

@@ -102,6 +102,16 @@ public:
     // Helper Functions
     //-------------------------------------------------------------------------
     /**
+     * Returns the entity associated with the given network ID, or entt::null 
+     * if the client doesn't exist.
+     *
+     * Use this instead of directly using netIDMap.
+     *
+     * Note: To go the other way (entt::entity -> NetworkID), use ClientSimData.
+     */
+    entt::entity getClientEntity(NetworkID netID);
+
+    /**
      * Teleports the given entity to the given position.
      * @return true if successful, else false. If false, the entity will 
      *         remain at its original position.
@@ -109,18 +119,11 @@ public:
     bool teleportEntity(entt::entity entity, const Vector3& newPosition);
 
     /**
-     * Adds the given item to the given entity.
-     *
-     * If we fail to add the item (inventory full, item not found), sends an 
-     * appropriate error message to the client.
-     */
-    void addItemToEntity(entt::entity entity, ItemID itemID, Uint8 count);
-
-    /**
      * Creates an entity with the given position.
      *
      * @param entityHint (Optional) The entityID to use, if it's available.
-     * @return The new entity's ID.
+     * @return The new entity's ID, or entt::null if a failure occurred 
+     *         (position outside of tile map bounds).
      */
     entt::entity createEntity(const Position& position,
                               entt::entity entityHint = entt::null);
@@ -130,8 +133,11 @@ public:
      *
      * Since an entity's collision is based on its graphics, this also adds
      * the Collision component and adds the entity to the locator.
+     *
+     * @return true if successful, else false (the graphic's collision + entity
+     *         position went outside of the tile map bounds).
      */
-    void addGraphicsComponents(entt::entity entity,
+    bool addGraphicsComponents(entt::entity entity,
                                const GraphicState& graphicState);
 
     /**

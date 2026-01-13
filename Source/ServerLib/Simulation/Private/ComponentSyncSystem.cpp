@@ -73,7 +73,7 @@ void ComponentSyncSystem::sendUpdates()
     //       exist anymore or there aren't any clients nearby to send it to.
     //       There may be ways to optimize by making it client-by-client like 
     //       MovementSyncSystem.
-    // Build an EntityUpdate for each entity that has constructed, updated, 
+    // Build a ComponentUpdate for each entity that has constructed, updated, 
     // or destroyed components.
     boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
         using ComponentType = decltype(I);

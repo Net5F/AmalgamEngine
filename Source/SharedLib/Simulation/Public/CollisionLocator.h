@@ -66,8 +66,11 @@ public:
      * @param entity The entity to add.
      * @param collisionVolume The entity's collision volume.
      * @param collisionLayers The layers that this entity should appear in.
+     *
+     * @return true if successful, else false (collision outside of locator 
+     *         bounds).
      */
-    void updateEntity(entt::entity entity, const BoundingBox& collisionVolume,
+    bool updateEntity(entt::entity entity, const BoundingBox& collisionVolume,
                       CollisionLayerBitSet collisionLayers);
 
     /**

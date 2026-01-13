@@ -98,10 +98,8 @@ void InventorySystem::processOperation(
     // Note: "Remove item" always applies to the client's own inventory.
 
     // Find the client's entity ID.
-    auto it{world.netIDMap.find(clientID)};
-    if (it != world.netIDMap.end()) {
-        entt::entity clientEntity{it->second};
-
+    entt::entity clientEntity{world.getClientEntity(clientID)};
+    if (clientEntity == entt::null) {
         // Try to remove the item, sending messages appropriately.
         world.inventoryHelper.removeItemFromEntity(
             inventoryRemoveItem.slotIndex, inventoryRemoveItem.count,
@@ -115,10 +113,8 @@ void InventorySystem::processOperation(
     // Note: "Move item" always applies to the client's own inventory.
 
     // Find the client's entity ID.
-    auto it{world.netIDMap.find(clientID)};
-    if (it != world.netIDMap.end()) {
-        entt::entity clientEntity{it->second};
-
+    entt::entity clientEntity{world.getClientEntity(clientID)};
+    if (clientEntity == entt::null) {
         // If the move is successful, tell the client.
         Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
         if (inventory.moveItem(inventoryMoveItem.sourceSlotIndex,

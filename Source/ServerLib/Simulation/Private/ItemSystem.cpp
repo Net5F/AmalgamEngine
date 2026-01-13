@@ -141,10 +141,8 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
                               NetworkID clientID)
 {
     // Find the client's entity ID.
-    auto it{world.netIDMap.find(clientID)};
-    if (it != world.netIDMap.end()) {
-        entt::entity clientEntity{it->second};
-
+    entt::entity clientEntity{world.getClientEntity(clientID)};
+    if (clientEntity != entt::null) {
         // If the combination is successful, tell the client.
         auto& inventory{world.registry.get<Inventory>(clientEntity)};
         const ItemCombination* combination{inventory.combineItems(
@@ -173,10 +171,8 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
                                  entt::entity targetEntity, NetworkID clientID)
 {
     // Find the client's entity ID.
-    auto it{world.netIDMap.find(clientID)};
-    if (it != world.netIDMap.end()) {
-        entt::entity clientEntity{it->second};
-
+    entt::entity clientEntity{world.getClientEntity(clientID)};
+    if (clientEntity != entt::null) {
         // If the slot is invalid or empty, do nothing.
         Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
         ItemID sourceItemID{inventory.slots[sourceSlotIndex].ID};

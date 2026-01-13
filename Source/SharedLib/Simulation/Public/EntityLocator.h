@@ -44,8 +44,11 @@ public:
     /**
      * Adds the given entity to this locator at the given position, or updates 
      * it if it's already added.
+     *
+     * @return true if successful, else false (position outside of locator 
+     *         bounds).
      */
-    void updateEntity(entt::entity entity, const Position& position);
+    bool updateEntity(entt::entity entity, const Position& position);
 
     /**
      * Removes the given entity from this locator, if present.

@@ -169,11 +169,9 @@ void EntityLifetimeSystem::processEntityData(
         // Note: Entity collision always comes from its Idle South graphic.
         const EntityGraphicSet& graphicSet{
             graphicData.getEntityGraphicSet(graphicState->graphicSetID)};
-        const auto& graphicArr{graphicSet.graphics.at(EntityGraphicType::Idle)};
-        const GraphicRef& graphic{graphicArr.at(Rotation::Direction::South)};
 
         // Add the Collision.
-        const BoundingBox& modelBounds{graphic.getModelBounds()};
+        const BoundingBox& modelBounds{graphicSet.getCollisionModelBounds()};
         const Position& position{registry.get<Position>(newEntity)};
         const Collision& collision{registry.emplace<Collision>(
             newEntity, modelBounds,

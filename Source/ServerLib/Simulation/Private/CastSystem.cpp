@@ -120,12 +120,11 @@ void CastSystem::processCastRequests()
 void CastSystem::processCastRequest(const CastRequest& castRequest)
 {
     // Find the entity ID of the client that sent this request.
-    auto it{world.netIDMap.find(castRequest.netID)};
-    if (it == world.netIDMap.end()) {
+    entt::entity clientEntity{world.getClientEntity(castRequest.netID)};
+    if (clientEntity == entt::null) {
         // Client doesn't exist (may have disconnected), skip this request.
         return;
     }
-    entt::entity clientEntity{it->second};
 
     // Try to perform the cast.
     CastFailureType result{CastFailureType::None};

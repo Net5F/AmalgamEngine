@@ -138,6 +138,18 @@ World::World(const SimulationContext& inSimContext)
 
 World::~World() = default;
 
+entt::entity World::getClientEntity(NetworkID netID)
+{
+    // Find the entity ID associated with the given network ID.
+    auto it{netIDMap.find(netID)};
+    if (it == netIDMap.end()) {
+        // Client doesn't exist (may have disconnected).
+        return entt::null;
+    }
+
+    return it->second;
+}
+
 bool World::teleportEntity(entt::entity entity, const Vector3& newPosition)
 {
     auto movementGroup{EnttGroups::getMovementGroup(registry)};
@@ -178,14 +190,20 @@ entt::entity World::createEntity(const Position& position,
     // Add RelicatedComponentList so it gets updated as we add others.
     registry.emplace<ReplicatedComponentList>(newEntity);
 
-    // All entities have a position.
+    // Add Position (all entities have a Position).
     registry.emplace<Position>(newEntity, position);
-    entityLocator.updateEntity(newEntity, position);
+
+    // Try to add the entity to the locator. If it fails, destroy the entity 
+    // and return null.
+    if (!(entityLocator.updateEntity(newEntity, position))) {
+        registry.destroy(newEntity);
+        return entt::null;
+    }
 
     return newEntity;
 }
 
-void World::addGraphicsComponents(entt::entity entity,
+bool World::addGraphicsComponents(entt::entity entity,
                                   const GraphicState& graphicState)
 {
     // Note: We only add entities to the locator (and replicate them to clients)
@@ -194,29 +212,40 @@ void World::addGraphicsComponents(entt::entity entity,
     //       Similarly, if we ever need to add GraphicState without Collision,
     //       we'll need to revisit this.
 
-    // Add the GraphicState.
-    registry.emplace<GraphicState>(entity, graphicState);
-
     // Use the current graphic as the entity's collision bounds.
     const EntityGraphicSet& graphicSet{
         graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
-    const auto& graphicArr{graphicSet.graphics.at(EntityGraphicType::Idle)};
-    const GraphicRef& graphic{graphicArr[Rotation::Direction::South]};
-    const BoundingBox modelBounds{graphic.getModelBounds()};
+    const BoundingBox& modelBounds{graphicSet.getCollisionModelBounds()};
     const Position& position{registry.get<Position>(entity)};
+
     const Collision& collision{registry.emplace<Collision>(
         entity, modelBounds,
         Transforms::modelToWorldEntity(modelBounds, position))};
     const CollisionBitSets& collisionBitSets{
         registry.emplace<CollisionBitSets>(entity, entity, registry)};
 
+    bool rotationAdded{false};
     if (!(registry.all_of<Rotation>(entity))) {
         registry.emplace<Rotation>(entity);
+        rotationAdded = true;
     }
 
-    // Entities with Collision get added to the locator.
-    collisionLocator.updateEntity(entity, collision.worldBounds,
-                                  collisionBitSets.getCollisionLayers());
+    // Try to add the Collision to the locator. If it fails, revert the 
+    // changes and return false.
+    if (!(collisionLocator.updateEntity(
+            entity, collision.worldBounds,
+            collisionBitSets.getCollisionLayers()))) {
+        registry.erase<Collision, CollisionBitSets>(entity);
+        if (rotationAdded) {
+            registry.erase<Rotation>(entity);
+        }
+        return false;
+    }
+
+    // Add the GraphicState.
+    registry.emplace<GraphicState>(entity, graphicState);
+
+    return true;
 }
 
 void World::addMovementComponents(entt::entity entity)
@@ -241,13 +270,6 @@ void World::addMovementComponents(entt::entity entity)
 
     if (!(registry.all_of<Rotation>(entity))) {
         registry.emplace<Rotation>(entity);
-    }
-
-    if (Collision* collision{registry.try_get<Collision>(entity)}) {
-        const CollisionBitSets& collisionBitSets{
-            registry.get<CollisionBitSets>(entity)};
-        collisionLocator.updateEntity(entity, collision->worldBounds,
-                                      collisionBitSets.getCollisionLayers());
     }
 }
 
