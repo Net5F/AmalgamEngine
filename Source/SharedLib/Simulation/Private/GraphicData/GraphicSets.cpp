@@ -5,6 +5,52 @@
 namespace AM
 {
 
+const Sprite& TerrainGraphicSet::getThumbnailSprite() const
+{
+    for (const GraphicRef& graphic : graphics) {
+        if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
+            return graphic.getFirstSprite();
+        }
+    }
+
+    return graphics[0].getFirstSprite();
+}
+
+const Sprite& FloorGraphicSet::getThumbnailSprite() const
+{
+    for (const GraphicRef& graphic : graphics) {
+        if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
+            return graphic.getFirstSprite();
+        }
+    }
+
+    return graphics[0].getFirstSprite();
+}
+
+const Sprite& WallGraphicSet::getThumbnailSprite() const
+{
+    return graphics[0].getFirstSprite();
+}
+
+const Sprite& ObjectGraphicSet::getThumbnailSprite() const
+{
+    for (const GraphicRef& graphic : graphics) {
+        if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
+            return graphic.getFirstSprite();
+        }
+    }
+
+    return graphics[0].getFirstSprite();
+}
+
+const Sprite& EntityGraphicSet::getThumbnailSprite() const
+{
+    // Note: Idle South is guaranteed to be present in every entity graphic
+    //       set (though it may be the null sprite).
+    const auto& graphicArr{graphics.at(EntityGraphicType::Idle)};
+    return graphicArr.at(Rotation::Direction::South).getFirstSprite();
+}
+
 BoundingBox EntityGraphicSet::getCollisionModelBounds() const
 {
     AM_ASSERT(graphics.contains(EntityGraphicType::Idle),

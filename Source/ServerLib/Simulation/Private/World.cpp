@@ -268,6 +268,9 @@ void World::addMovementComponents(entt::entity entity)
         registry.emplace<MovementModifiers>(entity);
     }
 
+    // Note: We add Rotation as part of movement (instead of just graphics), 
+    //       because it may be useful at some point to have a non-graphical 
+    //       entity that is movement-enabled and can face a direction.
     if (!(registry.all_of<Rotation>(entity))) {
         registry.emplace<Rotation>(entity);
     }

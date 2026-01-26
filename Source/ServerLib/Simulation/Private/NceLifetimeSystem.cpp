@@ -127,7 +127,9 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
 
     // Add the rest of its components.
     world.registry.emplace<Name>(newEntity, entityInitRequest.name);
-    world.registry.emplace<Rotation>(newEntity, entityInitRequest.rotation);
+    // Note: This new Rotation value will be sync'd properly, since 
+    //       ClientAOISystem hasn't ran yet.
+    world.registry.get<Rotation>(newEntity) = entityInitRequest.rotation;
 
     // Run the init script. If there was an error, tell the user.
     std::string resultString{
