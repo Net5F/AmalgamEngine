@@ -129,8 +129,8 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/tracy/"
 message(STATUS "Downloading dependency if not present: nlohmann_json")
 set(JSON_MultipleHeaders ON CACHE INTERNAL "Enable forward declaration.")
 FetchContent_Declare(json
-    URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz
-    URL_HASH MD5=4b67aba51ddf17c798e80361f527f50e
+    URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+    URL_HASH MD5=e155202b2a589137f6804724bd182f12
 )
 FetchContent_MakeAvailable(json)
                  

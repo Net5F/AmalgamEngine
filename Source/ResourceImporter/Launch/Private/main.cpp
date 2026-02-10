@@ -1,8 +1,6 @@
 #include "Log.h"
 #include "Application.h"
 
-#include "SDL2pp/Exception.hh"
-
 #include <exception>
 
 using namespace AM;
@@ -19,11 +17,7 @@ try {
     app.start();
 
     return 0;
-} catch (SDL2pp::Exception& e) {
-    LOG_INFO("Error in: %s  Reason:  %s", e.GetSDLFunction().c_str(),
-             e.GetSDLError().c_str());
-    return 1;
-} catch (std::exception& e) {
+}  catch (std::exception& e) {
     LOG_INFO("%s", e.what());
     return 1;
 }

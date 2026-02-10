@@ -7,7 +7,11 @@ target_sources(SharedLib
         Private/Morton.cpp
         Private/Paths.cpp
         Private/PeriodicCaller.cpp
+        Private/SDL.cpp
         Private/SDLHelpers.cpp
+        Private/SDLNet.cpp
+        Private/SDLRenderer.cpp
+        Private/SDLWindow.cpp
         Private/StringTools.cpp
         Private/Timer.cpp
         Private/Transforms.cpp
@@ -32,6 +36,10 @@ target_sources(SharedLib
         Public/Timer.h
         Public/Transforms.h
         Public/VariantTools.h
+        Public/SDL_Wrappers/SDL.h
+        Public/SDL_Wrappers/SDLNet.h
+        Public/SDL_Wrappers/SDLRenderer.h
+        Public/SDL_Wrappers/SDLWindow.h
 )
 
 target_include_directories(SharedLib

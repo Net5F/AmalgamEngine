@@ -4,6 +4,7 @@
 #include "SharedConfig.h"
 #include "UserConfig.h"
 #include "Paths.h"
+#include "SDLHelpers.h"
 #include "Log.h"
 #include <SDL.h>
 #include <memory>
@@ -21,11 +22,11 @@ Application::Application()
             UserConfig::get().getWindowSize().w,
             UserConfig::get().getWindowSize().h,
             SDL_WINDOW_SHOWN}
-, sdlRenderer{sdlWindow, -1, SDL_RENDERER_ACCELERATED}
+, sdlRenderer{sdlWindow.get(), -1, SDL_RENDERER_ACCELERATED}
 , simEventDispatcher{}
 , uiEventDispatcher{}
 , networkEventDispatcher{}
-, assetCache{sdlRenderer.Get()}
+, assetCache{sdlRenderer.get()}
 , resourceData{}
 , graphicData{resourceData.get(), assetCache}
 , iconData{resourceData.get()}
@@ -49,12 +50,12 @@ Application::Application()
             uiEventDispatcher,
             simEventDispatcher,
             networkEventDispatcher,
-            sdlRenderer.Get(),
+            sdlRenderer.get(),
             graphicData,
             iconData,
             itemData}
 , userInterface{uiContext}
-, rendererContext{sdlRenderer.Get(), simulation.getWorld(), userInterface,
+, rendererContext{sdlRenderer.get(), simulation.getWorld(), userInterface,
                   [&]() { return simCaller.getProgress(); }, graphicData}
 , renderer{rendererContext}
 , networkCaller{std::bind_front(&Network::tick, &network),
@@ -79,11 +80,11 @@ Application::Application()
     unsigned int fullscreenMode{UserConfig::get().getFullscreenMode()};
     switch (fullscreenMode) {
         case 0: {
-            sdlWindow.SetFullscreen(0);
+            SDLHelpers::setWindowFullscreen(sdlWindow.get(), 0);
             break;
-        }
-        case 1: {
-            sdlWindow.SetFullscreen(SDL_WINDOW_FULLSCREEN_DESKTOP);
+        case 1:
+            SDLHelpers::setWindowFullscreen(sdlWindow.get(),
+                                            SDL_WINDOW_FULLSCREEN);
             break;
         }
         // Note: We removed real fullscreen because it was behaving weirdly and

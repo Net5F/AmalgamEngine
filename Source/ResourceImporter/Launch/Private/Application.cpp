@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "Config.h"
 #include "Paths.h"
+#include "SDLHelpers.h"
 #include "Log.h"
 
 #include <SDL.h>
@@ -21,13 +22,13 @@ Application::Application()
             Config::ACTUAL_SCREEN_WIDTH,
             Config::ACTUAL_SCREEN_HEIGHT,
             SDL_WINDOW_SHOWN}
-, sdlRenderer{sdlWindow, -1, SDL_RENDERER_ACCELERATED}
-, assetCache{sdlRenderer.Get()}
-, dataModel{sdlRenderer.Get()}
-, userInterface{sdlRenderer.Get(), assetCache, dataModel}
+, sdlRenderer{sdlWindow.get(), -1, SDL_RENDERER_ACCELERATED}
+, assetCache{sdlRenderer.get()}
+, dataModel{sdlRenderer.get()}
+, userInterface{sdlRenderer.get(), assetCache, dataModel}
 , uiCaller{std::bind_front(&UserInterface::tick, &userInterface),
            Config::UI_TICK_TIMESTEP_S, "UserInterface", true}
-, renderer{sdlRenderer.Get(), userInterface}
+, renderer{sdlRenderer.get(), userInterface}
 , rendererCaller{std::bind_front(&Renderer::render, &renderer),
                  Renderer::FRAME_TIMESTEP_S, "Renderer", true}
 , eventHandlers{this, &userInterface, &renderer}
@@ -44,13 +45,15 @@ Application::Application()
     // Set fullscreen mode.
     switch (Config::FULLSCREEN_MODE) {
         case 0:
-            sdlWindow.SetFullscreen(0);
+            SDLHelpers::setWindowFullscreen(sdlWindow.get(), 0);
             break;
         case 1:
-            sdlWindow.SetFullscreen(SDL_WINDOW_FULLSCREEN);
+            SDLHelpers::setWindowFullscreen(sdlWindow.get(),
+                                            SDL_WINDOW_FULLSCREEN);
             break;
         case 2:
-            sdlWindow.SetFullscreen(SDL_WINDOW_FULLSCREEN_DESKTOP);
+            SDLHelpers::setWindowFullscreen(sdlWindow.get(),
+                                            SDL_WINDOW_FULLSCREEN_DESKTOP);
             break;
         default:
             LOG_FATAL("Invalid fullscreen value: %d", Config::FULLSCREEN_MODE);

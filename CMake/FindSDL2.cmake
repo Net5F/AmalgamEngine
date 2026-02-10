@@ -202,3 +202,49 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL2
                                   VERSION_VAR SDL2_VERSION_STRING)
 
 mark_as_advanced(SDL2_LIBRARY SDL2_INCLUDE_DIR)
+
+# Create imported target SDL2::SDL2
+if(SDL2_FOUND AND NOT TARGET SDL2::SDL2)
+  # SDL2_LIBRARY is a list, we need to separate the main library from additional ones
+  set(_sdl2_libs ${SDL2_LIBRARY})
+  
+  # Find the actual SDL2.lib (not SDL2main.lib)
+  set(_sdl2_main_lib "")
+  set(_sdl2_extra_libs "")
+  
+  foreach(_lib ${_sdl2_libs})
+    # Check if this is the main SDL2 library (not SDL2main)
+    if(_lib MATCHES "SDL2\\.lib$" OR (_lib MATCHES "libSDL2" AND NOT _lib MATCHES "main"))
+      set(_sdl2_main_lib "${_lib}")
+    else()
+      list(APPEND _sdl2_extra_libs "${_lib}")
+    endif()
+  endforeach()
+  
+  # Create the target
+  if(_sdl2_main_lib)
+    add_library(SDL2::SDL2 UNKNOWN IMPORTED)
+    set_target_properties(SDL2::SDL2 PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${SDL2_INCLUDE_DIRS}"
+      IMPORTED_LOCATION "${_sdl2_main_lib}"
+    )
+    
+    # Add SDL2main and other libraries as interface dependencies
+    if(_sdl2_extra_libs)
+      set_target_properties(SDL2::SDL2 PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${_sdl2_extra_libs}"
+      )
+    endif()
+  else()
+    # Fallback: use INTERFACE library if we can't find the main lib
+    add_library(SDL2::SDL2 INTERFACE IMPORTED)
+    set_target_properties(SDL2::SDL2 PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${SDL2_INCLUDE_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${SDL2_LIBRARY}"
+    )
+  endif()
+  
+  unset(_sdl2_libs)
+  unset(_sdl2_main_lib)
+  unset(_sdl2_extra_libs)
+endif()

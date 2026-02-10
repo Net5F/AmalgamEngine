@@ -9,7 +9,6 @@
 #include "ItemData.h"
 #include "CastableData.h"
 #include "PeriodicCaller.h"
-#include "SDLNetInitializer.h"
 #include "IMessageProcessorExtension.h"
 #include "MessageProcessorContext.h"
 #include "ISimulationExtension.h"
@@ -17,7 +16,8 @@
 
 #include "entt/signal/dispatcher.hpp"
 
-#include "SDL2pp/SDL.hh"
+#include "SDL_Wrappers/SDL.h"
+#include "SDL_Wrappers/SDLNet.h"
 
 #include <atomic>
 #include <thread>
@@ -78,9 +78,9 @@ private:
     //-------------------------------------------------------------------------
     // SDL Objects
     //-------------------------------------------------------------------------
-    SDL2pp::SDL sdl;
+    SDL sdl;
 
-    SDLNetInitializer sdlNetInit;
+    SDLNet sdlNet;
 
     //-------------------------------------------------------------------------
     // Event Busses

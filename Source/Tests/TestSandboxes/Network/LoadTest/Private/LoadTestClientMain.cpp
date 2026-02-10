@@ -1,9 +1,7 @@
 #include <SDL.h>
 #include <SDL_net.h>
-#include "SDL2pp/SDL.hh"
-#include "SDL2pp/Window.hh"
-#include "SDL2pp/Renderer.hh"
-#include "SDL2pp/Exception.hh"
+
+#include "SDL_Wrappers/SDL.h"
 
 #include "Timer.h"
 #include "Log.h"
@@ -65,7 +63,7 @@ try {
     }
 
     // Set up the SDL constructs.
-    SDL2pp::SDL sdl(0);
+    SDL sdl(0);
 
     // Initialize the user config.
     Client::UserConfig::get();
@@ -161,11 +159,7 @@ try {
     connectionThreadObj.join();
 
     return 0;
-} catch (SDL2pp::Exception& e) {
-    LOG_INFO("Error in: %s  Reason:  %s", e.GetSDLFunction().c_str(),
-             e.GetSDLError().c_str());
-    return 1;
-} catch (std::exception& e) {
+}  catch (std::exception& e) {
     LOG_INFO("%s", e.what());
     return 1;
 }

@@ -13,7 +13,7 @@ namespace Server
 {
 Application::Application()
 : sdl{0}
-, sdlNetInit{}
+, sdlNet{}
 , networkEventDispatcher{}
 , userConfigInitializer{}
 , resourceData{}

@@ -5,6 +5,7 @@
 
 struct SDL_Renderer;
 struct SDL_Texture;
+struct SDL_Window;
 
 namespace AM
 {
@@ -58,6 +59,13 @@ public:
      */
     static bool savePng(const std::string& filePath, SDL_Renderer* renderer,
                         SDL_Texture* texture);
+
+    /**
+     * Sets the fullscreen mode of the given window to the given mode.
+     *
+     * On failure, prints the error.
+     */
+    static void setWindowFullscreen(SDL_Window* window, Uint32 newMode);
 };
 
 } // namespace AM

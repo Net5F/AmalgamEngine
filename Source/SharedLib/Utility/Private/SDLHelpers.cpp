@@ -3,6 +3,7 @@
 #include "Log.h"
 #include <SDL_render.h>
 #include <SDL_image.h>
+#include <SDL_video.h>
 #include <cmath>
 
 namespace AM
@@ -67,6 +68,13 @@ bool SDLHelpers::savePng(const std::string& filePath, SDL_Renderer* renderer,
 
     SDL_SetRenderTarget(renderer, oldRenderTarget);
     return (result == 0);
+}
+
+void SDLHelpers::setWindowFullscreen(SDL_Window* window, Uint32 newMode)
+{
+    if (!SDL_SetWindowFullscreen(window, newMode)) {
+        LOG_INFO("Failed to set fullscreen mode: %s", SDL_GetError());
+    }
 }
 
 } // namespace AM
