@@ -26,7 +26,6 @@ target_link_libraries(ResourceImporter
         ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}
         ${SDL2_MIXER_LIBRARIES} ${SDL2_TTF_LIBRARIES}
         ${SDL2_GFX_LIBRARIES} ${SDL2PP_LIBRARIES}
-        SDL2pp
         AmalgamUI
         EnTT::EnTT
         nfd

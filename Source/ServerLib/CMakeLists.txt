@@ -29,7 +29,6 @@ target_link_libraries(ServerLib
         ${SDL2_MIXER_LIBRARIES} ${SDL2_TTF_LIBRARIES}
         ${SDL2PP_LIBRARIES}
         SDL2_net-static
-        SDL2pp
         boost_mp11
         Bitsery::bitsery
         readerwriterqueue

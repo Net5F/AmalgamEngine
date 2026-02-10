@@ -11,16 +11,13 @@ add_library(AmalgamEngine::SharedLib ALIAS SharedLib)
 
 target_include_directories(SharedLib
     PUBLIC
-        ${SDL2_INCLUDE_DIRS}
-        ${SDL2PP_INCLUDE_DIRS}
+        ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS}
 )
 
 target_link_libraries(SharedLib
     PUBLIC
-        ${SDL2_LIBRARIES}
-        ${SDL2PP_LIBRARIES}
+        ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}
         SDL2_net-static
-        SDL2pp
         boost_mp11
         lz4_static
         libmorton::libmorton 

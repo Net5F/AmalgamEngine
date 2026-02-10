@@ -89,14 +89,6 @@ option(LZ4_BUILD_LEGACY_LZ4C "Build lz4c program with legacy argument support" O
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/lz4/build/cmake/"
                  "${PROJECT_BINARY_DIR}/Libraries/lz4/")
 
-# Configure SDL2pp.
-set(SDL2PP_WITH_IMAGE ON)
-set(SDL2PP_WITH_MIXER ON)
-set(SDL2PP_WITH_TTF ON)
-set(SDL2PP_WITH_NET ON)
-add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/libSDL2pp/"
-                 "${PROJECT_BINARY_DIR}/Libraries/libSDL2pp/")
-
 # Configure Boost MP11.
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/mp11/"
                  "${PROJECT_BINARY_DIR}/Libraries/mp11/")

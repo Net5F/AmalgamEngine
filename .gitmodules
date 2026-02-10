@@ -1,6 +1,3 @@
-[submodule "Libraries/libSDL2pp"]
-	path = Libraries/libSDL2pp
-	url = git@github.com:libSDL2pp/libSDL2pp.git
 [submodule "Libraries/readerwriterqueue"]
 	path = Libraries/readerwriterqueue
 	url = git@github.com:cameron314/readerwriterqueue.git
