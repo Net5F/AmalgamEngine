@@ -186,7 +186,7 @@ void serialize(S& serializer, Item& item)
     //       ItemUpdate.
 
     serializer.text1b(item.displayName, Item::MAX_DISPLAY_NAME_LENGTH);
-    serializer.text1b(item.stringID, Item::MAX_DISPLAY_NAME_LENGTH);
+    serializer.text1b(item.stringID, Item::MAX_STRING_ID_LENGTH);
     serializer.value2b(item.numericID);
     serializer.value2b(item.iconID);
     serializer.value1b(item.maxStackSize);
