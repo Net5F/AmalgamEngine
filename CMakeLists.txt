@@ -23,65 +23,51 @@ option(AM_BUILD_TESTS "Build Amalgam Engine tests." OFF)
 # On Windows, if the user hasn't provided paths to the SDL libs, download them.
 include(FetchContent)
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    if (NOT DEFINED SDL2_DIR)
-        message(STATUS "Downloading dependency: SDL2")
-        FetchContent_Declare(SDL2Download
-            URL https://www.libsdl.org/release/SDL2-devel-2.0.20-VC.zip
-            URL_HASH MD5=85fe721cb9aa42fb6703da6f30b5df45
+    if (NOT DEFINED SDL3_DIR)
+        message(STATUS "Downloading dependency: SDL3")
+        FetchContent_Declare(SDL3Download
+            URL https://www.libsdl.org/release/SDL3-devel-3.4.2-VC.zip
+            URL_HASH MD5=24e189f730969a8f388e676451cf635f
         )
-        FetchContent_MakeAvailable(SDL2Download)
-        set(SDL2_DIR ${sdl2download_SOURCE_DIR} CACHE STRING "")
-        set(SDL2_INCLUDE_DIR ${sdl2download_SOURCE_DIR}/include CACHE STRING "")
+        FetchContent_MakeAvailable(SDL3Download)
+		list(APPEND CMAKE_PREFIX_PATH ${sdl3download_SOURCE_DIR})
     endif()
-    if (NOT DEFINED SDL2_IMAGE_LIBRARY)
-        message(STATUS "Downloading dependency: SDL2_Image")
-        FetchContent_Declare(SDL2ImageDownload
-            URL https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.0.5-VC.zip
-            URL_HASH MD5=b6c8c85b64e01b7096364036438b3333
+    if (NOT DEFINED SDL3_IMAGE_LIBRARY)
+        message(STATUS "Downloading dependency: SDL3_Image")
+        FetchContent_Declare(SDL3ImageDownload
+            URL https://www.libsdl.org/projects/SDL_image/release/SDL3_image-devel-3.4.0-VC.zip
+            URL_HASH MD5=5abf9939f7ede48f41c51d94aee77052
         )
-        FetchContent_MakeAvailable(SDL2ImageDownload)
-        set(SDL2_IMAGE_LIBRARY ${sdl2imagedownload_SOURCE_DIR}/lib/x64/SDL2_image.lib CACHE STRING "")
-        set(SDL2_IMAGE_INCLUDE_DIR ${sdl2imagedownload_SOURCE_DIR}/include CACHE STRING "")
+        FetchContent_MakeAvailable(SDL3ImageDownload)
+		list(APPEND CMAKE_PREFIX_PATH ${sdl3imagedownload_SOURCE_DIR})
     endif()
-    if (NOT DEFINED SDL2_MIXER_LIBRARY)
-        message(STATUS "Downloading dependency: SDL2_Mixer")
-        FetchContent_Declare(SDL2MixerDownload
-            URL https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.4-VC.zip
-            URL_HASH MD5=9fd36fba973a7011b9e9a1fa5193a53a
+    if (NOT DEFINED SDL3_MIXER_LIBRARY)
+        message(STATUS "Downloading dependency: SDL3_Mixer")
+        FetchContent_Declare(SDL3MixerDownload
+            URL https://www.libsdl.org/projects/SDL_mixer/release/SDL3_mixer-devel-3.1.2-VC.zip
+            URL_HASH MD5=683d1bc8e644e446ffca3442717dc2d3
         )
-        FetchContent_MakeAvailable(SDL2MixerDownload)
-        set(SDL2_MIXER_LIBRARY ${sdl2mixerdownload_SOURCE_DIR}/lib/x64/SDL2_mixer.lib CACHE STRING "")
-        set(SDL2_MIXER_INCLUDE_DIR ${sdl2mixerdownload_SOURCE_DIR}/include CACHE STRING "")
+        FetchContent_MakeAvailable(SDL3MixerDownload)
+		list(APPEND CMAKE_PREFIX_PATH ${sdl3mixerdownload_SOURCE_DIR})
     endif()
-    if (NOT DEFINED SDL2_TTF_LIBRARY)
-        message(STATUS "Downloading dependency: SDL2_TTF")
-        FetchContent_Declare(SDL2TtfDownload
-            URL https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.20.1/SDL2_ttf-devel-2.20.1-VC.zip
-            URL_HASH MD5=0e93c9052d01eebb9c18b1e641322637
+    if (NOT DEFINED SDL3_TTF_LIBRARY)
+        message(STATUS "Downloading dependency: SDL3_TTF")
+        FetchContent_Declare(SDL3TtfDownload
+            URL https://www.libsdl.org/projects/SDL_ttf/release/SDL3_ttf-devel-3.2.2-VC.zip
+            URL_HASH MD5=a36475472f285978c38475994714d762
         )
-        FetchContent_MakeAvailable(SDL2TtfDownload)
-        set(SDL2_TTF_LIBRARY ${sdl2ttfdownload_SOURCE_DIR}/lib/x64/SDL2_ttf.lib CACHE STRING "")
-        set(SDL2_TTF_INCLUDE_DIR ${sdl2ttfdownload_SOURCE_DIR}/include CACHE STRING "")
-    endif()
-    if (NOT DEFINED SDL2_GFX_LIBRARY)
-        message(STATUS "Downloading dependency: SDL2_GFX")
-        FetchContent_Declare(SDL2GfxDownload
-            URL https://github.com/Net5F/SDL_gfx/releases/download/1.0.4/SDL2_gfx-devel-1.0.4.zip
-            URL_HASH MD5=381bc9fd5e7052e98ce5710893a31304
-        )
-        FetchContent_MakeAvailable(SDL2GfxDownload)
-        set(SDL2_GFX_LIBRARY ${sdl2gfxdownload_SOURCE_DIR}/lib/x64/SDL2_gfx.lib CACHE STRING "")
-        set(SDL2_GFX_INCLUDE_DIR ${sdl2gfxdownload_SOURCE_DIR}/include CACHE STRING "")
+        FetchContent_MakeAvailable(SDL3TtfDownload)
+		list(APPEND CMAKE_PREFIX_PATH ${sdl3ttfdownload_SOURCE_DIR})
     endif()
 endif()
 
-# Find SDL2 and associated libs.
-find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
-find_package(SDL2_mixer REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-find_package(SDL2_gfx REQUIRED)
-include("${PROJECT_SOURCE_DIR}/CMake/SDL2_net.cmake")
+# Find SDL3 and associated libs.
+find_package(SDL3 REQUIRED)
+find_package(SDL3_image REQUIRED)
+find_package(SDL3_mixer REQUIRED)
+find_package(SDL3_ttf REQUIRED)
+add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/SDL_net/"
+                 "${PROJECT_BINARY_DIR}/Libraries/SDL_net/")
 
 # Configure lz4.
 option(LZ4_BUILD_CLI "Build lz4 program" OFF)

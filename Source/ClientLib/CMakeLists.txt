@@ -9,13 +9,6 @@ add_library(ClientLib STATIC "")
 # add_subdirectory() or find_package().
 add_library(AmalgamEngine::ClientLib ALIAS ClientLib)
 
-target_include_directories(ClientLib
-    PUBLIC
-        ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} 
-        ${SDL2_MIXER_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS}
-        ${SDL2_GFX_INCLUDE_DIRS} ${SDL2PP_INCLUDE_DIRS}
-)
-
 # Inherit Shared's precompiled header.
 # CMake causes issues when using precompiled headers with GCC on macOS,
 # so precompiled headers are disabled for that target.
@@ -25,9 +18,10 @@ endif()
 
 target_link_libraries(ClientLib
     PUBLIC
-        ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}
-        ${SDL2_MIXER_LIBRARIES} ${SDL2_TTF_LIBRARIES}
-        ${SDL2_GFX_LIBRARIES} ${SDL2PP_LIBRARIES}
+        SDL3::SDL3
+        SDL3_image::SDL3_image
+        SDL3_ttf::SDL3_ttf
+        SDL3_mixer::SDL3_mixer
         AmalgamUI
         Bitsery::bitsery
         readerwriterqueue

@@ -9,15 +9,11 @@ add_library(SharedLib STATIC "")
 # add_subdirectory() or find_package().
 add_library(AmalgamEngine::SharedLib ALIAS SharedLib)
 
-target_include_directories(SharedLib
-    PUBLIC
-        ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS}
-)
-
 target_link_libraries(SharedLib
     PUBLIC
-        ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}
-        SDL2_net-static
+        SDL3::SDL3
+        SDL3_image::SDL3_image
+        SDL3_net::SDL3_net
         boost_mp11
         lz4_static
         libmorton::libmorton 

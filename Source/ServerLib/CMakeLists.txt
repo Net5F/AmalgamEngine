@@ -9,13 +9,6 @@ add_library(ServerLib STATIC "")
 # add_subdirectory() or find_package().
 add_library(AmalgamEngine::ServerLib ALIAS ServerLib)
 
-target_include_directories(ServerLib
-    PUBLIC
-        ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} 
-        ${SDL2_MIXER_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS}
-        ${SDL2PP_INCLUDE_DIRS}
-)
-
 # Inherit Shared's precompiled header.
 # CMake causes issues when using precompiled headers with GCC on macOS,
 # so precompiled headers are disabled for that target.
@@ -25,10 +18,8 @@ endif()
 
 target_link_libraries(ServerLib
     PUBLIC
-        ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}
-        ${SDL2_MIXER_LIBRARIES} ${SDL2_TTF_LIBRARIES}
-        ${SDL2PP_LIBRARIES}
-        SDL2_net-static
+        SDL3::SDL3
+        SDL3_net::SDL3_net
         boost_mp11
         Bitsery::bitsery
         readerwriterqueue

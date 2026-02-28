@@ -4,9 +4,6 @@
 [submodule "Libraries/CircularBuffer"]
 	path = Libraries/CircularBuffer
 	url = git@github.com:Net5F/CircularBuffer.git
-[submodule "Libraries/SDL_net"]
-	path = Libraries/SDL_net
-	url = git@github.com:SDL-mirror/SDL_net.git
 [submodule "Libraries/bitsery"]
 	path = Libraries/bitsery
 	url = git@github.com:fraillt/bitsery.git
@@ -43,3 +40,6 @@
 [submodule "Libraries/libmorton"]
 	path = Libraries/libmorton
 	url = git@github.com:Forceflow/libmorton.git
+[submodule "Libraries/SDL_net"]
+	path = Libraries/SDL_net
+	url = git@github.com:libsdl-org/SDL_net.git
