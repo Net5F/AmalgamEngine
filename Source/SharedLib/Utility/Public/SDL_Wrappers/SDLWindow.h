@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <string>
 
 struct SDL_Window;
@@ -18,8 +18,7 @@ public:
      *
      * On init failure, prints the error and aborts.
      */
-    SDLWindow(const std::string& title, int x, int y, int w, int h,
-              Uint32 flags);
+    SDLWindow(const std::string& title, int w, int h, Uint32 flags);
 
 	~SDLWindow();
 

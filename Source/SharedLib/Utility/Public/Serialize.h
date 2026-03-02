@@ -2,7 +2,7 @@
 
 #include "SerializeBuffer.h"
 #include "Log.h"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include "bitsery/bitsery.h"
 #include "bitsery/adapter/buffer.h"
 #include "bitsery/adapter/stream.h"

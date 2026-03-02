@@ -4,7 +4,7 @@
 #include "ItemInitScript.h"
 #include "HashTools.h"
 #include "entt/signal/sigh.hpp"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <vector>
 #include <unordered_map>
 #include <string>

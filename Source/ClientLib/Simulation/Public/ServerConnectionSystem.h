@@ -6,7 +6,7 @@
 #include "ConnectionError.h"
 #include "Timer.h"
 #include "entt/signal/fwd.hpp"
-#include "SDL_stdinc.h"
+#include <SDL3/SDL_stdinc.h>
 #include <queue>
 #include <atomic>
 

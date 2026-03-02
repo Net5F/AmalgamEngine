@@ -135,7 +135,7 @@ private:
      * Called asynchronously when SDL_PumpEvents is called (during
      * SDL_PollEvent). May run on a different core.
      */
-    static int filterEvents(void* userData, SDL_Event* event);
+    static bool filterEvents(void* userData, SDL_Event* event);
 
     //-------------------------------------------------------------------------
     // SDL Objects

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AssetCache.h"
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 
 namespace AM
 {
@@ -20,7 +20,7 @@ struct IconRenderData {
     std::string iconSheetRelPath{};
 
     /** UV position and size in texture. */
-    SDL_Rect textureExtent{0, 0, 0, 0};
+    SDL_FRect textureExtent{0, 0, 0, 0};
 };
 
 } // End namespace Client

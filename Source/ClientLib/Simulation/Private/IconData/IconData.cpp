@@ -44,7 +44,7 @@ void IconData::parseJson(const nlohmann::json& json)
     try {
         // Add the null icon, giving it our engine-default texture.
         renderData.emplace_back(Paths::TEXTURE_DIR + "Defaults/Icon.png",
-                                SDL_Rect{0, 0, 64, 64});
+                                SDL_FRect{0, 0, 64, 64});
 
         // Parse every icon sheet in the json.
         for (auto& sheetJson : json["iconSheets"].items()) {

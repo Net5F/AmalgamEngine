@@ -5,7 +5,7 @@
 #include "NetworkDefs.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 
 namespace AM
 {

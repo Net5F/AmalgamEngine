@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BoundingBox.h"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 
 namespace AM
 {

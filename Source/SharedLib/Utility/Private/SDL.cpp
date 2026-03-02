@@ -1,6 +1,6 @@
 #include "SDL_Wrappers/SDL.h"
 #include "Log.h"
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 namespace AM
 {

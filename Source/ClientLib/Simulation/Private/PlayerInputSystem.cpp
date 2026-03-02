@@ -26,7 +26,7 @@ PlayerInputSystem::PlayerInputSystem(const SimulationContext& inSimContext)
 void PlayerInputSystem::processMomentaryInput(SDL_Event& event)
 {
     switch (event.type) {
-        case SDL_MOUSEWHEEL:
+        case SDL_EVENT_MOUSE_WHEEL:
             processMouseWheel(event.wheel);
             break;
         default:
@@ -42,7 +42,7 @@ void PlayerInputSystem::processHeldInputs()
         return;
     }
 
-    const Uint8* keyStates{SDL_GetKeyboardState(nullptr)};
+    const bool* keyStates{SDL_GetKeyboardState(nullptr)};
     Input::StateArr newInputStates{};
 
     // Get the latest state of all the keys that we care about.

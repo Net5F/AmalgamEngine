@@ -4,7 +4,7 @@
 #include "IconID.h"
 #include "SQLiteCpp/SQLiteCpp.h"
 #include "entt/fwd.hpp"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <optional>
 #include <memory>
 #include <thread>

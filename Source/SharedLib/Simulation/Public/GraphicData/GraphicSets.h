@@ -6,7 +6,7 @@
 #include "Terrain.h"
 #include "Wall.h"
 #include "Rotation.h"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <string>
 #include <array>
 #include <unordered_map>

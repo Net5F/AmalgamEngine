@@ -4,7 +4,7 @@
 #include "SDLHelpers.h"
 #include "Log.h"
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include "nfd.hpp"
 
 #include <memory>
@@ -16,13 +16,9 @@ namespace ResourceImporter
 {
 Application::Application()
 : sdl{SDL_INIT_VIDEO}
-, sdlWindow{"Amalgam Engine Resource Importer",
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
-            Config::ACTUAL_SCREEN_WIDTH,
-            Config::ACTUAL_SCREEN_HEIGHT,
-            SDL_WINDOW_SHOWN}
-, sdlRenderer{sdlWindow.get(), -1, SDL_RENDERER_ACCELERATED}
+, sdlWindow{"Amalgam Engine Resource Importer", Config::ACTUAL_SCREEN_WIDTH,
+            Config::ACTUAL_SCREEN_HEIGHT, 0}
+, sdlRenderer{sdlWindow.get(), nullptr}
 , assetCache{sdlRenderer.get()}
 , dataModel{sdlRenderer.get()}
 , userInterface{sdlRenderer.get(), assetCache, dataModel}
@@ -99,7 +95,7 @@ void Application::start()
 bool Application::handleOSEvent(SDL_Event& event)
 {
     switch (event.type) {
-        case SDL_QUIT:
+        case SDL_EVENT_QUIT:
             exitRequested = true;
             return true;
     }
@@ -133,7 +129,7 @@ bool Application::enoughTimeTillNextCall(double minimumTime)
     }
 }
 
-int Application::filterEvents(void*, SDL_Event*)
+bool Application::filterEvents(void*, SDL_Event*)
 {
     //Application* app{static_cast<Application*>(userData)};
 
@@ -142,7 +138,7 @@ int Application::filterEvents(void*, SDL_Event*)
     // switch (event->type) {
     // }
 
-    return 1;
+    return true;
 }
 
 } // End namespace ResourceImporter

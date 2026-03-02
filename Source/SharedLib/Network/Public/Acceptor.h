@@ -1,10 +1,9 @@
-#ifndef ACCEPTOR_H_
-#define ACCEPTOR_H_
+#pragma once
 
 #include "Peer.h"
 #include "SocketSet.h"
 #include "TcpSocket.h"
-#include <SDL_net.h>
+#include <SDL3_net/SDL_net.h>
 #include <memory>
 #include <string>
 
@@ -50,5 +49,3 @@ private:
 };
 
 } /* End namespace AM */
-
-#endif /* End ACCEPTOR_H_ */

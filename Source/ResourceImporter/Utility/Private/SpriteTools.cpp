@@ -6,8 +6,8 @@
 #include "Camera.h"
 #include "Log.h"
 #include "AUI/Core.h"
-#include <SDL_render.h>
-#include <SDL_image.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3_image/SDL_image.h>
 
 namespace AM
 {
@@ -106,7 +106,7 @@ SDL_Texture* SpriteTools::generateSpriteSheetTexture(
         // Copy the sprite into the sheet texture;
         SDL_Rect sourceRect{0, 0, sprite.textureExtent.w,
                             sprite.textureExtent.h};
-        SDL_RenderCopy(AUI::Core::getRenderer(), spriteTexture, &sourceRect,
+        SDL_RenderTexture(AUI::Core::getRenderer(), spriteTexture, &sourceRect,
                        &(sprite.textureExtent));
 
         // Clean up the sprite texture.
@@ -130,9 +130,9 @@ SDL_Texture*
 
     // If the surface isn't ARGB8888, convert it.
     if (spriteSurface->format->format != SDL_PIXELFORMAT_ARGB8888) {
-        SDL_Surface* newSurface{SDL_ConvertSurfaceFormat(
+        SDL_Surface* newSurface{SDL_ConvertSurface(
             spriteSurface, SDL_PIXELFORMAT_ARGB8888, 0)};
-        SDL_FreeSurface(spriteSurface);
+        SDL_DestroySurface(spriteSurface);
         spriteSurface = newSurface;
     }
 
@@ -149,7 +149,7 @@ SDL_Texture*
     // Turn the surface into a texture and return it.
     SDL_Texture* spriteTexture{
         SDL_CreateTextureFromSurface(AUI::Core::getRenderer(), spriteSurface)};
-    SDL_FreeSurface(spriteSurface);
+    SDL_DestroySurface(spriteSurface);
     return spriteTexture;
 }
 

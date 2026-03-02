@@ -2,7 +2,7 @@
 #include "Paths.h"
 #include "Log.h"
 #include "nlohmann/json.hpp"
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <string>
 #include <fstream>
 
@@ -78,10 +78,9 @@ void UserConfig::setWindowSize(const SDL_Rect& inWindowSize)
     // Note: SDL_GetDesktopDisplayMode() requires the SDL video subsystem
     //       to be initialized, so we have to check for that first.
     if ((fullscreenMode != 0) && SDL_WasInit(SDL_INIT_VIDEO)) {
-        SDL_DisplayMode displayMode;
-        SDL_GetDesktopDisplayMode(0, &displayMode);
-        windowSizeWidth = displayMode.w;
-        windowSizeHeight = displayMode.h;
+        const SDL_DisplayMode* displayMode{SDL_GetDesktopDisplayMode(0)};
+        windowSizeWidth = displayMode->w;
+        windowSizeHeight = displayMode->h;
     }
 }
 

@@ -2,7 +2,7 @@
 
 #include "LibraryListItem.h"
 #include "LibraryCollapsibleContainer.h"
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 
 namespace AM
 {

@@ -2,7 +2,8 @@
 
 #include "Sprite.h"
 #include "WorldObjectID.h"
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_pixels.h>
 #include <vector>
 #include <variant>
 
@@ -38,7 +39,7 @@ struct SpriteSortInfo {
 
     /** If non-default, the UI wants us to multiply this sprite's color and
         transparency by these values. */
-    SDL_Color colorMod{0, 0, 0, 255};
+    SDL_FColor colorMod{0, 0, 0, 255};
 
     //-------------------------------------------------------------------------
     // Topological sort data

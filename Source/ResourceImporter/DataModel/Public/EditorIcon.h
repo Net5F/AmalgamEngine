@@ -1,8 +1,8 @@
 #pragma once
 
 #include "IconID.h"
-#include <SDL_stdinc.h>
-#include <SDL_rect.h>
+#include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_rect.h>
 #include <string>
 
 namespace AM

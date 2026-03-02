@@ -185,7 +185,7 @@ void Simulation::tick()
 bool Simulation::handleOSEvent(SDL_Event& event)
 {
     switch (event.type) {
-        case SDL_MOUSEMOTION: {
+        case SDL_EVENT_MOUSE_MOTION: {
             return false;
         }
         default: {

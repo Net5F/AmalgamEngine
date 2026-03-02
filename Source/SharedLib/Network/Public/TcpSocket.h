@@ -1,12 +1,14 @@
 #pragma once
 
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <memory>
 #include <string>
 
 // Forward declaration
-struct _TCPsocket;
-typedef struct _TCPsocket* TCPsocket;
+//struct _TCPsocket;
+//typedef struct _TCPsocket* TCPsocket;
+struct TCPsocket {
+};
 
 namespace AM
 {

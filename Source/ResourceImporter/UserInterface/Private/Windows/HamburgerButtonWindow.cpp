@@ -22,13 +22,13 @@ HamburgerButtonWindow::HamburgerButtonWindow(MainScreen& inScreen)
 
     /* Buttons. */
     hamburgerButton.normalImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "HamburgerButton/Normal.png", SDL_ScaleModeLinear);
+        Paths::TEXTURE_DIR + "HamburgerButton/Normal.png", SDL_SCALEMODE_LINEAR);
     hamburgerButton.hoveredImage.setSimpleImage(
         Paths::TEXTURE_DIR + "HamburgerButton/Hovered.png",
-        SDL_ScaleModeLinear);
+        SDL_SCALEMODE_LINEAR);
     hamburgerButton.pressedImage.setSimpleImage(
         Paths::TEXTURE_DIR + "HamburgerButton/Pressed.png",
-        SDL_ScaleModeLinear);
+        SDL_SCALEMODE_LINEAR);
     hamburgerButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     hamburgerButton.text.setText("");
 

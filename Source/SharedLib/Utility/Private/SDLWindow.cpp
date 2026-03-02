@@ -1,13 +1,12 @@
 #include "SDL_Wrappers/SDLWindow.h"
 #include "Log.h"
-#include <SDL_video.h>
+#include <SDL3/SDL_video.h>
 
 namespace AM
 {
 
-SDLWindow::SDLWindow(const std::string& title, int x, int y, int w, int h,
-                     Uint32 flags)
-: window{SDL_CreateWindow(title.c_str(), x, y, w, h, flags)}
+SDLWindow::SDLWindow(const std::string& title, int w, int h, Uint32 flags)
+: window{SDL_CreateWindow(title.c_str(), w, h, flags)}
 {
     if (!window) {
         LOG_INFO("SDL_Window init error: %s", SDL_GetError());

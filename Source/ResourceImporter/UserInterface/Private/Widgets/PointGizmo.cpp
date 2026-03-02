@@ -9,7 +9,7 @@
 #include "AUI/ScalingHelpers.h"
 #include "AUI/SDLHelpers.h"
 #include <algorithm>
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 #include <SDL2_gfxPrimitives.h>
 
 namespace AM

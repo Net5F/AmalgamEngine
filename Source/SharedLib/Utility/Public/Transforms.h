@@ -5,7 +5,7 @@
 #include "BoundingBox.h"
 #include "Ray.h"
 #include "SharedConfig.h"
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 #include <optional>
 
 namespace AM

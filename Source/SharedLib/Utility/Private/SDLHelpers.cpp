@@ -1,9 +1,9 @@
 #include "SDLHelpers.h"
 #include "Ray.h"
 #include "Log.h"
-#include <SDL_render.h>
-#include <SDL_image.h>
-#include <SDL_video.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3/SDL_video.h>
 #include <cmath>
 
 namespace AM
@@ -51,20 +51,12 @@ bool SDLHelpers::savePng(const std::string& filePath, SDL_Renderer* renderer,
     SDL_Texture* oldRenderTarget{SDL_GetRenderTarget(renderer)};
     SDL_SetRenderTarget(renderer, texture);
 
-    // Get the texture's dimensions.
-    int width{};
-    int height{};
-    SDL_QueryTexture(texture, NULL, NULL, &width, &height);
-
     // Copy the texture into a surface.
-    SDL_Surface* surface{SDL_CreateRGBSurface(
-        0, width, height, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF)};
-    SDL_RenderReadPixels(renderer, NULL, surface->format->format,
-                         surface->pixels, surface->pitch);
+    SDL_Surface* surface{SDL_RenderReadPixels(renderer, nullptr)};
 
     // Save the surface to a file.
     int result{IMG_SavePNG(surface, filePath.c_str())};
-    SDL_FreeSurface(surface);
+    SDL_DestroySurface(surface);
 
     SDL_SetRenderTarget(renderer, oldRenderTarget);
     return (result == 0);

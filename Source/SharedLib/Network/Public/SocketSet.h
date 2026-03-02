@@ -1,7 +1,6 @@
-#ifndef SOCKETSET_H_
-#define SOCKETSET_H_
+#pragma once
 
-#include <SDL_net.h>
+#include <SDL3_net/SDL_net.h>
 #include <memory>
 
 namespace AM
@@ -51,12 +50,10 @@ public:
     int checkSockets(unsigned int timeoutMs);
 
 private:
-    SDLNet_SocketSet set;
+    //NET_StreamSocket set;
 
     /** The number of sockets currently in the set. */
     int numSockets;
 };
 
 } // End namespace AM
-
-#endif /* End SOCKETSET_H_ */

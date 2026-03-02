@@ -1,16 +1,16 @@
 #include "SDL_Wrappers/SDLNet.h"
-#include "SDL_net.h"
+#include <SDL3_net/SDL_net.h>
 
 namespace AM
 {
 SDLNet::SDLNet()
 {
-    SDLNet_Init();
+    NET_Init();
 }
 
 SDLNet::~SDLNet()
 {
-    SDLNet_Quit();
+    NET_Quit();
 }
 
 } // end namespace AM

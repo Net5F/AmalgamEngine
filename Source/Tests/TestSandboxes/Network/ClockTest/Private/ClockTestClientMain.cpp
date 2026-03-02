@@ -1,5 +1,5 @@
-#include "SDL.h"
-#include "SDL_net.h"
+#include <SDL3/SDL.h>
+#include <SDL3_net/SDL_net.h>
 #include <string>
 #include <vector>
 #include <array>

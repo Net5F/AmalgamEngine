@@ -2,7 +2,7 @@
 
 #include "HashTools.h"
 #include "bitsery/ext/std_map.h"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <unordered_map>
 #include <string>
 

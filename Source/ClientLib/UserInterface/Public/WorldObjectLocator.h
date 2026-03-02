@@ -5,7 +5,7 @@
 #include "CellExtent.h"
 #include "CellPosition.h"
 #include "Config.h"
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 #include <vector>
 #include <unordered_map>
 
@@ -69,7 +69,7 @@ public:
      * @return The ID of the intersected object. If no layer is hit, the variant
      *         type will == std::monostate.
      */
-    WorldObjectID getObjectUnderPoint(const SDL_Point& screenPoint) const;
+    WorldObjectID getObjectUnderPoint(const SDL_FPoint& screenPoint) const;
 
     /**
      * Clears all of our internal data structures, getting rid of any tracked

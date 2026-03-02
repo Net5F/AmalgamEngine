@@ -2,7 +2,7 @@
 
 #include "SpriteSheetID.h"
 #include "SpriteID.h"
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 #include <string>
 #include <vector>
 

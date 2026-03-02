@@ -1,7 +1,7 @@
 #include "Renderer.h"
 #include "UserInterface.h"
 #include "Log.h"
-#include <SDL_render.h>
+#include <SDL3/SDL_render.h>
 #include <SDL2_gfxPrimitives.h>
 
 namespace AM

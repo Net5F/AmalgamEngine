@@ -6,7 +6,7 @@
 #include "Paths.h"
 #include "AUI/ScalingHelpers.h"
 #include "AUI/Core.h"
-#include <SDL_image.h>
+#include <SDL3_image/SDL_image.h>
 #include <algorithm>
 
 namespace AM

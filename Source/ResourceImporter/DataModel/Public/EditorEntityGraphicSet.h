@@ -4,7 +4,7 @@
 #include "GraphicSetIDs.h"
 #include "EntityGraphicType.h"
 #include "Rotation.h"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <string>
 #include <unordered_map>
 #include <array>

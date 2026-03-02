@@ -2,7 +2,7 @@
 
 #include "UserConfigStructs.h"
 #include "nlohmann/json_fwd.hpp"
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 
 namespace AM
 {

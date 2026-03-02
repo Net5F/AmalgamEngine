@@ -3,7 +3,7 @@
 #include "SpawnStrategy.h"
 #include "SharedConfig.h"
 #include "ConstexprTools.h"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <string>
 
 namespace AM

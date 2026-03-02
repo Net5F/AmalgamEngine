@@ -5,7 +5,7 @@
 #include "ConnectionResponse.h"
 #include "ConnectionError.h"
 #include "entt/entity/registry.hpp"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <atomic>
 
 namespace AM

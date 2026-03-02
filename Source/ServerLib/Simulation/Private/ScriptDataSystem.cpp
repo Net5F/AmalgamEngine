@@ -7,7 +7,7 @@
 #include "EntityInitScriptResponse.h"
 #include "ItemInitScriptResponse.h"
 #include "Log.h"
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 #include <vector>
 
 namespace AM

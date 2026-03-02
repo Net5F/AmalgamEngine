@@ -2,7 +2,7 @@
 
 #include "Deserialize.h"
 #include "QueuedEvents.h"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <memory>
 
 namespace AM

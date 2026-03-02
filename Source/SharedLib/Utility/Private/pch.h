@@ -14,7 +14,7 @@
 #include <unordered_map>
 
 // Libs
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include "readerwriterqueue.h"
 #include "nlohmann/json.hpp"
 

@@ -6,7 +6,7 @@
 #include "Paths.h"
 #include "SDLHelpers.h"
 #include "Log.h"
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <memory>
 
 namespace AM
@@ -17,12 +17,10 @@ Application::Application()
 : sdl{SDL_INIT_VIDEO}
 , userConfigInitializer{}
 , sdlWindow{Config::WINDOW_TITLE,
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
             UserConfig::get().getWindowSize().w,
             UserConfig::get().getWindowSize().h,
-            SDL_WINDOW_SHOWN}
-, sdlRenderer{sdlWindow.get(), -1, SDL_RENDERER_ACCELERATED}
+            0}
+, sdlRenderer{sdlWindow.get(), nullptr}
 , simEventDispatcher{}
 , uiEventDispatcher{}
 , networkEventDispatcher{}
@@ -147,7 +145,7 @@ void Application::start()
 bool Application::handleOSEvent(SDL_Event& event)
 {
     switch (event.type) {
-        case SDL_QUIT: {
+        case SDL_EVENT_QUIT: {
             exitRequested = true;
             return true;
         }
@@ -183,7 +181,7 @@ bool Application::enoughTimeTillNextCall(double minimumTime)
     }
 }
 
-int Application::filterEvents(void*, SDL_Event*)
+bool Application::filterEvents(void*, SDL_Event*)
 {
     // Application* app{static_cast<Application*>(userData)};
 
@@ -192,7 +190,7 @@ int Application::filterEvents(void*, SDL_Event*)
     // switch (event->type) {
     // }
 
-    return 1;
+    return true;
 }
 
 } // End namespace Client

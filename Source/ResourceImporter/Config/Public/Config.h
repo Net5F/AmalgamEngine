@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL_render.h>
+#include <SDL3/SDL_render.h>
 #include <string>
 
 namespace AM
@@ -40,7 +40,7 @@ public:
      * 
      * UI textures ignore this setting.
      */
-    static constexpr SDL_ScaleMode SPRITE_SCALING_QUALITY{SDL_ScaleModeLinear};
+    static constexpr SDL_ScaleMode SPRITE_SCALING_QUALITY{SDL_SCALEMODE_LINEAR};
 
     /** The rate at which the user interfaces fires off tick() events. */
     static constexpr unsigned int UI_TICKS_PER_SECOND{30};

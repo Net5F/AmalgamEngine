@@ -181,7 +181,7 @@ private:
      * If a color mod is returned, it will be removed from spriteColorMods.
      */
     template<typename T>
-    SDL_Color getColorMod(const T& objectID);
+    SDL_FColor getColorMod(const T& objectID);
 
     /**
      * Returns the height of the terrain at the given position, in world units.

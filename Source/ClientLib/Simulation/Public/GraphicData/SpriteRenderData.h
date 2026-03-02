@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AssetCache.h"
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 
 namespace AM
 {
@@ -26,12 +26,12 @@ struct SpriteRenderData {
     std::shared_ptr<SDL_Texture> texture{};
 
     /** This sprite's actual-space UV position and size within its texture. */
-    SDL_Rect textureExtent{0, 0, 0, 0};
+    SDL_FRect textureExtent{0, 0, 0, 0};
 
     /** The actual-space point within the sprite where the "stage" starts.
         The "stage" is the coordinate space that we overlay onto the sprite 
         image. */
-    SDL_Point stageOrigin{0, 0};
+    SDL_FPoint stageOrigin{0, 0};
 
     /** If true, this sprite will have its alpha premultiplied. */
     bool premultiplyAlpha{false};

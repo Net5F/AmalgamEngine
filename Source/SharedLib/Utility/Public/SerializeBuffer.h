@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include "bitsery/adapter/buffer.h"
 
 namespace AM

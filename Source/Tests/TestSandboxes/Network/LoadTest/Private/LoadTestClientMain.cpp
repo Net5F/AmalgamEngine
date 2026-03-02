@@ -1,5 +1,5 @@
-#include <SDL.h>
-#include <SDL_net.h>
+#include <SDL3/SDL.h>
+#include <SDL3_net/SDL_net.h>
 
 #include "SDL_Wrappers/SDL.h"
 
@@ -142,7 +142,7 @@ try {
         // Check for attempts to exit.
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
+            if (event.type == SDL_EVENT_QUIT) {
                 exitRequested = true;
             }
         }

@@ -4,7 +4,7 @@
 #include "PreviousPosition.h"
 #include "BoundingBox.h"
 #include "TileExtent.h"
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 
 namespace AM
 {

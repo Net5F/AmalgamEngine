@@ -3,7 +3,7 @@
 #include "MovementState.h"
 #include "EngineMessageType.h"
 #include "SharedConfig.h"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <vector>
 
 namespace AM

@@ -6,7 +6,7 @@
 #include "Log.h"
 #include "NetworkStats.h"
 #include "IMessageProcessorExtension.h"
-#include <SDL_net.h>
+#include <SDL3_net/SDL_net.h>
 #include <algorithm>
 #include <atomic>
 

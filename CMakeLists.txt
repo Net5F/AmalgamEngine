@@ -62,10 +62,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 # Find SDL3 and associated libs.
-find_package(SDL3 REQUIRED)
-find_package(SDL3_image REQUIRED)
-find_package(SDL3_mixer REQUIRED)
-find_package(SDL3_ttf REQUIRED)
+find_package(SDL3 REQUIRED CONFIG)
+find_package(SDL3_image REQUIRED CONFIG)
+find_package(SDL3_mixer REQUIRED CONFIG)
+find_package(SDL3_ttf REQUIRED CONFIG)
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/SDL_net/"
                  "${PROJECT_BINARY_DIR}/Libraries/SDL_net/")
 

@@ -4,7 +4,7 @@
 #include "SpriteSheetID.h"
 #include "BoundingBoxID.h"
 #include "BoundingBox.h"
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 #include <string>
 
 namespace AM

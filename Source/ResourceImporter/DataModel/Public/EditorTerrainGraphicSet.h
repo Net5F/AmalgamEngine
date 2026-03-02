@@ -3,7 +3,7 @@
 #include "Terrain.h"
 #include "GraphicID.h"
 #include "GraphicSetIDs.h"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <string>
 #include <array>
 

@@ -5,7 +5,7 @@
 #include "Dialogue.h"
 #include "NetworkID.h"
 #include "entt/fwd.hpp"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <string_view>
 #include <functional>
 

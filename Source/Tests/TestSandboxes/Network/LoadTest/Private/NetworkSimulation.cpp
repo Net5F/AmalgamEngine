@@ -5,7 +5,7 @@
 #include "Config.h"
 #include "UserConfig.h"
 #include "AMAssert.h"
-#include <SDL_net.h>
+#include <SDL3_net/SDL_net.h>
 
 namespace AM
 {

@@ -56,15 +56,15 @@ void WorldObjectLocator::addWorldObject(const WorldObjectID& objectID,
 }
 
 WorldObjectID
-    WorldObjectLocator::getObjectUnderPoint(const SDL_Point& screenPoint) const
+    WorldObjectLocator::getObjectUnderPoint(const SDL_FPoint& screenPoint) const
 {
     // DDA Algorithm Ref: https://lodev.org/cgtutor/raycasting.html
     //                    https://www.youtube.com/watch?v=NbSee-XM7WA
 
     // Cast a world-space ray from the plane formed by camera.target.z to the 
     // given point on the screen.
-    std::optional<Ray> rayOpt{Transforms::screenToWorldRay(
-        SDLHelpers::pointToFPoint(screenPoint), camera)};
+    std::optional<Ray> rayOpt{
+        Transforms::screenToWorldRay(screenPoint, camera)};
     if (!(rayOpt.has_value())) {
         return {};
     }

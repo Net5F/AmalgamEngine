@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 
 struct SDL_Window;
 struct SDL_Renderer;
@@ -18,7 +18,7 @@ public:
      *
      * On init failure, prints the error and aborts.
      */
-	SDLRenderer(SDL_Window* window, int index, Uint32 flags);
+	SDLRenderer(SDL_Window* window, const char* name);
 
     ~SDLRenderer();
 

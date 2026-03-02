@@ -4,7 +4,7 @@
 #include "Log.h"
 
 #include "SQLiteCpp/SQLiteCpp.h"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 #include <iostream>
 
 #ifdef SQLITECPP_ENABLE_ASSERT_HANDLER

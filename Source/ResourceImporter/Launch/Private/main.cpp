@@ -1,7 +1,7 @@
 #include "Log.h"
 #include "Application.h"
-
 #include <exception>
+#include <SDL3/SDL_main.h>
 
 using namespace AM;
 using namespace AM::ResourceImporter;

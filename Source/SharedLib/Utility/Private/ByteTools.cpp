@@ -1,7 +1,7 @@
 #include "ByteTools.h"
 #include "Log.h"
 #include "AMAssert.h"
-#include <SDL_endian.h>
+#include <SDL3/SDL_endian.h>
 #include "lz4.h"
 
 // If the system has data access alignment restrictions, our casting may fail.
@@ -21,23 +21,23 @@ namespace AM
 {
 Uint16 ByteTools::read16(const Uint8* buffer)
 {
-    return SDL_SwapLE16(*reinterpret_cast<const Uint16*>(buffer));
+    return SDL_Swap16LE(*reinterpret_cast<const Uint16*>(buffer));
 }
 
 Uint32 ByteTools::read32(const Uint8* buffer)
 {
-    return SDL_SwapLE32(*reinterpret_cast<const Uint32*>(buffer));
+    return SDL_Swap32LE(*reinterpret_cast<const Uint32*>(buffer));
 }
 
 void ByteTools::write16(Uint16 value, Uint8* buffer)
 {
     // Note: SwapLE16 does nothing on little endian systems.
-    *reinterpret_cast<Uint16*>(buffer) = SDL_SwapLE16(value);
+    *reinterpret_cast<Uint16*>(buffer) = SDL_Swap16LE(value);
 }
 
 void ByteTools::write32(Uint32 value, Uint8* buffer)
 {
-    *reinterpret_cast<Uint32*>(buffer) = SDL_SwapLE32(value);
+    *reinterpret_cast<Uint32*>(buffer) = SDL_Swap32LE(value);
 }
 
 std::size_t ByteTools::compressBound(std::size_t sourceLength)

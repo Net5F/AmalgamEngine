@@ -2,7 +2,7 @@
 
 #include "CastableID.h"
 #include "CastInfo.h"
-#include <SDL_stdinc.h>
+#include <SDL3/SDL_stdinc.h>
 
 namespace AM
 {
