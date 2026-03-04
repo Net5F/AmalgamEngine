@@ -13,7 +13,7 @@ target_link_libraries(SharedLib
     PUBLIC
         SDL3::SDL3
         SDL3_image::SDL3_image
-        SDL3_net::SDL3_net
+        SDL3_net-static::SDL3_net-static
         boost_mp11
         lz4_static
         libmorton::libmorton 

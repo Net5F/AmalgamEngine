@@ -5,10 +5,8 @@
 #include <string>
 
 // Forward declaration
-//struct _TCPsocket;
-//typedef struct _TCPsocket* TCPsocket;
-struct TCPsocket {
-};
+struct _TCPsocket;
+typedef struct _TCPsocket* TCPsocket;
 
 namespace AM
 {

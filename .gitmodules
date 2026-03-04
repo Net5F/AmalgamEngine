@@ -42,4 +42,4 @@
 	url = git@github.com:Forceflow/libmorton.git
 [submodule "Libraries/SDL_net"]
 	path = Libraries/SDL_net
-	url = git@github.com:libsdl-org/SDL_net.git
+	url = git@github.com:Net5F/SDL_net.git

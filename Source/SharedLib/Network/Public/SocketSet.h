@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL3_net/SDL_net.h>
+#include "SDL_net.h"
 #include <memory>
 
 namespace AM
@@ -50,7 +50,7 @@ public:
     int checkSockets(unsigned int timeoutMs);
 
 private:
-    //NET_StreamSocket set;
+    SDLNet_SocketSet set;
 
     /** The number of sockets currently in the set. */
     int numSockets;

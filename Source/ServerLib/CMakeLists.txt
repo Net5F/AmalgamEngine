@@ -19,7 +19,6 @@ endif()
 target_link_libraries(ServerLib
     PUBLIC
         SDL3::SDL3
-        SDL3_net::SDL3_net
         boost_mp11
         Bitsery::bitsery
         readerwriterqueue

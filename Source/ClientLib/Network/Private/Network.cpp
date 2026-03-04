@@ -8,7 +8,7 @@
 #include "NetworkStats.h"
 #include "IMessageProcessorExtension.h"
 #include "AMAssert.h"
-#include <SDL3_net/SDL_net.h>
+#include "SDL_net.h"
 
 namespace AM
 {
@@ -32,7 +32,7 @@ Network::Network(const MessageProcessorContext& inMessageProcessorContext)
 , ticksSinceNetstatsLog{0}
 {
     if (!Config::RUN_OFFLINE) {
-        NET_Init();
+        SDLNet_Init();
     }
 }
 
@@ -44,7 +44,7 @@ Network::~Network()
         if (receiveThreadObj.joinable()) {
             receiveThreadObj.join();
         }
-        NET_Quit();
+        SDLNet_Quit();
     }
 }
 
