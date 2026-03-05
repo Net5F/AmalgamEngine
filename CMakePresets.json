@@ -1,0 +1,55 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "cacheVariables": {
+                "AM_BUILD_RESOURCE_IMPORTER": "OFF",
+                "AM_BUILD_TOOLS": "OFF",
+                "AM_BUILD_TESTS": "OFF",
+                "TRACY_ENABLE": "OFF"
+            }
+        },
+        {
+            "name": "windows-debug",
+            "inherits": "base",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/Build/Windows/Debug",
+            "installDir": "${sourceDir}/Packages/Windows/Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "windows-release",
+            "inherits": "base",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/Build/Windows/Release",
+            "installDir": "${sourceDir}/Packages/Windows/Release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "linux-debug",
+            "inherits": "base",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/Build/Linux/Debug",
+            "installDir": "${sourceDir}/Packages/Linux/Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "linux-release",
+            "inherits": "base",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/Build/Linux/Release",
+            "installDir": "${sourceDir}/Packages/Linux/Release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ]
+}
