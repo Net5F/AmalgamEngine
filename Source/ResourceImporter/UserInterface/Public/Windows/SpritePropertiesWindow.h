@@ -99,7 +99,7 @@ private:
     void onSpriteCollisionEnabledChanged(SpriteID spriteID,
                                          bool newCollisionEnabled);
     void onSpriteStageOriginChanged(SpriteID spriteID,
-                                    const SDL_Point& newStageOrigin);
+                                    const SDL_FPoint& newStageOrigin);
     void onSpritePremultiplyAlphaChanged(SpriteID spriteID,
                                          bool newPremultiplyAlpha);
 

@@ -41,7 +41,7 @@ private:
     void onSpriteCustomModelBoundsChanged(
         SpriteID spriteID, const BoundingBox& newCustomModelBounds);
     void onSpriteStageOriginChanged(SpriteID spriteID,
-                                    const SDL_Point& newStageOrigin);
+                                    const SDL_FPoint& newStageOrigin);
 
     /**
      * (If active sprite was removed) Hides this view.

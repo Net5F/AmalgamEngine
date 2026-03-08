@@ -12,7 +12,7 @@ namespace AM
 {
 namespace ResourceImporter
 {
-AnimationTimeline::AnimationTimeline(const SDL_Rect& inLogicalExtent,
+AnimationTimeline::AnimationTimeline(const SDL_FRect& inLogicalExtent,
                                      const std::string& inDebugName)
 : AUI::Widget(inLogicalExtent, inDebugName)
 , numberContainer{{0, 24 + 4, logicalExtent.w, 18}, "NumberContainer"}
@@ -51,10 +51,10 @@ AnimationTimeline::AnimationTimeline(const SDL_Rect& inLogicalExtent,
     loopHandle.setColor({255, 191, 0, 191});
     loopHandle.setRenderLine(false);
 
-    frameScrubber.setOnDragged([&](const SDL_Point& cursorPosition) {
+    frameScrubber.setOnDragged([&](const SDL_FPoint& cursorPosition) {
         onFrameScrubberDragged(cursorPosition);
     });
-    loopHandle.setOnDragged([&](const SDL_Point& cursorPosition) {
+    loopHandle.setOnDragged([&](const SDL_FPoint& cursorPosition) {
         onLoopHandleDragged(cursorPosition);
     });
 }
@@ -173,10 +173,10 @@ void AnimationTimeline::onTick(double)
     }
 }
 
-void AnimationTimeline::render(const SDL_Point& windowTopLeft)
+void AnimationTimeline::render(const SDL_FPoint& windowTopLeft)
 {
     // If this widget is fully clipped, don't render it.
-    if (SDL_RectEmpty(&clippedExtent)) {
+    if (SDL_RectEmptyFloat(&clippedExtent)) {
         return;
     }
 
@@ -184,16 +184,17 @@ void AnimationTimeline::render(const SDL_Point& windowTopLeft)
     int loopCount{activeAnimation->frameCount
                   - activeAnimation->loopStartFrame};
     if (loopCount != 0) {
-        int scaledFrameWidth{
+        float scaledFrameWidth{
             AUI::ScalingHelpers::logicalToActual(TimelineFrame::LOGICAL_WIDTH)};
-        int loopBackgroundX{
+        float loopBackgroundX{
             clippedExtent.x + windowTopLeft.x
             + (scaledFrameWidth * activeAnimation->loopStartFrame)};
-        int loopBackgroundWidth{scaledFrameWidth * loopCount};
+        float loopBackgroundWidth{scaledFrameWidth * loopCount};
 
-        SDL_Rect loopBackgroundExtent{
+        SDL_FRect loopBackgroundExtent{
             loopBackgroundX, (clippedExtent.y + windowTopLeft.y),
-            loopBackgroundWidth, AUI::ScalingHelpers::logicalToActual(24 * 2)};
+            loopBackgroundWidth,
+            AUI::ScalingHelpers::logicalToActual(24.f * 2.f)};
         SDL_SetRenderDrawBlendMode(AUI::Core::getRenderer(),
                                    SDL_BLENDMODE_BLEND);
         SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 255, 191, 0, 64);
@@ -204,7 +205,7 @@ void AnimationTimeline::render(const SDL_Point& windowTopLeft)
     Widget::render(windowTopLeft);
 }
 
-void AnimationTimeline::onFrameScrubberDragged(const SDL_Point& cursorPosition)
+void AnimationTimeline::onFrameScrubberDragged(const SDL_FPoint& cursorPosition)
 {
     // Ignore scrubber interactions if we're playing an animation.
     if (playingAnimation) {
@@ -221,7 +222,7 @@ void AnimationTimeline::onFrameScrubberDragged(const SDL_Point& cursorPosition)
     }
 }
 
-void AnimationTimeline::onLoopHandleDragged(const SDL_Point& cursorPosition)
+void AnimationTimeline::onLoopHandleDragged(const SDL_FPoint& cursorPosition)
 {
     // Ignore loop handle interactions if we're playing an animation.
     if (playingAnimation) {
@@ -249,7 +250,7 @@ void AnimationTimeline::onLoopHandleDragged(const SDL_Point& cursorPosition)
 }
 
 void AnimationTimeline::onSpriteDragStarted(Uint8 frameNumber,
-                                            const SDL_Point& cursorPosition)
+                                            const SDL_FPoint& cursorPosition)
 {
     // Remember where the drag started.
     originSpriteDragFrameNumber = frameNumber;
@@ -257,7 +258,7 @@ void AnimationTimeline::onSpriteDragStarted(Uint8 frameNumber,
 }
 
 void AnimationTimeline::onSpriteDragged(Uint8 frameNumber,
-                                        const SDL_Point& cursorPosition)
+                                        const SDL_FPoint& cursorPosition)
 {
     // If the cursor is over a new frame, reset the old frame's circle 
     // and add one to the new frame.
@@ -288,7 +289,7 @@ void AnimationTimeline::onSpriteDragged(Uint8 frameNumber,
 }
 
 void AnimationTimeline::onSpriteDragReleased(Uint8 frameNumber,
-                                             const SDL_Point& cursorPosition)
+                                             const SDL_FPoint& cursorPosition)
 {
     // Reset the display state.
     TimelineFrame& originFrame{static_cast<TimelineFrame&>(
@@ -318,13 +319,13 @@ void AnimationTimeline::refreshFrames()
     for (Uint8 i{0}; i < activeAnimation->frameCount; ++i) {
         auto frame{std::make_unique<TimelineFrame>()};
         frame->setOnPressed([&, i]() { setFrameScrubberPosition(i); });
-        frame->setOnSpriteDragStarted([&, i](const SDL_Point& cursorPosition) {
+        frame->setOnSpriteDragStarted([&, i](const SDL_FPoint& cursorPosition) {
             onSpriteDragStarted(i, cursorPosition);
         });
-        frame->setOnSpriteDragged([&, i](const SDL_Point& cursorPosition) {
+        frame->setOnSpriteDragged([&, i](const SDL_FPoint& cursorPosition) {
             onSpriteDragged(i, cursorPosition);
         });
-        frame->setOnSpriteDragReleased([&, i](const SDL_Point& cursorPosition) {
+        frame->setOnSpriteDragReleased([&, i](const SDL_FPoint& cursorPosition) {
             onSpriteDragReleased(i, cursorPosition);
         });
 
@@ -332,8 +333,8 @@ void AnimationTimeline::refreshFrames()
         if (i % 5 == 0) {
             frame->drawDarkBackground = true;
 
-            auto numberText{std::make_unique<AUI::Text>(SDL_Rect{0, 0, 24, 18},
-                                                        "NumberText")};
+            auto numberText{std::make_unique<AUI::Text>(
+                SDL_FRect{0, 0, 24.f, 18.f}, "NumberText")};
             styleNumberText(*numberText, std::to_string(i));
             numberContainer.push_back(std::move(numberText));
         }
@@ -352,7 +353,7 @@ void AnimationTimeline::refreshFrames()
 
     // Update this widget's width to match the frames, adding an extra frame's
     // width for the loop handle.
-    SDL_Rect newLogicalExtent{logicalExtent};
+    SDL_FRect newLogicalExtent{logicalExtent};
     newLogicalExtent.w
         = activeAnimation->frameCount * TimelineFrame::LOGICAL_WIDTH;
     newLogicalExtent.w += TimelineFrame::LOGICAL_WIDTH;
@@ -371,7 +372,7 @@ void AnimationTimeline::setFrameScrubberPosition(Uint8 frameNumber)
     // Center the scrubber over the new frame.
     AM_ASSERT(frameNumber < frameContainer.size(), "Invalid frame number.");
 
-    SDL_Rect newScrubberExtent{frameScrubber.getLogicalExtent()};
+    SDL_FRect newScrubberExtent{frameScrubber.getLogicalExtent()};
     newScrubberExtent.x = TimelineFrame::LOGICAL_WIDTH * frameNumber;
     frameScrubber.setLogicalExtent(newScrubberExtent);
 
@@ -386,22 +387,22 @@ void AnimationTimeline::setLoopHandlePosition(Uint8 frameNumber)
     // Center the handle over the new frame.
     AM_ASSERT(frameNumber <= frameContainer.size(), "Invalid frame number.");
 
-    SDL_Rect newHandleExtent{loopHandle.getLogicalExtent()};
+    SDL_FRect newHandleExtent{loopHandle.getLogicalExtent()};
     newHandleExtent.x = TimelineFrame::LOGICAL_WIDTH * frameNumber;
     loopHandle.setLogicalExtent(newHandleExtent);
 }
 
-Uint8 AnimationTimeline::getCursorFrame(const SDL_Point& cursorPosition)
+Uint8 AnimationTimeline::getCursorFrame(const SDL_FPoint& cursorPosition)
 {
     // Offset the cursor to be relative to this widget's top left.
-    SDL_Point offsetCursorPosition{cursorPosition};
+    SDL_FPoint offsetCursorPosition{cursorPosition};
     offsetCursorPosition.x -= clippedExtent.x;
     offsetCursorPosition.y -= clippedExtent.y;
 
     // Calculate which frame the cursor is aligned with.
-    int cursorFrame{
-        AUI::ScalingHelpers::actualToLogical(offsetCursorPosition.x)};
-    cursorFrame /= TimelineFrame::LOGICAL_WIDTH;
+    int cursorFrame{static_cast<int>(
+        AUI::ScalingHelpers::actualToLogical(offsetCursorPosition.x)
+        / TimelineFrame::LOGICAL_WIDTH)};
 
     // Clamp to valid values.
     cursorFrame = std::clamp(cursorFrame, 0,

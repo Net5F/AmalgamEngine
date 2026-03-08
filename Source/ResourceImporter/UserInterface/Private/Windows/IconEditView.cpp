@@ -66,10 +66,10 @@ void IconEditView::onActiveLibraryItemChanged(
     iconImage.setSimpleImage(imagePath, newActiveIcon->textureExtent);
 
     // Center the icon to the stage's X, but use a fixed Y.
-    SDL_Rect centeredIconExtent{newActiveIcon->textureExtent};
-    centeredIconExtent.x = logicalExtent.w / 2;
-    centeredIconExtent.x -= (centeredIconExtent.w / 2);
-    centeredIconExtent.y = AUI::ScalingHelpers::logicalToActual(212);
+    SDL_FRect centeredIconExtent{newActiveIcon->textureExtent};
+    centeredIconExtent.x = logicalExtent.w / 2.f;
+    centeredIconExtent.x -= (centeredIconExtent.w / 2.f);
+    centeredIconExtent.y = AUI::ScalingHelpers::logicalToActual(212.f);
 
     // Size the icon image to the icon extent size.
     iconImage.setLogicalExtent(centeredIconExtent);

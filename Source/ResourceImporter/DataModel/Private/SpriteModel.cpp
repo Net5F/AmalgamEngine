@@ -55,12 +55,16 @@ SpriteModel::SpriteModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
     // safe).
     // Note: We standardize on ARGB8888 for our texture generation, so it 
     //       doesn't vary based on the host platform.
-    SDL_RendererInfo info{};
-    SDL_GetRendererInfo(sdlRenderer, &info);
+    SDL_PropertiesID props{SDL_GetRendererProperties(sdlRenderer)};
+    const SDL_PixelFormat* pixelFormats{
+        static_cast<const SDL_PixelFormat*>(SDL_GetPointerProperty(
+            props, SDL_PROP_RENDERER_TEXTURE_FORMATS_POINTER, NULL))};
+
     bool argb8888Found{false};
-    for (auto pixelFormat : info.texture_formats) {
-        if (pixelFormat == SDL_PIXELFORMAT_ARGB8888) {
+    for (int i{0}; pixelFormats[i] != SDL_PIXELFORMAT_UNKNOWN; ++i) {
+        if (pixelFormats[i] == SDL_PIXELFORMAT_ARGB8888) {
             argb8888Found = true;
+            break;
         }
     }
     if (!argb8888Found) {
@@ -273,16 +277,15 @@ bool SpriteModel::addSprite(const std::string& imageRelPath,
         errorString += fullImagePath.c_str();
         return false;
     }
-    SDL_Rect textureExtent{};
-    SDL_QueryTexture(texture, nullptr, nullptr,
-                     &(textureExtent.w), &(textureExtent.h));
+    SDL_FRect textureExtent{static_cast<float>(texture->w),
+                            static_cast<float>(texture->h)};
     SDL_DestroyTexture(texture);
 
     // Validate the stage origin.
-    SDL_Point stageOrigin{};
+    SDL_FPoint stageOrigin{};
     try {
-        stageOrigin.x = std::stoi(stageOriginX);
-        stageOrigin.y = std::stoi(stageOriginY);
+        stageOrigin.x = std::stof(stageOriginX);
+        stageOrigin.y = std::stof(stageOriginY);
     } catch (std::exception&) {
         errorString = "Stage origin X or Y is not a valid integer.";
         return false;
@@ -297,7 +300,7 @@ bool SpriteModel::addSprite(const std::string& imageRelPath,
             * animation{animationModel.getAnimation(animationName)}) {
             // Sprite is going to be added to this animation. Validate size.
             for (const auto& frame : animation->frames) {
-                const SDL_Rect& animTextureExtent{
+                const SDL_FRect& animTextureExtent{
                     frame.sprite.get().textureExtent};
                 if ((textureExtent.w != animTextureExtent.w)
                     || (textureExtent.h != animTextureExtent.h)) {
@@ -469,7 +472,7 @@ void SpriteModel::setSpriteCustomModelBounds(SpriteID spriteID,
 }
 
 void SpriteModel::setSpriteStageOrigin(SpriteID spriteID,
-                                       const SDL_Point& newStageOrigin)
+                                       const SDL_FPoint& newStageOrigin)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
@@ -696,8 +699,8 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
     }
 
     // Determine the largest sprite size.
-    int maxSpriteWidth{0};
-    int maxSpriteHeight{0};
+    float maxSpriteWidth{0};
+    float maxSpriteHeight{0};
     for (SpriteID spriteID : spriteSheet.spriteIDs) {
         EditorSprite& sprite{mgetSprite(spriteID)};
         if (sprite.textureExtent.w > maxSpriteWidth) {
@@ -720,8 +723,8 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
         int gridSideLength{static_cast<int>(std::pow(2, powerOfTwo))};
 
         // Determine how many sprites can fit with this side length.
-        spritesPerRow = gridSideLength / maxSpriteWidth;
-        int spritesPerColumn{gridSideLength / maxSpriteHeight};
+        spritesPerRow = static_cast<int>(gridSideLength / maxSpriteWidth);
+        int spritesPerColumn{static_cast<int>(gridSideLength / maxSpriteHeight)};
         if ((spritesPerRow < 1) || (spritesPerColumn < 1)) {
             // Can't fit any, continue to the next power of two.
             continue;
@@ -749,8 +752,8 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
     }
 
     // Place the sprites.
-    int gridX{0};
-    int gridY{0};
+    float gridX{0};
+    float gridY{0};
     for (SpriteID spriteID : spriteSheet.spriteIDs) {
         EditorSprite& sprite{mgetSprite(spriteID)};
 

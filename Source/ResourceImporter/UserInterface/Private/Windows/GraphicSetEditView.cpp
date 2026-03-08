@@ -124,7 +124,7 @@ void GraphicSetEditView::loadActiveGraphicSet(GraphicSet::Type graphicSetType,
 
         // Construct the new slot widget.
         std::unique_ptr<AUI::Widget> slotPtr{
-            std::make_unique<GraphicSetSlot>(200)};
+            std::make_unique<GraphicSetSlot>(200.f)};
         GraphicSetSlot& slot{static_cast<GraphicSetSlot&>(*slotPtr)};
 
         // Set the top text.
@@ -268,9 +268,9 @@ void GraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
 
         // Calc a square texture extent that shows the bottom of the sprite
         // (so we don't have to squash it).
-        SDL_Rect textureExtent{sprite->textureExtent};
+        SDL_FRect textureExtent{sprite->textureExtent};
         if (textureExtent.h > textureExtent.w) {
-            int diff{textureExtent.h - textureExtent.w};
+            float diff{textureExtent.h - textureExtent.w};
             textureExtent.h -= diff;
             textureExtent.y += diff;
         }

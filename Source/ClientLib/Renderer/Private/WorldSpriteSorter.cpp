@@ -399,7 +399,7 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     }
 
     // If the UI wants a color mod on this sprite, use it.
-    SDL_FColor colorMod{getColorMod<TileLayerID>(layerID)};
+    SDL_Color colorMod{getColorMod<TileLayerID>(layerID)};
 
     // If this sprite comes from an existing tile layer or is a phantom that
     // replaces an existing sprite, set the layer's ID. Otherwise, leave it
@@ -500,7 +500,7 @@ void WorldSpriteSorter::pushEntitySprite(T entity, const Position& position,
             graphicSet.getCollisionModelBounds(), position)};
 
         // If the UI wants a color mod on this sprite, use it.
-        SDL_FColor colorMod{getColorMod<T>(entity)};
+        SDL_Color colorMod{getColorMod<T>(entity)};
 
         // If this sprite doesn't come from a phantom, set the owner ID.
         WorldObjectID ownerID{std::monostate{}};
@@ -662,7 +662,7 @@ GraphicRef WorldSpriteSorter::getPhantomGraphic(
 }
 
 template<typename T>
-SDL_FColor WorldSpriteSorter::getColorMod(const T& objectID)
+SDL_Color WorldSpriteSorter::getColorMod(const T& objectID)
 {
     auto objectIDsMatch = [&](const SpriteColorModInfo& info) {
         // If this color mod is for the same type of object.
@@ -681,7 +681,7 @@ SDL_FColor WorldSpriteSorter::getColorMod(const T& objectID)
                                      spriteColorMods.end(), objectIDsMatch);
     if (colorModInfo != spriteColorMods.end()) {
         // Remove this color mod from our temp vector, since it's been used.
-        SDL_FColor colorMod{colorModInfo->colorMod};
+        SDL_Color colorMod{colorModInfo->colorMod};
         spriteColorMods.erase(colorModInfo);
         return colorMod;
     }

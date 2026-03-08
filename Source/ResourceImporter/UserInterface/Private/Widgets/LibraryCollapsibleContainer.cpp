@@ -31,10 +31,10 @@ LibraryCollapsibleContainer::LibraryCollapsibleContainer(
     setLeftPadding(8);
 }
 
-void LibraryCollapsibleContainer::setLeftPadding(int inLeftPadding)
+void LibraryCollapsibleContainer::setLeftPadding(float inLeftPadding)
 {
-    int imageX{0 + inLeftPadding};
-    int textX{25 + inLeftPadding};
+    float imageX{0 + inLeftPadding};
+    float textX{25 + inLeftPadding};
 
     expandedImage.setLogicalExtent({imageX, 4, 20, 20});
     collapsedImage.setLogicalExtent({imageX, 4, 20, 20});

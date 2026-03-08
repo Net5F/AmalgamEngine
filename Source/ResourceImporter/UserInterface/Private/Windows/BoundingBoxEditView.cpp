@@ -86,8 +86,8 @@ void BoundingBoxEditView::onActiveLibraryItemChanged(
     activeBoundingBoxID = newActiveBoundingBox->numericID;
 
     // Set up the gizmo with the default sprite's size and data.
-    const SDL_Rect defaultSpriteExtent{0, 0, 256, 512};
-    const SDL_Point defaultSpriteOrigin{128, 374};
+    const SDL_FRect defaultSpriteExtent{0, 0, 256, 512};
+    const SDL_FPoint defaultSpriteOrigin{128, 374};
     boundingBoxGizmo.setSpriteImageSize(defaultSpriteExtent.w,
                                         defaultSpriteExtent.h);
     boundingBoxGizmo.setStageOrigin(defaultSpriteOrigin);
@@ -95,7 +95,7 @@ void BoundingBoxEditView::onActiveLibraryItemChanged(
 
     // Use the gizmo's centered sprite extent to set the background and sprite
     // extents.
-    SDL_Rect logicalSpriteExtent{
+    SDL_FRect logicalSpriteExtent{
         boundingBoxGizmo.getLogicalCenteredSpriteExtent()};
     logicalSpriteExtent.x += boundingBoxGizmo.getLogicalExtent().x;
     logicalSpriteExtent.y += boundingBoxGizmo.getLogicalExtent().y;
@@ -103,8 +103,8 @@ void BoundingBoxEditView::onActiveLibraryItemChanged(
     spriteImage.setLogicalExtent(logicalSpriteExtent);
 
     // Set up the stage graphic.
-    const SDL_Rect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
-    SDL_Rect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
+    const SDL_FRect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
+    SDL_FRect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
         boundingBoxGizmo.getLogicalCenteredSpriteExtent())};
     stageGraphic.updateStage(defaultSpriteExtent, defaultSpriteOrigin,
                              {(gizmoClippedExtent.x + actualSpriteExtent.x),

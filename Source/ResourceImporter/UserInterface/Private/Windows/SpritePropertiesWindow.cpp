@@ -102,7 +102,7 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
                                   {1, 1, 1, 1});
 
     auto styleLabel
-        = [&](AUI::Text& label, const std::string& text, int fontSize) {
+        = [&](AUI::Text& label, const std::string& text, float fontSize) {
         label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
         label.setColor({255, 255, 255, 255});
         label.setText(text);
@@ -341,7 +341,7 @@ void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(
 }
 
 void SpritePropertiesWindow::onSpriteStageOriginChanged(
-    SpriteID spriteID, const SDL_Point& newStageOrigin)
+    SpriteID spriteID, const SDL_FPoint& newStageOrigin)
 {
     if (spriteID == activeSpriteID) {
         stageOriginXInput.setText(std::to_string(newStageOrigin.x));
@@ -623,14 +623,14 @@ void SpritePropertiesWindow::saveStageOriginX()
     // Validate the user input as a valid int.
     try {
         // Convert the input string to an int.
-        int newStageOriginX{std::stoi(stageOriginXInput.getText())};
+        float newStageOriginX{std::stof(stageOriginXInput.getText())};
 
         // Clamp the value to its bounds.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
-        SDL_Point newStageOrigin{activeSprite.stageOrigin};
+        SDL_FPoint newStageOrigin{activeSprite.stageOrigin};
         newStageOrigin.x
-            = std::clamp(newStageOriginX, 0, activeSprite.textureExtent.w);
+            = std::clamp(newStageOriginX, 0.f, activeSprite.textureExtent.w);
 
         // Apply the new value.
         dataModel.spriteModel.setSpriteStageOrigin(activeSpriteID,
@@ -646,14 +646,14 @@ void SpritePropertiesWindow::saveStageOriginY()
     // Validate the user input as a valid int.
     try {
         // Convert the input string to an int.
-        int newStageOriginY{std::stoi(stageOriginYInput.getText())};
+        float newStageOriginY{std::stof(stageOriginYInput.getText())};
 
         // Clamp the value to its bounds.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
-        SDL_Point newStageOrigin{activeSprite.stageOrigin};
+        SDL_FPoint newStageOrigin{activeSprite.stageOrigin};
         newStageOrigin.y
-            = std::clamp(newStageOriginY, 0, activeSprite.textureExtent.h);
+            = std::clamp(newStageOriginY, 0.f, activeSprite.textureExtent.h);
 
         // Apply the new value.
         dataModel.spriteModel.setSpriteStageOrigin(activeSpriteID,

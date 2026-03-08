@@ -14,8 +14,8 @@ namespace AM
 namespace ResourceImporter
 {
 BoundingBox 
-SpriteTools::calcSpriteStageWorldExtent(const SDL_Rect& spriteImageExtent,
-    const SDL_Point& stageOrigin)
+SpriteTools::calcSpriteStageWorldExtent(const SDL_FRect& spriteImageExtent,
+    const SDL_FPoint& stageOrigin)
 {
     // There are 3 options for how we could've sized the stage:
     //   1. Clamp max values to stay within the image bounds (would form an 
@@ -31,12 +31,10 @@ SpriteTools::calcSpriteStageWorldExtent(const SDL_Rect& spriteImageExtent,
 
     // Find the screen-space position of the images bottom corners, relative 
     // to the origin.
-    SDL_FPoint bottomLeft{
-        static_cast<float>(-1.f * stageOrigin.x),
-        static_cast<float>(spriteImageExtent.h - stageOrigin.y)};
-    SDL_FPoint bottomRight{
-        static_cast<float>(spriteImageExtent.w - stageOrigin.x),
-        static_cast<float>(spriteImageExtent.h - stageOrigin.y)};
+    SDL_FPoint bottomLeft{-1.f * stageOrigin.x,
+                          spriteImageExtent.h - stageOrigin.y};
+    SDL_FPoint bottomRight{spriteImageExtent.w - stageOrigin.x,
+                           spriteImageExtent.h - stageOrigin.y};
 
     // Convert the screen-space points to world space.
     Position worldBottomLeft{Transforms::screenToWorldMinimum(bottomLeft, {})};
@@ -51,8 +49,8 @@ SpriteTools::calcSpriteStageWorldExtent(const SDL_Rect& spriteImageExtent,
     // the top of the image.
     float originToMaxY{Transforms::worldToScreen(
         {worldBottomRight.x, worldBottomLeft.y, 0}, 1.f).y};
-    stageWorldExtent.max.z = Transforms::screenYToWorldZ(
-        (static_cast<float>(stageOrigin.y) + originToMaxY), 1.0);
+    stageWorldExtent.max.z
+        = Transforms::screenYToWorldZ((stageOrigin.y + originToMaxY), 1.0);
 
     return stageWorldExtent;
 }
@@ -62,8 +60,6 @@ SDL_Texture* SpriteTools::generateSpriteSheetTexture(
 {
     // Create an empty texture to hold the sprite sheet.
     // Note: We check that ARGB8888 is supported in SpriteModel.
-    SDL_RendererInfo info{};
-    SDL_GetRendererInfo(AUI::Core::getRenderer(), &info);
     SDL_Texture* spriteSheetTexture{
         SDL_CreateTexture(AUI::Core::getRenderer(), SDL_PIXELFORMAT_ARGB8888,
                           SDL_TEXTUREACCESS_TARGET, spriteSheet.textureWidth,
@@ -104,7 +100,7 @@ SDL_Texture* SpriteTools::generateSpriteSheetTexture(
         SDL_SetTextureBlendMode(spriteTexture, SDL_BLENDMODE_NONE);
 
         // Copy the sprite into the sheet texture;
-        SDL_Rect sourceRect{0, 0, sprite.textureExtent.w,
+        SDL_FRect sourceRect{0, 0, sprite.textureExtent.w,
                             sprite.textureExtent.h};
         SDL_RenderTexture(AUI::Core::getRenderer(), spriteTexture, &sourceRect,
                        &(sprite.textureExtent));
@@ -129,20 +125,15 @@ SDL_Texture*
     }
 
     // If the surface isn't ARGB8888, convert it.
-    if (spriteSurface->format->format != SDL_PIXELFORMAT_ARGB8888) {
+    if (spriteSurface->format != SDL_PIXELFORMAT_ARGB8888) {
         SDL_Surface* newSurface{SDL_ConvertSurface(
-            spriteSurface, SDL_PIXELFORMAT_ARGB8888, 0)};
+            spriteSurface, SDL_PIXELFORMAT_ARGB8888)};
         SDL_DestroySurface(spriteSurface);
         spriteSurface = newSurface;
     }
 
     // Premultiply the alpha channel into the color channels.
-    int pitch{spriteSurface->w * 4};
-    if (SDL_PremultiplyAlpha(spriteSurface->w, spriteSurface->h,
-                             SDL_PIXELFORMAT_ARGB8888, spriteSurface->pixels,
-                             pitch, SDL_PIXELFORMAT_ARGB8888,
-                             spriteSurface->pixels, pitch)
-        != 0) {
+    if (!SDL_PremultiplySurfaceAlpha(spriteSurface, true)) {
         LOG_INFO("Error while premultiplying alpha: %s", SDL_GetError());
     }
 

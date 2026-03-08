@@ -1,14 +1,14 @@
 #include "TimelineFrame.h"
+#include "SDLHelpers.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
-#include <SDL2_gfxPrimitives.h>
 
 namespace AM
 {
 namespace ResourceImporter
 {
 TimelineFrame::TimelineFrame()
-: AUI::Widget({0, 0, LOGICAL_WIDTH, 26}, "TimelineFrame")
+: AUI::Widget({0, 0, LOGICAL_WIDTH, 26.f}, "TimelineFrame")
 , hasSprite{false}
 , drawDarkBackground{false}
 , isDragging{false}
@@ -21,34 +21,34 @@ void TimelineFrame::setOnPressed(std::function<void(void)> inOnPressed)
 }
 
 void TimelineFrame::setOnSpriteDragStarted(
-    std::function<void(const SDL_Point&)> inOnSpriteDragStarted)
+    std::function<void(const SDL_FPoint&)> inOnSpriteDragStarted)
 {
     onSpriteDragStarted = std::move(inOnSpriteDragStarted);
 }
 
 void TimelineFrame::setOnSpriteDragged(
-    std::function<void(const SDL_Point&)> inOnSpriteDragged)
+    std::function<void(const SDL_FPoint&)> inOnSpriteDragged)
 {
     onSpriteDragged = std::move(inOnSpriteDragged);
 }
 
 void TimelineFrame::setOnSpriteDragReleased(
-    std::function<void(const SDL_Point&)> inOnSpriteDragReleased)
+    std::function<void(const SDL_FPoint&)> inOnSpriteDragReleased)
 {
     onSpriteDragReleased = std::move(inOnSpriteDragReleased);
 }
 
-void TimelineFrame::render(const SDL_Point& windowTopLeft)
+void TimelineFrame::render(const SDL_FPoint& windowTopLeft)
 {
     // Render the larger outline rectangle.
-    SDL_Rect finalExtent{clippedExtent};
+    SDL_FRect finalExtent{clippedExtent};
     finalExtent.x += windowTopLeft.x;
     finalExtent.y += windowTopLeft.y;
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 184, 184, 184, 255);
     SDL_RenderFillRect(AUI::Core::getRenderer(), &finalExtent);
 
     // Render the body rectangle.
-    const int borderSize{AUI::ScalingHelpers::logicalToActual(1)};
+    const float borderSize{AUI::ScalingHelpers::logicalToActual(1.f)};
     finalExtent.x += borderSize;
     finalExtent.y += borderSize;
     finalExtent.w -= (borderSize * 2);
@@ -60,16 +60,16 @@ void TimelineFrame::render(const SDL_Point& windowTopLeft)
 
     // If this frame has a sprite, render the circle.
     if (hasSprite) {
-        SDL_Point frameCenter{(finalExtent.x + (finalExtent.w / 2)),
+        SDL_FPoint frameCenter{(finalExtent.x + (finalExtent.w / 2)),
                               (finalExtent.y + (finalExtent.h / 2))};
-        int radius{AUI::ScalingHelpers::logicalToActual(7)};
-        filledCircleRGBA(AUI::Core::getRenderer(), frameCenter.x, frameCenter.y,
-                         radius, 64, 64, 64, 255);
+        float radius{AUI::ScalingHelpers::logicalToActual(7.f)};
+        SDLHelpers::renderHexagon(AUI::Core::getRenderer(), frameCenter, radius,
+                                  SDL_Color{64, 64, 64, 255});
     }
 }
 
 AUI::EventResult TimelineFrame::onMouseDown(AUI::MouseButtonType buttonType,
-                                           const SDL_Point& cursorPosition)
+                                           const SDL_FPoint& cursorPosition)
 {
     // If the right mouse button was pressed and we have a sprite to drag, 
     // start dragging.
@@ -97,14 +97,14 @@ AUI::EventResult TimelineFrame::onMouseDown(AUI::MouseButtonType buttonType,
 
 AUI::EventResult
     TimelineFrame::onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                     const SDL_Point& cursorPosition)
+                                     const SDL_FPoint& cursorPosition)
 {
     // We treat additional clicks as regular MouseDown events.
     return onMouseDown(buttonType, cursorPosition);
 }
 
 AUI::EventResult TimelineFrame::onMouseUp(AUI::MouseButtonType buttonType,
-                                         const SDL_Point& cursorPosition)
+                                         const SDL_FPoint& cursorPosition)
 {
     if (isDragging) {
         isDragging = false;
@@ -119,7 +119,7 @@ AUI::EventResult TimelineFrame::onMouseUp(AUI::MouseButtonType buttonType,
     return AUI::EventResult{.wasHandled{false}, .releaseMouseCapture{true}};
 }
 
-AUI::EventResult TimelineFrame::onMouseMove(const SDL_Point& cursorPosition)
+AUI::EventResult TimelineFrame::onMouseMove(const SDL_FPoint& cursorPosition)
 {
     if (isDragging) {
         if (onSpriteDragged) {

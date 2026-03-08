@@ -2,6 +2,7 @@
 
 #include <string>
 #include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_pixels.h>
 
 struct SDL_Renderer;
 struct SDL_Texture;
@@ -66,6 +67,25 @@ public:
      * On failure, prints the error.
      */
     static void setWindowFullscreen(SDL_Window* window, Uint32 newMode);
+
+    /**
+     * Converts a [0 - 255] color to a [0 - 1] float color.
+     */
+    static SDL_FColor colorToFColor(const SDL_Color& color);
+
+    /**
+     * Renders a thick line that spans from min to max, with the given 
+     * thickness and color.
+     */
+    static void renderThickLine(SDL_Renderer* renderer, const SDL_FPoint& min,
+                                const SDL_FPoint& max, float thickness,
+                                const SDL_Color& color);
+
+    /**
+     * Renders a hexagon with the given radius and color at the given point.
+     */
+    static void renderHexagon(SDL_Renderer* renderer, const SDL_FPoint& center,
+                              float radius, const SDL_Color& color);
 };
 
 } // namespace AM

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 message(STATUS "Configuring Amalgam Engine Load Test Client")
 
@@ -44,13 +44,10 @@ endif()
 
 target_link_libraries(LoadTestClient
     PRIVATE
-        ${SDL2_LIBRARIES}
-        ${SDL2PP_LIBRARIES}
-        SDL2_net-static
+        SharedLib
         readerwriterqueue
         EnTT::EnTT
         QueuedEvents
-        SharedLib
 )
 
 # Compile with C++23.
@@ -68,7 +65,12 @@ endif()
 file(COPY ${CMAKE_SOURCE_DIR}/Resources/Client/Common/UserConfig.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
-# On Windows, copy the SDL2 DLL into the build folder so we can run our executable.
+# On Windows, copy the SDL3 DLL into the build folder so we can run our executable.
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    file(COPY ${SDL2_DIR}/lib/x64/SDL2.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+    add_custom_command(TARGET LoadTestClient POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			$<TARGET_RUNTIME_DLLS:LoadTestClient>
+			$<TARGET_FILE_DIR:LoadTestClient>
+		COMMAND_EXPAND_LISTS
+	)
 endif()

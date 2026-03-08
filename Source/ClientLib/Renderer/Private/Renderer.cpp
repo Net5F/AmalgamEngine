@@ -11,6 +11,7 @@
 #include "IRendererExtension.h"
 #include "Transforms.h"
 #include "MovementHelpers.h"
+#include "SDLHelpers.h"
 #include "Log.h"
 #include <SDL3/SDL_render.h>
 
@@ -145,10 +146,10 @@ void Renderer::renderSprite(const SpriteSortInfo& spriteInfo)
 {
     const SpriteRenderData& renderData{
         graphicData.getSpriteRenderData(spriteInfo.sprite->numericID)};
-    const SDL_FColor& colorMod{spriteInfo.colorMod};
+    const SDL_Color& colorMod{spriteInfo.colorMod};
 
     // Apply the alpha mod that the UI gave us.
-    SDL_SetTextureAlphaModFloat(renderData.texture.get(), colorMod.a);
+    SDL_SetTextureAlphaMod(renderData.texture.get(), colorMod.a);
 
     // Render the sprite with an appropriate blend mode.
     if (renderData.premultiplyAlpha) {
@@ -173,8 +174,8 @@ void Renderer::renderSprite(const SpriteSortInfo& spriteInfo)
     // If the UI gave us a color mod to apply, render an additional sprite
     // with an additive blend mode and apply the color to that.
     if (colorMod.r > 0 || colorMod.g > 0 || colorMod.b > 0) {
-        SDL_SetTextureColorModFloat(renderData.texture.get(), colorMod.r,
-                               colorMod.g, colorMod.b);
+        SDL_SetTextureColorMod(renderData.texture.get(), colorMod.r, colorMod.g,
+                               colorMod.b);
         SDL_SetTextureBlendMode(renderData.texture.get(),
                                 SDL_BLENDMODE_ADD);
 
@@ -184,7 +185,7 @@ void Renderer::renderSprite(const SpriteSortInfo& spriteInfo)
 
         SDL_SetTextureBlendMode(renderData.texture.get(),
                                 SDL_BLENDMODE_BLEND);
-        SDL_SetTextureColorModFloat(renderData.texture.get(), 255, 255, 255);
+        SDL_SetTextureColorMod(renderData.texture.get(), 255, 255, 255);
     }
 
     // Reset the texture's alpha.
@@ -233,28 +234,28 @@ void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
     }
 
     // Transform all the vertices to screen space.
-    // Bottom face of bounding box:
-    std::vector<SDL_Vertex> verts(8);
+    // Bottom face of bounding box
+    std::array<SDL_Vertex, 8> verts{};
     Vector3 point{box.min.x, box.min.y, box.min.z};
-    SDL_FColor color{200, 0, 50, 150};
-    verts.push_back({Transforms::worldToScreen(point, camera.zoomFactor), color});
+    SDL_FColor color{SDLHelpers::colorToFColor({200, 0, 50, 150})};
+    verts[0] = {Transforms::worldToScreen(point, camera.zoomFactor), color};
     point = {box.max.x, box.min.y, box.min.z};
-    verts.push_back({Transforms::worldToScreen(point, camera.zoomFactor), color});
+    verts[1] = {Transforms::worldToScreen(point, camera.zoomFactor), color};
     point = {box.max.x, box.max.y, box.min.z};
-    verts.push_back({Transforms::worldToScreen(point, camera.zoomFactor), color});
+    verts[2] = {Transforms::worldToScreen(point, camera.zoomFactor), color};
     point = {box.min.x, box.max.y, box.min.z};
-    verts.push_back({Transforms::worldToScreen(point, camera.zoomFactor), color});
+    verts[3] = {Transforms::worldToScreen(point, camera.zoomFactor), color};
 
-    // Top face of bounding box:
+    // Top face of bounding box
     point = {box.min.x, box.min.y, box.max.z};
-    color = {200, 0, 0, 150};
-    verts.push_back({Transforms::worldToScreen(point, camera.zoomFactor), color});
+    color = SDLHelpers::colorToFColor({200, 0, 0, 150});
+    verts[4] = {Transforms::worldToScreen(point, camera.zoomFactor), color};
     point = {box.max.x, box.min.y, box.max.z};
-    verts.push_back({Transforms::worldToScreen(point, camera.zoomFactor), color});
+    verts[5] = {Transforms::worldToScreen(point, camera.zoomFactor), color};
     point = {box.max.x, box.max.y, box.max.z};
-    verts.push_back({Transforms::worldToScreen(point, camera.zoomFactor), color});
+    verts[6] = {Transforms::worldToScreen(point, camera.zoomFactor), color};
     point = {box.min.x, box.max.y, box.max.z};
-    verts.push_back({Transforms::worldToScreen(point, camera.zoomFactor), color});
+    verts[7] = {Transforms::worldToScreen(point, camera.zoomFactor), color};
 
     // Adjust all verts for the camera.
     for (SDL_Vertex& vert : verts) {
@@ -265,7 +266,9 @@ void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
     // Draw the faces.
     // Two triangles per face: (0, 1, 2) and (0, 2, 3), then offset to the next.
     std::array<int, 12> indices{0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7};
-    SDL_RenderGeometry(sdlRenderer, nullptr, verts.data(), 8, indices.data(), 12);
+    SDL_RenderGeometry(sdlRenderer, nullptr, verts.data(),
+                       static_cast<int>(verts.size()), indices.data(),
+                       static_cast<int>(indices.size()));
 
     SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
 }

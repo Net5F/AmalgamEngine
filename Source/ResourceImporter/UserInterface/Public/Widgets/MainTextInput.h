@@ -13,7 +13,7 @@ namespace ResourceImporter
 class MainTextInput : public AUI::TextInput
 {
 public:
-    MainTextInput(const SDL_Rect& inLogicalExtent,
+    MainTextInput(const SDL_FRect& inLogicalExtent,
                   const std::string& inDebugName = "MainTextInput");
 };
 

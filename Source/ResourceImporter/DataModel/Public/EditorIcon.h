@@ -25,7 +25,7 @@ struct EditorIcon {
     std::string displayName{""};
 
     /** UV position and size in texture. */
-    SDL_Rect textureExtent{0, 0, 0, 0};
+    SDL_FRect textureExtent{0, 0, 0, 0};
 };
 
 } // namespace ResourceImporter

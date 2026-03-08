@@ -20,7 +20,7 @@ public:
     /**
      * Sets the left padding. Used to define the visual hierarchy in the list.
      */
-    void setLeftPadding(int inLeftPadding);
+    void setLeftPadding(float inLeftPadding);
 };
 
 } // End namespace ResourceImporter

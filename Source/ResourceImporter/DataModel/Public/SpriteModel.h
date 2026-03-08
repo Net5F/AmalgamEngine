@@ -107,7 +107,7 @@ public:
                                     const BoundingBox& newModelBounds);
     void setSpriteCollisionEnabled(SpriteID spriteID, bool newCollisionEnabled);
     void setSpriteStageOrigin(SpriteID spriteID,
-                              const SDL_Point& newStageOrigin);
+                              const SDL_FPoint& newStageOrigin);
     void setSpritePremultiplyAlpha(SpriteID spriteID, bool newPremultiplyAlpha);
 
     /** Resets the model state, setting it back to default. */
@@ -241,7 +241,7 @@ private:
         spriteCustomModelBoundsChangedSig;
     entt::sigh<void(SpriteID spriteID, bool newCollisionEnabled)>
         spriteCollisionEnabledChangedSig;
-    entt::sigh<void(SpriteID spriteID, const SDL_Point& newStageOrigin)>
+    entt::sigh<void(SpriteID spriteID, const SDL_FPoint& newStageOrigin)>
         spriteStageOriginChangedSig;
     entt::sigh<void(SpriteID spriteID, bool newPremultiplyAlpha)>
         spritePremultiplyAlphaChangedSig;
@@ -286,7 +286,7 @@ public:
         spriteCollisionEnabledChanged;
     /** A sprite's stage origin has changed. */
     entt::sink<
-        entt::sigh<void(SpriteID spriteID, const SDL_Point& newStageOrigin)>>
+        entt::sigh<void(SpriteID spriteID, const SDL_FPoint& newStageOrigin)>>
         spriteStageOriginChanged;
     /** A sprite's "premultiply alpha" field has changed. */
     entt::sink<entt::sigh<void(SpriteID spriteID, bool newPremultiplyAlpha)>>

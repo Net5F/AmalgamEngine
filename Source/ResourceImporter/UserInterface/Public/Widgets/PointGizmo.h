@@ -24,7 +24,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    PointGizmo(const SDL_Rect& inLogicalExtent);
+    PointGizmo(const SDL_FRect& inLogicalExtent);
 
     virtual ~PointGizmo() = default;
 
@@ -43,13 +43,13 @@ public:
      * Sets the size of the sprite image that this gizmo is drawing over.
      * The resulting extent will be centered within this widget.
      */
-    void setSpriteImageSize(int logicalSpriteWidth, int logicalSpriteHeight);
+    void setSpriteImageSize(float logicalSpriteWidth, float logicalSpriteHeight);
 
     /**
      * Sets the stage's screen-space origin offset, relative to the top left of 
      * the image.
      */
-    void setStageOrigin(const SDL_Point& inLogicalStageOrigin);
+    void setStageOrigin(const SDL_FPoint& inLogicalStageOrigin);
 
     /**
      * Sets this gizmo to match newPoint.
@@ -60,7 +60,7 @@ public:
      * Returns the sprite image extent that was set by the last call to 
      * setSpriteImageSize(), centered within this widget.
      */
-    const SDL_Rect& getLogicalCenteredSpriteExtent() const;
+    const SDL_FRect& getLogicalCenteredSpriteExtent() const;
 
     //-------------------------------------------------------------------------
     // Callback registration
@@ -74,24 +74,24 @@ public:
     //-------------------------------------------------------------------------
     // Base class overrides
     //-------------------------------------------------------------------------
-    void setLogicalExtent(const SDL_Rect& inLogicalExtent) override;
+    void setLogicalExtent(const SDL_FRect& inLogicalExtent) override;
 
     /**
      * If the UI scaling has changed, refreshes our controls.
      */
-    void arrange(const SDL_Point& startPosition,
-                 const SDL_Rect& availableExtent,
+    void arrange(const SDL_FPoint& startPosition,
+                 const SDL_FRect& availableExtent,
                  AUI::WidgetLocator* widgetLocator) override;
 
-    void render(const SDL_Point& windowTopLeft) override;
+    void render(const SDL_FPoint& windowTopLeft) override;
 
     AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
-                                 const SDL_Point& cursorPosition) override;
+                                 const SDL_FPoint& cursorPosition) override;
 
     AUI::EventResult onMouseUp(AUI::MouseButtonType buttonType,
-                               const SDL_Point& cursorPosition) override;
+                               const SDL_FPoint& cursorPosition) override;
 
-    AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
+    AUI::EventResult onMouseMove(const SDL_FPoint& cursorPosition) override;
 
 private:
     /** The base transparency value for a selected gizmo. */
@@ -131,18 +131,18 @@ private:
     bool isEnabled;
 
     /** A reasonable size for the control rectangles. */
-    static constexpr int LOGICAL_RECT_SIZE{12};
+    static constexpr float LOGICAL_RECT_SIZE{12};
 
     /** The scaled size of the control rectangles. */
-    int scaledRectSize;
+    float scaledRectSize;
 
     /** Sets the extent where the sprite image will be placed, relative to the
         top left of this widget. */
-    SDL_Rect logicalSpriteImageExtent;
+    SDL_FRect logicalSpriteImageExtent;
 
     /** The stage's screen-space origin offset, relative to the top left of 
         the image. */
-    SDL_Point logicalStageOrigin;
+    SDL_FPoint logicalStageOrigin;
 
     /** The stage's world-space extent.
         We limit this extent to the edges of the sprite image. */
@@ -150,7 +150,7 @@ private:
 
     // Controls (scaled extents, without parent offsets)
     /** The extent of the point position control. */
-    SDL_Rect pointControlExtent;
+    SDL_FRect pointControlExtent;
 
     /** If true, the point control is currently being held. */
     bool currentlyHeld;

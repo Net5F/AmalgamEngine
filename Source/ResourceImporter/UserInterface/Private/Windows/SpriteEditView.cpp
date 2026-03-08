@@ -113,7 +113,7 @@ void SpriteEditView::onActiveLibraryItemChanged(
 
     // Use the gizmo's centered sprite extent to set the background and sprite
     // extents.
-    SDL_Rect logicalSpriteExtent{
+    SDL_FRect logicalSpriteExtent{
         boundingBoxGizmo.getLogicalCenteredSpriteExtent()};
     logicalSpriteExtent.x += boundingBoxGizmo.getLogicalExtent().x;
     logicalSpriteExtent.y += boundingBoxGizmo.getLogicalExtent().y;
@@ -121,8 +121,8 @@ void SpriteEditView::onActiveLibraryItemChanged(
     spriteImage.setLogicalExtent(logicalSpriteExtent);
 
     // Set up the stage graphic.
-    const SDL_Rect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
-    SDL_Rect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
+    const SDL_FRect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
+    SDL_FRect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
         boundingBoxGizmo.getLogicalCenteredSpriteExtent())};
     stageGraphic.updateStage(newActiveSprite->textureExtent,
                              newActiveSprite->stageOrigin,
@@ -175,7 +175,7 @@ void SpriteEditView::onSpriteCustomModelBoundsChanged(
 }
 
 void SpriteEditView::onSpriteStageOriginChanged(SpriteID spriteID,
-                                                const SDL_Point& newStageOrigin)
+                                                const SDL_FPoint& newStageOrigin)
 {
     // If the sprite isn't active or isn't set to custom bounds, do nothing.
     const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
@@ -184,8 +184,8 @@ void SpriteEditView::onSpriteStageOriginChanged(SpriteID spriteID,
     }
 
     // Update up the stage graphic.
-    const SDL_Rect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
-    SDL_Rect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
+    const SDL_FRect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
+    SDL_FRect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
         boundingBoxGizmo.getLogicalCenteredSpriteExtent())};
     stageGraphic.updateStage(sprite.textureExtent, sprite.stageOrigin,
                              {(gizmoClippedExtent.x + actualSpriteExtent.x),

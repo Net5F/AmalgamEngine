@@ -23,7 +23,7 @@ struct EditorSprite;
 class AnimationTimeline : public AUI::Widget
 {
 public:
-    AnimationTimeline(const SDL_Rect& inLogicalExtent,
+    AnimationTimeline(const SDL_FRect& inLogicalExtent,
                       const std::string& inDebugName = "AnimationTimeline");
 
     void setActiveAnimation(const EditorAnimation& newActiveAnimation);
@@ -76,39 +76,39 @@ public:
     //-------------------------------------------------------------------------
     void onTick(double timestepS) override;
 
-    void render(const SDL_Point& windowTopLeft) override;
+    void render(const SDL_FPoint& windowTopLeft) override;
 
 private:
     /**
      * If the scrubber has been dragged far enough, selects a new frame.
      */
-    void onFrameScrubberDragged(const SDL_Point& cursorPosition);
+    void onFrameScrubberDragged(const SDL_FPoint& cursorPosition);
 
     // TODO: We're trying this to see if it's performant enough. If updating 
     //       while dragging is too slow, we can do it like SpriteDrag
     /**
      * If the handle has been dragged far enough, changes the loop value.
      */
-    void onLoopHandleDragged(const SDL_Point& cursorPosition);
+    void onLoopHandleDragged(const SDL_FPoint& cursorPosition);
 
     /**
      * Handles a frame that contains a sprite being right-click dragged.
      */
     void onSpriteDragStarted(Uint8 frameNumber,
-                             const SDL_Point& cursorPosition);
+                             const SDL_FPoint& cursorPosition);
 
     /**
      * If a frame containing a sprite has been dragged far enough, visually 
      * moves the frame circle to the new hovered frame.
      */
-    void onSpriteDragged(Uint8 frameNumber, const SDL_Point& cursorPosition);
+    void onSpriteDragged(Uint8 frameNumber, const SDL_FPoint& cursorPosition);
 
     /**
      * If the cursor is over a frame other than originSpriteDragFrameNumber, 
      * moves the sprite into that frame.
      */
     void onSpriteDragReleased(Uint8 frameNumber,
-                              const SDL_Point& cursorPosition);
+                              const SDL_FPoint& cursorPosition);
 
     /**
      * Refreshes frameContainer to match the current active animation.
@@ -128,7 +128,7 @@ private:
     /** 
      * Returns which frame the given cursor position is aligned with.
      */
-    Uint8 getCursorFrame(const SDL_Point& cursorPosition);
+    Uint8 getCursorFrame(const SDL_FPoint& cursorPosition);
 
     void styleNumberText(AUI::Text& textObject, const std::string& text);
 
@@ -169,7 +169,7 @@ private:
     bool playingAnimation;
 
     /** The amber background that we render to show the loop area. */
-    SDL_Rect loopBackgroundExtent;
+    SDL_FRect loopBackgroundExtent;
 
     std::function<void(Uint8)> onSelectionChanged;
 

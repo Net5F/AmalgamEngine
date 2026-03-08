@@ -80,9 +80,10 @@ MainScreen::MainScreen(DataModel& inDataModel)
     confirmationDialog.bodyText.setColor({255, 255, 255, 255});
 
     // Buttons.
-    auto styleDialogButton = [&](AUI::Button& button, const SDL_Rect& logicalExtent) {
+    auto styleDialogButton = [&](AUI::Button& button,
+                                 const SDL_FRect& logicalExtent) {
         button.setLogicalExtent(logicalExtent);
-        SDL_Rect imageExtent{0, 0, logicalExtent.w, logicalExtent.h};
+        SDL_FRect imageExtent{0, 0, logicalExtent.w, logicalExtent.h};
         button.normalImage.setLogicalExtent(imageExtent);
         button.hoveredImage.setLogicalExtent(imageExtent);
         button.pressedImage.setLogicalExtent(imageExtent);

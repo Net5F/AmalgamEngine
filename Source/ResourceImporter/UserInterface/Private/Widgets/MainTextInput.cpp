@@ -5,7 +5,7 @@ namespace AM
 {
 namespace ResourceImporter
 {
-MainTextInput::MainTextInput(const SDL_Rect& inLogicalExtent,
+MainTextInput::MainTextInput(const SDL_FRect& inLogicalExtent,
                              const std::string& inDebugName)
 : AUI::TextInput(inLogicalExtent, inDebugName)
 {
@@ -19,7 +19,7 @@ MainTextInput::MainTextInput(const SDL_Rect& inLogicalExtent,
     setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 25);
 
     // Set our input box properties.
-    setCursorWidth(2);
+    setCursorWidth(2.f);
 }
 
 } // End namespace ResourceImporter

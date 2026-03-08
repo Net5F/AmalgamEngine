@@ -34,7 +34,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    AnimationElementsListItem(const SDL_Rect& inLogicalExtent,
+    AnimationElementsListItem(const SDL_FRect& inLogicalExtent,
                               const std::string& inText,
                               const std::string& inDebugName
                               = "AnimationElementsListItem");
@@ -77,7 +77,7 @@ public:
     /**
      * Sets the left padding. Used to define the visual hierarchy in the list.
      */
-    void setLeftPadding(int inLeftPadding);
+    void setLeftPadding(float inLeftPadding);
 
     //-------------------------------------------------------------------------
     // Public child widgets
@@ -111,11 +111,11 @@ public:
     // Base class overrides
     //-------------------------------------------------------------------------
     AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
-                                 const SDL_Point& cursorPosition) override;
+                                 const SDL_FPoint& cursorPosition) override;
 
     AUI::EventResult
         onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                           const SDL_Point& cursorPosition) override;
+                           const SDL_FPoint& cursorPosition) override;
 
     void onMouseEnter() override;
 

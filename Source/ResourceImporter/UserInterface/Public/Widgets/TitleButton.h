@@ -12,7 +12,7 @@ namespace ResourceImporter
 class TitleButton : public AUI::Button
 {
 public:
-    TitleButton(const SDL_Rect& inLogicalExtent, const std::string& inText,
+    TitleButton(const SDL_FRect& inLogicalExtent, const std::string& inText,
                 const std::string& inDebugName = "TitleButton");
 };
 

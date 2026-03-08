@@ -22,14 +22,14 @@ ParentListItem::ParentListItem(const std::string& inHeaderText,
 
     // Set our child container's click region to cover from the far left, to
     // the start of our text.
-    SDL_Rect textLogicalExtent{
+    SDL_FRect textLogicalExtent{
         childListItemContainer.headerText.getLogicalExtent()};
     childListItemContainer.setClickRegionLogicalExtent(
         {0, 0, textLogicalExtent.x, textLogicalExtent.h});
 }
 
 AUI::EventResult ParentListItem::onMouseDown(AUI::MouseButtonType buttonType,
-                                             const SDL_Point& cursorPosition)
+                                             const SDL_FPoint& cursorPosition)
 {
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
@@ -37,7 +37,7 @@ AUI::EventResult ParentListItem::onMouseDown(AUI::MouseButtonType buttonType,
     }
 
     // If our text was clicked, select this widget.
-    if (SDL_PointInRect(&cursorPosition, &(text.getClippedExtent()))) {
+    if (SDL_PointInRectFloat(&cursorPosition, &(text.getClippedExtent()))) {
         // Note: Our only difference in behavior from LibraryListItem is that 
         //       we only react to clicking on the text region, so we can just 
         //       call its handler.
@@ -52,7 +52,7 @@ AUI::EventResult ParentListItem::onMouseDown(AUI::MouseButtonType buttonType,
 
 AUI::EventResult
     ParentListItem::onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                       const SDL_Point& cursorPosition)
+                                       const SDL_FPoint& cursorPosition)
 {
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
@@ -60,7 +60,7 @@ AUI::EventResult
     }
 
     // If our text was clicked, select this widget.
-    if (SDL_PointInRect(&cursorPosition, &(text.getClippedExtent()))) {
+    if (SDL_PointInRectFloat(&cursorPosition, &(text.getClippedExtent()))) {
         // Note: Our only difference in behavior from LibraryListItem is that 
         //       we only react to clicking on the text region, so we can just 
         //       call its handler.
@@ -72,11 +72,11 @@ AUI::EventResult
     return AUI::EventResult{.wasHandled{false}};
 }
 
-AUI::EventResult ParentListItem::onMouseMove(const SDL_Point& cursorPosition)
+AUI::EventResult ParentListItem::onMouseMove(const SDL_FPoint& cursorPosition)
 {
     // If the mouse is within the header extent.
-    SDL_Rect headerExtent{childListItemContainer.getHeaderExtent()};
-    if (SDL_PointInRect(&cursorPosition, &headerExtent)) {
+    SDL_FRect headerExtent{childListItemContainer.getHeaderExtent()};
+    if (SDL_PointInRectFloat(&cursorPosition, &headerExtent)) {
         // If we're not selected or hovered, become hovered.
         if (!isSelected && !isHovered) {
             setIsHovered(true);
@@ -106,7 +106,7 @@ void ParentListItem::onMouseLeave()
     }
 }
 
-void ParentListItem::measure(const SDL_Rect& availableExtent)
+void ParentListItem::measure(const SDL_FRect& availableExtent)
 {
     // Run the normal measure step (measures our children and sets our 
     // scaledExtent).

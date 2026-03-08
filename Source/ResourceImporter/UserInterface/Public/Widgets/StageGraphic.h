@@ -16,7 +16,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    StageGraphic(const SDL_Rect& inLogicalExtent);
+    StageGraphic(const SDL_FRect& inLogicalExtent);
 
     /**
      * Updates the stage graphic to match the given extent and origin.
@@ -27,14 +27,14 @@ public:
      *        relative to the top left of this widget and scaled to actual 
      *        (screen-relative) size.
      */
-    void updateStage(const SDL_Rect& spriteTextureExtent,
-                     const SDL_Point& stageOrigin,
-                     const SDL_Point& actualSpriteImageOffset);
+    void updateStage(const SDL_FRect& spriteTextureExtent,
+                     const SDL_FPoint& stageOrigin,
+                     const SDL_FPoint& actualSpriteImageOffset);
 
     //-------------------------------------------------------------------------
     // Base class overrides
     //-------------------------------------------------------------------------
-    void render(const SDL_Point& windowTopLeft) override;
+    void render(const SDL_FPoint& windowTopLeft) override;
 
 private:
     /** The transparency value for the stage graphic. */
@@ -45,28 +45,29 @@ private:
      * space to screen space, scales them to the current UI scaling, and 
      * offsets them using the current offsets.
      *
-     * The finished points are pushed into the given vector in the order:
+     * The finished points are set in the given array in the order:
      *     (minX, minY, minZ), (maxX, minY, minZ), (maxX, maxY, minZ),
      *     (minX, maxY, minZ)
+     *
+     * @post stageCoords is updated to the new position.
      */
-    void calcStageScreenPoints(const SDL_Rect& spriteTextureExtent,
-                               const SDL_Point& stageOrigin,
-                               const SDL_Point& logicalSpriteImageOffset,
-                               std::vector<SDL_Point>& stageScreenPoints);
+    void updateStageScreenPoints(const SDL_FRect& spriteTextureExtent,
+                                 const SDL_FPoint& stageOrigin,
+                                 const SDL_FPoint& logicalSpriteImageOffset);
 
     /**
      * Moves the stage graphic coords to their proper screen position.
      */
-    void moveStageGraphic(std::vector<SDL_Point>& stageScreenPoints);
+    void moveStageGraphic(std::vector<SDL_FPoint>& stageScreenPoints);
 
     /**
      * Renders the stage's bottom face.
      */
-    void renderStage(const SDL_Point& windowTopLeft);
+    void renderStage(const SDL_FPoint& windowTopLeft);
 
-    // Stage (1 polygon, 4 coordinates)
-    std::array<Sint16, 4> stageXCoords;
-    std::array<Sint16, 4> stageYCoords;
+    // Stage bottom face (1 polygon, 4 coordinates starting from top left and 
+    // going clockwise)
+    std::array<SDL_FPoint, 4> stageCoords;
 };
 
 } // End namespace ResourceImporter

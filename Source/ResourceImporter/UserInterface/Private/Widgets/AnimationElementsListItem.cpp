@@ -7,7 +7,7 @@ namespace AM
 namespace ResourceImporter
 {
 AnimationElementsListItem::AnimationElementsListItem(
-    const SDL_Rect& inLogicalExtent, const std::string& inText,
+    const SDL_FRect& inLogicalExtent, const std::string& inText,
     const std::string& inDebugName)
 : AUI::Widget(inLogicalExtent, inDebugName)
 , hoveredImage({0, 0, logicalExtent.w, logicalExtent.h})
@@ -39,7 +39,7 @@ AnimationElementsListItem::AnimationElementsListItem(
 
 void AnimationElementsListItem::enable()
 {
-    SDL_Point cursorPosition{};
+    SDL_FPoint cursorPosition{};
     SDL_GetMouseState(&(cursorPosition.x), &(cursorPosition.y));
     cursorPosition.x -= clippedExtent.x;
     cursorPosition.y -= clippedExtent.y;
@@ -97,7 +97,7 @@ AnimationElementsListItem::State
     return currentState;
 }
 
-void AnimationElementsListItem::setLeftPadding(int inLeftPadding)
+void AnimationElementsListItem::setLeftPadding(float inLeftPadding)
 {
     text.setLogicalExtent(
         {inLeftPadding, 0, (logicalExtent.w - inLeftPadding), logicalExtent.h});
@@ -116,7 +116,7 @@ void AnimationElementsListItem::setOnDeselected(
 }
 
 AUI::EventResult AnimationElementsListItem::onMouseDown(AUI::MouseButtonType buttonType,
-                                              const SDL_Point&)
+                                              const SDL_FPoint&)
 {
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
@@ -136,7 +136,7 @@ AUI::EventResult AnimationElementsListItem::onMouseDown(AUI::MouseButtonType but
 }
 
 AUI::EventResult AnimationElementsListItem::onMouseDoubleClick(
-    AUI::MouseButtonType buttonType, const SDL_Point& cursorPosition)
+    AUI::MouseButtonType buttonType, const SDL_FPoint& cursorPosition)
 {
     // We treat additional clicks as regular MouseDown events.
     return onMouseDown(buttonType, cursorPosition);

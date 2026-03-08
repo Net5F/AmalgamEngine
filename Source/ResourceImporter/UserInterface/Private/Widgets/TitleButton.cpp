@@ -5,7 +5,7 @@ namespace AM
 {
 namespace ResourceImporter
 {
-TitleButton::TitleButton(const SDL_Rect& inLogicalExtent,
+TitleButton::TitleButton(const SDL_FRect& inLogicalExtent,
                          const std::string& inText,
                          const std::string& inDebugName)
 : AUI::Button(inLogicalExtent, inDebugName)

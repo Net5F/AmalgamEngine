@@ -135,10 +135,10 @@ void SpriteSheetEditView::refreshSpriteSheetImage(
 
     // Calc a scaled texture extent that fits inside the max image bounds 
     // without changing the texture's aspect ratio.
-    SDL_Rect imageExtent{MAX_SPRITESHEET_IMAGE_EXTENT.x,
+    SDL_FRect imageExtent{MAX_SPRITESHEET_IMAGE_EXTENT.x,
                          MAX_SPRITESHEET_IMAGE_EXTENT.y};
-    int widthDiff{spriteSheet.textureWidth - MAX_SPRITESHEET_IMAGE_EXTENT.w};
-    int heightDiff{spriteSheet.textureHeight - MAX_SPRITESHEET_IMAGE_EXTENT.h};
+    float widthDiff{spriteSheet.textureWidth - MAX_SPRITESHEET_IMAGE_EXTENT.w};
+    float heightDiff{spriteSheet.textureHeight - MAX_SPRITESHEET_IMAGE_EXTENT.h};
     if ((widthDiff > 0) || (heightDiff > 0)) {
         // Texture is larger than max extent in at least one direction. Scale 
         // down to fit.
@@ -154,15 +154,14 @@ void SpriteSheetEditView::refreshSpriteSheetImage(
                             / static_cast<float>(spriteSheet.textureHeight));
         }
 
-        imageExtent.w = static_cast<int>(spriteSheet.textureWidth * scaleToFit);
-        imageExtent.h
-            = static_cast<int>(spriteSheet.textureHeight * scaleToFit);
+        imageExtent.w = spriteSheet.textureWidth * scaleToFit;
+        imageExtent.h = spriteSheet.textureHeight * scaleToFit;
     }
     else {
         // Texture is smaller than max extent in both directions. No need to 
         // scale.
-        imageExtent.w = spriteSheet.textureWidth;
-        imageExtent.h = spriteSheet.textureHeight;
+        imageExtent.w = static_cast<float>(spriteSheet.textureWidth);
+        imageExtent.h = static_cast<float>(spriteSheet.textureHeight);
     }
 
     spriteSheetImage.setLogicalExtent(imageExtent);

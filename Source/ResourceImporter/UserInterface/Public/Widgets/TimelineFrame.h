@@ -18,7 +18,7 @@ class TimelineFrame : public AUI::Widget
 {
 public:
     /** This widget's width. */
-    static constexpr int LOGICAL_WIDTH{24};
+    static constexpr float LOGICAL_WIDTH{24};
 
     TimelineFrame();
 
@@ -43,43 +43,43 @@ public:
      *                              position.
      */
     void setOnSpriteDragStarted(
-        std::function<void(const SDL_Point&)> inOnSpriteDragStarted);
+        std::function<void(const SDL_FPoint&)> inOnSpriteDragStarted);
 
     /**
      * @param inOnSpriteDragged A callback that expects the cursor's current 
      *                          position.
      */
     void setOnSpriteDragged(
-        std::function<void(const SDL_Point&)> inOnSpriteDragged);
+        std::function<void(const SDL_FPoint&)> inOnSpriteDragged);
 
     /**
      * @param inOnSpriteDragReleased A callback that expects the cursor's 
      *                               current position.
      */
     void setOnSpriteDragReleased(
-        std::function<void(const SDL_Point&)> inOnSpriteDragReleased);
+        std::function<void(const SDL_FPoint&)> inOnSpriteDragReleased);
 
     //-------------------------------------------------------------------------
     // Base class overrides
     //-------------------------------------------------------------------------
-    void render(const SDL_Point& windowTopLeft) override;
+    void render(const SDL_FPoint& windowTopLeft) override;
 
     AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
-                            const SDL_Point& cursorPosition) override;
+                            const SDL_FPoint& cursorPosition) override;
 
     AUI::EventResult onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                   const SDL_Point& cursorPosition) override;
+                                   const SDL_FPoint& cursorPosition) override;
 
     AUI::EventResult onMouseUp(AUI::MouseButtonType buttonType,
-                               const SDL_Point& cursorPosition) override;
+                               const SDL_FPoint& cursorPosition) override;
 
-    AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
+    AUI::EventResult onMouseMove(const SDL_FPoint& cursorPosition) override;
 
 private:
     std::function<void(void)> onPressed;
-    std::function<void(const SDL_Point&)> onSpriteDragStarted;
-    std::function<void(const SDL_Point&)> onSpriteDragged;
-    std::function<void(const SDL_Point&)> onSpriteDragReleased;
+    std::function<void(const SDL_FPoint&)> onSpriteDragStarted;
+    std::function<void(const SDL_FPoint&)> onSpriteDragged;
+    std::function<void(const SDL_FPoint&)> onSpriteDragReleased;
 
     /** If true, the mouse is currently dragging this frame. */
     bool isDragging;

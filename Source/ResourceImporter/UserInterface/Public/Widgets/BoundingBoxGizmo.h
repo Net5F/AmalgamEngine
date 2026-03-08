@@ -24,7 +24,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BoundingBoxGizmo(const SDL_Rect& inLogicalExtent);
+    BoundingBoxGizmo(const SDL_FRect& inLogicalExtent);
 
     virtual ~BoundingBoxGizmo() = default;
 
@@ -43,13 +43,13 @@ public:
      * Sets the size of the sprite image that this gizmo is drawing over.
      * The resulting extent will be centered within this widget.
      */
-    void setSpriteImageSize(int logicalSpriteWidth, int logicalSpriteHeight);
+    void setSpriteImageSize(float logicalSpriteWidth, float logicalSpriteHeight);
 
     /**
      * Sets the stage's screen-space origin offset, relative to the top left of 
      * the image.
      */
-    void setStageOrigin(const SDL_Point& inLogicalStageOrigin);
+    void setStageOrigin(const SDL_FPoint& inLogicalStageOrigin);
 
     /**
      * Sets this gizmo to match newBoundingBox.
@@ -60,7 +60,7 @@ public:
      * Returns the sprite image extent that was set by the last call to 
      * setSpriteImageSize(), centered within this widget.
      */
-    const SDL_Rect& getLogicalCenteredSpriteExtent() const;
+    const SDL_FRect& getLogicalCenteredSpriteExtent() const;
 
     //-------------------------------------------------------------------------
     // Callback registration
@@ -75,24 +75,24 @@ public:
     //-------------------------------------------------------------------------
     // Base class overrides
     //-------------------------------------------------------------------------
-    void setLogicalExtent(const SDL_Rect& inLogicalExtent) override;
+    void setLogicalExtent(const SDL_FRect& inLogicalExtent) override;
 
     /**
      * If the UI scaling has changed, refreshes our controls.
      */
-    void arrange(const SDL_Point& startPosition,
-                 const SDL_Rect& availableExtent,
+    void arrange(const SDL_FPoint& startPosition,
+                 const SDL_FRect& availableExtent,
                  AUI::WidgetLocator* widgetLocator) override;
 
-    void render(const SDL_Point& windowTopLeft) override;
+    void render(const SDL_FPoint& windowTopLeft) override;
 
     AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
-                                 const SDL_Point& cursorPosition) override;
+                                 const SDL_FPoint& cursorPosition) override;
 
     AUI::EventResult onMouseUp(AUI::MouseButtonType buttonType,
-                               const SDL_Point& cursorPosition) override;
+                               const SDL_FPoint& cursorPosition) override;
 
-    AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
+    AUI::EventResult onMouseMove(const SDL_FPoint& cursorPosition) override;
 
 private:
     /** The base transparency value for a selected gizmo. */
@@ -141,7 +141,7 @@ private:
     /**
      * Updates the maxZ bound to match the given mouse position.
      */
-    void updateZBounds(int mouseScreenYPos);
+    void updateZBounds(float mouseScreenYPos);
 
     /**
      * Transforms the vertices in the current boundingBox from world space 
@@ -154,37 +154,37 @@ private:
      *     (minX, minY, maxZ)
      */
     void
-        calcBoundingBoxScreenPoints(std::vector<SDL_Point>& boundsScreenPoints);
+        calcBoundingBoxScreenPoints(std::array<SDL_FPoint, 7>& boundsScreenPoints);
 
     /**
      * Moves the control extents to their proper screen position.
      */
-    void moveControls(std::vector<SDL_Point>& boundsScreenPoints);
+    void moveControls(const std::array<SDL_FPoint, 7>& boundsScreenPoints);
 
     /**
      * Moves the line points to their proper screen position.
      */
-    void moveLines(std::vector<SDL_Point>& boundsScreenPoints);
+    void moveLines(const std::array<SDL_FPoint, 7>& boundsScreenPoints);
 
     /**
      * Moves the plane coords to their proper screen position.
      */
-    void movePlanes(std::vector<SDL_Point>& boundsScreenPoints);
+    void movePlanes(const std::array<SDL_FPoint, 7>& boundsScreenPoints);
 
     /**
      * Renders the control rectangles.
      */
-    void renderControls(const SDL_Point& windowTopLeft);
+    void renderControls(const SDL_FPoint& windowTopLeft);
 
     /**
      * Renders the line polygons.
      */
-    void renderLines(const SDL_Point& windowTopLeft);
+    void renderLines(const SDL_FPoint& windowTopLeft);
 
     /**
      * Renders the plane polygons.
      */
-    void renderPlanes(const SDL_Point& windowTopLeft);
+    void renderPlanes(const SDL_FPoint& windowTopLeft);
 
     /** The value of AUI::Core::actualScreenSize that was used the last time
         this widget updated its layout. Used to detect when the UI scale
@@ -199,24 +199,24 @@ private:
     bool isEnabled;
 
     /** A reasonable size for the control rectangles. */
-    static constexpr int LOGICAL_RECT_SIZE{12};
+    static constexpr float LOGICAL_RECT_SIZE{12};
 
     /** The scaled size of the control rectangles. */
-    int scaledRectSize;
+    float scaledRectSize;
 
     /** A reasonable width for the lines. */
-    static constexpr int LOGICAL_LINE_WIDTH{4};
+    static constexpr float LOGICAL_LINE_WIDTH{4};
 
     /** The scaled width of the lines. */
-    int scaledLineWidth;
+    float scaledLineWidth;
 
     /** Sets the extent where the sprite image will be placed, relative to the
         top left of this widget. */
-    SDL_Rect logicalSpriteImageExtent;
+    SDL_FRect logicalSpriteImageExtent;
 
     /** The stage's screen-space origin offset, relative to the top left of 
         the image. */
-    SDL_Point logicalStageOrigin;
+    SDL_FPoint logicalStageOrigin;
 
     /** The stage's world-space extent.
         We limit this extent to the edges of the sprite image. */
@@ -224,30 +224,29 @@ private:
 
     // Controls (scaled extents, without parent offsets)
     /** The extent of the box position control, (maxX, maxY, minZ). */
-    SDL_Rect positionControlExtent;
+    SDL_FRect positionControlExtent;
 
     /** The extent of the x-axis box length control, (minX, maxY, minZ). */
-    SDL_Rect xControlExtent;
+    SDL_FRect xControlExtent;
 
     /** The extent of the y-axis box length control, (maxX, minY, minZ). */
-    SDL_Rect yControlExtent;
+    SDL_FRect yControlExtent;
 
     /** The extent of the z-axis box length control, (maxX, maxY, maxZ). */
-    SDL_Rect zControlExtent;
+    SDL_FRect zControlExtent;
 
     // Lines
-    SDL_Point lineXMinPoint;
-    SDL_Point lineXMaxPoint;
+    SDL_FPoint lineXMinPoint;
+    SDL_FPoint lineXMaxPoint;
 
-    SDL_Point lineYMinPoint;
-    SDL_Point lineYMaxPoint;
+    SDL_FPoint lineYMinPoint;
+    SDL_FPoint lineYMaxPoint;
 
-    SDL_Point lineZMinPoint;
-    SDL_Point lineZMaxPoint;
+    SDL_FPoint lineZMinPoint;
+    SDL_FPoint lineZMaxPoint;
 
     // Planes (each polygon takes 4 coordinates)
-    std::array<Sint16, 12> planeXCoords;
-    std::array<Sint16, 12> planeYCoords;
+    std::array<SDL_FPoint, 12> planeCoords;
 
     /** Tracks which control, if any, is currently being held. */
     Control currentHeldControl;

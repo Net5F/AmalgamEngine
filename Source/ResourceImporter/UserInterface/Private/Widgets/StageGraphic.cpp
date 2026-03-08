@@ -4,46 +4,39 @@
 #include "BoundingBox.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
-#include <SDL2_gfxPrimitives.h>
 
 namespace AM
 {
 namespace ResourceImporter
 {
-StageGraphic::StageGraphic(const SDL_Rect& inLogicalExtent)
+StageGraphic::StageGraphic(const SDL_FRect& inLogicalExtent)
 : AUI::Widget({320, 58, 1297, 1022}, "StageGraphic")
-, stageXCoords{}
-, stageYCoords{}
+, stageCoords{}
 {
 }
 
-void StageGraphic::updateStage(const SDL_Rect& spriteTextureExtent,
-                               const SDL_Point& stageOrigin,
-                               const SDL_Point& actualSpriteImageOffset)
+void StageGraphic::updateStage(const SDL_FRect& spriteTextureExtent,
+                               const SDL_FPoint& stageOrigin,
+                               const SDL_FPoint& actualSpriteImageOffset)
 {
-    // Calculate where the stage is on the screen, for our generated graphics.
-    std::vector<SDL_Point> screenPoints{};
-    calcStageScreenPoints(spriteTextureExtent, stageOrigin,
-                          actualSpriteImageOffset, screenPoints);
-
-    // Move the stage graphic coords to the correct positions.
-    moveStageGraphic(screenPoints);
+    // Update where the stage is on the screen, for our generated graphics.
+    updateStageScreenPoints(spriteTextureExtent, stageOrigin,
+                            actualSpriteImageOffset);
 }
 
-void StageGraphic::render(const SDL_Point& windowTopLeft)
+void StageGraphic::render(const SDL_FPoint& windowTopLeft)
 {
     // If this widget is fully clipped, don't render it.
-    if (SDL_RectEmpty(&clippedExtent)) {
+    if (SDL_RectEmptyFloat(&clippedExtent)) {
         return;
     }
 
     renderStage(windowTopLeft);
 }
 
-void StageGraphic::calcStageScreenPoints(
-    const SDL_Rect& spriteTextureExtent, const SDL_Point& stageOrigin,
-    const SDL_Point& actualSpriteImageOffset,
-    std::vector<SDL_Point>& stageScreenPoints)
+void StageGraphic::updateStageScreenPoints(
+    const SDL_FRect& spriteTextureExtent, const SDL_FPoint& stageOrigin,
+    const SDL_FPoint& actualSpriteImageOffset)
 {
     /* Transform the world positions to screen points. */
     std::array<SDL_FPoint, 4> screenPoints{};
@@ -66,13 +59,13 @@ void StageGraphic::calcStageScreenPoints(
     screenPoints[3] = Transforms::worldToScreen(point, 1);
 
     // Account for the gizmo's position and the image's position.
-    SDL_Point actualStageOrigin{
+    SDL_FPoint actualStageOrigin{
         AUI::ScalingHelpers::logicalToActual(stageOrigin)};
-    int finalXOffset{actualSpriteImageOffset.x + actualStageOrigin.x};
-    int finalYOffset{actualSpriteImageOffset.y + actualStageOrigin.y};
+    float finalXOffset{actualSpriteImageOffset.x + actualStageOrigin.x};
+    float finalYOffset{actualSpriteImageOffset.y + actualStageOrigin.y};
 
     // Scale and offset each point, then push it into the return vector.
-    for (SDL_FPoint& point : screenPoints) {
+    for (std::size_t i{0}; i < screenPoints.size(); ++i) {
         // Scale and round the point.
         point.x = std::round(AUI::ScalingHelpers::logicalToActual(point.x));
         point.y = std::round(AUI::ScalingHelpers::logicalToActual(point.y));
@@ -80,45 +73,28 @@ void StageGraphic::calcStageScreenPoints(
         // Offset the point.
         point.x += finalXOffset;
         point.y += finalYOffset;
-
-        // Cast to int and push into the return vector.
-        stageScreenPoints.push_back(
-            {static_cast<int>(point.x), static_cast<int>(point.y)});
+        
+        // Update the graphic's coordinate.
+        stageCoords[i].x = point.x;
+        stageCoords[i].y = point.y;
     }
 }
 
-void StageGraphic::moveStageGraphic(
-    std::vector<SDL_Point>& stageScreenPoints)
+void StageGraphic::renderStage(const SDL_FPoint& windowTopLeft)
 {
-    // Set the coords for the bottom face of the stage. (coords 0 - 3, starting
-    // from top left and going clockwise.)
-    stageXCoords[0] = stageScreenPoints[0].x;
-    stageYCoords[0] = stageScreenPoints[0].y;
-    stageXCoords[1] = stageScreenPoints[1].x;
-    stageYCoords[1] = stageScreenPoints[1].y;
-    stageXCoords[2] = stageScreenPoints[2].x;
-    stageYCoords[2] = stageScreenPoints[2].y;
-    stageXCoords[3] = stageScreenPoints[3].x;
-    stageYCoords[3] = stageScreenPoints[3].y;
-}
-
-void StageGraphic::renderStage(const SDL_Point& windowTopLeft)
-{
-    /* Offset all the points. */
-    std::array<Sint16, 4> offsetXCoords{};
-    for (std::size_t i = 0; i < offsetXCoords.size(); ++i) {
-        offsetXCoords[i] = stageXCoords[i] + windowTopLeft.x;
+    // Offset all the points.
+    std::array<SDL_Vertex, 4> verts{};
+    for (std::size_t i{0}; i < verts.size(); ++i) {
+        verts[i].position.x = stageCoords[i].x + windowTopLeft.x;
+        verts[i].position.y = stageCoords[i].y + windowTopLeft.y;
+        verts[i].color = {0, 149, 0, STAGE_ALPHA};
     }
 
-    std::array<Sint16, 4> offsetYCoords{};
-    for (std::size_t i = 0; i < offsetYCoords.size(); ++i) {
-        offsetYCoords[i] = stageYCoords[i] + windowTopLeft.y;
-    }
-
-    /* Draw the stage's floor bounds. */
-    filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[0]),
-                      &(offsetYCoords[0]), 4, 0, 149, 0,
-                      static_cast<Uint8>(STAGE_ALPHA));
+    // Draw the stage's floor bounds.
+    // Two triangles form a face: (0, 1, 2) and (0, 2, 3)
+    std::array<int, 6> indices{0, 1, 2, 0, 2, 3};
+    SDL_RenderGeometry(AUI::Core::getRenderer(), nullptr, verts.data(), 4,
+                       indices.data(), 6);
 }
 
 } // End namespace ResourceImporter

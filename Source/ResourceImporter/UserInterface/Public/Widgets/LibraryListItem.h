@@ -58,7 +58,7 @@ public:
     /**
      * Sets the left padding. Used to define the visual hierarchy in the list.
      */
-    void setLeftPadding(int inLeftPadding);
+    void setLeftPadding(float inLeftPadding);
 
     /**
      * The types of list items that we hold in the library.
@@ -121,11 +121,11 @@ public:
     // Base class overrides
     //-------------------------------------------------------------------------
     AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
-                                 const SDL_Point& cursorPosition) override;
+                                 const SDL_FPoint& cursorPosition) override;
 
     AUI::EventResult
         onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                           const SDL_Point& cursorPosition) override;
+                           const SDL_FPoint& cursorPosition) override;
 
     void onMouseEnter() override;
 

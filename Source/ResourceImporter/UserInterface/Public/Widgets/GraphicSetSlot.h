@@ -22,7 +22,7 @@ public:
      * @param logicalWidth The widget's width. Only affects the text width, the 
      *                     other elements are all centered.
      */
-    GraphicSetSlot(int logicalWidth);
+    GraphicSetSlot(float logicalWidth);
 
     //-------------------------------------------------------------------------
     // Public child widgets

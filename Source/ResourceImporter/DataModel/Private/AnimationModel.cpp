@@ -338,7 +338,7 @@ void AnimationModel::addAnimationFrame(AnimationID animationID,
 
     // If the new sprite isn't the same size as the other sprites, don't add it.
     for (const EditorAnimation::Frame& frame : animation.frames) {
-        const SDL_Rect& textureExtent{frame.sprite.get().textureExtent};
+        const SDL_FRect& textureExtent{frame.sprite.get().textureExtent};
         if ((newSprite.textureExtent.w != textureExtent.w)
             || (newSprite.textureExtent.h != textureExtent.h)) {
             return;

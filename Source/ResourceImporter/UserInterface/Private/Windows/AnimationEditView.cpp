@@ -75,9 +75,9 @@ AnimationEditView::AnimationEditView(
         });
 
     /* Timeline */
-    SDL_Rect timelineExtent{timelineScrollArea.getLogicalExtent()};
+    SDL_FRect timelineExtent{timelineScrollArea.getLogicalExtent()};
     timelineScrollArea.content = std::make_unique<AnimationTimeline>(
-        SDL_Rect{0, 0, timelineExtent.w, timelineExtent.h},
+        SDL_FRect{0, 0, timelineExtent.w, timelineExtent.h},
         "AnimationTimeline");
     timelineScrollArea.setScrollOrientation(AUI::Orientation::Horizontal);
     timeline
@@ -167,7 +167,7 @@ void AnimationEditView::onActiveLibraryItemChanged(
 
     // Use the gizmo's centered sprite extent to set the background and sprite
     // extents.
-    SDL_Rect logicalSpriteExtent{
+    SDL_FRect logicalSpriteExtent{
         boundingBoxGizmo.getLogicalCenteredSpriteExtent()};
     logicalSpriteExtent.x += boundingBoxGizmo.getLogicalExtent().x;
     logicalSpriteExtent.y += boundingBoxGizmo.getLogicalExtent().y;
@@ -175,8 +175,8 @@ void AnimationEditView::onActiveLibraryItemChanged(
     spriteImage.setLogicalExtent(logicalSpriteExtent);
 
     // Set up the stage graphic.
-    const SDL_Rect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
-    SDL_Rect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
+    const SDL_FRect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
+    SDL_FRect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
         boundingBoxGizmo.getLogicalCenteredSpriteExtent())};
     stageGraphic.updateStage(firstSprite.textureExtent,
                              firstSprite.stageOrigin,
@@ -356,8 +356,8 @@ void AnimationEditView::onTimelineSelectionChanged(Uint8 selectedFrameNumber)
     entityAlignmentAnchorGizmo.setStageOrigin(selectedSprite->stageOrigin);
 
     // Update the stage graphic.
-    const SDL_Rect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
-    SDL_Rect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
+    const SDL_FRect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
+    SDL_FRect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
         boundingBoxGizmo.getLogicalCenteredSpriteExtent())};
     stageGraphic.updateStage(selectedSprite->textureExtent,
                              selectedSprite->stageOrigin,

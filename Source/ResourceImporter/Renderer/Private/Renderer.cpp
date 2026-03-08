@@ -2,7 +2,6 @@
 #include "UserInterface.h"
 #include "Log.h"
 #include <SDL3/SDL_render.h>
-#include <SDL2_gfxPrimitives.h>
 
 namespace AM
 {
@@ -29,11 +28,9 @@ void Renderer::render()
 
 bool Renderer::handleOSEvent(SDL_Event& event)
 {
-    switch (event.type) {
-        case SDL_WINDOWEVENT:
-            // TODO: Handle this.
-            return true;
-    }
+    //switch (event.type) {
+		// TODO: Handle window events.
+    //}
 
     return false;
 }

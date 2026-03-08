@@ -13,7 +13,7 @@ namespace AM
 namespace ResourceImporter
 {
 /** The width of a graphic container slot. */
-static constexpr unsigned int SLOT_WIDTH{156};
+static constexpr float SLOT_WIDTH{156};
 
 EntityGraphicSetEditView::EntityGraphicSetEditView(
     DataModel& inDataModel,
@@ -222,11 +222,11 @@ void EntityGraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
 
         // Calc a square texture extent that shows the bottom of the sprite
         // (so we don't have to squash it).
-        SDL_Rect textureExtent{sprite->textureExtent};
+        SDL_FRect textureExtent{sprite->textureExtent};
         textureExtent.x = 0;
         textureExtent.y = 0;
         if (textureExtent.h > textureExtent.w) {
-            int diff{textureExtent.h - textureExtent.w};
+            float diff{textureExtent.h - textureExtent.w};
             textureExtent.h -= diff;
             textureExtent.y += diff;
         }

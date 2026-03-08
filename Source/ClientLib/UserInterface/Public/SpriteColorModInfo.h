@@ -23,7 +23,7 @@ struct SpriteColorModInfo {
               would make it darker), we render an additional sprite with an
               additive blend mode and multiply that one by this color.
               Alpha is applied to both sprites. */
-    SDL_FColor colorMod{0, 0, 0, 255};
+    SDL_Color colorMod{0, 0, 0, 255};
 };
 
 } // End namespace Client

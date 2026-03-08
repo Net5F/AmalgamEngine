@@ -80,7 +80,7 @@ bool LibraryListItem::getIsSelected() const
     return isSelected;
 }
 
-void LibraryListItem::setLeftPadding(int inLeftPadding)
+void LibraryListItem::setLeftPadding(float inLeftPadding)
 {
     text.setLogicalExtent(
         {inLeftPadding, 0, (logicalExtent.w - inLeftPadding), logicalExtent.h});
@@ -105,7 +105,7 @@ void LibraryListItem::setOnActivated(
 }
 
 AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
-                                              const SDL_Point&)
+                                              const SDL_FPoint&)
 {
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
@@ -118,7 +118,7 @@ AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
     }
     // If we're already selected and the ctrl key is held, deselect.
     else {
-        const Uint8* keyStates{SDL_GetKeyboardState(nullptr)};
+        const bool* keyStates{SDL_GetKeyboardState(nullptr)};
         if (keyStates[SDL_SCANCODE_LCTRL] || keyStates[SDL_SCANCODE_RCTRL]) {
             setIsSelected(false);
             if (onDeselected) {
@@ -132,7 +132,7 @@ AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
 
 AUI::EventResult
     LibraryListItem::onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                        const SDL_Point&)
+                                        const SDL_FPoint&)
 {
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
@@ -145,7 +145,7 @@ AUI::EventResult
     }
     // If we're already selected and the ctrl key is held, deselect.
     else {
-        const Uint8* keyStates{SDL_GetKeyboardState(nullptr)};
+        const bool* keyStates{SDL_GetKeyboardState(nullptr)};
         if (keyStates[SDL_SCANCODE_LCTRL] || keyStates[SDL_SCANCODE_RCTRL]) {
             setIsSelected(false);
             if (onDeselected) {
@@ -201,7 +201,7 @@ void LibraryListItem::setIsSelected(bool inIsSelected)
 
 bool LibraryListItem::modifierKeyIsHeld()
 {
-    const Uint8* keyStates{SDL_GetKeyboardState(nullptr)};
+    const bool* keyStates{SDL_GetKeyboardState(nullptr)};
     bool shiftIsHeld{keyStates[SDL_SCANCODE_LSHIFT]
                      || keyStates[SDL_SCANCODE_RSHIFT]};
     bool ctrlIsHeld{keyStates[SDL_SCANCODE_LCTRL]

@@ -33,12 +33,12 @@ struct EditorSprite {
 
     /** This sprite's actual-space UV position and size within its parent 
         sprite sheet texture. */
-    SDL_Rect textureExtent{0, 0, 0, 0};
+    SDL_FRect textureExtent{0, 0, 0, 0};
 
     /** The actual-space point within the sprite where the "stage" starts.
         The "stage" is the coordinate space that we overlay onto the sprite 
         image. */
-    SDL_Point stageOrigin{0, 0};
+    SDL_FPoint stageOrigin{0, 0};
 
     /** If true, this sprite's modelBounds will be used in collision checks.
         Floors never have collision, regardless of this setting. */

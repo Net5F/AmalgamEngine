@@ -7,7 +7,7 @@ namespace AM
 
 SDL::SDL(Uint32 flags)
 {
-    if (SDL_Init(flags) != 0) {
+    if (!SDL_Init(flags)) {
         LOG_INFO("SDL_Init error: %s", SDL_GetError());
         std::abort();
     }

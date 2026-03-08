@@ -56,7 +56,7 @@ AddSpriteDialog::AddSpriteDialog(MainScreen& inMainScreen,
 
     /* Stage origin entry. */
     auto styleLabel
-        = [&](AUI::Text& label, const std::string& text, int fontSize) {
+        = [&](AUI::Text& label, const std::string& text, float fontSize) {
         label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
         label.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
         label.setColor({255, 255, 255, 255});

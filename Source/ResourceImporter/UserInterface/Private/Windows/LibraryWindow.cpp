@@ -748,7 +748,7 @@ void LibraryWindow::addIconToSheetListItem(ParentListItem& sheetListItem,
 void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
 {
     // Find out if the shift or ctrl keys are held.
-    const Uint8* keyStates{SDL_GetKeyboardState(nullptr)};
+    const bool* keyStates{SDL_GetKeyboardState(nullptr)};
     bool shiftIsHeld{keyStates[SDL_SCANCODE_LSHIFT]
                      || keyStates[SDL_SCANCODE_RSHIFT]};
     bool ctrlIsHeld{keyStates[SDL_SCANCODE_LCTRL]

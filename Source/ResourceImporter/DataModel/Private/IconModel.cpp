@@ -117,8 +117,8 @@ bool IconModel::addIconSheet(const std::string& relPath,
     SDL_Texture* sheetTexture{IMG_LoadTexture(sdlRenderer, fullPath.c_str())};
     if (sheetTexture != nullptr) {
         // Save the texture size for later.
-        SDL_QueryTexture(sheetTexture, nullptr, nullptr, &sheetWidth,
-                         &sheetHeight);
+        sheetWidth = sheetTexture->w;
+        sheetHeight = sheetTexture->h;
 
         // We don't need the actual texture right now, destroy it.
         SDL_DestroyTexture(sheetTexture);
@@ -130,19 +130,19 @@ bool IconModel::addIconSheet(const std::string& relPath,
         return false;
     }
 
-    // Validate the width/height/yOffset.
-    int iconWidthI{0};
-    int iconHeightI{0};
+    // Validate the width/height.
+    float iconWidthF{0};
+    float iconHeightF{0};
     try {
-        iconWidthI = std::stoi(iconWidth);
-        iconHeightI = std::stoi(iconHeight);
+        iconWidthF = std::stof(iconWidth);
+        iconHeightF = std::stof(iconHeight);
     } catch (std::exception&) {
         errorString = "Error: Width or height is not a valid integer.";
         return false;
     }
 
     // Validate the size of the texture.
-    if ((iconWidthI > sheetWidth) || (iconHeightI > sheetHeight)) {
+    if ((iconWidthF > sheetWidth) || (iconHeightF > sheetHeight)) {
         errorString = "Error: Sheet must be larger than icon size.";
         return false;
     }
@@ -154,14 +154,14 @@ bool IconModel::addIconSheet(const std::string& relPath,
     // For each icon in this texture.
     EditorIconSheet& iconSheet{iconSheetMap[sheetID]};
     int iconCount{0};
-    for (int y = 0; y <= (sheetHeight - iconHeightI); y += iconHeightI) {
-        for (int x = 0; x <= (sheetWidth - iconWidthI); x += iconWidthI) {
+    for (float y{0}; y <= (sheetHeight - iconHeightF); y += iconHeightF) {
+        for (float x{0}; x <= (sheetWidth - iconWidthF); x += iconWidthF) {
             // Build the icon's display name (baseName_count).
             std::string displayName{baseName};
             displayName += std::to_string(iconCount);
 
             // Find the icon's extent within the sheet texture.
-            SDL_Rect textureExtent{x, y, iconWidthI, iconHeightI};
+            SDL_FRect textureExtent{x, y, iconWidthF, iconHeightF};
 
             // Add the icon to the map and sheet.
             IconID iconID{static_cast<IconID>(iconIDPool.reserveID())};

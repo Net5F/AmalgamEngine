@@ -7,16 +7,14 @@
 #include "Log.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
-#include "AUI/SDLHelpers.h"
 #include <algorithm>
 #include <SDL3/SDL_rect.h>
-#include <SDL2_gfxPrimitives.h>
 
 namespace AM
 {
 namespace ResourceImporter
 {
-PointGizmo::PointGizmo(const SDL_Rect& inLogicalExtent)
+PointGizmo::PointGizmo(const SDL_FRect& inLogicalExtent)
 : AUI::Widget(inLogicalExtent, "PointGizmo")
 , lastUsedScreenSize{0, 0}
 , point{}
@@ -42,8 +40,8 @@ void PointGizmo::disable()
     refreshGraphics();
 }
 
-void PointGizmo::setSpriteImageSize(int logicalSpriteWidth,
-                                          int logicalSpriteHeight)
+void PointGizmo::setSpriteImageSize(float logicalSpriteWidth,
+                                    float logicalSpriteHeight)
 {
     logicalSpriteImageExtent.x
         = (logicalExtent.w / 2) - (logicalSpriteWidth / 2);
@@ -56,7 +54,7 @@ void PointGizmo::setSpriteImageSize(int logicalSpriteWidth,
     refreshGraphics();
 }
 
-void PointGizmo::setStageOrigin(const SDL_Point& inLogicalStageOrigin)
+void PointGizmo::setStageOrigin(const SDL_FPoint& inLogicalStageOrigin)
 {
     logicalStageOrigin = inLogicalStageOrigin;
     updateStageExtent();
@@ -69,7 +67,7 @@ void PointGizmo::setPoint(const Vector3& newPoint)
     refreshGraphics();
 }
 
-const SDL_Rect& PointGizmo::getLogicalCenteredSpriteExtent() const
+const SDL_FRect& PointGizmo::getLogicalCenteredSpriteExtent() const
 {
     return logicalSpriteImageExtent;
 }
@@ -80,16 +78,16 @@ void PointGizmo::setOnPointUpdated(
     onPointUpdated = std::move(inOnPointUpdated);
 }
 
-void PointGizmo::setLogicalExtent(const SDL_Rect& inLogicalExtent)
+void PointGizmo::setLogicalExtent(const SDL_FRect& inLogicalExtent)
 {
     Widget::setLogicalExtent(inLogicalExtent);
     updateStageExtent();
     refreshGraphics();
 }
 
-void PointGizmo::arrange(const SDL_Point& startPosition,
-                               const SDL_Rect& availableExtent,
-                               AUI::WidgetLocator* widgetLocator)
+void PointGizmo::arrange(const SDL_FPoint& startPosition,
+                         const SDL_FRect& availableExtent,
+                         AUI::WidgetLocator* widgetLocator)
 {
     // Note: This custom arrange isn't really needed, since ResourceImporter
     //       isn't likely to change screen size at runtime. It's nice to keep
@@ -100,7 +98,7 @@ void PointGizmo::arrange(const SDL_Point& startPosition,
     Widget::arrange(startPosition, availableExtent, widgetLocator);
 
     // If this widget is fully clipped, return early.
-    if (SDL_RectEmpty(&clippedExtent)) {
+    if (SDL_RectEmptyFloat(&clippedExtent)) {
         return;
     }
 
@@ -112,10 +110,10 @@ void PointGizmo::arrange(const SDL_Point& startPosition,
     }
 }
 
-void PointGizmo::render(const SDL_Point& windowTopLeft)
+void PointGizmo::render(const SDL_FPoint& windowTopLeft)
 {
     // If this widget is fully clipped, don't render it.
-    if (SDL_RectEmpty(&clippedExtent)) {
+    if (SDL_RectEmptyFloat(&clippedExtent)) {
         return;
     }
 
@@ -126,7 +124,7 @@ void PointGizmo::render(const SDL_Point& windowTopLeft)
     }
 
     // Render the point.
-    SDL_Rect offsetExtent{pointControlExtent};
+    SDL_FRect offsetExtent{pointControlExtent};
     offsetExtent.x += windowTopLeft.x;
     offsetExtent.y += windowTopLeft.y;
 
@@ -137,7 +135,7 @@ void PointGizmo::render(const SDL_Point& windowTopLeft)
 }
 
 AUI::EventResult PointGizmo::onMouseDown(AUI::MouseButtonType buttonType,
-                                               const SDL_Point& cursorPosition)
+                                         const SDL_FPoint& cursorPosition)
 {
     // Do nothing if disabled. Only respond to the left mouse button.
     if (!isEnabled || (buttonType != AUI::MouseButtonType::Left)) {
@@ -145,7 +143,7 @@ AUI::EventResult PointGizmo::onMouseDown(AUI::MouseButtonType buttonType,
     }
 
     // Check if the mouse press hit our control.
-    if (SDL_PointInRect(&cursorPosition, &pointControlExtent)) {
+    if (SDL_PointInRectFloat(&cursorPosition, &pointControlExtent)) {
         currentlyHeld = true;
     }
 
@@ -160,7 +158,7 @@ AUI::EventResult PointGizmo::onMouseDown(AUI::MouseButtonType buttonType,
 }
 
 AUI::EventResult PointGizmo::onMouseUp(AUI::MouseButtonType buttonType,
-                                             const SDL_Point&)
+                                       const SDL_FPoint&)
 {
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
@@ -177,7 +175,7 @@ AUI::EventResult PointGizmo::onMouseUp(AUI::MouseButtonType buttonType,
     }
 }
 
-AUI::EventResult PointGizmo::onMouseMove(const SDL_Point& cursorPosition)
+AUI::EventResult PointGizmo::onMouseMove(const SDL_FPoint& cursorPosition)
 {
     // If a control isn't currently being held, ignore the event.
     if (!currentlyHeld) {
@@ -186,25 +184,23 @@ AUI::EventResult PointGizmo::onMouseMove(const SDL_Point& cursorPosition)
 
     /* Translate the mouse position to world space. */
     // Account for this widget's position.
-    SDL_Rect actualSpriteImageExtent{
+    SDL_FRect actualSpriteImageExtent{
         AUI::ScalingHelpers::logicalToActual(logicalSpriteImageExtent)};
-    SDL_Point actualStageOrigin{
+    SDL_FPoint actualStageOrigin{
         AUI::ScalingHelpers::logicalToActual(logicalStageOrigin)};
-    int finalXOffset{clippedExtent.x + actualSpriteImageExtent.x
-                     + actualStageOrigin.x};
-    int finalYOffset{clippedExtent.y + actualSpriteImageExtent.y
-                     + actualStageOrigin.y};
+    float finalXOffset{clippedExtent.x + actualSpriteImageExtent.x
+                       + actualStageOrigin.x};
+    float finalYOffset{clippedExtent.y + actualSpriteImageExtent.y
+                       + actualStageOrigin.y};
 
     // Apply the offset to the mouse position and convert to logical space.
-    SDL_Point offsetMousePoint{cursorPosition.x - finalXOffset,
+    SDL_FPoint offsetMousePoint{cursorPosition.x - finalXOffset,
                                cursorPosition.y - finalYOffset};
     offsetMousePoint = AUI::ScalingHelpers::actualToLogical(offsetMousePoint);
 
     // Convert the screen-space mouse point to world space.
-    SDL_FPoint offsetMouseScreenPoint{static_cast<float>(offsetMousePoint.x),
-                                      static_cast<float>(offsetMousePoint.y)};
     Position mouseWorldPos{
-        Transforms::screenToWorldMinimum(offsetMouseScreenPoint, {})};
+        Transforms::screenToWorldMinimum(offsetMousePoint, {})};
 
     // Adjust the currently pressed control appropriately.
     updatePoint(mouseWorldPos);
@@ -230,17 +226,17 @@ void PointGizmo::updateStageExtent()
 void PointGizmo::refreshGraphics()
 {
     // Calculate where the point is on the screen.
-    SDL_FPoint screenPoint{Transforms::worldToScreen(point, 1)};
+    SDL_FPoint screenPoint{Transforms::worldToScreen(point, 1.f)};
 
     // Account for this widget's position and the image's position.
-    SDL_Rect actualSpriteImageExtent{
+    SDL_FRect actualSpriteImageExtent{
         AUI::ScalingHelpers::logicalToActual(logicalSpriteImageExtent)};
-    SDL_Point actualStageOrigin{
+    SDL_FPoint actualStageOrigin{
         AUI::ScalingHelpers::logicalToActual(logicalStageOrigin)};
-    int finalXOffset{clippedExtent.x + actualSpriteImageExtent.x
-                     + actualStageOrigin.x};
-    int finalYOffset{clippedExtent.y + actualSpriteImageExtent.y
-                     + actualStageOrigin.y};
+    float finalXOffset{clippedExtent.x + actualSpriteImageExtent.x
+                       + actualStageOrigin.x};
+    float finalYOffset{clippedExtent.y + actualSpriteImageExtent.y
+                       + actualStageOrigin.y};
 
     // Scale and round the point.
     screenPoint.x
@@ -253,11 +249,11 @@ void PointGizmo::refreshGraphics()
     screenPoint.y += finalYOffset;
 
     // Calc half the control rectangle size so we can center the control.
-    int halfRectSize{static_cast<int>(scaledRectSize / 2.f)};
+    float halfRectSize{scaledRectSize / 2.f};
 
     // Move the control to the correct position.
-    pointControlExtent.x = static_cast<int>(screenPoint.x - halfRectSize);
-    pointControlExtent.y = static_cast<int>(screenPoint.y - halfRectSize);
+    pointControlExtent.x = screenPoint.x - halfRectSize;
+    pointControlExtent.y = screenPoint.y - halfRectSize;
 }
 
 void PointGizmo::updatePoint(const Position& mouseWorldPos)

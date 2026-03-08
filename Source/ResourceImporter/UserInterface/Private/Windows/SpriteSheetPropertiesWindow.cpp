@@ -39,7 +39,7 @@ SpriteSheetPropertiesWindow::SpriteSheetPropertiesWindow(MainScreen& inScreen,
                                   {1, 1, 1, 1});
 
     auto styleLabel
-        = [&](AUI::Text& label, const std::string& text, int fontSize) {
+        = [&](AUI::Text& label, const std::string& text, float fontSize) {
         label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
         label.setColor({255, 255, 255, 255});
         label.setText(text);

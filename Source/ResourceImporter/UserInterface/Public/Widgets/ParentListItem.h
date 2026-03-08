@@ -26,19 +26,19 @@ public:
     // Base class overrides
     //-------------------------------------------------------------------------
     AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
-                                 const SDL_Point& cursorPosition) override;
+                                 const SDL_FPoint& cursorPosition) override;
 
     AUI::EventResult
         onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                           const SDL_Point& cursorPosition) override;
+                           const SDL_FPoint& cursorPosition) override;
 
-    AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
+    AUI::EventResult onMouseMove(const SDL_FPoint& cursorPosition) override;
 
     void onMouseEnter() override;
 
     void onMouseLeave() override;
 
-    void measure(const SDL_Rect& availableExtent) override;
+    void measure(const SDL_FRect& availableExtent) override;
 
     //-------------------------------------------------------------------------
     // Public child widgets

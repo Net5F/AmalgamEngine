@@ -65,7 +65,7 @@ private:
     SpriteSheetID activeSpriteSheetID;
 
     /** The maximum extent that spriteSheetImage can take up. */
-    const SDL_Rect MAX_SPRITESHEET_IMAGE_EXTENT;
+    const SDL_FRect MAX_SPRITESHEET_IMAGE_EXTENT;
 
     //-------------------------------------------------------------------------
     // Private child widgets

@@ -47,10 +47,6 @@ Application::Application()
             SDLHelpers::setWindowFullscreen(sdlWindow.get(),
                                             SDL_WINDOW_FULLSCREEN);
             break;
-        case 2:
-            SDLHelpers::setWindowFullscreen(sdlWindow.get(),
-                                            SDL_WINDOW_FULLSCREEN_DESKTOP);
-            break;
         default:
             LOG_FATAL("Invalid fullscreen value: %d", Config::FULLSCREEN_MODE);
     }

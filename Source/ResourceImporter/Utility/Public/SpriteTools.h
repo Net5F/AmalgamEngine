@@ -26,8 +26,8 @@ public:
      *       without any scaling.
      */
     static BoundingBox
-        calcSpriteStageWorldExtent(const SDL_Rect& spriteImageExtent,
-                                   const SDL_Point& stageOrigin);
+        calcSpriteStageWorldExtent(const SDL_FRect& spriteImageExtent,
+                                   const SDL_FPoint& stageOrigin);
 
     /**
      * Generates a sprite sheet texture containing all of the sheet's sprites, 
