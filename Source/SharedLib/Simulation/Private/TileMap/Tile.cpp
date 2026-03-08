@@ -24,8 +24,9 @@ void Tile::addLayer(const TileOffset& tileOffset, TileLayer::Type layerType,
         newLayer);
 }
 
-std::size_t Tile::removeLayers(const TileOffset& tileOffset, TileLayer::Type layerType,
-                       Uint16 graphicSetID, Uint8 graphicValue)
+std::size_t Tile::removeLayers(const TileOffset& tileOffset,
+                               TileLayer::Type layerType, Uint16 graphicSetID,
+                               Uint8 graphicValue)
 {
     // Erase any layers with a matching type, graphic index, and graphic set.
     std::size_t numErased{0};
@@ -196,8 +197,7 @@ const std::vector<TileLayer>& Tile::getAllLayers() const
 TileLayer* Tile::findLayer(TileLayer::Type layerType, Uint8 graphicValue)
 {
     for (TileLayer& layer : layers) {
-        if ((layer.type == layerType)
-            && (layer.graphicValue == graphicValue)) {
+        if ((layer.type == layerType) && (layer.graphicValue == graphicValue)) {
             return &layer;
         }
         else if (layer.type == (layerType + 1)) {
@@ -213,8 +213,7 @@ const TileLayer* Tile::findLayer(TileLayer::Type layerType,
                                  Uint8 graphicValue) const
 {
     for (const TileLayer& layer : layers) {
-        if ((layer.type == layerType)
-            && (layer.graphicValue == graphicValue)) {
+        if ((layer.type == layerType) && (layer.graphicValue == graphicValue)) {
             return &layer;
         }
         else if (layer.type == (layerType + 1)) {

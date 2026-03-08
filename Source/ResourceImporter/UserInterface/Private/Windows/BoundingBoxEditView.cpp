@@ -10,7 +10,7 @@ namespace AM
 namespace ResourceImporter
 {
 BoundingBoxEditView::BoundingBoxEditView(DataModel& inDataModel,
-                                           LibraryWindow& inLibraryWindow)
+                                         LibraryWindow& inLibraryWindow)
 : AUI::Window({320, 58, 1297, 1022}, "BoundingBoxEditView")
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}

@@ -64,23 +64,23 @@ public:
     //-------------------------------------------------------------------------
     // Simulation System Hooks (Hooks into engine systems)
     //-------------------------------------------------------------------------
-    // These functions allow the project to affect various World state 
+    // These functions allow the project to affect various World state
     // modifications.
 
     /**
-     * Gives the project a chance to update the type of graphic that the given 
+     * Gives the project a chance to update the type of graphic that the given
      * entity should use, based on its current sim state.
      *
-     * The project must handle graphic type updates when the entity is doing 
-     * something that the engine isn't aware of. For example, if the project 
+     * The project must handle graphic type updates when the entity is doing
+     * something that the engine isn't aware of. For example, if the project
      * implements swimming, this function should check if the entity is swimming
      * and return a Swimming graphic type if so.
-     * 
-     * If this function returns NotSet, the engine will set the entity's graphic 
+     *
+     * If this function returns NotSet, the engine will set the entity's graphic
      * type to one of the types in EngineEntityGraphicType.
      *
-     * @return The entity's new graphic type, or NotSet if no project-implemented
-     *         graphic types are appropriate.
+     * @return The entity's new graphic type, or NotSet if no
+     * project-implemented graphic types are appropriate.
      */
     virtual EntityGraphicType getUpdatedGraphicType(entt::entity entity) = 0;
 };

@@ -12,13 +12,13 @@ namespace AM
  *
  * Used in situations where both are supported (graphic sets, tiles, entities).
  */
-struct GraphicRef : public std::variant<std::reference_wrapper<const Sprite>,
-                                        std::reference_wrapper<const Animation>>
-{
+struct GraphicRef
+: public std::variant<std::reference_wrapper<const Sprite>,
+                      std::reference_wrapper<const Animation>> {
     /**
-     * Returns the graphic ID for the Sprite or Animation that this ref points 
+     * Returns the graphic ID for the Sprite or Animation that this ref points
      * to.
-     * 
+     *
      * The top bit is this graphic's type. 0 == Sprite, 1 == Animation.
      * The bottom 31 bits are the Sprite or Animation's ID.
      */
@@ -32,14 +32,14 @@ struct GraphicRef : public std::variant<std::reference_wrapper<const Sprite>,
 
     /**
      * If this ref points to a Sprite, returns it.
-     * If this ref points to an Animation, returns the first sprite in the 
+     * If this ref points to an Animation, returns the first sprite in the
      * animation.
      */
     const Sprite& getFirstSprite() const;
 
     /**
      * If this ref points to a Sprite, returns it.
-     * If this ref points to an Animation, returns the sprite that should be 
+     * If this ref points to an Animation, returns the sprite that should be
      * displayed at the given animation time.
      * @return nullptr if no sprite should be displayed.
      */

@@ -26,7 +26,7 @@ struct ItemError {
         StringIDNotFound,
         /** A string ID wasn't supplied in the request message. */
         StringIDMissing,
-        /** Init or change request failed because given string ID is already 
+        /** Init or change request failed because given string ID is already
             in use. */
         StringIDInUse,
         /** The requester lacks permissions to make the requested change. */

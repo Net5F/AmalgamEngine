@@ -28,7 +28,7 @@ struct EditorFloorGraphicSet {
         must be set. If a direction isn't provided, it should be set to
         NULL_GRAPHIC_ID. */
     std::array<GraphicID, Rotation::Direction::Count> graphicIDs{
-        /* NULL_GRAPHIC_ID */ };
+        /* NULL_GRAPHIC_ID */};
 };
 
 } // namespace ResourceImporter

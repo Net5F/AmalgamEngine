@@ -18,7 +18,7 @@ class DataModel;
 class LibraryWindow;
 
 /**
- * The properties window shown when the user loads a bounding box from the 
+ * The properties window shown when the user loads a bounding box from the
  * Library.
  * Allows the user to edit the active bounding box's properties.
  */
@@ -60,7 +60,8 @@ public:
 
 private:
     /**
-     * If the new active item is a bounding box, loads it's data into this panel.
+     * If the new active item is a bounding box, loads it's data into this
+     * panel.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
@@ -70,7 +71,7 @@ private:
     void onBoundingBoxRemoved(BoundingBoxID boundingBoxID);
 
     /**
-     * (If ID matches active bounding box) Updates this panel with the active 
+     * (If ID matches active bounding box) Updates this panel with the active
      * bounding box's new properties.
      */
     void onBoundingBoxDisplayNameChanged(BoundingBoxID boundingBoxID,

@@ -27,7 +27,7 @@ struct CombineItems {
     ItemID resultItemID{NULL_ITEM_ID};
 
     /** How large a stack of the resulting item can be.
-        This value is available in the item's definition, but we have to send 
+        This value is available in the item's definition, but we have to send
         it here because the client may not yet have the definition.
         When sent by the client, this field is ignored. */
     Uint8 resultItemMaxStackSize{1};

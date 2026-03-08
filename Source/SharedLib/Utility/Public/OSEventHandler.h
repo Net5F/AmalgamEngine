@@ -13,7 +13,7 @@ namespace AM
 class OSEventHandler
 {
 public:
-    virtual ~OSEventHandler(){};
+    virtual ~OSEventHandler() {};
 
     /**
      * Handles the given event.

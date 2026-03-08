@@ -18,8 +18,9 @@ namespace AM
 {
 namespace ResourceImporter
 {
-AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
-    DataModel& inDataModel, LibraryWindow& inLibraryWindow)
+AnimationPropertiesWindow::AnimationPropertiesWindow(
+    MainScreen& inScreen, DataModel& inDataModel,
+    LibraryWindow& inLibraryWindow)
 : AUI::Window({1617, 0, 303, 931}, "AnimationPropertiesWindow")
 , mainScreen{inScreen}
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
@@ -117,10 +118,10 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
 
     auto styleLabel
         = [&](AUI::Text& label, const std::string& text, float fontSize) {
-        label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
-        label.setColor({255, 255, 255, 255});
-        label.setText(text);
-    };
+              label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
+              label.setColor({255, 255, 255, 255});
+              label.setText(text);
+          };
     styleLabel(windowLabel, "Animation Properties", 21);
     windowLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
 
@@ -133,7 +134,7 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
         textInput.setPadding({0, 8, 0, 8});
     };
     styleTextInput(nameInput);
-    // Note: Display name is auto-generated from sprite image name and can't be 
+    // Note: Display name is auto-generated from sprite image name and can't be
     //       changed.
     nameInput.disable();
 
@@ -258,7 +259,7 @@ void AnimationPropertiesWindow::onActiveLibraryItemChanged(
 
     activeAnimationID = newActiveAnimation->numericID;
 
-    // Update all of our property fields to match the new active animation's 
+    // Update all of our property fields to match the new active animation's
     // data.
     nameInput.setText(newActiveAnimation->displayName);
     frameCountInput.setText(std::to_string(newActiveAnimation->frameCount));
@@ -309,7 +310,7 @@ void AnimationPropertiesWindow::onActiveLibraryItemChanged(
         alignYInput.enable();
         alignZInput.enable();
     }
-    else  {
+    else {
         alignXInput.disable();
         alignYInput.disable();
         alignZInput.disable();
@@ -356,7 +357,8 @@ void AnimationPropertiesWindow::onAnimationModelBoundsIDChanged(
         return;
     }
 
-    // Whether they're enabled or not, the fields should show the correct bounds.
+    // Whether they're enabled or not, the fields should show the correct
+    // bounds.
     const EditorAnimation& animation{
         dataModel.animationModel.getAnimation(animationID)};
 
@@ -459,7 +461,7 @@ void AnimationPropertiesWindow::onLibrarySelectedItemsChanged(
             != boundingBoxNameLabel.asString())) {
         boundingBoxButton.text.setText("Assign");
     }
-    // If we have a shared bounding box assigned, allow the user to switch 
+    // If we have a shared bounding box assigned, allow the user to switch
     // to a custom bounding box.
     else if (dataModel.animationModel.getAnimation(activeAnimationID)
                  .modelBoundsID
@@ -508,9 +510,9 @@ void AnimationPropertiesWindow::saveFrameCount()
 
         // Determine the lower bound.
         // Note: There must always be at least 1 frame in every animation.
-        // Note: We only let this be reduced to the position of the last filled 
-        //       frame. This is because we consider sprites to "belong" to the 
-        //       animation that they were named for. If you want to remove the 
+        // Note: We only let this be reduced to the position of the last filled
+        //       frame. This is because we consider sprites to "belong" to the
+        //       animation that they were named for. If you want to remove the
         //       sprite from the animation, you need to delete it.
         int lowerBound{1};
         const EditorAnimation& animation{
@@ -583,7 +585,7 @@ void AnimationPropertiesWindow::onBoundingBoxButtonPressed()
     const std::string buttonText{boundingBoxButton.text.asString()};
     if (buttonText == "Assign") {
         // If a bounding box is selected, assign it to the active animation.
-        // Note: This just uses the first selected graphic. Multi-select is 
+        // Note: This just uses the first selected graphic. Multi-select is
         //       ignored.
         const auto& selectedListItems{libraryWindow.getSelectedListItems()};
         bool boundingBoxIsSelected{false};
@@ -607,7 +609,7 @@ void AnimationPropertiesWindow::onBoundingBoxButtonPressed()
         }
     }
     else if (buttonText == "Save as") {
-        // If the animation is using a custom bounding box, open the "Save as" 
+        // If the animation is using a custom bounding box, open the "Save as"
         // menu.
         const EditorAnimation& animation{
             animationModel.getAnimation(activeAnimationID)};
@@ -789,7 +791,7 @@ void AnimationPropertiesWindow::saveCollisionEnabled()
     bool collisionEnabled{(collisionEnabledInput.getCurrentState()
                            == AUI::Checkbox::State::Checked)};
     dataModel.animationModel.setAnimationCollisionEnabled(activeAnimationID,
-                                                    collisionEnabled);
+                                                          collisionEnabled);
 }
 
 void AnimationPropertiesWindow::saveAlignX()

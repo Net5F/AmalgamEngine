@@ -26,7 +26,8 @@ public:
 
 private:
     /**
-     * If the new active item is a sprite sheet, loads it's data onto this stage.
+     * If the new active item is a sprite sheet, loads it's data onto this
+     * stage.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 

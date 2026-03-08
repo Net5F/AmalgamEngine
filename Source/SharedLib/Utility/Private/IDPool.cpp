@@ -11,7 +11,7 @@ IDPool::IDPool(ReservationStrategy inStrategy, std::size_t initialPoolSize)
 , nextLowestID{0}
 , IDs(initialPoolSize)
 {
-    // Make sure the initial size is > 0, otherwise our resizes will never 
+    // Make sure the initial size is > 0, otherwise our resizes will never
     // grow.
     if (initialPoolSize == 0) {
         IDs.resize(1);
@@ -62,10 +62,10 @@ void IDPool::markIDAsReserved(unsigned int ID)
         && (ID >= nextMarchID)) {
         setNextMarchID();
     }
-    // Else if we're reusing lowest and this is the lowest ID, find the next 
+    // Else if we're reusing lowest and this is the lowest ID, find the next
     // free ID.
     else if ((strategy == ReservationStrategy::ReuseLowest)
-        && (ID == nextLowestID)) {
+             && (ID == nextLowestID)) {
         setNextLowestID();
     }
 }

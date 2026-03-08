@@ -133,14 +133,15 @@ void SpriteSheetEditView::refreshSpriteSheetImage(
         SpriteTools::generateSpriteSheetTexture(dataModel, spriteSheet)};
     spriteSheetImage.setSimpleImage(spriteSheetTexture, "GenSpriteSheet");
 
-    // Calc a scaled texture extent that fits inside the max image bounds 
+    // Calc a scaled texture extent that fits inside the max image bounds
     // without changing the texture's aspect ratio.
     SDL_FRect imageExtent{MAX_SPRITESHEET_IMAGE_EXTENT.x,
-                         MAX_SPRITESHEET_IMAGE_EXTENT.y};
+                          MAX_SPRITESHEET_IMAGE_EXTENT.y};
     float widthDiff{spriteSheet.textureWidth - MAX_SPRITESHEET_IMAGE_EXTENT.w};
-    float heightDiff{spriteSheet.textureHeight - MAX_SPRITESHEET_IMAGE_EXTENT.h};
+    float heightDiff{spriteSheet.textureHeight
+                     - MAX_SPRITESHEET_IMAGE_EXTENT.h};
     if ((widthDiff > 0) || (heightDiff > 0)) {
-        // Texture is larger than max extent in at least one direction. Scale 
+        // Texture is larger than max extent in at least one direction. Scale
         // down to fit.
         float scaleToFit{};
         if (widthDiff > heightDiff) {
@@ -158,7 +159,7 @@ void SpriteSheetEditView::refreshSpriteSheetImage(
         imageExtent.h = spriteSheet.textureHeight * scaleToFit;
     }
     else {
-        // Texture is smaller than max extent in both directions. No need to 
+        // Texture is smaller than max extent in both directions. No need to
         // scale.
         imageExtent.w = static_cast<float>(spriteSheet.textureWidth);
         imageExtent.h = static_cast<float>(spriteSheet.textureHeight);

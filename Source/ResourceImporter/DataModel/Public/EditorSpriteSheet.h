@@ -16,12 +16,12 @@ namespace ResourceImporter
  */
 struct EditorSpriteSheet {
     /** This sprite sheet's unique numeric identifier.
-        Note: Sprite sheet numeric IDs aren't saved to the json or used by 
-              the engine, so we just generate new ones each time the 
+        Note: Sprite sheet numeric IDs aren't saved to the json or used by
+              the engine, so we just generate new ones each time the
               importer is ran. */
     SpriteSheetID numericID{NULL_SPRITE_SHEET_ID};
 
-    /** Unique display name. Shown in the UI, and used as the name of the 
+    /** Unique display name. Shown in the UI, and used as the name of the
         exported sprite sheet image file. */
     std::string displayName{""};
 

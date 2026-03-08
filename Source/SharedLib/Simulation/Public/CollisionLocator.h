@@ -67,7 +67,7 @@ public:
      * @param collisionVolume The entity's collision volume.
      * @param collisionLayers The layers that this entity should appear in.
      *
-     * @return true if successful, else false (collision outside of locator 
+     * @return true if successful, else false (collision outside of locator
      *         bounds).
      */
     bool updateEntity(entt::entity entity, const BoundingBox& collisionVolume,
@@ -251,7 +251,8 @@ private:
                                  const Tile& tile);
 
     template<typename RaycastStrategy>
-    void raycastInternal(RaycastStrategy& strategy, const RaycastParams& params);
+    void raycastInternal(RaycastStrategy& strategy,
+                         const RaycastParams& params);
 
     /**
      * Performs a broad phase to get all collision volumes in cells intersected

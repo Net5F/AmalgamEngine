@@ -22,7 +22,7 @@ MovementSyncSystem::MovementSyncSystem(const SimulationContext& inSimContext)
 , entitiesToSend{}
 , movementSyncObserver{}
 {
-    // Observe Input and MovementModifiers. Everything else can be handled 
+    // Observe Input and MovementModifiers. Everything else can be handled
     // client-side.
     movementSyncObserver.bind(world.registry);
     movementSyncObserver.on_update<Input>().on_update<MovementModifiers>();

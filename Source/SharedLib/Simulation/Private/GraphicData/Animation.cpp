@@ -7,11 +7,11 @@ namespace AM
 {
 
 const Sprite* Animation::getSpriteAtTime(double animationTime) const
-{ 
-    // Note: ResourceImporter should guarantee that every animation has at 
+{
+    // Note: ResourceImporter should guarantee that every animation has at
     //       least one filled frame.
 
-    // Calculate which frame should be displayed, based on the given time and 
+    // Calculate which frame should be displayed, based on the given time and
     // the animation's looping behavior.
     std::size_t desiredFrame{};
     double frameDuration{1.0 / static_cast<double>(fps)};
@@ -33,7 +33,7 @@ const Sprite* Animation::getSpriteAtTime(double animationTime) const
                 std::floor(animationTime / frameDuration));
         }
         else {
-            // We've looped. Subtract the first play and calc the loop 
+            // We've looped. Subtract the first play and calc the loop
             // remainder.
             int loopFrameCount{frameCount - loopStartFrame};
             double loopTime{loopFrameCount * frameDuration};
@@ -48,7 +48,7 @@ const Sprite* Animation::getSpriteAtTime(double animationTime) const
     // Find the sprite closest to, but not surpassing, the desired frame.
     const Sprite* sprite{&(frames[0].sprite.get())};
     for (std::size_t i{0}; i < frames.size(); ++i) {
-        // If this frame number matches, or the next frame is a higher number, 
+        // If this frame number matches, or the next frame is a higher number,
         // return this frame's sprite.
         if ((frames[i].frameNumber == desiredFrame)
             || (((i + 1) < frames.size())

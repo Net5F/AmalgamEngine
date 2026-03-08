@@ -11,9 +11,9 @@ namespace Client
 
 /**
  * Tracks whether an entity is currently casting a Castable.
- * 
- * To match the behavior of Server::CastState, this component will only be 
- * present on an entity if a cast is currently ongoing. It gets removed when 
+ *
+ * To match the behavior of Server::CastState, this component will only be
+ * present on an entity if a cast is currently ongoing. It gets removed when
  * the cast ends.
  */
 struct ClientCastState {
@@ -23,14 +23,14 @@ struct ClientCastState {
     enum class State {
         /** A cast is ongoing. */
         Casting,
-        /** The cast has successfully completed and the "cast complete" 
+        /** The cast has successfully completed and the "cast complete"
             graphic should be shown. */
         CastComplete
     };
     /** The casting state that the entity is currently in. */
     State state{};
 
-    /** The tick that the current state will finish on. If 0, this cast hasn't 
+    /** The tick that the current state will finish on. If 0, this cast hasn't
         been processed for the first time yet. */
     Uint32 endTick{0};
 };

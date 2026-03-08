@@ -11,39 +11,37 @@ namespace AM
 class Math
 {
 public:
+    /**
+     * Returns a component-wise minimum of the given vectors.
+     */
+    static Vector3 min(const Vector3& a, const Vector3& b)
+    {
+        Vector3 res;
+        res.x = std::min(a.x, b.x);
+        res.y = std::min(a.y, b.y);
+        res.z = std::min(a.z, b.z);
+        return res;
+    }
 
-/**
- * Returns a component-wise minimum of the given vectors.
- */
-static Vector3 min(const Vector3& a, const Vector3& b)
-{
-    Vector3 res;
-    res.x = std::min(a.x, b.x);
-    res.y = std::min(a.y, b.y);
-    res.z = std::min(a.z, b.z);
-    return res;
-}
+    /**
+     * Returns a component-wise maximum of the given vectors.
+     */
+    static Vector3 max(const Vector3& a, const Vector3& b)
+    {
+        Vector3 res;
+        res.x = std::max(a.x, b.x);
+        res.y = std::max(a.y, b.y);
+        res.z = std::max(a.z, b.z);
+        return res;
+    }
 
-/**
- * Returns a component-wise maximum of the given vectors.
- */
-static Vector3 max(const Vector3& a, const Vector3& b)
-{
-    Vector3 res;
-    res.x = std::max(a.x, b.x);
-    res.y = std::max(a.y, b.y);
-    res.z = std::max(a.z, b.z);
-    return res;
-}
-
-/**
- * Returns a component-wise maximum of the given vectors.
- */
-static Vector3 abs(const Vector3& vector)
-{
-    return {std::abs(vector.x), std::abs(vector.y), std::abs(vector.z)};
-}
-
+    /**
+     * Returns a component-wise maximum of the given vectors.
+     */
+    static Vector3 abs(const Vector3& vector)
+    {
+        return {std::abs(vector.x), std::abs(vector.y), std::abs(vector.z)};
+    }
 };
 
 } // namespace AM

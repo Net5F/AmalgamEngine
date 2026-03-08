@@ -42,7 +42,7 @@ void CameraSystem::moveCameras()
         // Note: The camera can always see down to Z == 0.
         camera.viewBounds.min.z = 0;
         camera.viewBounds.max.z = camera.target.z + SharedConfig::VIEW_RADIUS;
-        // Note: We purposely don't clip to the tile map's bounds, because it's 
+        // Note: We purposely don't clip to the tile map's bounds, because it's
         //       reasonable to view things outside of the map.
     }
 }

@@ -27,7 +27,8 @@ static constexpr Uint32 GRAPHIC_ID_ANIMATION_VALUE{0x80000000};
 bool isSpriteID(GraphicID graphicID);
 
 /**
- * Returns true if the given graphic ID is for an animation. Else, returns false.
+ * Returns true if the given graphic ID is for an animation. Else, returns
+ * false.
  */
 bool isAnimationID(GraphicID graphicID);
 
@@ -52,7 +53,7 @@ GraphicID toGraphicID(SpriteID spriteID);
 GraphicID toGraphicID(AnimationID animationID);
 
 /**
- * The ID of the "null graphic", or the ID used to indicate that a graphic 
+ * The ID of the "null graphic", or the ID used to indicate that a graphic
  * is not present.
  *
  * Note: Since the null ID is 0, you can do null checks like "if (graphicID)".

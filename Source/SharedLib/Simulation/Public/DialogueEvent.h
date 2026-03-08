@@ -12,22 +12,19 @@ static constexpr std::size_t MAX_DIALOGUE_LINE_TEXT_LENGTH{500};
 /**
  * Describes a piece of dialogue that was said.
  */
-struct SayEvent
-{
+struct SayEvent {
     std::string text{};
 };
 
 /**
  * Describes anything that isn't verbal: actions, settings, thoughts, feelings.
  */
-struct NarrateEvent
-{
+struct NarrateEvent {
     std::string text{};
 };
 
 /** A dialogue event. */
 using DialogueEvent = std::variant<SayEvent, NarrateEvent>;
-
 
 template<typename S>
 void serialize(S& serializer, SayEvent& sayEvent)

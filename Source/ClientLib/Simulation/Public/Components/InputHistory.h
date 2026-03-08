@@ -11,7 +11,7 @@ namespace Client
 /**
  * Stores a history of inputs that have been applied to the player entity.
  *
- * Only used for the player entity. You can use this component to distinguish 
+ * Only used for the player entity. You can use this component to distinguish
  * between player and non-player entities.
  */
 struct InputHistory {

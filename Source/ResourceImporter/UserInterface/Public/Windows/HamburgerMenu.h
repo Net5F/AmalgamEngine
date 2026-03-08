@@ -10,7 +10,7 @@ namespace ResourceImporter
 {
 
 /**
- * A menu that lets the user perform file operations, like saving the json, or 
+ * A menu that lets the user perform file operations, like saving the json, or
  * exporting sprite sheet images
  *
  * Opens when you press the hamburger button.

@@ -18,15 +18,14 @@ AISystem::AISystem(const SimulationContext& inSimContext)
 void AISystem::processAITick()
 {
     // For each AI type in the list, update all AI components of that type.
-    boost::mp11::mp_for_each<ProjectAITypes>(
-        [&](auto I) { 
-            using AIType = decltype(I);
+    boost::mp11::mp_for_each<ProjectAITypes>([&](auto I) {
+        using AIType = decltype(I);
 
-            auto view{world.registry.view<AIType>()};
-            for (auto [entity, aiLogic] : view.each()) {
-                aiLogic.tick(world, entity);
-            }
-        });
+        auto view{world.registry.view<AIType>()};
+        for (auto [entity, aiLogic] : view.each()) {
+            aiLogic.tick(world, entity);
+        }
+    });
 }
 
 } // End namespace Server

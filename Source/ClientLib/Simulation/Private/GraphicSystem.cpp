@@ -29,19 +29,19 @@ void GraphicSystem::updateAnimations()
     // Update all entity sprites to match their current rotation.
     // Note: This iterates static entities, even though most don't change state
     //       very often. If this becomes a performance issue, we can revisit.
-    auto view{world.registry.view<Rotation, GraphicState, ClientGraphicState>()};
+    auto view{
+        world.registry.view<Rotation, GraphicState, ClientGraphicState>()};
     for (auto [entity, rotation, graphicState, clientGraphicState] :
          view.each()) {
         // Give the project a chance to update the graphic type.
-        EntityGraphicType graphicType{
-            extension->getUpdatedGraphicType(entity)};
+        EntityGraphicType graphicType{extension->getUpdatedGraphicType(entity)};
         if (graphicType != EntityGraphicType::NotSet) {
             clientGraphicState.graphicType = graphicType;
             clientGraphicState.setStartTime = true;
             continue;
         }
 
-        // Determine which graphic type is desired, based on the current 
+        // Determine which graphic type is desired, based on the current
         // entity state.
         EntityGraphicType desiredGraphicType{getDesiredGraphicType(entity)};
 
@@ -61,7 +61,7 @@ void GraphicSystem::updateAnimations()
         }
         if (newGraphic.direction != clientGraphicState.graphicDirection) {
             clientGraphicState.graphicDirection = newGraphic.direction;
-            // Note: We don't reset the animation time, since we want e.g. 
+            // Note: We don't reset the animation time, since we want e.g.
             //       a run animation to play smoothly when changing direction.
         }
     }
@@ -79,7 +79,7 @@ EntityGraphicType GraphicSystem::getDesiredGraphicType(entt::entity entity)
         input && input->inputStates.any()) {
         return EntityGraphicType::Run;
     }
-    // If the entity is casting, use the appropriate graphic from the 
+    // If the entity is casting, use the appropriate graphic from the
     // Castable.
     else if (const auto* castState{
                  world.registry.try_get<ClientCastState>(entity)}) {

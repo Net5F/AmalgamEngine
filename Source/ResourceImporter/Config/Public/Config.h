@@ -35,9 +35,9 @@ public:
     static constexpr unsigned int FULLSCREEN_MODE{0};
 
     /**
-     * Sets the quality of scaling/filtering algorithm used for sprite 
+     * Sets the quality of scaling/filtering algorithm used for sprite
      * textures (i.e any textures rendered by Renderer).
-     * 
+     *
      * UI textures ignore this setting.
      */
     static constexpr SDL_ScaleMode SPRITE_SCALING_QUALITY{SDL_SCALEMODE_LINEAR};

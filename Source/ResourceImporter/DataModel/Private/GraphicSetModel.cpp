@@ -29,7 +29,7 @@ GraphicSetModel::GraphicSetModel(DataModel& inDataModel)
 , graphicSetSlotChanged{graphicSetSlotChangedSig}
 , graphicSetDisplayNameChanged{graphicSetDisplayNameChangedSig}
 {
-    // Reserve the null ID for each graphic set type (the engine provides it in 
+    // Reserve the null ID for each graphic set type (the engine provides it in
     // code, so we don't need it in the json).
     terrainIDPool.reserveID();
     floorIDPool.reserveID();
@@ -93,7 +93,7 @@ bool GraphicSetModel::addTerrain()
     int nameCount{0};
     std::string displayName{"NewTerrain"};
     while (!graphicSetNameIsUnique<EditorTerrainGraphicSet>(numericID,
-                                                                displayName)) {
+                                                            displayName)) {
         displayName = "NewTerrain" + std::to_string(nameCount);
         nameCount++;
     }
@@ -101,8 +101,8 @@ bool GraphicSetModel::addTerrain()
     // Add the new, empty graphic set to the map.
     std::array<GraphicID, Terrain::Height::Count> graphicIDs{
         /* NULL_GRAPHIC_ID */};
-    terrainMap.emplace(numericID, EditorTerrainGraphicSet{
-                                            numericID, displayName, graphicIDs});
+    terrainMap.emplace(
+        numericID, EditorTerrainGraphicSet{numericID, displayName, graphicIDs});
 
     // Signal the new graphic set to the UI.
     EditorTerrainGraphicSet& graphicSet{terrainMap[numericID]};
@@ -121,8 +121,8 @@ bool GraphicSetModel::addFloor()
     // Generate a unique name.
     int nameCount{0};
     std::string displayName{"NewFloor"};
-    while (
-        !graphicSetNameIsUnique<EditorFloorGraphicSet>(numericID, displayName)) {
+    while (!graphicSetNameIsUnique<EditorFloorGraphicSet>(numericID,
+                                                          displayName)) {
         displayName = "NewFloor" + std::to_string(nameCount);
         nameCount++;
     }
@@ -158,8 +158,7 @@ bool GraphicSetModel::addWall()
     }
 
     // Add the new, empty graphic set to the map.
-    std::array<GraphicID, Wall::Type::Count> graphicIDs{
-        /* NULL_GRAPHIC_ID */};
+    std::array<GraphicID, Wall::Type::Count> graphicIDs{/* NULL_GRAPHIC_ID */};
     wallMap.emplace(numericID,
                     EditorWallGraphicSet{numericID, displayName, graphicIDs});
 
@@ -181,8 +180,8 @@ bool GraphicSetModel::addObject()
     // Generate a unique name.
     int nameCount{0};
     std::string displayName{"NewObject"};
-    while (
-        !graphicSetNameIsUnique<EditorObjectGraphicSet>(numericID, displayName)) {
+    while (!graphicSetNameIsUnique<EditorObjectGraphicSet>(numericID,
+                                                           displayName)) {
         displayName = "NewObject" + std::to_string(nameCount);
         nameCount++;
     }
@@ -190,8 +189,8 @@ bool GraphicSetModel::addObject()
     // Add the new, empty graphic set to the map.
     std::array<GraphicID, Rotation::Direction::Count> graphicIDs{
         /* NULL_GRAPHIC_ID */};
-    objectMap.emplace(numericID,
-                      EditorObjectGraphicSet{numericID, displayName, graphicIDs});
+    objectMap.emplace(
+        numericID, EditorObjectGraphicSet{numericID, displayName, graphicIDs});
 
     // Signal the new graphic set to the UI.
     EditorObjectGraphicSet& graphicSet{objectMap[numericID]};
@@ -286,7 +285,8 @@ const EditorTerrainGraphicSet&
     return terrainIt->second;
 }
 
-const EditorFloorGraphicSet& GraphicSetModel::getFloor(FloorGraphicSetID floorID)
+const EditorFloorGraphicSet&
+    GraphicSetModel::getFloor(FloorGraphicSetID floorID)
 {
     auto floorIt{floorMap.find(floorID)};
     if (floorIt == floorMap.end()) {
@@ -317,9 +317,9 @@ const EditorObjectGraphicSet&
     return objectIt->second;
 }
 
-void GraphicSetModel::setGraphicSetDisplayName(GraphicSet::Type type,
-                                             Uint16 graphicSetID,
-                                             const std::string& newDisplayName)
+void GraphicSetModel::setGraphicSetDisplayName(
+    GraphicSet::Type type, Uint16 graphicSetID,
+    const std::string& newDisplayName)
 {
     switch (type) {
         case GraphicSet::Type::Terrain: {
@@ -329,17 +329,17 @@ void GraphicSetModel::setGraphicSetDisplayName(GraphicSet::Type type,
         }
         case GraphicSet::Type::Floor: {
             setGraphicSetDisplayName<EditorFloorGraphicSet>(type, graphicSetID,
-                                                          newDisplayName);
+                                                            newDisplayName);
             break;
         }
         case GraphicSet::Type::Wall: {
             setGraphicSetDisplayName<EditorWallGraphicSet>(type, graphicSetID,
-                                                         newDisplayName);
+                                                           newDisplayName);
             break;
         }
         case GraphicSet::Type::Object: {
             setGraphicSetDisplayName<EditorObjectGraphicSet>(type, graphicSetID,
-                                                           newDisplayName);
+                                                             newDisplayName);
             break;
         }
         default: {
@@ -349,8 +349,9 @@ void GraphicSetModel::setGraphicSetDisplayName(GraphicSet::Type type,
     }
 }
 
-void GraphicSetModel::setGraphicSetSlot(GraphicSet::Type type, Uint16 graphicSetID,
-                                      std::size_t index, GraphicID newGraphicID)
+void GraphicSetModel::setGraphicSetSlot(GraphicSet::Type type,
+                                        Uint16 graphicSetID, std::size_t index,
+                                        GraphicID newGraphicID)
 {
     switch (type) {
         case GraphicSet::Type::Terrain: {
@@ -360,17 +361,17 @@ void GraphicSetModel::setGraphicSetSlot(GraphicSet::Type type, Uint16 graphicSet
         }
         case GraphicSet::Type::Floor: {
             setGraphicSetSlot<EditorFloorGraphicSet>(type, graphicSetID, index,
-                                                   newGraphicID);
+                                                     newGraphicID);
             break;
         }
         case GraphicSet::Type::Wall: {
             setGraphicSetSlot<EditorWallGraphicSet>(type, graphicSetID, index,
-                                                  newGraphicID);
+                                                    newGraphicID);
             break;
         }
         case GraphicSet::Type::Object: {
             setGraphicSetSlot<EditorObjectGraphicSet>(type, graphicSetID, index,
-                                                    newGraphicID);
+                                                      newGraphicID);
             break;
         }
         default: {
@@ -396,9 +397,9 @@ void GraphicSetModel::removeGraphicIDFromSets(GraphicID graphicID)
 {
     // Given one of the graphic set maps, this will replace all instances of
     // graphicID with NULL_GRAPHIC_ID and emit a graphicSetGraphicIDChanged.
-    auto replaceIDInSets = [this]<typename T>(std::map<Uint16, T>& graphicSetMap,
-                                              GraphicSet::Type type,
-                                              GraphicID graphicID) {
+    auto replaceIDInSets = [this]<typename T>(
+                               std::map<Uint16, T>& graphicSetMap,
+                               GraphicSet::Type type, GraphicID graphicID) {
         // For each graphic set in the map.
         for (auto& pair : graphicSetMap) {
             T& graphicSet{pair.second};
@@ -433,15 +434,16 @@ bool GraphicSetModel::parseTerrainGraphicSet(
 {
     TerrainGraphicSetID numericID{
         static_cast<TerrainGraphicSetID>(terrainIDPool.reserveID())};
-    std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
+    std::string displayName{
+        graphicSetJson.at("displayName").get<std::string>()};
 
     // Add the graphic set's graphics.
     const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
     std::array<GraphicID, Terrain::Height::Count> graphicIDs{};
     for (std::size_t i = 0; i < graphicIDs.size(); ++i) {
         graphicIDs[i] = graphicIDJson[i].get<GraphicID>();
-        if (!graphicSetNameIsUnique<EditorTerrainGraphicSet>(
-                numericID, displayName)) {
+        if (!graphicSetNameIsUnique<EditorTerrainGraphicSet>(numericID,
+                                                             displayName)) {
             errorString = "Terrain display name isn't unique: ";
             errorString += displayName.c_str();
             return false;
@@ -463,7 +465,8 @@ bool GraphicSetModel::parseFloorGraphicSet(const nlohmann::json& graphicSetJson)
 {
     FloorGraphicSetID numericID{
         static_cast<FloorGraphicSetID>(floorIDPool.reserveID())};
-    std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
+    std::string displayName{
+        graphicSetJson.at("displayName").get<std::string>()};
 
     // Add the graphic set's graphics.
     const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
@@ -493,7 +496,8 @@ bool GraphicSetModel::parseWallGraphicSet(const nlohmann::json& graphicSetJson)
 {
     WallGraphicSetID numericID{
         static_cast<WallGraphicSetID>(wallIDPool.reserveID())};
-    std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
+    std::string displayName{
+        graphicSetJson.at("displayName").get<std::string>()};
 
     // Add the graphic set's graphics.
     const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
@@ -519,11 +523,13 @@ bool GraphicSetModel::parseWallGraphicSet(const nlohmann::json& graphicSetJson)
     return true;
 }
 
-bool GraphicSetModel::parseObjectGraphicSet(const nlohmann::json& graphicSetJson)
+bool GraphicSetModel::parseObjectGraphicSet(
+    const nlohmann::json& graphicSetJson)
 {
     ObjectGraphicSetID numericID{
         static_cast<ObjectGraphicSetID>(objectIDPool.reserveID())};
-    std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
+    std::string displayName{
+        graphicSetJson.at("displayName").get<std::string>()};
 
     // Add the graphic set's graphics.
     const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
@@ -539,8 +545,8 @@ bool GraphicSetModel::parseObjectGraphicSet(const nlohmann::json& graphicSetJson
     }
 
     // Save the graphic set in the appropriate map.
-    objectMap.emplace(numericID,
-                      EditorObjectGraphicSet{numericID, displayName, graphicIDs});
+    objectMap.emplace(
+        numericID, EditorObjectGraphicSet{numericID, displayName, graphicIDs});
 
     // Signal the new graphic set to the UI.
     EditorObjectGraphicSet& graphicSet{objectMap[numericID]};
@@ -573,7 +579,7 @@ std::map<Uint16, T>& GraphicSetModel::getMapForGraphicSetType()
 
 template<typename T>
 bool GraphicSetModel::graphicSetNameIsUnique(Uint16 graphicSetID,
-                                           const std::string& displayName)
+                                             const std::string& displayName)
 {
     auto& graphicSetMap{getMapForGraphicSetType<T>()};
 
@@ -594,9 +600,9 @@ bool GraphicSetModel::graphicSetNameIsUnique(Uint16 graphicSetID,
 }
 
 template<typename T>
-void GraphicSetModel::setGraphicSetDisplayName(GraphicSet::Type type,
-                                             Uint16 graphicSetID,
-                                             const std::string& newDisplayName)
+void GraphicSetModel::setGraphicSetDisplayName(
+    GraphicSet::Type type, Uint16 graphicSetID,
+    const std::string& newDisplayName)
 {
     auto& graphicSetMap{getMapForGraphicSetType<T>()};
 
@@ -620,12 +626,13 @@ void GraphicSetModel::setGraphicSetDisplayName(GraphicSet::Type type,
 
     // Signal the change.
     graphicSetDisplayNameChangedSig.publish(type, graphicSetID,
-                                           graphicSet.displayName);
+                                            graphicSet.displayName);
 }
 
 template<typename T>
-void GraphicSetModel::setGraphicSetSlot(GraphicSet::Type type, Uint16 graphicSetID,
-                                      std::size_t index, GraphicID newGraphicID)
+void GraphicSetModel::setGraphicSetSlot(GraphicSet::Type type,
+                                        Uint16 graphicSetID, std::size_t index,
+                                        GraphicID newGraphicID)
 {
     auto& graphicSetMap{getMapForGraphicSetType<T>()};
 

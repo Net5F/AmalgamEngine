@@ -26,7 +26,7 @@ public:
     virtual ~AddSpriteDialog() = default;
 
     /**
-     * Sets the sprite image paths to add to the active sprite sheet the next 
+     * Sets the sprite image paths to add to the active sprite sheet the next
      * time the "Add" button is pressed.
      */
     void setSpriteImageRelPaths(
@@ -82,7 +82,7 @@ private:
     /** The active sprite sheet's ID. */
     SpriteSheetID activeSpriteSheetID;
 
-    /** The sprite images to add to the active sprite sheet the next time the 
+    /** The sprite images to add to the active sprite sheet the next time the
         Add button is pressed. */
     std::vector<std::string> spriteImageRelPaths;
 

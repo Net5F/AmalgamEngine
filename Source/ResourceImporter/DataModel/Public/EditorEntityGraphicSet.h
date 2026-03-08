@@ -26,10 +26,10 @@ struct EditorEntityGraphicSet {
     std::string displayName{""};
 
     /** The entity graphic types that this set contains.
-        Each graphic type is associated with an array of up to 8 graphics, one 
+        Each graphic type is associated with an array of up to 8 graphics, one
         for each possible rotation of the entity.
         The Idle graphic type will always be present. All others are optional.
-        If any slots weren't assigned a graphic, they will be set to 
+        If any slots weren't assigned a graphic, they will be set to
         NULL_GRAPHIC_ID in the array. */
     std::unordered_map<EntityGraphicType,
                        std::array<GraphicID, Rotation::Direction::Count>>

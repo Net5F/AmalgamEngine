@@ -15,16 +15,16 @@ namespace AM
 namespace Server
 {
 /**
- * A helper class for establishing and working with the entt groups that the  
+ * A helper class for establishing and working with the entt groups that the
  * server uses.
- * 
+ *
  * Groups can be finicky to work with. If you establish a group <Foo, Bar, Baz>
- * and later try to get group <Foo, Baz>, it'll result in a compiler error. 
- * To make them easier to work with, we provide these functions that return the 
+ * and later try to get group <Foo, Baz>, it'll result in a compiler error.
+ * To make them easier to work with, we provide these functions that return the
  * most-restrictive versions of each group.
  *
- * Other less-restrictive groups may be made by hand (e.g. <Foo, Bar> in the 
- * above example), as long as they're compatible with the constraints imposed 
+ * Other less-restrictive groups may be made by hand (e.g. <Foo, Bar> in the
+ * above example), as long as they're compatible with the constraints imposed
  * by these groups.
  */
 class EnttGroups
@@ -43,10 +43,7 @@ public:
     /**
      * Initializes all of the entt groups that the client uses.
      */
-    static void init(entt::registry& registry)
-    {
-        getMovementGroup(registry);
-    }
+    static void init(entt::registry& registry) { getMovementGroup(registry); }
 };
 
 } // End namespace Server

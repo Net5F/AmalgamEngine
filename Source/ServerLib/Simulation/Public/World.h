@@ -67,7 +67,7 @@ public:
         their position. */
     EntityLocator entityLocator;
 
-    /** Spatial partitioning grid for efficiently locating entities and tile 
+    /** Spatial partitioning grid for efficiently locating entities and tile
         layers by their collision volumes. */
     CollisionLocator collisionLocator;
 
@@ -78,7 +78,7 @@ public:
     EntityStoredValueIDMap entityStoredValueIDMap;
 
     /** Global key-value store.
-        Note: Stored values are often cast to different types, but their 
+        Note: Stored values are often cast to different types, but their
               underlying type is always Uint32. */
     GlobalStoredValueMap globalStoredValueMap;
 
@@ -94,7 +94,7 @@ public:
 
     /** Maps network IDs to entity IDs.
         Used for interfacing with the Network.
-        Note: To go the other way (entt::entity -> NetworkID), use 
+        Note: To go the other way (entt::entity -> NetworkID), use
               ClientSimData. */
     std::unordered_map<NetworkID, entt::entity> netIDMap;
 
@@ -102,7 +102,7 @@ public:
     // Helper Functions
     //-------------------------------------------------------------------------
     /**
-     * Returns the entity associated with the given network ID, or entt::null 
+     * Returns the entity associated with the given network ID, or entt::null
      * if the client doesn't exist.
      *
      * Use this instead of directly using netIDMap.
@@ -113,7 +113,7 @@ public:
 
     /**
      * Teleports the given entity to the given position.
-     * @return true if successful, else false. If false, the entity will 
+     * @return true if successful, else false. If false, the entity will
      *         remain at its original position.
      */
     bool teleportEntity(entt::entity entity, const Vector3& newPosition);
@@ -122,7 +122,7 @@ public:
      * Creates an entity with the given position.
      *
      * @param entityHint (Optional) The entityID to use, if it's available.
-     * @return The new entity's ID, or entt::null if a failure occurred 
+     * @return The new entity's ID, or entt::null if a failure occurred
      *         (position outside of tile map bounds).
      */
     entt::entity createEntity(const Position& position,
@@ -166,10 +166,10 @@ public:
 
     /**
      * Returns the numeric ID for the given entity stored value string ID.
-     * If stringID is not present in the map, adds it and generates the next 
+     * If stringID is not present in the map, adds it and generates the next
      * numeric ID.
-     * 
-     * @return If a flag with the given ID doesn't exist and the map is full, 
+     *
+     * @return If a flag with the given ID doesn't exist and the map is full,
      *         returns null. Otherwise, returns the numeric ID.
      */
     EntityStoredValueID getEntityStoredValueID(std::string_view stringID);
@@ -179,7 +179,7 @@ public:
      *
      * If newValue == 0 (the default value), the value will be deleted.
      *
-     * Note: Stored values are often cast to different types, but their 
+     * Note: Stored values are often cast to different types, but their
      *       underlying type is always Uint32.
      *
      * @param stringID The string ID of the value to add or overwrite.
@@ -190,11 +190,11 @@ public:
     /**
      * Gets a stored value.
      *
-     * Note: Stored values are often cast to different types, but their 
+     * Note: Stored values are often cast to different types, but their
      *       underlying type is always Uint32.
-     * 
+     *
      * @param stringID The string ID of the value to get.
-     * @return The requested value. If not found, returns 0 (the default value 
+     * @return The requested value. If not found, returns 0 (the default value
      *         that the value would have if it existed).
      */
     Uint32 getStoredValue(std::string_view stringID);
@@ -224,9 +224,9 @@ private:
     /**
      * Initializes any components that have lazy-updated timers.
      *
-     * Note: We update them on load instead of on save, because we don't want 
+     * Note: We update them on load instead of on save, because we don't want
      *       to add time to the save operation.
-     * Note: If the project ever needs to do this same sort of thing, we can 
+     * Note: If the project ever needs to do this same sort of thing, we can
      *       either add a signal or an extension function.
      */
     void initTimerComponents(entt::entity entity);
@@ -253,8 +253,8 @@ private:
     /** Used to run item init scripts. */
     ItemInitLua& itemInitLua;
 
-    /** Tracks the next numeric entity stored value ID to use (typically 1 greater 
-        than the highest ID in entityStoredValueIDMap). */
+    /** Tracks the next numeric entity stored value ID to use (typically 1
+       greater than the highest ID in entityStoredValueIDMap). */
     Uint32 nextStoredValueID;
 
     /** A scratch buffer used while processing string IDs. */

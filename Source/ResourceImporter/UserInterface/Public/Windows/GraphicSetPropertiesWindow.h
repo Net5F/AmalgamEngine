@@ -17,8 +17,8 @@ namespace ResourceImporter
 class DataModel;
 
 /**
- * The properties window shown when the user loads a Floor, Floor Covering, Wall, 
- * or Object graphic set from the Library. Entity graphic sets use 
+ * The properties window shown when the user loads a Floor, Floor Covering,
+ * Wall, or Object graphic set from the Library. Entity graphic sets use
  * EntityGraphicPropertiesWindow.
  *
  * Allows the user to edit the active graphic set's properties.
@@ -42,7 +42,8 @@ public:
 
 private:
     /**
-     * If the new active item is a graphic set, loads it's data into this window.
+     * If the new active item is a graphic set, loads it's data into this
+     * window.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
@@ -55,18 +56,19 @@ private:
      * (If type/ID matches active set) Updates this panel with the active
      * graphic set's new properties.
      */
-    void onGraphicSetDisplayNameChanged(GraphicSet::Type type, Uint16 graphicSetID,
-                                       const std::string& newDisplayName);
+    void onGraphicSetDisplayNameChanged(GraphicSet::Type type,
+                                        Uint16 graphicSetID,
+                                        const std::string& newDisplayName);
 
     /**
      * Loads the given graphic set's data into this panel.
      */
     template<typename T>
     void loadActiveGraphicSet(GraphicSet::Type graphicSetType,
-                             const T& newActiveGraphicSet);
+                              const T& newActiveGraphicSet);
 
     /**
-     * Sets the modelBounds of each sprite in this set to 
+     * Sets the modelBounds of each sprite in this set to
      * DEFAULT_FLOOR_SPRITE_BOUNDS.
      * Only used when a Floor graphic set is loaded.
      */

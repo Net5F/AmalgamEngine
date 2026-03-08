@@ -224,7 +224,7 @@ void Simulation::initializeSystems()
     avSystem = std::make_unique<AVSystem>(simContext);
     cameraSystem = std::make_unique<CameraSystem>(simContext);
 
-    // If the project extension is already set, re-set it to handle that 
+    // If the project extension is already set, re-set it to handle that
     // initialization.
     if (extension) {
         setExtension(extension);

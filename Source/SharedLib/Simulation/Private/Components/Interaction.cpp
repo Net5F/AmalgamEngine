@@ -9,8 +9,7 @@ namespace AM
 
 bool Interaction::add(EntityInteractionType newInteraction)
 {
-    if (supportedInteractions.size()
-        == SharedConfig::MAX_ENTITY_INTERACTIONS) {
+    if (supportedInteractions.size() == SharedConfig::MAX_ENTITY_INTERACTIONS) {
         // The interaction limit has been reached.
         return false;
     }

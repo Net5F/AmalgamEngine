@@ -17,7 +17,7 @@ try {
     app.start();
 
     return 0;
-}  catch (std::exception& e) {
+} catch (std::exception& e) {
     LOG_INFO("%s", e.what());
     return 1;
 }

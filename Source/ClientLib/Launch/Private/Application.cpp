@@ -16,10 +16,8 @@ namespace Client
 Application::Application()
 : sdl{SDL_INIT_VIDEO}
 , userConfigInitializer{}
-, sdlWindow{Config::WINDOW_TITLE,
-            UserConfig::get().getWindowSize().w,
-            UserConfig::get().getWindowSize().h,
-            0}
+, sdlWindow{Config::WINDOW_TITLE, UserConfig::get().getWindowSize().w,
+            UserConfig::get().getWindowSize().h, 0}
 , sdlRenderer{sdlWindow.get(), nullptr}
 , simEventDispatcher{}
 , uiEventDispatcher{}
@@ -80,10 +78,11 @@ Application::Application()
         case 0: {
             SDLHelpers::setWindowFullscreen(sdlWindow.get(), 0);
             break;
-        case 1:
-            SDLHelpers::setWindowFullscreen(sdlWindow.get(),
-                                            SDL_WINDOW_FULLSCREEN);
-            break;
+        }
+        case 1: {
+			SDLHelpers::setWindowFullscreen(sdlWindow.get(),
+											SDL_WINDOW_FULLSCREEN);
+			break;
         }
         // Note: We removed real fullscreen because it was behaving weirdly and
         //       causing network timeouts, and having just windowed and

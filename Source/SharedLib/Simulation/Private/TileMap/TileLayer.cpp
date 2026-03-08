@@ -13,7 +13,7 @@ GraphicRef TileLayer::getGraphic() const
 GraphicRef TileLayer::getGraphic(Type type, const GraphicSet& graphicSet,
                                  Uint8 graphicValue)
 {
-    // Note: We don't need to check if the slots refer to a non-null 
+    // Note: We don't need to check if the slots refer to a non-null
     //       graphic, because the null graphic is fine to return.
     if (type == Type::Terrain) {
         Terrain::Height height{Terrain::getHeight(graphicValue)};

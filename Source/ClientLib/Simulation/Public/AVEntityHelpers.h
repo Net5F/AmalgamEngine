@@ -24,7 +24,7 @@ public:
                           const entt::registry& registry);
 
     /**
-     * Returns the appropriate target position for the given behavior, either 
+     * Returns the appropriate target position for the given behavior, either
      * targetEntity's position or targetPosition.
      */
     static std::optional<Position> getTargetPosition(
@@ -38,7 +38,7 @@ public:
         Rotation::Direction graphicDirection{};
     };
     /**
-     * Returns the appropriate starting position and graphic state for the 
+     * Returns the appropriate starting position and graphic state for the
      * given behavior.
      */
     static std::optional<StartStateReturn>
@@ -53,7 +53,7 @@ public:
     /**
      * Returns the appropriate graphic state for the given behavior.
      *
-     * If behavior is one of the types that points towards targetPosition, and 
+     * If behavior is one of the types that points towards targetPosition, and
      * casterPosition == targetPosition, returns Rotation::Direction::None.
      * This lets the caller know to use the previous direction.
      */
@@ -63,7 +63,7 @@ public:
                         const Position& targetPosition);
 
     /**
-     * If the given behavior is time-based and its time has elapsed, returns 
+     * If the given behavior is time-based and its time has elapsed, returns
      * true.
      */
     static bool timeElapsed(AVEntity::Behavior behavior, double startTime,
@@ -71,7 +71,7 @@ public:
                             GraphicRef currentGraphic);
 
     /**
-     * If the given behavior is position-based and entityPos == targetPos, 
+     * If the given behavior is position-based and entityPos == targetPos,
      * returns true.
      */
     static bool positionReached(AVEntity::Behavior behavior,
@@ -79,7 +79,7 @@ public:
                                 const Position& targetPos);
 
     /**
-     * Converts the given direction vector to the closest X/Y direction 
+     * Converts the given direction vector to the closest X/Y direction
      * value. Ignores the Z axis.
      */
     static Rotation::Direction
@@ -88,4 +88,3 @@ public:
 
 } // End namespace Client
 } // End namespace AM
-

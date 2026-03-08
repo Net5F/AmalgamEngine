@@ -14,7 +14,7 @@ class World;
 class AILogic
 {
 public:
-    // Note: We pass world and entity as parameters so that we don't have to 
+    // Note: We pass world and entity as parameters so that we don't have to
     //       deal with a World& member during serialization.
     /**
      * Processes one iteration of AI logic.

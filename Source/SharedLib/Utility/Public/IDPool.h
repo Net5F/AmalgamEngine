@@ -24,11 +24,11 @@ class IDPool
 public:
     /** The strategy to use when reserving IDs. */
     enum class ReservationStrategy {
-         /** Marches forward, e.g. if 0-10 were reserved and freed, 11 will 
-             still be the next reserved ID. After we reserve the last ID, we 
-             wrap back around. This aims to remove situations where an ID was 
-             reserved, freed, and re-reserved while old data exists in the 
-             system. */
+        /** Marches forward, e.g. if 0-10 were reserved and freed, 11 will
+            still be the next reserved ID. After we reserve the last ID, we
+            wrap back around. This aims to remove situations where an ID was
+            reserved, freed, and re-reserved while old data exists in the
+            system. */
         MarchForward,
         ReuseLowest
     };
@@ -68,20 +68,20 @@ public:
     void freeAllIDs();
 
 private:
-    // Note: It'd be more ideal if we didn't allocate for new IDs until the ID 
+    // Note: It'd be more ideal if we didn't allocate for new IDs until the ID
     //       was actually needed. Our logic seems simpler if we do this "pre-
     //       find the next ID" approach, though.
     /**
-     * Starting at nextMarchID, finds the next free ID, wrapping and searching 
+     * Starting at nextMarchID, finds the next free ID, wrapping and searching
      * if necessary.
-     * @post nextMarchID is set to the next free ID to use. If no IDs are 
+     * @post nextMarchID is set to the next free ID to use. If no IDs are
      *       available, the IDs vector will be resized to allocate more.
      */
     void setNextMarchID();
 
     /**
      * Starting at nextLowestID, searches for the next free ID.
-     * @post nextLowestID is set to the next free ID to use. If no IDs are 
+     * @post nextLowestID is set to the next free ID to use. If no IDs are
      *       available, the IDs vector will be resized to allocate more.
      */
     void setNextLowestID();

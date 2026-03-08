@@ -149,7 +149,7 @@ void Simulation::tick()
     // Process inventory updates.
     inventorySystem.processInventoryUpdates();
 
-    // Process Talk interactions and dialogue choice requests, updating sim 
+    // Process Talk interactions and dialogue choice requests, updating sim
     // state and sending responses as necessary.
     dialogueSystem.processDialogueInteractions();
 

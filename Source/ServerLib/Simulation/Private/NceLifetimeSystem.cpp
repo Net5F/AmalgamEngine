@@ -62,19 +62,20 @@ void NceLifetimeSystem::handleInitRequest(
         return;
     }
 
-    // If the message contains a valid entity ID, re-initialize the given entity.
+    // If the message contains a valid entity ID, re-initialize the given
+    // entity.
     if (world.registry.valid(entityInitRequest.entity)) {
-        // If the requested entity is a client entity, do nothing (we don't 
+        // If the requested entity is a client entity, do nothing (we don't
         // allow clients to re-init client entities).
         if (world.registry.all_of<IsClientEntity>(entityInitRequest.entity)) {
             return;
         }
 
         // Destroy the entity.
-        // Note: This will cause it to be removed from the entity locator, 
+        // Note: This will cause it to be removed from the entity locator,
         //       triggering ClientAOISystem to tell peers to delete it.
-        //       Then, when we re-init it, ClientAOISystem will send them 
-        //       the new data. This ensures that we don't leave any old 
+        //       Then, when we re-init it, ClientAOISystem will send them
+        //       the new data. This ensures that we don't leave any old
         //       components.
         world.registry.destroy(entityInitRequest.entity);
 
@@ -127,7 +128,7 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
 
     // Add the rest of its components.
     world.registry.emplace<Name>(newEntity, entityInitRequest.name);
-    // Note: This new Rotation value will be sync'd properly, since 
+    // Note: This new Rotation value will be sync'd properly, since
     //       ClientAOISystem hasn't ran yet.
     world.registry.get<Rotation>(newEntity) = entityInitRequest.rotation;
 

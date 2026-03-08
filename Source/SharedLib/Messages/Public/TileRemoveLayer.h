@@ -26,9 +26,9 @@ public:
     /** The position of the tile to update. */
     TilePosition tilePosition{};
 
-    /** If type == Floor or Object, this is how far the layer is offset from 
+    /** If type == Floor or Object, this is how far the layer is offset from
         tilePosition.
-        Note: Terrain and Walls don't use this. Terrain is always aligned to 
+        Note: Terrain and Walls don't use this. Terrain is always aligned to
               the tile, and Walls always match the Terrain height. */
     TileOffset tileOffset{};
 
@@ -41,9 +41,9 @@ public:
     Uint16 graphicSetID{0};
 
     /** The layer's graphic value.
-        For all types except Terrain, this is simply an index into 
+        For all types except Terrain, this is simply an index into
         graphicSet.graphics. For Terrain, this is a bit-packed value.
-        For Terrain, cast this to Terrain::Value. For Walls, cast this to 
+        For Terrain, cast this to Terrain::Value. For Walls, cast this to
         Wall::Type. For Floors and Objects, cast this to Rotation::Direction. */
     Uint8 graphicValue{0};
 

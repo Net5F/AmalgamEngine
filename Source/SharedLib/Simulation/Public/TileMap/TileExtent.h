@@ -34,7 +34,7 @@ struct TileExtent : public DiscreteExtent<DiscreteImpl::TileTag> {
     /**
      * Constructs the smallest tile extent that contains the given bounding box.
      *
-     * If the box is exactly on the edge of a tile, that tile will not be 
+     * If the box is exactly on the edge of a tile, that tile will not be
      * included in this extent.
      */
     explicit TileExtent(const BoundingBox& boundingBox);

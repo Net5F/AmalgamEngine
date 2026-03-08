@@ -15,7 +15,7 @@ bool Cylinder::intersects(const Position& position) const
         return false;
     }
 
-    // The point intersects along the Z axis. The rest of the test now 
+    // The point intersects along the Z axis. The rest of the test now
     // reduces to a 2D circle/rectangle intersection.
 
     // Calc the X/Y components of the distance from our center to the point.

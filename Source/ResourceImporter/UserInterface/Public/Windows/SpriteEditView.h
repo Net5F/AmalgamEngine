@@ -33,7 +33,7 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * If the changed sprite is currently active, updates this stage to reflect 
+     * If the changed sprite is currently active, updates this stage to reflect
      * the new data.
      */
     void onSpriteModelBoundsIDChanged(SpriteID spriteID,

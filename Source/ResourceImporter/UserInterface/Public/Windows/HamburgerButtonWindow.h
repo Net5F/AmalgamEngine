@@ -11,10 +11,10 @@ namespace ResourceImporter
 class MainScreen;
 
 /**
- * Holds the "hamburger menu" button at the top of the screen, next to the 
+ * Holds the "hamburger menu" button at the top of the screen, next to the
  * properties window.
  *
- * Facilitates file operations like saving the json, or exporting sprite 
+ * Facilitates file operations like saving the json, or exporting sprite
  * sheet images.
  */
 class HamburgerButtonWindow : public AUI::Window

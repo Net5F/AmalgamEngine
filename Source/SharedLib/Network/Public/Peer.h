@@ -86,7 +86,8 @@ public:
      *
      * @param buffer The buffer to fill with data, if any was received.
      * @param numBytes The number of bytes to receive.
-     * @return The number of received bytes, or -1 if this peer was disconnected.
+     * @return The number of received bytes, or -1 if this peer was
+     * disconnected.
      */
     int receiveBytes(Uint8* buffer, std::size_t numBytes);
 
@@ -96,7 +97,8 @@ public:
      *
      * @param buffer  The buffer to fill with data, if any was received.
      * @param numBytes  The number of bytes to receive.
-     * @return The number of received bytes, or -1 if this peer was disconnected.
+     * @return The number of received bytes, or -1 if this peer was
+     * disconnected.
      */
     int receiveBytesWait(Uint8* buffer, std::size_t numBytes);
 

@@ -19,8 +19,8 @@ GraphicSetPropertiesWindow::GraphicSetPropertiesWindow(DataModel& inDataModel)
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
 , setDefaultGraphicBoundsButton{{24, 134, 255, 34},
-                               "Set Default Graphic Bounds",
-                               "SetDefaultGraphicBoundsButton"}
+                                "Set Default Graphic Bounds",
+                                "SetDefaultGraphicBoundsButton"}
 , dataModel{inDataModel}
 , activeGraphicSetType{GraphicSet::Type::None}
 , activeGraphicSetID{SDL_MAX_UINT16}
@@ -57,13 +57,15 @@ GraphicSetPropertiesWindow::GraphicSetPropertiesWindow(DataModel& inDataModel)
     nameInput.setOnTextCommitted([this]() { saveName(); });
 
     /* Bounds setting. */
-    setDefaultGraphicBoundsButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 16);
+    setDefaultGraphicBoundsButton.text.setFont(
+        (Paths::FONT_DIR + "B612-Regular.ttf"), 16);
     setDefaultGraphicBoundsButton.setOnPressed(
         [&]() { onSetDefaultGraphicBoundsButtonPressed(); });
 
     // When the active graphic set is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
-        .connect<&GraphicSetPropertiesWindow::onActiveLibraryItemChanged>(*this);
+        .connect<&GraphicSetPropertiesWindow::onActiveLibraryItemChanged>(
+            *this);
     dataModel.graphicSetModel.graphicSetRemoved
         .connect<&GraphicSetPropertiesWindow::onGraphicSetRemoved>(*this);
     dataModel.graphicSetModel.graphicSetDisplayNameChanged
@@ -99,10 +101,11 @@ void GraphicSetPropertiesWindow::onActiveLibraryItemChanged(
 }
 
 void GraphicSetPropertiesWindow::onGraphicSetRemoved(GraphicSet::Type type,
-                                                   Uint16 graphicSetID)
+                                                     Uint16 graphicSetID)
 {
     // If the active set was deleted, hide this window.
-    if ((type == activeGraphicSetType) && (graphicSetID == activeGraphicSetID)) {
+    if ((type == activeGraphicSetType)
+        && (graphicSetID == activeGraphicSetID)) {
         activeGraphicSetType = GraphicSet::Type::None;
         activeGraphicSetID = SDL_MAX_UINT16;
         setIsVisible(false);
@@ -110,9 +113,11 @@ void GraphicSetPropertiesWindow::onGraphicSetRemoved(GraphicSet::Type type,
 }
 
 void GraphicSetPropertiesWindow::onGraphicSetDisplayNameChanged(
-    GraphicSet::Type type, Uint16 graphicSetID, const std::string& newDisplayName)
+    GraphicSet::Type type, Uint16 graphicSetID,
+    const std::string& newDisplayName)
 {
-    if ((type == activeGraphicSetType) && (graphicSetID == activeGraphicSetID)) {
+    if ((type == activeGraphicSetType)
+        && (graphicSetID == activeGraphicSetID)) {
         nameInput.setText(newDisplayName);
     }
 }
@@ -154,7 +159,7 @@ void GraphicSetPropertiesWindow::loadActiveGraphicSet(
 
 void GraphicSetPropertiesWindow::onSetDefaultGraphicBoundsButtonPressed()
 {
-    // Note: We assume a Floor graphic set is loaded. This button shouldn't be 
+    // Note: We assume a Floor graphic set is loaded. This button shouldn't be
     //       visible otherwise.
 
     static constexpr BoundingBox defaultFloorBounds{
@@ -169,7 +174,7 @@ void GraphicSetPropertiesWindow::onSetDefaultGraphicBoundsButtonPressed()
         if (!graphicID) {
             continue;
         }
-           
+
         if (isSpriteID(graphicID)) {
             dataModel.spriteModel.setSpriteCustomModelBounds(
                 toSpriteID(graphicID), defaultFloorBounds);

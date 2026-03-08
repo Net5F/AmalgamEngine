@@ -26,7 +26,7 @@ public:
      * Calculates an updated velocity based on the given data.
 
      * @param inputStates The current input state.
-     * @param[out] movement The current movement state (may update velocity 
+     * @param[out] movement The current movement state (may update velocity
      *                      and jumpCount).
      * @param movementMods The current movement mod state.
      *
@@ -66,9 +66,9 @@ public:
     static Position interpolatePosition(const PreviousPosition& previousPos,
                                         const Position& position, double alpha);
 
-    /** An epsilon that can be used when comparing float world positions to 
+    /** An epsilon that can be used when comparing float world positions to
         integer values, to account for float precision loss.
-        Calculated by finding the float precision at the furthest position of 
+        Calculated by finding the float precision at the furthest position of
         the largest map that we support.
         Reference: https://blog.demofox.org/2017/11/21/floating-point-precision/
         Note: The division by 2 is because we center the map on the origin. */
@@ -87,7 +87,7 @@ private:
     static Rotation::Direction directionIntToDirection(int directionInt);
 
     /**
-     * Performs the first step of velocity calculations, assuming the entity 
+     * Performs the first step of velocity calculations, assuming the entity
      * can fly.
      */
     static Vector3 calcVelocityCanFly(const Input::StateArr& inputStates,
@@ -95,7 +95,7 @@ private:
                                       const MovementModifiers& movementMods);
 
     /**
-     * Performs the first step of velocity calculations, assuming the entity 
+     * Performs the first step of velocity calculations, assuming the entity
      * cannot fly.
      */
     static Vector3 calcVelocityNoFly(const Input::StateArr& inputStates,

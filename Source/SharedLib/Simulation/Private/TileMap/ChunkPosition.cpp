@@ -36,9 +36,9 @@ ChunkPosition::ChunkPosition(const Vector3& worldPoint)
 
 ChunkPosition::ChunkPosition(const TilePosition& tilePosition)
 : DiscretePosition<DiscreteImpl::ChunkTag>(
-    static_cast<int>(tilePosition.x / SharedConfig::CHUNK_WIDTH),
-    static_cast<int>(tilePosition.y / SharedConfig::CHUNK_WIDTH),
-    tilePosition.z)
+      static_cast<int>(tilePosition.x / SharedConfig::CHUNK_WIDTH),
+      static_cast<int>(tilePosition.y / SharedConfig::CHUNK_WIDTH),
+      tilePosition.z)
 {
 }
 

@@ -23,11 +23,11 @@ namespace ResourceImporter
  * This only includes the types that the user is able to double click to load
  * into the edit stage.
  *
- * Note: These pointers should never be null, you don't need to check them. 
- *       We just use them because std::reference_wrapper is 
+ * Note: These pointers should never be null, you don't need to check them.
+ *       We just use them because std::reference_wrapper is
  */
 using LibraryItemData
-    = std::variant<std::monostate, 
+    = std::variant<std::monostate,
                    std::reference_wrapper<const EditorSpriteSheet>,
                    std::reference_wrapper<const EditorSprite>,
                    std::reference_wrapper<const EditorAnimation>,
@@ -39,7 +39,8 @@ using LibraryItemData
                    std::reference_wrapper<const EditorEntityGraphicSet>,
                    std::reference_wrapper<const EditorIcon>>;
 
-// Note: We define these convenience functions because variant<reference_wrapper>
+// Note: We define these convenience functions because
+// variant<reference_wrapper>
 //       is very noisy otherwise.
 template<typename T>
 bool holds_alternative(const LibraryItemData& libraryItemData)
@@ -48,13 +49,13 @@ bool holds_alternative(const LibraryItemData& libraryItemData)
         libraryItemData);
 }
 
-template <typename T>
+template<typename T>
 const T& get(const LibraryItemData& libraryItemData)
 {
     return std::get<std::reference_wrapper<const T>>(libraryItemData).get();
 }
 
-template <typename T>
+template<typename T>
 const T* get_if(const LibraryItemData* libraryItemData)
 {
     const auto* dataPtr{

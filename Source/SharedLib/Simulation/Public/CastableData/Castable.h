@@ -19,16 +19,16 @@ namespace AM
  *
  * Casts are defined in a few stages:
  *     1. Pre-cast
- *         Before the cast has started. Check the requirements, make sure the 
+ *         Before the cast has started. Check the requirements, make sure the
  *         entity can cast it.
  *     2. Casting
- *         The cast has begun. Set the caster to a casting graphic, send a 
+ *         The cast has begun. Set the caster to a casting graphic, send a
  *         request to the server.
  *     3. (Predicted) Cast complete
- *         The cast has finished on the client. If the Castable is set to be 
+ *         The cast has finished on the client. If the Castable is set to be
  *         predicted, play any resulting A/V effects.
  *     4. Cast complete
- *         The cast has finished on the server. Process any world state 
+ *         The cast has finished on the server. Process any world state
  *         changes. If the Castable is set to non-predicted, play any resulting
  *         A/V effects.
  */
@@ -45,9 +45,9 @@ struct Castable {
             the caster. */
         SelfOrEntity,
         /** Targets an AoE circle on the ground. */
-        Circle 
+        Circle
     };
-    /** This castable's targeting behavior. Determines what data must be 
+    /** This castable's targeting behavior. Determines what data must be
         provided by the client in the "cast request" message. */
     TargetType targetType{};
 
@@ -63,14 +63,14 @@ struct Castable {
     /** How long the caster must wait to cast this castable again. */
     float cooldownTime{0};
 
-    /** If true, casting this castable will trigger the global cooldown (see 
+    /** If true, casting this castable will trigger the global cooldown (see
         SharedConfig::CAST_GLOBAL_COOLDOWN_S). */
     bool triggersGCD{true};
 
-    /** If true, this cast will be queued by the server and processed on the 
-        tick when the client cast it (clients are in the future). If false, it 
+    /** If true, this cast will be queued by the server and processed on the
+        tick when the client cast it (clients are in the future). If false, it
         will be processed as soon as the server receives it.
-        Most castables will want this to be true. False is useful for things 
+        Most castables will want this to be true. False is useful for things
         that should be instant and don't affect the sim, e.g. Examine, Talk. */
     bool isTickSynchronized{true};
 
@@ -98,13 +98,13 @@ struct Castable {
     std::vector<VisualEffect> castCompleteVisualEffects{};
 
     /** The client-only audio effects to play when this cast is successful. */
-    //std::vector<AudioEffect> castCompleteAudioEffects{};
+    // std::vector<AudioEffect> castCompleteAudioEffects{};
 
     /** The client-only A/V entities to spawn when this cast is successful. */
     std::vector<AVEntity> castCompleteAVEntities{};
 
     /**
-     * Returns a target cylinder centered on the given position along the X/Y 
+     * Returns a target cylinder centered on the given position along the X/Y
      * axes, and sitting on top of it along the Z axis.
      *
      * Only valid if targetToolType == Circle and radius is set.

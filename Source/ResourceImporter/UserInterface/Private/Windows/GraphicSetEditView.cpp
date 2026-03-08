@@ -82,10 +82,11 @@ void GraphicSetEditView::onActiveLibraryItemChanged(
 }
 
 void GraphicSetEditView::onGraphicSetRemoved(GraphicSet::Type type,
-                                            Uint16 graphicSetID)
+                                             Uint16 graphicSetID)
 {
     // If the active set was deleted, hide this window.
-    if ((type == activeGraphicSetType) && (graphicSetID == activeGraphicSetID)) {
+    if ((type == activeGraphicSetType)
+        && (graphicSetID == activeGraphicSetID)) {
         activeGraphicSetType = GraphicSet::Type::None;
         activeGraphicSetID = SDL_MAX_UINT16;
         setIsVisible(false);
@@ -93,12 +94,13 @@ void GraphicSetEditView::onGraphicSetRemoved(GraphicSet::Type type,
 }
 
 void GraphicSetEditView::onGraphicSetSlotChanged(GraphicSet::Type type,
-                                                Uint16 graphicSetID,
-                                                std::size_t index,
-                                                GraphicID newGraphicID)
+                                                 Uint16 graphicSetID,
+                                                 std::size_t index,
+                                                 GraphicID newGraphicID)
 {
     // If the changed data doesn't affect us, return early.
-    if ((type != activeGraphicSetType) || (graphicSetID != activeGraphicSetID)) {
+    if ((type != activeGraphicSetType)
+        || (graphicSetID != activeGraphicSetID)) {
         return;
     }
     if (index > graphicContainer.size()) {
@@ -106,13 +108,14 @@ void GraphicSetEditView::onGraphicSetSlotChanged(GraphicSet::Type type,
     }
 
     // Fill in the new slot data.
-    GraphicSetSlot& slot{static_cast<GraphicSetSlot&>(*graphicContainer[index])};
+    GraphicSetSlot& slot{
+        static_cast<GraphicSetSlot&>(*graphicContainer[index])};
     fillSlotGraphicData(slot, newGraphicID);
 }
 
 template<typename T>
 void GraphicSetEditView::loadActiveGraphicSet(GraphicSet::Type graphicSetType,
-                                               const T& newActiveGraphicSet)
+                                              const T& newActiveGraphicSet)
 {
     activeGraphicSetType = graphicSetType;
     activeGraphicSetID = newActiveGraphicSet.numericID;
@@ -134,9 +137,8 @@ void GraphicSetEditView::loadActiveGraphicSet(GraphicSet::Type graphicSetType,
         fillSlotGraphicData(slot, graphicID);
 
         // Set the assignment button callback.
-        slot.assignButton.setOnPressed([this, i]() {
-            onAssignButtonPressed(i);
-        });
+        slot.assignButton.setOnPressed(
+            [this, i]() { onAssignButtonPressed(i); });
 
         graphicContainer.push_back(std::move(slotPtr));
     }
@@ -144,7 +146,8 @@ void GraphicSetEditView::loadActiveGraphicSet(GraphicSet::Type graphicSetType,
     // Make sure the container is visible.
     graphicContainer.setIsVisible(true);
 
-    // Fill in the appropriate description texts for the active graphic set type.
+    // Fill in the appropriate description texts for the active graphic set
+    // type.
     fillDescriptionTexts();
 }
 
@@ -249,7 +252,7 @@ std::string GraphicSetEditView::getSlotTopText(std::size_t graphicSetIndex)
 }
 
 void GraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
-                                              GraphicID graphicID)
+                                             GraphicID graphicID)
 {
     // If this slot isn't empty, set the widget's data.
     if (graphicID) {
@@ -260,7 +263,7 @@ void GraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
         // Get the graphic's first sprite.
         const EditorSprite* sprite{graphic.getFirstSprite()};
         if (!sprite) {
-            // Graphic doesn't have a sprite (empty animation). Leave the 
+            // Graphic doesn't have a sprite (empty animation). Leave the
             // image blank.
             slot.spriteImage.setIsVisible(false);
             return;
@@ -329,7 +332,8 @@ void GraphicSetEditView::fillDescriptionTexts()
                 "system is able to form any shape of wall.\n\nWalls may have "
                 "collision. You can control this using each graphic's "
                 "collisionEnabled.\n\nMake sure to draw appropriate bounding "
-                "volumes on each graphic, as they will be used when clicking the "
+                "volumes on each graphic, as they will be used when clicking "
+                "the "
                 "object in build mode.\n\nAll 4 graphics must be set.");
             break;
         }

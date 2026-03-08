@@ -80,23 +80,24 @@ MainScreen::MainScreen(DataModel& inDataModel)
     confirmationDialog.bodyText.setColor({255, 255, 255, 255});
 
     // Buttons.
-    auto styleDialogButton = [&](AUI::Button& button,
-                                 const SDL_FRect& logicalExtent) {
-        button.setLogicalExtent(logicalExtent);
-        SDL_FRect imageExtent{0, 0, logicalExtent.w, logicalExtent.h};
-        button.normalImage.setLogicalExtent(imageExtent);
-        button.hoveredImage.setLogicalExtent(imageExtent);
-        button.pressedImage.setLogicalExtent(imageExtent);
-        button.text.setLogicalExtent({-1, -1, logicalExtent.w, logicalExtent.h});
-        button.normalImage.setNineSliceImage(
-            Paths::TEXTURE_DIR + "MainButton/Normal.png", {4, 4, 4, 4});
-        button.hoveredImage.setNineSliceImage(
-            Paths::TEXTURE_DIR + "MainButton/Hovered.png", {4, 4, 4, 4});
-        button.pressedImage.setNineSliceImage(
-            Paths::TEXTURE_DIR + "MainButton/Pressed.png", {4, 4, 4, 4});
-        button.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-        button.text.setColor({255, 255, 255, 255});
-    };
+    auto styleDialogButton
+        = [&](AUI::Button& button, const SDL_FRect& logicalExtent) {
+              button.setLogicalExtent(logicalExtent);
+              SDL_FRect imageExtent{0, 0, logicalExtent.w, logicalExtent.h};
+              button.normalImage.setLogicalExtent(imageExtent);
+              button.hoveredImage.setLogicalExtent(imageExtent);
+              button.pressedImage.setLogicalExtent(imageExtent);
+              button.text.setLogicalExtent(
+                  {-1, -1, logicalExtent.w, logicalExtent.h});
+              button.normalImage.setNineSliceImage(
+                  Paths::TEXTURE_DIR + "MainButton/Normal.png", {4, 4, 4, 4});
+              button.hoveredImage.setNineSliceImage(
+                  Paths::TEXTURE_DIR + "MainButton/Hovered.png", {4, 4, 4, 4});
+              button.pressedImage.setNineSliceImage(
+                  Paths::TEXTURE_DIR + "MainButton/Pressed.png", {4, 4, 4, 4});
+              button.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
+              button.text.setColor({255, 255, 255, 255});
+          };
     styleDialogButton(confirmationDialog.confirmButton, {1074, 604, 120, 50});
     styleDialogButton(confirmationDialog.cancelButton, {940, 604, 120, 50});
     confirmationDialog.cancelButton.text.setText("Cancel");
@@ -208,7 +209,7 @@ void MainScreen::openConfirmationDialog(
 
 void MainScreen::openErrorDialog(const std::string& bodyText)
 {
-    // Note: We just repurpose the confirmationDialog by hiding the cancel 
+    // Note: We just repurpose the confirmationDialog by hiding the cancel
     //       button and using the confirm button to cancel.
 
     // Hide the "Cancel" button and repurpose the "Confirm" button for closing.

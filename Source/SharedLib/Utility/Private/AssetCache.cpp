@@ -18,7 +18,7 @@ std::shared_ptr<SDL_Texture>
         return it->second;
     }
 
-    // The ID wasn't found in the cache, assume it's a path to an image and 
+    // The ID wasn't found in the cache, assume it's a path to an image and
     // try to load it.
     SDL_Texture* rawTexture{IMG_LoadTexture(sdlRenderer, resourceID.c_str())};
     if (!rawTexture) {

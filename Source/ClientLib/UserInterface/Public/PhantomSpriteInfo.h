@@ -23,25 +23,26 @@ namespace Client
  * Phantoms are visual-only, so they're purely a UI/Renderer concern and don't
  * get added to the simulation.
  *
- * Terrain and Wall tile layer phantoms will replace any sprites in the same 
- * spot. Objects and other tile layer types will be added on top instead of 
+ * Terrain and Wall tile layer phantoms will replace any sprites in the same
+ * spot. Objects and other tile layer types will be added on top instead of
  * replacing.
  *
  * An example usage is when a user is in build mode and is trying to place a
  * wall. A phantom wall sprite will follow the user's mouse to show where the
  * wall will be placed when they click.
  *
- * Note: Currently we only support phantom sprites. If we ever want to support 
- *       phantom animations, this should be renamed to PhantomGraphicInfo and 
+ * Note: Currently we only support phantom sprites. If we ever want to support
+ *       phantom animations, this should be renamed to PhantomGraphicInfo and
  *       replace Sprite with GraphicRef.
  */
 struct PhantomSpriteInfo {
-    /** If this is a tile phantom, this is the position of the phantom's tile. */
+    /** If this is a tile phantom, this is the position of the phantom's tile.
+     */
     TilePosition tilePosition{};
 
     /** If this is a Floor or Object tile phantom, this is the phantom's offset
         relative to tilePosition.
-        Note: Terrain and Wall phantoms shouldn't be given offsets, 
+        Note: Terrain and Wall phantoms shouldn't be given offsets,
               they're already handled by WorldSpriteSorter. */
     TileOffset tileOffset{};
 

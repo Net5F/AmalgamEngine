@@ -64,8 +64,7 @@ public:
      */
     bool dataIsReady();
 
-    struct ReceiveResult
-    {
+    struct ReceiveResult {
         /** The result of the receive attempt. */
         NetworkResult networkResult{NetworkResult::NotSet};
         /** The type of the received message. Will be NotSet if networkResult
@@ -166,7 +165,7 @@ private:
     //--------------------------------------------------------------------------
     // Receiving
     //--------------------------------------------------------------------------
-    /** The max size that a received client message can be before we need to 
+    /** The max size that a received client message can be before we need to
         anticipate that it will be split into multiple packets over the wire. */
     static constexpr std::size_t CLIENT_MAX_SMALL_MESSAGE_SIZE{
         ETHERNET_MTU - CLIENT_HEADER_SIZE - MESSAGE_HEADER_SIZE};
@@ -176,23 +175,24 @@ private:
         know all of the data will be immediately present. */
     static BinaryBuffer smallReceiveBuffer;
 
-    /** A pool that holds all the buffers we've allocated for large message 
+    /** A pool that holds all the buffers we've allocated for large message
         receiving. */
     using LargeBufferPool = BufferPool<CLIENT_MAX_MESSAGE_SIZE>;
     static LargeBufferPool bufferPool;
 
-    /** If nullptr, we're currently composing a large message into this buffer. */
+    /** If nullptr, we're currently composing a large message into this buffer.
+     */
     std::unique_ptr<LargeBufferPool::BufferType> largeReceiveBuffer;
 
     /** The type of the message that we're currently composing. */
     Uint8 messageType;
 
     /** The size of the message that we're currently composing.
-        Note: This eventually gets cast to EngineMessageType or 
+        Note: This eventually gets cast to EngineMessageType or
               ProjectMessageType. */
     Uint16 messageSize;
 
-    /** If we're currently composing a large message, this is the first empty 
+    /** If we're currently composing a large message, this is the first empty
         index within largeReceiveBuffer. */
     Uint16 compositionIndex;
 

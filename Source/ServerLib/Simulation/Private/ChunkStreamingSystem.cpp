@@ -19,7 +19,8 @@ namespace AM
 {
 namespace Server
 {
-ChunkStreamingSystem::ChunkStreamingSystem(const SimulationContext& inSimContext)
+ChunkStreamingSystem::ChunkStreamingSystem(
+    const SimulationContext& inSimContext)
 : world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
 , chunkDataRequestQueue{inSimContext.networkEventDispatcher}

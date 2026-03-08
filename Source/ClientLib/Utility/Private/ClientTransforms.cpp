@@ -25,7 +25,7 @@ SDL_FRect ClientTransforms::entityToScreenExtent(
     SDL_FPoint screenPoint{
         Transforms::worldToScreen(position, camera.zoomFactor)};
 
-    // Offset the sprite to line up with where the "stage" starts within the 
+    // Offset the sprite to line up with where the "stage" starts within the
     // image.
     screenPoint.x -= (renderData.stageOrigin.x * camera.zoomFactor);
     screenPoint.y -= (renderData.stageOrigin.y * camera.zoomFactor);
@@ -67,7 +67,7 @@ SDL_FRect ClientTransforms::tileToScreenExtent(
     SDL_FPoint screenPoint{
         Transforms::worldToScreen(worldPoint, camera.zoomFactor)};
 
-    // Offset the sprite to line up with where the "stage" starts within the 
+    // Offset the sprite to line up with where the "stage" starts within the
     // image.
     screenPoint.x -= (renderData.stageOrigin.x * camera.zoomFactor);
     screenPoint.y -= (renderData.stageOrigin.y * camera.zoomFactor);

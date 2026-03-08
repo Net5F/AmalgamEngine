@@ -17,26 +17,26 @@ struct Rotation;
 struct Collision;
 
 /**
- * A helper class that manages the logic of moving entities, resolving 
+ * A helper class that manages the logic of moving entities, resolving
  * collisions, etc.
- * 
- * This is a class instead of a set of free functions to avoid needing to pass 
+ *
+ * This is a class instead of a set of free functions to avoid needing to pass
  * dependencies on every call.
  *
- * Note: Since player movement is predicted on clients, a player colliding with 
+ * Note: Since player movement is predicted on clients, a player colliding with
  *       a moving NPC is always going to cause mis-predictions and rollback.
- *       To avoid this, we have a blanket rule of "a moving entity (player or 
+ *       To avoid this, we have a blanket rule of "a moving entity (player or
  *       NPC) will ignore the collision of all movement-enabled entities
  *       (whether they're currently moving or not)".
  */
-class EntityMover {
+class EntityMover
+{
 public:
     EntityMover(const entt::registry& inRegistry, const TileMapBase& inTileMap,
                 EntityLocator& inEntityLocator,
                 CollisionLocator& inCollisionLocator);
 
-    struct MoveEntityParams
-    {   
+    struct MoveEntityParams {
         entt::entity entity;
         const Input::StateArr& inputStates;
         Position& position;
@@ -49,14 +49,14 @@ public:
         double deltaSeconds;
     };
     /**
-     * Processes a tick of entity movement, updating the given components 
+     * Processes a tick of entity movement, updating the given components
      * appropriately.
      */
     void moveEntity(const MoveEntityParams& params);
 
 private:
     /**
-     * The maximum number of iterations that the narrow phase of collision 
+     * The maximum number of iterations that the narrow phase of collision
      * resolution should perform.
      */
     static constexpr int NARROW_PHASE_ITERATION_COUNT{3};
@@ -81,7 +81,7 @@ private:
         float remainingTime{};
     };
     /**
-     * Performs a single iteration of narrow phase collision resolution between 
+     * Performs a single iteration of narrow phase collision resolution between
      * the given bounds and all volumes in broadPhaseMatches.
      */
     NarrowPhaseResult

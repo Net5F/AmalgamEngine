@@ -67,10 +67,10 @@ BoundingBoxPropertiesWindow::BoundingBoxPropertiesWindow(
 
     auto styleLabel
         = [&](AUI::Text& label, const std::string& text, float fontSize) {
-        label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
-        label.setColor({255, 255, 255, 255});
-        label.setText(text);
-    };
+              label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
+              label.setColor({255, 255, 255, 255});
+              label.setText(text);
+          };
     styleLabel(windowLabel, "Bounding Box Properties", 21);
     windowLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
 
@@ -109,7 +109,8 @@ BoundingBoxPropertiesWindow::BoundingBoxPropertiesWindow(
 
     // When the active sprite is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
-        .connect<&BoundingBoxPropertiesWindow::onActiveLibraryItemChanged>(*this);
+        .connect<&BoundingBoxPropertiesWindow::onActiveLibraryItemChanged>(
+            *this);
     BoundingBoxModel& boundingBoxModel{dataModel.boundingBoxModel};
     boundingBoxModel.boundingBoxDisplayNameChanged
         .connect<&BoundingBoxPropertiesWindow::onBoundingBoxDisplayNameChanged>(

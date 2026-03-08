@@ -20,7 +20,7 @@ void assertion_failed(char const* apFile, int apLine, char const* apFunc,
 #endif
 
 using namespace AM;
-// Note: Database migrations are only relevant to the server, so we shouldn't 
+// Note: Database migrations are only relevant to the server, so we shouldn't
 //       hit any clashes with the Client namespace.
 using namespace AM::Server;
 using namespace AM::DM;

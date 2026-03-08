@@ -22,7 +22,7 @@ struct EditorSprite {
     /** This sprite's unique numeric identifier. */
     SpriteID numericID{NULL_SPRITE_ID};
 
-    // Note: We don't need to store the sprite sheet ID, since sprite sheets 
+    // Note: We don't need to store the sprite sheet ID, since sprite sheets
     //       know which sprites they own (both in memory and in json).
 
     /** The relPath to the individual image file for this sprite. */
@@ -31,12 +31,12 @@ struct EditorSprite {
     /** Unique display name, shown in the UI.  */
     std::string displayName{""};
 
-    /** This sprite's actual-space UV position and size within its parent 
+    /** This sprite's actual-space UV position and size within its parent
         sprite sheet texture. */
     SDL_FRect textureExtent{0, 0, 0, 0};
 
     /** The actual-space point within the sprite where the "stage" starts.
-        The "stage" is the coordinate space that we overlay onto the sprite 
+        The "stage" is the coordinate space that we overlay onto the sprite
         image. */
     SDL_FPoint stageOrigin{0, 0};
 
@@ -50,7 +50,7 @@ struct EditorSprite {
         if collisionEnabled). */
     BoundingBoxID modelBoundsID{NULL_BOUNDING_BOX_ID};
 
-    /** If modelBoundsID is null, this is the sprite's custom model-space 
+    /** If modelBoundsID is null, this is the sprite's custom model-space
         bounding box. */
     BoundingBox customModelBounds{};
 
@@ -60,7 +60,7 @@ struct EditorSprite {
     /**
      * Returns this sprite's model-space bounding box.
      *
-     * If modelBoundsID is non-null, returns the associated bounding box. Else, 
+     * If modelBoundsID is non-null, returns the associated bounding box. Else,
      * returns customModelBounds.
      */
     const BoundingBox&

@@ -39,7 +39,7 @@ AnimationModel::AnimationModel(DataModel& inDataModel)
 , animationEntityAlignmentAnchorChanged{
       animationEntityAlignmentAnchorChangedSig}
 {
-    // Reserve the null animation ID (the engine provides it in code, 
+    // Reserve the null animation ID (the engine provides it in code,
     // so we don't need it in the json).
     animationIDPool.reserveID();
 }
@@ -83,8 +83,8 @@ void AnimationModel::save(nlohmann::json& json)
         json["animations"][i]["loopStartFrame"] = animation.loopStartFrame;
 
         // If the animation has any filled frames, add them.
-        // Note: Frame numbers/IDs are parallel arrays to save file space. If we 
-        //       switch to a binary format, they can be combined into a single 
+        // Note: Frame numbers/IDs are parallel arrays to save file space. If we
+        //       switch to a binary format, they can be combined into a single
         //       struct or used as key/value in a map.
         if ((animation.frames.size() > 0)
             && (animation.frames[0].sprite.get().numericID != NULL_SPRITE_ID)) {
@@ -110,11 +110,11 @@ void AnimationModel::save(nlohmann::json& json)
         json["animations"][i]["modelBoundsID"] = animation.modelBoundsID;
 
         // Add the model-space bounds.
-        // Note: This will either be a shared bounding box or a custom one 
-        //       depending on modelBoundsID. In either case, we always save to 
-        //       modelBounds because that's what the engine uses. 
+        // Note: This will either be a shared bounding box or a custom one
+        //       depending on modelBoundsID. In either case, we always save to
+        //       modelBounds because that's what the engine uses.
         const BoundingBox& animationModelBounds{
-            animation.getModelBounds(dataModel.boundingBoxModel)}; 
+            animation.getModelBounds(dataModel.boundingBoxModel)};
         json["animations"][i]["modelBounds"]["minX"]
             = animationModelBounds.min.x;
         json["animations"][i]["modelBounds"]["maxX"]
@@ -187,8 +187,7 @@ const EditorAnimation&
 {
     auto animationIt{animationMap.find(animationID)};
     if (animationIt == animationMap.end()) {
-        LOG_FATAL("Tried to get animation with invalid ID: %d",
-                  animationID);
+        LOG_FATAL("Tried to get animation with invalid ID: %d", animationID);
     }
 
     return animationIt->second;
@@ -213,7 +212,7 @@ void AnimationModel::setAnimationFrameCount(AnimationID animationID,
         LOG_FATAL("Tried to set frame count using invalid animation ID.");
     }
 
-    // If loopStartFrame is past the end of the new frame count, pull it back 
+    // If loopStartFrame is past the end of the new frame count, pull it back
     // in.
     EditorAnimation& animation{animationPair->second};
     if (animation.loopStartFrame > newFrameCount) {
@@ -262,7 +261,7 @@ void AnimationModel::setAnimationLoopStartFrame(AnimationID animationID,
 }
 
 void AnimationModel::setAnimationModelBoundsID(AnimationID animationID,
-                                         BoundingBoxID newModelBoundsID)
+                                               BoundingBoxID newModelBoundsID)
 {
     auto animationPair{animationMap.find(animationID)};
     if (animationPair == animationMap.end()) {
@@ -276,8 +275,8 @@ void AnimationModel::setAnimationModelBoundsID(AnimationID animationID,
     animationModelBoundsIDChangedSig.publish(animationID, newModelBoundsID);
 }
 
-void AnimationModel::setAnimationCustomModelBounds(AnimationID animationID,
-                                       const BoundingBox& newModelBounds)
+void AnimationModel::setAnimationCustomModelBounds(
+    AnimationID animationID, const BoundingBox& newModelBounds)
 {
     auto animationPair{animationMap.find(animationID)};
     if (animationPair == animationMap.end()) {
@@ -345,7 +344,7 @@ void AnimationModel::addAnimationFrame(AnimationID animationID,
         }
     }
 
-    // If there are no filled frames in the animation, and there are empty 
+    // If there are no filled frames in the animation, and there are empty
     // frames, add the sprite to the first frame.
     // Note: This should only occur with newly created animations.
     int frameNumber{-1};
@@ -354,11 +353,12 @@ void AnimationModel::addAnimationFrame(AnimationID animationID,
         frameNumber = 0;
     }
     else {
-        // The animation has filled frames. If the last filled frame has an 
+        // The animation has filled frames. If the last filled frame has an
         // empty slot after it, add the sprite to that slot.
         for (std::size_t i{frames.size()}; i-- > 0;) {
             if (frames.at(i)) {
-                // Found the last filled frame. Is there an empty frame after it?
+                // Found the last filled frame. Is there an empty frame after
+                // it?
                 if ((i + 1) < frames.size()) {
                     // There's an empty frame after, add the sprite to it.
                     frames.at(i + 1) = &newSprite;
@@ -369,7 +369,7 @@ void AnimationModel::addAnimationFrame(AnimationID animationID,
             }
         }
 
-        // If the last frame wasn't followed by an empty slot, add the sprite 
+        // If the last frame wasn't followed by an empty slot, add the sprite
         // to a new frame at the end.
         if (frameNumber == -1) {
             frames.emplace_back(&newSprite);
@@ -380,9 +380,9 @@ void AnimationModel::addAnimationFrame(AnimationID animationID,
             animationFrameCountChangedSig.publish(animationID,
                                                   animation.frameCount);
             // Note: We don't update loop start because the user will likely be
-            //       adding all their sprites at once, in which case we want to 
-            //       keep loopStartFrame at 0 (to loop all). The downside is, 
-            //       if the user sets their loopStart elsewhere (e.g. the end, 
+            //       adding all their sprites at once, in which case we want to
+            //       keep loopStartFrame at 0 (to loop all). The downside is,
+            //       if the user sets their loopStart elsewhere (e.g. the end,
             //       to loop none) and then adds a sprite, they may need to re-
             //       adjust their loop start.
         }
@@ -405,8 +405,7 @@ void AnimationModel::swapAnimationFrames(AnimationID animationID,
     EditorAnimation& animation{animationPair->second};
     AM_ASSERT(sourceFrameNumber < animation.frameCount,
               "Invalid frame number.");
-    AM_ASSERT(destFrameNumber < animation.frameCount,
-              "Invalid frame number.");
+    AM_ASSERT(destFrameNumber < animation.frameCount, "Invalid frame number.");
     std::vector<const EditorSprite*> frames{animation.getExpandedFrameVector()};
 
     // Swap the frames.
@@ -464,16 +463,14 @@ const std::string& AnimationModel::getErrorString()
 bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
 {
     // Mark the animation's ID as reserved so it doesn't get reused.
-    AnimationID animationID{
-        animationJson.at("numericID").get<AnimationID>()};
+    AnimationID animationID{animationJson.at("numericID").get<AnimationID>()};
     animationIDPool.markIDAsReserved(animationID);
 
     animationMap.emplace(animationID, EditorAnimation{animationID});
     EditorAnimation& animation{animationMap[animationID]};
 
     // If the display name isn't unique, fail.
-    std::string displayName{
-        animationJson.at("displayName").get<std::string>()};
+    std::string displayName{animationJson.at("displayName").get<std::string>()};
     if (!animationNameIsUnique(animationID, displayName)) {
         errorString = "Animation display name isn't unique: ";
         errorString += animation.displayName.c_str();
@@ -492,8 +489,8 @@ bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
     animation.loopStartFrame = animationJson.at("loopStartFrame");
 
     // Add the frames.
-    // Note: Frame numbers/IDs are parallel arrays to save file space. If we 
-    //       switch to a binary format, they can be combined into a single 
+    // Note: Frame numbers/IDs are parallel arrays to save file space. If we
+    //       switch to a binary format, they can be combined into a single
     //       struct or used as key/value in a map.
     const auto& frameNumbersJson{animationJson.at("frameNumbers")};
     const auto& spriteIdsJson{animationJson.at("spriteIDs")};
@@ -514,7 +511,7 @@ bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
     // Add modelBoundsID.
     animation.modelBoundsID = animationJson.at("modelBoundsID");
 
-    // Default our custom bounds to the saved modelBounds, regardless of 
+    // Default our custom bounds to the saved modelBounds, regardless of
     // whether we use a shared bounding box or not.
     animation.customModelBounds.min.x
         = animationJson.at("modelBounds").at("minX");
@@ -544,9 +541,9 @@ bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
 }
 
 bool AnimationModel::animationNameIsUnique(AnimationID animationID,
-                                               const std::string& displayName)
+                                           const std::string& displayName)
 {
-    // If the desired name is already in the map, and the owner of the name 
+    // If the desired name is already in the map, and the owner of the name
     // isn't the given ID, the name isn't unique.
     auto it{animationNameMap.find(displayName)};
     if ((it != animationNameMap.end()) && (it->second != animationID)) {

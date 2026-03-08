@@ -24,7 +24,7 @@ public:
 
     UserInterface& userInterface;
 
-    /** Returns how far the sim tick is towards its next call, as a 
+    /** Returns how far the sim tick is towards its next call, as a
         percentage from 0 - 1. */
     std::function<double(void)> getSimTickProgress;
 

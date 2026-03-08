@@ -49,10 +49,11 @@ public:
     void render(const SDL_FPoint& windowTopLeft) override;
 
     AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
-                            const SDL_FPoint& cursorPosition) override;
+                                 const SDL_FPoint& cursorPosition) override;
 
-    AUI::EventResult onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                   const SDL_FPoint& cursorPosition) override;
+    AUI::EventResult
+        onMouseDoubleClick(AUI::MouseButtonType buttonType,
+                           const SDL_FPoint& cursorPosition) override;
 
     AUI::EventResult onMouseUp(AUI::MouseButtonType buttonType,
                                const SDL_FPoint& cursorPosition) override;

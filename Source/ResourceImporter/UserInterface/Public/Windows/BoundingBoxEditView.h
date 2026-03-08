@@ -27,17 +27,17 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BoundingBoxEditView(DataModel& inDataModel,
-                         LibraryWindow& inLibraryWindow);
+    BoundingBoxEditView(DataModel& inDataModel, LibraryWindow& inLibraryWindow);
 
 private:
     /**
-     * If the new active item is a bounding box, loads it's data onto this stage.
+     * If the new active item is a bounding box, loads it's data onto this
+     * stage.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * If the changed box is currently active, updates this stage to reflect 
+     * If the changed box is currently active, updates this stage to reflect
      * the new data.
      */
     void onBoundingBoxBoundsChanged(BoundingBoxID boundingBoxID,

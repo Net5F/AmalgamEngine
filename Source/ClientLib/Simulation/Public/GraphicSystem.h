@@ -13,7 +13,7 @@ class GraphicData;
 class ISimulationExtension;
 
 /**
- * Handles updating each entity's graphic state to reflect their current sim 
+ * Handles updating each entity's graphic state to reflect their current sim
  * state.
  *
  * Does not render anything (that's handled by Renderer).
@@ -32,7 +32,7 @@ public:
 
 private:
     /**
-     * Returns the desired graphic type for the given entity, based on its 
+     * Returns the desired graphic type for the given entity, based on its
      * current state.
      */
     EntityGraphicType getDesiredGraphicType(entt::entity entity);

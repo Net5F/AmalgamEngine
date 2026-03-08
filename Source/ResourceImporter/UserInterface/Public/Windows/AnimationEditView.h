@@ -22,7 +22,7 @@ class LibraryListItem;
 
 /**
  * The center stage shown when the user loads an animation from the Library.
- * Allows the user to add sprites to the animation, set fps and frame count, 
+ * Allows the user to add sprites to the animation, set fps and frame count,
  * and edit its bounding box.
  */
 class AnimationEditView : public AUI::Window
@@ -46,7 +46,7 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * If the changed animation is currently active, updates this stage to 
+     * If the changed animation is currently active, updates this stage to
      * reflect the new data.
      */
     void onAnimationFrameCountChanged(AnimationID animationID,
@@ -121,7 +121,7 @@ private:
     //-------------------------------------------------------------------------
     AUI::Text topText;
 
-    /** Checkerboard image, tiled as the background for the current frame's 
+    /** Checkerboard image, tiled as the background for the current frame's
         sprite. */
     AUI::Image checkerboardImage;
 

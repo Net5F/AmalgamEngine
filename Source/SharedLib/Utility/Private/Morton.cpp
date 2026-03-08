@@ -4,7 +4,7 @@
 
 namespace AM
 {
-/** A lookup table of morton code values, for up to a 16x16 value space. 
+/** A lookup table of morton code values, for up to a 16x16 value space.
     Note: If you're trying to understand the ordering, look at the wiki page.
           This initializer visually has the X and Y axis flipped. */
 static constexpr std::array<std::array<Uint8, 16>, 16> zValues16x16{
@@ -31,7 +31,7 @@ static constexpr std::array<std::array<Uint8, 16>, 16> zValues16x16{
      {85, 87, 93, 95, 117, 119, 125, 127, 213, 215, 221, 223, 245, 247, 253,
       255}}};
 
-/** A reverse lookup table of x/y values given a morton code, for up to a 
+/** A reverse lookup table of x/y values given a morton code, for up to a
     16x16 value space. */
 static constexpr std::array<Morton::Result2D<Uint8>, 256> xyValues16x16{
     {{0, 0},   {1, 0},   {0, 1},   {1, 1},   {2, 0},   {3, 0},   {2, 1},

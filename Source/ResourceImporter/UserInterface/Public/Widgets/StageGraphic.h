@@ -7,7 +7,7 @@ namespace AM
 namespace ResourceImporter
 {
 /**
- * Draws the stage graphic, used to show where the bounds are when editing 
+ * Draws the stage graphic, used to show where the bounds are when editing
  * boxes.
  */
 class StageGraphic : public AUI::Widget
@@ -20,11 +20,11 @@ public:
 
     /**
      * Updates the stage graphic to match the given extent and origin.
-     * 
+     *
      * @param spriteTextureExtent The texture extent from the sprite data.
      * @param stageOrigin The stage origin from the sprite data.
-     * @param actualSpriteImageOffset Where the sprite image will start, 
-     *        relative to the top left of this widget and scaled to actual 
+     * @param actualSpriteImageOffset Where the sprite image will start,
+     *        relative to the top left of this widget and scaled to actual
      *        (screen-relative) size.
      */
     void updateStage(const SDL_FRect& spriteTextureExtent,
@@ -42,7 +42,7 @@ private:
 
     /**
      * Transforms the vertices that make up the stage's bottom face from world
-     * space to screen space, scales them to the current UI scaling, and 
+     * space to screen space, scales them to the current UI scaling, and
      * offsets them using the current offsets.
      *
      * The finished points are set in the given array in the order:
@@ -65,7 +65,7 @@ private:
      */
     void renderStage(const SDL_FPoint& windowTopLeft);
 
-    // Stage bottom face (1 polygon, 4 coordinates starting from top left and 
+    // Stage bottom face (1 polygon, 4 coordinates starting from top left and
     // going clockwise)
     std::array<SDL_FPoint, 4> stageCoords;
 };

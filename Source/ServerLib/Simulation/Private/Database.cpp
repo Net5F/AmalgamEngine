@@ -31,7 +31,7 @@ Database::Database()
                  SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE}
 , currentTransaction{}
 , backupThreadObj{}
-, exitRequested{false} 
+, exitRequested{false}
 , backupMutex{}
 , backupCondVar{}
 , backupRequested{false}
@@ -53,7 +53,7 @@ Database::Database()
     SQLite::Backup backup(database, backupDatabase);
     backup.executeStep(-1);
 
-    // Note: We build these queries after initTables() because they'll 
+    // Note: We build these queries after initTables() because they'll
     //       segfault if there's no DB with the expected fields.
     insertEntityQuery = std::make_unique<SQLite::Statement>(
         database,
@@ -152,9 +152,9 @@ bool Database::backupIsInProgress()
     return backupRequested.load();
 }
 
-void Database::saveEntityData(entt::entity entity,
-                              std::span<const Uint8> serializedEngineComponents,
-                              std::span<const Uint8> serializedProjectComponents)
+void Database::saveEntityData(
+    entt::entity entity, std::span<const Uint8> serializedEngineComponents,
+    std::span<const Uint8> serializedProjectComponents)
 {
     try {
         insertEntityQuery->bind(1, static_cast<int>(entity));
@@ -254,7 +254,7 @@ void Database::initTables()
     // Note: We only need to init the file-backed database, since the in-memory
     //       database will copy it.
     try {
-        // Version numbers for all data in this database that needs to support 
+        // Version numbers for all data in this database that needs to support
         // migration.
         if (!backupDatabase.tableExists("versions")) {
             backupDatabase.exec(
@@ -280,9 +280,9 @@ void Database::initTables()
 
         // Entity components.
         if (!backupDatabase.tableExists("entities")) {
-            // The component lists need to be serialized separately, so we can 
-            // migrate them separately. If we tried to serialize them together, 
-            // there may be situations where both lists need to be updated at 
+            // The component lists need to be serialized separately, so we can
+            // migrate them separately. If we tried to serialize them together,
+            // there may be situations where both lists need to be updated at
             // the same time, which we can't do with a split migration setup.
             backupDatabase.exec(
                 "CREATE TABLE entities (id INTEGER PRIMARY KEY, "
@@ -330,8 +330,8 @@ void Database::checkDataVersions()
         unsigned int versionNumber{
             static_cast<unsigned int>(getVersionQuery.getColumn(2).getInt())};
 
-        // Match the name to one of our expected names and check the version 
-        // number. If it's newer than the code, fail immediately. If it's 
+        // Match the name to one of our expected names and check the version
+        // number. If it's newer than the code, fail immediately. If it's
         // older, push the required migrations.
         if (std::strcmp(name, "EngineComponents") == 0) {
             if (versionNumber > ENGINE_COMPONENTS_VERSION) {

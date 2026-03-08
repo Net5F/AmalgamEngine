@@ -11,7 +11,7 @@ namespace AM
 namespace Client
 {
 GraphicData::GraphicData(const nlohmann::json& resourceDataJson,
-                       AssetCache& assetCache)
+                         AssetCache& assetCache)
 : GraphicDataBase(resourceDataJson)
 {
     // Parse the json structure to construct our sprite render data.
@@ -63,8 +63,8 @@ void GraphicData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
             texturePath += ".png";
 
             TextureHandle texture{};
-            texture = assetCache.requestTexture(
-                texturePath, Config::SPRITE_SCALING_QUALITY);
+            texture = assetCache.requestTexture(texturePath,
+                                                Config::SPRITE_SCALING_QUALITY);
             if (!texture) {
                 // Note: requestTexture will LOG_ERROR if the file isn't found.
                 continue;
@@ -75,7 +75,7 @@ void GraphicData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
                 parseSprite(spriteJson.value(), texturePath, texture);
             }
         }
-        
+
         // Parse every animation in the json.
         for (auto& animationJson : json["animations"].items()) {
             parseAnimation(animationJson.value());
@@ -145,7 +145,7 @@ Vector3
         return {};
     }
 
-    // If the requested graphic is a Sprite, return 0 (sprites don't have 
+    // If the requested graphic is a Sprite, return 0 (sprites don't have
     // alignment anchors).
     const auto& graphicArr{graphicSet.graphics.at(graphicType)};
     const GraphicRef& graphicRef{graphicArr.at(direction)};
@@ -163,7 +163,7 @@ Vector3
         return {};
     }
 
-    // Return the difference between the Idle South graphic's bottom center and 
+    // Return the difference between the Idle South graphic's bottom center and
     // the requested animation's alignment anchor.
     const auto& idleGraphicArr{graphicSet.graphics.at(EntityGraphicType::Idle)};
     Vector3 idleSouthBottomCenter{idleGraphicArr.at(Rotation::Direction::South)

@@ -98,7 +98,7 @@ World::World(const SimulationContext& inSimContext)
     // Initialize our entt groups.
     EnttGroups::init(registry);
 
-    // Calc our group spawn point starting position. We add padding to make 
+    // Calc our group spawn point starting position. We add padding to make
     // sure they don't clip the North or West edges of the map.
     TileExtent tileMapExtent{tileMap.getTileExtent()};
     groupX
@@ -160,7 +160,7 @@ bool World::teleportEntity(entt::entity entity, const Vector3& newPosition)
         = Transforms::modelToWorldEntity(collision.modelBounds, position);
 
     // If the entity is movement-enabled, update its previous position.
-    // This will make it teleport straight to the new position instead of 
+    // This will make it teleport straight to the new position instead of
     // lerping there.
     if (PreviousPosition
         * prevPosition{registry.try_get<PreviousPosition>(entity)}) {
@@ -193,7 +193,7 @@ entt::entity World::createEntity(const Position& position,
     // Add Position (all entities have a Position).
     registry.emplace<Position>(newEntity, position);
 
-    // Try to add the entity to the locator. If it fails, destroy the entity 
+    // Try to add the entity to the locator. If it fails, destroy the entity
     // and return null.
     if (!(entityLocator.updateEntity(newEntity, position))) {
         registry.destroy(newEntity);
@@ -230,7 +230,7 @@ bool World::addGraphicsComponents(entt::entity entity,
         rotationAdded = true;
     }
 
-    // Try to add the Collision to the locator. If it fails, revert the 
+    // Try to add the Collision to the locator. If it fails, revert the
     // changes and return false.
     if (!(collisionLocator.updateEntity(
             entity, collision.worldBounds,
@@ -268,8 +268,8 @@ void World::addMovementComponents(entt::entity entity)
         registry.emplace<MovementModifiers>(entity);
     }
 
-    // Note: We add Rotation as part of movement (instead of just graphics), 
-    //       because it may be useful at some point to have a non-graphical 
+    // Note: We add Rotation as part of movement (instead of just graphics),
+    //       because it may be useful at some point to have a non-graphical
     //       entity that is movement-enabled and can face a direction.
     if (!(registry.all_of<Rotation>(entity))) {
         registry.emplace<Rotation>(entity);
@@ -347,7 +347,7 @@ void World::storeGlobalValue(std::string_view stringID, Uint32 newValue)
     // Derive string ID in case the user accidentally passed a display name.
     StringTools::deriveStringID(stringID, workStringID);
 
-    // If we're setting the value to 0, don't add it to the map (default values 
+    // If we're setting the value to 0, don't add it to the map (default values
     // don't need to be stored).
     if (newValue == 0) {
         // If the value already exists, erase it.
@@ -415,7 +415,7 @@ Position World::getGroupedSpawnPoint()
 
     // If the row wrapped, increment our group position.
     if (previousRow > rowIndex) {
-        // The width of a full group of entities. We add one extra padding to 
+        // The width of a full group of entities. We add one extra padding to
         // make sure they don't clip the Eastern edge of the map.
         const float GROUP_WIDTH{Config::SPAWN_POINT_GROUP_PADDING_X
                                     * Config::SPAWN_POINT_GROUP_COLUMNS
@@ -424,7 +424,7 @@ Position World::getGroupedSpawnPoint()
         // Increment the group X offset.
         groupX += Config::SPAWN_POINT_GROUP_OFFSET_X;
 
-        // If the new group would go off the East edge of the map, reset the 
+        // If the new group would go off the East edge of the map, reset the
         // X offset and increment the Y offset.
         TileExtent tileMapExtent{tileMap.getTileExtent()};
         float tileMapMaxX{tileMapExtent.xMax() * TILE_WIDTH};
@@ -443,13 +443,13 @@ Position World::getGroupedSpawnPoint()
 
 void World::onEntityDestroyed(entt::entity entity)
 {
-    // Note: Only ClientConnectionSystem should be destroying client entities, 
+    // Note: Only ClientConnectionSystem should be destroying client entities,
     //       so we don't handle netIDMap cleanup here.
 
     // Remove it from the locators.
-    // Note: Client entities could easily be removed where we delete them, but 
+    // Note: Client entities could easily be removed where we delete them, but
     //       NCEs may be deleted at any point by project code, so we handle it
-    //       here to avoid bugs. 
+    //       here to avoid bugs.
     entityLocator.removeEntity(entity);
     collisionLocator.removeEntity(entity);
 
@@ -477,14 +477,14 @@ void World::loadNonClientEntities()
                                 projectComponents);
 
         // Find the Position component.
-        // Note: We do this separately because we know every entity has a 
-        //       Position, and we need it for createEntity() (and we want to 
+        // Note: We do this separately because we know every entity has a
+        //       Position, and we need it for createEntity() (and we want to
         //       use createEntity() to centralize logic and avoid bugs).
         const Position* position{nullptr};
         for (const EnginePersistedComponent& componentVariant :
              engineComponents) {
-            if (const Position*
-                tempPosition{std::get_if<Position>(&componentVariant)}) {
+            if (const Position* tempPosition{
+                    std::get_if<Position>(&componentVariant)}) {
                 position = tempPosition;
                 break;
             }
@@ -507,47 +507,52 @@ void World::loadNonClientEntities()
         for (const EnginePersistedComponent& componentVariant :
              engineComponents) {
             std::visit(VariantTools::Overload(
-                [&](const Position&) {
-                    // Do nothing, we already added the position above.
-                },
-                [&](const Input&) {
-                    // Note: We don't use the persisted Input state, but we 
-                    //       persist it to flag that the entity is movement-
-                    //       enabled.
-                    addMovementComponents(newEntity);
-                },
-                [&](const Rotation& rotation) {
-                    // Note: If movement or graphics components are added first,
-                    //       this will be a replace.
-                    registry.emplace_or_replace<Rotation>(newEntity, rotation);
-                },
-                [&](const CollisionBitSets& collisionBitSets) {
-                    // Note: If graphics components are added first, this will
-                    //       be a replace.
-                    registry.emplace_or_replace<CollisionBitSets>(newEntity, 
-                        collisionBitSets);
-                },
-                [&](const GraphicState& graphicState) {
-                    // Note: We only persist GraphicState, but it implies 
-                    //       the rest of the graphics components.
-                    addGraphicsComponents(newEntity, graphicState);
-                },
-                [&](const auto& component) {
-                    using T = std::decay_t<decltype(component)>;
-                    registry.emplace<T>(newEntity, component);
-                }),
-                componentVariant);
+                           [&](const Position&) {
+                               // Do nothing, we already added the position
+                               // above.
+                           },
+                           [&](const Input&) {
+                               // Note: We don't use the persisted Input state,
+                               // but we
+                               //       persist it to flag that the entity is
+                               //       movement- enabled.
+                               addMovementComponents(newEntity);
+                           },
+                           [&](const Rotation& rotation) {
+                               // Note: If movement or graphics components are
+                               // added first,
+                               //       this will be a replace.
+                               registry.emplace_or_replace<Rotation>(newEntity,
+                                                                     rotation);
+                           },
+                           [&](const CollisionBitSets& collisionBitSets) {
+                               // Note: If graphics components are added first,
+                               // this will
+                               //       be a replace.
+                               registry.emplace_or_replace<CollisionBitSets>(
+                                   newEntity, collisionBitSets);
+                           },
+                           [&](const GraphicState& graphicState) {
+                               // Note: We only persist GraphicState, but it
+                               // implies
+                               //       the rest of the graphics components.
+                               addGraphicsComponents(newEntity, graphicState);
+                           },
+                           [&](const auto& component) {
+                               using T = std::decay_t<decltype(component)>;
+                               registry.emplace<T>(newEntity, component);
+                           }),
+                       componentVariant);
         }
 
         // Project components
         for (const ProjectPersistedComponent& componentVariant :
              projectComponents) {
-            std::visit(VariantTools::Overload(
-                [&](const auto& component) {
-                    using T = std::decay_t<decltype(component)>;
-                    registry.emplace<T>(newEntity, component);
-                }),
-                componentVariant);
+            std::visit(VariantTools::Overload([&](const auto& component) {
+                           using T = std::decay_t<decltype(component)>;
+                           registry.emplace<T>(newEntity, component);
+                       }),
+                       componentVariant);
         }
 
         // Init any components with lazy-updated timers.
@@ -566,7 +571,7 @@ void World::initTimerComponents(entt::entity entity)
     }
 
     // Init CastCooldown, if present.
-    if (CastCooldown* castCooldown{registry.try_get<CastCooldown>(entity)}) {
+    if (CastCooldown * castCooldown{registry.try_get<CastCooldown>(entity)}) {
         castCooldown->initAfterLoad(saveTimestamp->lastSavedTick,
                                     simulation.getCurrentTick());
     }

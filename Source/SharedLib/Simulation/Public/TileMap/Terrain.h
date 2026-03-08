@@ -18,8 +18,8 @@ struct Terrain {
      *   Start Height (4b)
      *     How high the terrain block should be placed within the tile.
      *
-     * The start height field allows us to conserve space. One could imagine 
-     * using Terrain::tileOffset instead, but packing it into graphicValue 
+     * The start height field allows us to conserve space. One could imagine
+     * using Terrain::tileOffset instead, but packing it into graphicValue
      * saves us from sending an extra 3B for every piece of terrain.
      *
      * Note: Terrain must never extend beyond the bounds of its tile.
@@ -29,21 +29,15 @@ struct Terrain {
     /**
      * A Z-axis height value, relative to SharedConfig::TILE_WORLD_HEIGHT.
      *
-     * Since we only have one terrain shape, this is enough information to 
+     * Since we only have one terrain shape, this is enough information to
      * describe which graphic to use for a given piece of terrain.
      *
-     * Note: When a tile's terrain height changes, all of the other tile 
-     *       layers are adjusted to match. This keeps walls, floors, etc from 
-     *       getting trapped under the new terrain geometry, but anything that  
+     * Note: When a tile's terrain height changes, all of the other tile
+     *       layers are adjusted to match. This keeps walls, floors, etc from
+     *       getting trapped under the new terrain geometry, but anything that
      *       was meant to stay the same must be manually re-adjusted.
      */
-    enum Height : Uint8 {
-        Flat,
-        OneThird,
-        TwoThird,
-        Full,
-        Count
-    };
+    enum Height : Uint8 { Flat, OneThird, TwoThird, Full, Count };
 
     /** Bitmask for getting the height of the terrain. */
     static constexpr Uint8 HEIGHT_MASK{0b11110000};
@@ -70,15 +64,14 @@ struct Terrain {
      */
     static Height getTotalHeight(Value value);
 
-    struct InfoReturn
-    {
+    struct InfoReturn {
         /** The terrain's height. */
         Height height{};
         /** The terrain's starting height. */
         Height startHeight{};
     };
     /**
-     * Returns the separate terrain info fields that are bitpacked in the 
+     * Returns the separate terrain info fields that are bitpacked in the
      * given value.
      */
     static InfoReturn getInfo(Value value);

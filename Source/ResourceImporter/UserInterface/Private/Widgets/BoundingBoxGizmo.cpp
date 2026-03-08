@@ -103,7 +103,7 @@ void BoundingBoxGizmo::arrange(const SDL_FPoint& startPosition,
 {
     // Note: This custom arrange isn't really needed, since ResourceImporter
     //       isn't likely to change screen size at runtime. It's nice to keep
-    //       as an example though, of what to do if you have custom graphics 
+    //       as an example though, of what to do if you have custom graphics
     //       that rely on clippedExtent for layout.
 
     // Run the normal arrange step.
@@ -198,9 +198,9 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_FPoint& cursorPosition)
     SDL_FPoint actualStageOrigin{
         AUI::ScalingHelpers::logicalToActual(logicalStageOrigin)};
     float finalXOffset{clippedExtent.x + actualSpriteImageExtent.x
-                     + actualStageOrigin.x};
+                       + actualStageOrigin.x};
     float finalYOffset{clippedExtent.y + actualSpriteImageExtent.y
-                     + actualStageOrigin.y};
+                       + actualStageOrigin.y};
 
     // Apply the offset to the mouse position and convert to logical space.
     SDL_FPoint offsetMousePoint{cursorPosition.x - finalXOffset,
@@ -327,7 +327,7 @@ void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
     updatedBounds.min.x = std::clamp(mouseWorldPos.x, 0.f, updatedBounds.max.x);
 
     // Signal the updated bounding box.
-    // Note: We don't update our internal bounding box until our owner 
+    // Note: We don't update our internal bounding box until our owner
     //       saves the update in the model and calls setBoundingBox().
     if (onBoundingBoxUpdated) {
         onBoundingBoxUpdated(updatedBounds);
@@ -546,9 +546,9 @@ void BoundingBoxGizmo::renderLines(const SDL_FPoint& windowTopLeft)
     offsetMaxPoint.x += windowTopLeft.x;
     offsetMaxPoint.y += windowTopLeft.y;
 
-    SDLHelpers::renderThickLine(AUI::Core::getRenderer(), offsetMinPoint,
-                                offsetMaxPoint, scaledLineWidth,
-                                SDL_Color{148, 0, 0, static_cast<Uint8>(alpha)});
+    SDLHelpers::renderThickLine(
+        AUI::Core::getRenderer(), offsetMinPoint, offsetMaxPoint,
+        scaledLineWidth, SDL_Color{148, 0, 0, static_cast<Uint8>(alpha)});
 
     // Y-axis line
     offsetMinPoint = lineYMinPoint;

@@ -42,7 +42,7 @@ public:
     void sendCastCooldownInits();
 
     /**
-     * Processes cast requests, updates ongoing casts, cancels casts as 
+     * Processes cast requests, updates ongoing casts, cancels casts as
      * necessary, and passes completed casts to registered handlers.
      */
     void processCasts();
@@ -64,13 +64,13 @@ private:
     void updateCasts();
 
     /**
-     * Sends a CastStarted message and sets any entity state related to the 
+     * Sends a CastStarted message and sets any entity state related to the
      * cast being started.
      */
     void startCast(CastState& castState);
 
     /**
-     * Cancels the current cast, resetting cooldowns and sending error messages 
+     * Cancels the current cast, resetting cooldowns and sending error messages
      * appropriately.
      */
     void cancelCast(CastState& castState);
@@ -98,7 +98,7 @@ private:
     /**
      * Returns true if the caster is in range and in LoS of the target.
      *
-     * Note: CastHelper validates casts before they start, so we only use this 
+     * Note: CastHelper validates casts before they start, so we only use this
      *       before finishing a cast.
      */
     bool castIsValid(const CastInfo& castInfo, const Vector3& casterPosition);
@@ -112,7 +112,7 @@ private:
     const ItemData& itemData;
     const CastableData& castableData;
 
-    /** Observes player CastCooldown component creation so we can send the 
+    /** Observes player CastCooldown component creation so we can send the
         initial cast cooldown state to a newly-logged-on player. */
     EnttObserver playerCastCooldownObserver;
 

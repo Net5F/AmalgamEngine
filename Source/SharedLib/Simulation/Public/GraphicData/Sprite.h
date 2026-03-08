@@ -32,7 +32,7 @@ struct Sprite {
     bool collisionEnabled{false};
 
     /** This sprite's model-space bounding volume.
-        Note: Tiles use these bounds, but entities use the bounds defined by 
+        Note: Tiles use these bounds, but entities use the bounds defined by
               their Collision component. */
     BoundingBox modelBounds{};
 };

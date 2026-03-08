@@ -11,7 +11,7 @@ struct TilePosition;
  */
 struct Floor {
     /**
-     * Returns a bounding volume for a floor, translated to world space and 
+     * Returns a bounding volume for a floor, translated to world space and
      * offset to the given tile coords.
      */
     static BoundingBox calcWorldBounds(const TilePosition& tilePosition);

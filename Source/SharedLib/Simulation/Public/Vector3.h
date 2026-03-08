@@ -54,7 +54,7 @@ struct Vector3 {
     [[nodiscard]] Vector3 normal() const;
 
     /**
-     * Returns the per-component reciprocal of this vector (i.e. 
+     * Returns the per-component reciprocal of this vector (i.e.
      * {1/x, 1/y, 1/z}).
      */
     [[nodiscard]] Vector3 reciprocal() const;
@@ -71,7 +71,7 @@ struct Vector3 {
     [[nodiscard]] Vector3 slide(const Vector3& normal) const;
 
     /**
-     * Assuming this Vector3 is a point, returns a new point moved towards  
+     * Assuming this Vector3 is a point, returns a new point moved towards
      * otherPoint by the given distance.
      * If the distance is sufficient to reach otherPoint, returns otherPoint.
      */

@@ -18,9 +18,9 @@ class DataModel;
 /**
  * Holds data for bounding boxes.
  *
- * Note: The engine doesn't actually load this data (or anything from the 
- *       "boundingBoxes" section of ResourceData.json). Instead, we copy the 
- *       relevant bounds data directly into the Sprites and Animations that 
+ * Note: The engine doesn't actually load this data (or anything from the
+ *       "boundingBoxes" section of ResourceData.json). Instead, we copy the
+ *       relevant bounds data directly into the Sprites and Animations that
  *       use them.
  */
 class BoundingBoxModel
@@ -29,7 +29,7 @@ public:
     BoundingBoxModel(DataModel& inDataModel);
 
     /**
-     * Attempts to load the "boundingBoxes" section of the given json into this 
+     * Attempts to load the "boundingBoxes" section of the given json into this
      * model.
      *
      * @return true if successful. If false, getErrorString() will return more
@@ -49,7 +49,7 @@ public:
     bool addBoundingBox();
 
     /**
-     * Adds a bounding box with the given name and bounds, or updates an 
+     * Adds a bounding box with the given name and bounds, or updates an
      * existing one if the name is already taken.
      */
     BoundingBoxID addOrUpdateBoundingBox(const std::string& displayName,
@@ -85,8 +85,8 @@ private:
     /**
      * Checks if the given name is unique among all bounding boxes in the model.
      *
-     * @param boundingBoxID  The ID of the bounds that might get displayName. 
-     *                       If it already is set to displayName, it won't be 
+     * @param boundingBoxID  The ID of the bounds that might get displayName.
+     *                       If it already is set to displayName, it won't be
      *                       counted as non-unique.
      * @param displayName  The display name that the bounds will be set to.
      */
@@ -94,9 +94,9 @@ private:
                                  const std::string& displayName);
 
     /**
-     * Adds a bounding box with the given name, signals to the UI that 
+     * Adds a bounding box with the given name, signals to the UI that
      * the box was added, and returns it.
-     * Note: This doesn't check that the name is unique. You must ensure that 
+     * Note: This doesn't check that the name is unique. You must ensure that
      *       yourself.
      */
     EditorBoundingBox& addBoundingBoxInternal(const std::string& displayName,
@@ -104,7 +104,7 @@ private:
 
     DataModel& dataModel;
 
-    /** Maps bounding box IDs -> the bounding boxes that we currently have 
+    /** Maps bounding box IDs -> the bounding boxes that we currently have
         loaded. */
     std::map<BoundingBoxID, EditorBoundingBox> boundingBoxMap;
 

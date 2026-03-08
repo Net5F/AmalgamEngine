@@ -53,7 +53,7 @@ void InventorySystem::initInventory(const InventoryInit& inventoryInit)
                 inventory.slots[i].ID = itemSlot.ID;
                 inventory.slots[i].count = itemSlot.count;
 
-                // If this slot is non-empty and we don't have the latest 
+                // If this slot is non-empty and we don't have the latest
                 // definition for the item in it, add it to the vector.
                 if (itemSlot.ID
                     && (!(itemData.getItem(itemSlot.ID))

@@ -22,12 +22,12 @@ class World;
 
 /**
  * Interface for interacting with the database.
- * 
- * We use the database to persist item definitions, non-client entity data, 
+ *
+ * We use the database to persist item definitions, non-client entity data,
  * and tile map data as blobs.
  *
- * To avoid blocking the main loop, we first copy all of our data into an 
- * in-memory database. Then, we use a separate thread to backup the in-memory 
+ * To avoid blocking the main loop, we first copy all of our data into an
+ * in-memory database. Then, we use a separate thread to backup the in-memory
  * database to a file. See SaveSystem.h for more info.
  *
  * Note: Client entity data is persisted in the account database, not here.
@@ -40,13 +40,13 @@ public:
     ~Database();
 
     /**
-     * Begins a transaction. While a transaction is ongoing, queries will be 
+     * Begins a transaction. While a transaction is ongoing, queries will be
      * queued until commitTransaction() is called.
      */
     void startTransaction();
 
     /**
-     * If a transaction is ongoing, commits it. This will execute all queued 
+     * If a transaction is ongoing, commits it. This will execute all queued
      * queries.
      */
     void commitTransaction();
@@ -70,7 +70,7 @@ public:
      * @param entity The entity entry to update.
      * @param serializedEngineComponents A serialized
      * std::vector<EnginePersistedComponent>.
-     * @param serializedrojectComponents A serialized 
+     * @param serializedrojectComponents A serialized
      * std::vector<ProjectPersistedComponent>.
      */
     void saveEntityData(entt::entity entity,
@@ -87,10 +87,10 @@ public:
     /**
      * Calls the given callback on each entity data entry.
      *
-     * @param callback A callback of form void(entt::entity, 
-     *                 std::span<const Uint8>, std::span<const Uint8>) that 
-     *                 expects the entity's ID, a serialized 
-     *                 std::vector<EnginePersistedComponent>, and a serialized 
+     * @param callback A callback of form void(entt::entity,
+     *                 std::span<const Uint8>, std::span<const Uint8>) that
+     *                 expects the entity's ID, a serialized
+     *                 std::vector<EnginePersistedComponent>, and a serialized
      *                 std::vector<ProjectPersistedComponent>.
      */
     template<typename Func>
@@ -138,10 +138,10 @@ public:
     /**
      * Calls the given callback on each item data entry.
      *
-     * @param callback A callback of form void(ItemID, std::span<const Uint8>, 
-     *                 ItemVersion, std::string_view) that expects the item's ID,
-     *                 a serialized Item struct, and the item's version and init 
-     *                 script.
+     * @param callback A callback of form void(ItemID, std::span<const Uint8>,
+     *                 ItemVersion, std::string_view) that expects the item's
+     *                 ID, a serialized Item struct, and the item's version 
+     *                 and init script.
      */
     template<typename Func>
     void iterateItems(Func callback)
@@ -176,7 +176,7 @@ public:
     /**
      * Calls the given callback on the entity stored value ID map data entry.
      *
-     * @param callback A callback of form void(std::span<const Uint8>) that 
+     * @param callback A callback of form void(std::span<const Uint8>) that
      *                 expects a serialized EntityStoredValueIDMap.
      */
     template<typename Func>
@@ -201,7 +201,7 @@ public:
     /**
      * Calls the given callback on the global stored value map data entry.
      *
-     * @param callback A callback of form void(std::span<const Uint8>) that 
+     * @param callback A callback of form void(std::span<const Uint8>) that
      *                 expects a serialized GlobalStoredValueMap.
      */
     template<typename Func>
@@ -223,8 +223,8 @@ protected:
     void initTables();
 
     /**
-     * Compares each version number from the database to the current version 
-     * numbers in code. If the data version doesn't match the code version, 
+     * Compares each version number from the database to the current version
+     * numbers in code. If the data version doesn't match the code version,
      * prints an appropriate error and exits.
      */
     void checkDataVersions();
@@ -232,12 +232,12 @@ protected:
     /**
      * Thread function.
      * Waits for backupToFile() to flag that a backup should begin.
-     * 
+     *
      * Backs up the in-memory database to the file database.
      */
     void performBackup();
 
-    /** In-memory database. Used to gather our data so we can safely work 
+    /** In-memory database. Used to gather our data so we can safely work
         with it in another thread. */
     SQLite::Database database;
 

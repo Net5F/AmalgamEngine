@@ -80,11 +80,11 @@ void CastCooldown::update(Uint32 newTick)
 
 void CastCooldown::initAfterLoad(Uint32 lastSavedTick, Uint32 currentTick)
 {
-    // Update to account for the time between the last update and when this 
+    // Update to account for the time between the last update and when this
     // component was saved.
     update(lastSavedTick);
 
-    // Since we've accounted for all the time pre-save, we can now start 
+    // Since we've accounted for all the time pre-save, we can now start
     // tracking the current session.
     lastUpdateTick = currentTick;
 }

@@ -93,7 +93,7 @@ private:
     WorldSpriteSorter worldSpriteSorter;
 
     /** Contains the project's rendering extension functions.
-        Allows the project to provide rendering code and have it be called at 
+        Allows the project to provide rendering code and have it be called at
         the appropriate time. */
     IRendererExtension* extension;
 };

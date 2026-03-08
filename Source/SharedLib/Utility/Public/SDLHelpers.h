@@ -74,7 +74,7 @@ public:
     static SDL_FColor colorToFColor(const SDL_Color& color);
 
     /**
-     * Renders a thick line that spans from min to max, with the given 
+     * Renders a thick line that spans from min to max, with the given
      * thickness and color.
      */
     static void renderThickLine(SDL_Renderer* renderer, const SDL_FPoint& min,

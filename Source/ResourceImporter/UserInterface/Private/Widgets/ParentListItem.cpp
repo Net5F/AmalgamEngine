@@ -38,8 +38,8 @@ AUI::EventResult ParentListItem::onMouseDown(AUI::MouseButtonType buttonType,
 
     // If our text was clicked, select this widget.
     if (SDL_PointInRectFloat(&cursorPosition, &(text.getClippedExtent()))) {
-        // Note: Our only difference in behavior from LibraryListItem is that 
-        //       we only react to clicking on the text region, so we can just 
+        // Note: Our only difference in behavior from LibraryListItem is that
+        //       we only react to clicking on the text region, so we can just
         //       call its handler.
         LibraryListItem::onMouseDown(buttonType, cursorPosition);
         return AUI::EventResult{.wasHandled{true}};
@@ -61,8 +61,8 @@ AUI::EventResult
 
     // If our text was clicked, select this widget.
     if (SDL_PointInRectFloat(&cursorPosition, &(text.getClippedExtent()))) {
-        // Note: Our only difference in behavior from LibraryListItem is that 
-        //       we only react to clicking on the text region, so we can just 
+        // Note: Our only difference in behavior from LibraryListItem is that
+        //       we only react to clicking on the text region, so we can just
         //       call its handler.
         LibraryListItem::onMouseDoubleClick(buttonType, cursorPosition);
     }
@@ -108,11 +108,11 @@ void ParentListItem::onMouseLeave()
 
 void ParentListItem::measure(const SDL_FRect& availableExtent)
 {
-    // Run the normal measure step (measures our children and sets our 
+    // Run the normal measure step (measures our children and sets our
     // scaledExtent).
     Widget::measure(availableExtent);
 
-    // Since our child container might expand or collapse, adjust our height to 
+    // Since our child container might expand or collapse, adjust our height to
     // match.
     logicalExtent.h = childListItemContainer.getLogicalExtent().h;
 }

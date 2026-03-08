@@ -29,9 +29,9 @@ TilePosition::TilePosition(const Vector3& worldPoint)
     static constexpr float TILE_HEIGHT{
         static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
 
-    // Note: We may want to account for float precision loss here using an 
-    //       epsilon, but it's unclear how that rounding would behave (do you 
-    //       round up? round down? round either direction if within epsilon 
+    // Note: We may want to account for float precision loss here using an
+    //       epsilon, but it's unclear how that rounding would behave (do you
+    //       round up? round down? round either direction if within epsilon
     //       range?) This also applies for ChunkPosition and CellPosition.
     x = static_cast<int>(std::floor(worldPoint.x / TILE_WIDTH));
     y = static_cast<int>(std::floor(worldPoint.y / TILE_WIDTH));
@@ -40,9 +40,9 @@ TilePosition::TilePosition(const Vector3& worldPoint)
 
 TilePosition::TilePosition(const ChunkPosition& chunkPosition)
 : DiscretePosition<DiscreteImpl::TileTag>(
-    static_cast<int>(chunkPosition.x * SharedConfig::CHUNK_WIDTH),
-    static_cast<int>(chunkPosition.y * SharedConfig::CHUNK_WIDTH),
-    chunkPosition.z)
+      static_cast<int>(chunkPosition.x * SharedConfig::CHUNK_WIDTH),
+      static_cast<int>(chunkPosition.y * SharedConfig::CHUNK_WIDTH),
+      chunkPosition.z)
 {
 }
 

@@ -30,7 +30,7 @@ void SimulatedClient::connect()
 
 void SimulatedClient::receiveAndProcess()
 {
-    // Note: This is safe to call, even if connect() is running on another 
+    // Note: This is safe to call, even if connect() is running on another
     //       thread (it has an internal check).
     networkSim.receiveAndProcess();
 }

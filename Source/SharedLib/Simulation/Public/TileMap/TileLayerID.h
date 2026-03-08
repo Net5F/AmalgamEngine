@@ -11,16 +11,16 @@ namespace AM
 /**
  * The minimum information needed to uniquely identify a tile layer.
  *
- * Technically, multiple layers may have the same information, but they'll be 
+ * Technically, multiple layers may have the same information, but they'll be
  * exactly the same so differentiation isn't useful.
  */
 struct TileLayerID {
     /** The position of the tile that contains the layer. */
     TilePosition tilePosition{};
 
-    /** If type == Floor or Object, this is how far the layer is offset from 
+    /** If type == Floor or Object, this is how far the layer is offset from
         tilePosition.
-        Note: Terrain and Walls don't use this. Terrain is always aligned to 
+        Note: Terrain and Walls don't use this. Terrain is always aligned to
               the tile, and Walls always match the Terrain height. */
     TileOffset tileOffset{};
 
@@ -31,9 +31,9 @@ struct TileLayerID {
     Uint16 graphicSetID{0};
 
     /** A value that describes this layer's graphic.
-        For all types except Terrain, this is simply an index into 
+        For all types except Terrain, this is simply an index into
         graphicSet.graphics. For Terrain, this is a bit-packed value.
-        For Terrain, cast this to Terrain::Value. For Walls, cast this to 
+        For Terrain, cast this to Terrain::Value. For Walls, cast this to
         Wall::Type. For Floors and Objects, cast this to Rotation::Direction. */
     Uint8 graphicValue{0};
 

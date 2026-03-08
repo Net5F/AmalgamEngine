@@ -74,8 +74,8 @@ void Network::registerCurrentTickPtr(
 
 Uint32 Network::getCurrentTick()
 {
-    // Note: This isn't safe since we're trying to observe changes to a raw 
-    //       pointer across threads, but this should only ever be nullptr if 
+    // Note: This isn't safe since we're trying to observe changes to a raw
+    //       pointer across threads, but this should only ever be nullptr if
     //       the main thread crashes during startup, so it's fine.
     if (currentTickPtr) {
         return *currentTickPtr;

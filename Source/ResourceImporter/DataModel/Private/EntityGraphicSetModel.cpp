@@ -49,9 +49,9 @@ void EntityGraphicSetModel::save(nlohmann::json& json)
     json["entities"] = nlohmann::json::array();
 
     // Fill the json with each entity graphic set in the model.
-    // Note: We encourage people to always have an Idle South graphic (since 
-    //       that's what we use in any situation that needs a default), but 
-    //       we don't require it. If they end up with an unclickable entity 
+    // Note: We encourage people to always have an Idle South graphic (since
+    //       that's what we use in any situation that needs a default), but
+    //       we don't require it. If they end up with an unclickable entity
     //       because they didn't add any graphics to a set, they can easily fix
     //       it.
     int i{0};
@@ -60,8 +60,8 @@ void EntityGraphicSetModel::save(nlohmann::json& json)
         json["entities"][i]["displayName"] = graphicSet.displayName;
         json["entities"][i]["numericID"] = graphicSet.numericID;
 
-        // Note: Types/Values are parallel arrays to save file space. If we 
-        //       switch to a binary format, they can be combined into a single 
+        // Note: Types/Values are parallel arrays to save file space. If we
+        //       switch to a binary format, they can be combined into a single
         //       struct or used as key/value in a map.
         for (auto& [entityGraphicType, graphicID] : graphicSet.graphicIDs) {
             json["entities"][i]["graphicIDTypes"].push_back(entityGraphicType);
@@ -237,13 +237,15 @@ const std::string& EntityGraphicSetModel::getErrorString()
     return errorString;
 }
 
-bool EntityGraphicSetModel::parseEntityGraphicSet(const nlohmann::json& graphicSetJson)
+bool EntityGraphicSetModel::parseEntityGraphicSet(
+    const nlohmann::json& graphicSetJson)
 {
     EntityGraphicSetID numericID{
         static_cast<EntityGraphicSetID>(entityIDPool.reserveID())};
 
     // If the display name isn't unique, error.
-    std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
+    std::string displayName{
+        graphicSetJson.at("displayName").get<std::string>()};
     if (!graphicSetNameIsUnique(numericID, displayName)) {
         errorString = "Entity display name isn't unique: ";
         errorString += displayName.c_str();
@@ -251,8 +253,8 @@ bool EntityGraphicSetModel::parseEntityGraphicSet(const nlohmann::json& graphicS
     }
 
     // Add the graphic set's graphics.
-    // Note: Types/Values are parallel arrays to save file space. If we switch 
-    //       to a binary format, they can be combined into a single struct or 
+    // Note: Types/Values are parallel arrays to save file space. If we switch
+    //       to a binary format, they can be combined into a single struct or
     //       used as key/value in a map.
     const auto& graphicIDTypesJson{graphicSetJson.at("graphicIDTypes")};
     const auto& graphicIDValuesJson{graphicSetJson.at("graphicIDValues")};

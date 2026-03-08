@@ -27,13 +27,13 @@ template<typename S>
 void serialize(S& serializer, Input& input)
 {
     // Bit pack the input bitset.
-    serializer.enableBitPacking(
-        [&input](typename S::BPEnabledType& sbp) {
-            sbp.ext(input.inputStates, bitsery::ext::StdBitset{});
-        });
+    serializer.enableBitPacking([&input](typename S::BPEnabledType& sbp) {
+        sbp.ext(input.inputStates, bitsery::ext::StdBitset{});
+    });
 
-    // Note: We shouldn't need to align after bit packing (when the context ends,
-    //       it'll auto-align), but measureSize() enables bit packing for 
+    // Note: We shouldn't need to align after bit packing (when the context
+    // ends,
+    //       it'll auto-align), but measureSize() enables bit packing for
     //       everything, so the context never ends and aligns itself.
     serializer.adapter().align();
 }

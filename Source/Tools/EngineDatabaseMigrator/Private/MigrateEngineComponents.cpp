@@ -7,10 +7,10 @@
 #include "Log.h"
 #include "entt/fwd.hpp"
 
-// Note: This is all just example code used in testing. The test involved 
-//       adding a "MyNewComponent" struct to the middle of the component type 
+// Note: This is all just example code used in testing. The test involved
+//       adding a "MyNewComponent" struct to the middle of the component type
 //       list.
-//       If we end up doing this a lot, we should make some helper functions 
+//       If we end up doing this a lot, we should make some helper functions
 //       to make this process easier.
 namespace AM
 {
@@ -96,13 +96,12 @@ void MigrateEngineComponents::migrateV0ToV1(SQLite::Database& database)
         // Copy the data to the new format.
         engineComponents.clear();
         for (auto& engineComponentV0 : engineComponentsV0) {
-            // V1 has all of V0's components, so we don't need to do anything 
+            // V1 has all of V0's components, so we don't need to do anything
             // special. Just get it in the new variant format.
-            std::visit(VariantTools::Overload(
-                [&](const auto& component) {
-                    engineComponents.push_back(component);
-                }),
-                engineComponentV0);
+            std::visit(VariantTools::Overload([&](const auto& component) {
+                           engineComponents.push_back(component);
+                       }),
+                       engineComponentV0);
         }
 
         // Serialize the updated data.

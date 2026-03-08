@@ -27,8 +27,8 @@ void InputSystem::processInputMessages()
     ZoneScoped;
 
     // Sort any waiting client input requests.
-    while (const InputChangeRequest
-           * inputChangeRequest{inputChangeRequestQueue.peek()}) {
+    while (const InputChangeRequest* inputChangeRequest{
+        inputChangeRequestQueue.peek()}) {
         // Push the request into the sorter.
         SorterBase::ValidityResult result{inputChangeRequestSorter.push(
             *inputChangeRequest, inputChangeRequest->tickNum)};

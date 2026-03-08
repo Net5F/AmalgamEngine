@@ -93,7 +93,7 @@ std::optional<AVEntityHelpers::GraphicStateReturn>
         case AVEntity::Behavior::FollowEntityStartCaster:
         case AVEntity::Behavior::MoveToPosition:
         case AVEntity::Behavior::FollowDirection: {
-            // If the entity has reached the target position, we don't know 
+            // If the entity has reached the target position, we don't know
             // which direction to face. Return None so the caller knows to use
             // the previous direction.
             if (casterPosition == targetPosition) {
@@ -138,8 +138,8 @@ bool AVEntityHelpers::timeElapsed(AVEntity::Behavior behavior, double startTime,
             }
 
             // Duration == -1. Use the graphic's duration.
-            if (std::holds_alternative<
-                    std::reference_wrapper<const Sprite>>(currentGraphic)) {
+            if (std::holds_alternative<std::reference_wrapper<const Sprite>>(
+                    currentGraphic)) {
                 // Sprites have no duration, end immediately.
                 return true;
             }
@@ -148,7 +148,7 @@ bool AVEntityHelpers::timeElapsed(AVEntity::Behavior behavior, double startTime,
                     std::get<std::reference_wrapper<const Animation>>(
                         currentGraphic)};
 
-                // Subtract 1 tick's worth of time, since the A/V entity will 
+                // Subtract 1 tick's worth of time, since the A/V entity will
                 // be alive for an extra tick after we increment.
                 double endTime{startTime + animation.get().getLengthS()
                                - SharedConfig::SIM_TICK_TIMESTEP_S};
@@ -169,7 +169,7 @@ bool AVEntityHelpers::positionReached(AVEntity::Behavior behavior,
                                       const Position& entityPos,
                                       const Position& targetPos)
 {
-    // If this is a position-based phase and we've reached the target, 
+    // If this is a position-based phase and we've reached the target,
     // return true.
     switch (behavior) {
         case AVEntity::Behavior::MoveToEntity:

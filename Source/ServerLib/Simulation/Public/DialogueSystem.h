@@ -19,10 +19,10 @@ struct DialogueChoiceConditionLua;
 
 /**
  * Handles entity dialogue data requests.
- * 
+ *
  * Dialogue is started when a player selects the Talk interaction on an entity.
- * We respond to the Talk interaction by sending the entity's first dialogue 
- * topic. From there, the dialogue may automatically run further topics, or 
+ * We respond to the Talk interaction by sending the entity's first dialogue
+ * topic. From there, the dialogue may automatically run further topics, or
  * the player may navigate to other topics by selecting an available choice.
  */
 class DialogueSystem
@@ -31,7 +31,7 @@ public:
     DialogueSystem(const SimulationContext& inSimContext);
 
     /**
-     * Processes Talk interactions and dialogue choice requests, sending 
+     * Processes Talk interactions and dialogue choice requests, sending
      * dialogue data if the request is valid.
      *
      * Dialogue may also update sim state, e.g. when giving items to entities.
@@ -39,8 +39,8 @@ public:
     void processDialogueInteractions();
 
 private:
-    /** The maximum number of setNextTopic() calls that can be chained (e.g. a 
-        choice action script has a call, which leads to a topic script with a 
+    /** The maximum number of setNextTopic() calls that can be chained (e.g. a
+        choice action script has a call, which leads to a topic script with a
         call, etc).
         We need to set a max, otherwise people could write infinite loops. */
     const std::size_t TOPIC_NAVIGATION_MAX{5};
@@ -59,18 +59,17 @@ private:
     };
     /**
      * Runs the given topic's topicScript.
-     * @return If the script contained a valid setNextTopic(), returns the next 
+     * @return If the script contained a valid setNextTopic(), returns the next
      *         topic. Else, returns nullptr.
      */
     TopicPair runTopic(const Dialogue& dialogue, const Dialogue::Topic& topic,
                        NetworkID clientID);
 
     /**
-     * Processes a dialogue choice request, sending appropriate response 
+     * Processes a dialogue choice request, sending appropriate response
      * messages.
      */
-    void processDialogueChoice(
-        const DialogueChoiceRequest& choiceRequest);
+    void processDialogueChoice(const DialogueChoiceRequest& choiceRequest);
 
     /**
      * Runs the given choice's actionScript.
@@ -83,11 +82,11 @@ private:
                         NetworkID clientID);
 
     /**
-     * Validates that the given request has valid data and that the choice's 
+     * Validates that the given request has valid data and that the choice's
      * condition is satisfied by the client entity.
      *
      * @param clientEntity The entity associated with the request's netID.
-     * @return If valid, returns the the target entity's Dialogue component. 
+     * @return If valid, returns the the target entity's Dialogue component.
      *         Else, returns nullptr and sends an appropriate error message.
      */
     const Dialogue*
@@ -96,9 +95,10 @@ private:
 
     /**
      * Runs the given choice's condition script.
-     * @return true if the script ran successfully and evaluated to true, else 
-     *         false. If the script evaluated to false and sendAccessErrorMessage
-     *         == true, sends an appropriate error message.
+     * @return true if the script ran successfully and evaluated to true, else
+     *         false. If the script evaluated to false and 
+     *         sendAccessErrorMessage == true, sends an appropriate error 
+     *         message.
      */
     bool runChoiceCondition(const Dialogue::Choice& choice,
                             entt::entity clientEntity,
@@ -106,8 +106,9 @@ private:
                             bool sendAccessErrorMessage);
 
     /**
-     * Iterates the given choices, checking their conditions against clientEntity
-     * and targetEntity and adding them to the given response if they pass.
+     * Iterates the given choices, checking their conditions against
+     * clientEntity and targetEntity and adding them to the given response if
+     * they pass.
      */
     void addChoicesToResponse(const std::vector<Dialogue::Choice>& choices,
                               entt::entity clientEntity,

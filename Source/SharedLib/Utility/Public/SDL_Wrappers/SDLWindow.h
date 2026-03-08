@@ -20,7 +20,7 @@ public:
      */
     SDLWindow(const std::string& title, int w, int h, Uint32 flags);
 
-	~SDLWindow();
+    ~SDLWindow();
 
     /**
      * Returns a pointer to the underlying window.

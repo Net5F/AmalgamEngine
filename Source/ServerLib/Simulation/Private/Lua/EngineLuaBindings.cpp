@@ -44,7 +44,7 @@ EngineLuaBindings::EngineLuaBindings(
 , workString{}
 {
     // Initialize the Lua environments.
-    // Note: We only allow the base library, to avoid giving scripts unsafe 
+    // Note: We only allow the base library, to avoid giving scripts unsafe
     //       access to our system.
     entityInitLua.luaState.open_libraries(sol::lib::base);
     entityItemHandlerLua.luaState.open_libraries(sol::lib::base);
@@ -53,7 +53,7 @@ EngineLuaBindings::EngineLuaBindings(
     dialogueChoiceConditionLua.luaState.open_libraries(sol::lib::base);
 
     // Add the GLOBAL Lua constant to the non-init environments.
-    // Note: GLOBAL can be used instead of an entity ID when setting stored 
+    // Note: GLOBAL can be used instead of an entity ID when setting stored
     //       values.
     Uint32 nullEntityID{entt::to_integral(entt::entity{entt::null})};
     entityItemHandlerLua.luaState["GLOBAL"] = nullEntityID;
@@ -75,7 +75,7 @@ void EngineLuaBindings::addEntityInitBindings()
         "setCollisionLayers", &EngineLuaBindings::setCollisionLayers, this);
     entityInitLua.luaState.set_function(
         "setCollisionMask", &EngineLuaBindings::setCollisionMask, this);
-    // Note: TerrainWall, ClientEntity, NonClientEntity are handled 
+    // Note: TerrainWall, ClientEntity, NonClientEntity are handled
     //       automatically.
     //       Object is only useful in setCollisionMask
     entityInitLua.luaState["CLT_OBJECT"] = CollisionLayerType::Object;
@@ -255,8 +255,7 @@ void EngineLuaBindings::addDialogueChoiceBindings()
 void EngineLuaBindings::setCollisionLayers(CollisionLayerBitSet collisionLayers)
 {
     entt::entity selfEntity{entityInitLua.selfEntity};
-    if (world.registry.all_of<CollisionBitSets>(selfEntity))
-    {
+    if (world.registry.all_of<CollisionBitSets>(selfEntity)) {
         world.registry.patch<CollisionBitSets>(
             selfEntity, [&](CollisionBitSets& collisionBitSets) {
                 collisionBitSets.setCollisionLayers(collisionLayers, selfEntity,
@@ -272,8 +271,7 @@ void EngineLuaBindings::setCollisionLayers(CollisionLayerBitSet collisionLayers)
 void EngineLuaBindings::setCollisionMask(CollisionLayerBitSet collisionMask)
 {
     entt::entity selfEntity{entityInitLua.selfEntity};
-    if (world.registry.all_of<CollisionBitSets>(selfEntity))
-    {
+    if (world.registry.all_of<CollisionBitSets>(selfEntity)) {
         world.registry.patch<CollisionBitSets>(
             selfEntity, [&](CollisionBitSets& collisionBitSets) {
                 collisionBitSets.setCollisionMask(collisionMask);
@@ -342,7 +340,7 @@ void EngineLuaBindings::topic(std::string_view topicName,
 
 void EngineLuaBindings::setDescription(std::string_view description)
 {
-    // All items support the Examine interaction already, so we only need to 
+    // All items support the Examine interaction already, so we only need to
     // add the ItemDescription property.
     Item* item{itemInitLua.selfItem};
 
@@ -370,7 +368,8 @@ void EngineLuaBindings::addCombination(std::string_view otherItemID,
     }
     else {
         workString.clear();
-        workString.append("Failed to add item combination: Item(s) not found: ");
+        workString.append(
+            "Failed to add item combination: Item(s) not found: ");
         if (!otherItem) {
             workString.append("\"");
             workString.append(otherItemID);
@@ -491,7 +490,8 @@ std::size_t EngineLuaBindings::getItemCount(entt::entity entityToCount,
         throw std::runtime_error{"Failed to get item count: Invalid item ID."};
     }
 
-    // Inventory doesn't exist, so the entity has 0 count of the item by default.
+    // Inventory doesn't exist, so the entity has 0 count of the item by
+    // default.
     return 0;
 }
 
@@ -512,7 +512,8 @@ void EngineLuaBindings::storeUint(entt::entity entity,
             workString.clear();
             workString.append("Failed to store value \"");
             workString.append(stringID);
-            workString.append("\": value doesn't exist and value limit is reached");
+            workString.append(
+                "\": value doesn't exist and value limit is reached");
             throw std::runtime_error{workString};
         }
     }
@@ -548,7 +549,7 @@ void EngineLuaBindings::storeFloat(entt::entity entity,
 void EngineLuaBindings::storeTime(entt::entity entity,
                                   std::string_view stringID, Uint32 newValue)
 {
-    // Note: Time is only a type to make scripts more readable. It's handled 
+    // Note: Time is only a type to make scripts more readable. It's handled
     //       the same as Uint32.
     storeUint(entity, stringID, newValue);
 }
@@ -556,7 +557,7 @@ void EngineLuaBindings::storeTime(entt::entity entity,
 void EngineLuaBindings::storeBitSet(entt::entity entity,
                                     std::string_view stringID, Uint32 newValue)
 {
-    // Note: BitSet is only a type to make scripts more readable. It's handled 
+    // Note: BitSet is only a type to make scripts more readable. It's handled
     //       the same as Uint32.
     storeUint(entity, stringID, newValue);
 }
@@ -569,7 +570,7 @@ void EngineLuaBindings::storeBit(entt::entity entity, std::string_view stringID,
             "Failed to store bit: bitToSet must be within range [0, 31]."};
     }
 
-    // This will give us either the current value if it already exists, or 
+    // This will give us either the current value if it already exists, or
     // 0 (a fresh bit set).
     Uint32 bitSet{getStoredUint(entity, stringID)};
 
@@ -628,15 +629,15 @@ float EngineLuaBindings::getStoredFloat(entt::entity entity,
 Uint32 EngineLuaBindings::getStoredTime(entt::entity entity,
                                         std::string_view stringID)
 {
-    // Note: Time is only a type to make scripts more readable. It's handled 
+    // Note: Time is only a type to make scripts more readable. It's handled
     //       the same as Uint32.
     return getStoredUint(entity, stringID);
 }
 
 Uint32 EngineLuaBindings::getStoredBitSet(entt::entity entity,
-                                                   std::string_view stringID)
+                                          std::string_view stringID)
 {
-    // Note: BitSet is only a type to make scripts more readable. It's handled 
+    // Note: BitSet is only a type to make scripts more readable. It's handled
     //       the same as Uint32.
     return getStoredUint(entity, stringID);
 }
@@ -649,7 +650,7 @@ bool EngineLuaBindings::getStoredBit(entt::entity entity,
             "Failed to get bit: bitToGet must be within range [0, 31]."};
     }
 
-    // This will give us either the current value if it already exists, or 
+    // This will give us either the current value if it already exists, or
     // 0 (a fresh bit set).
     Uint32 storedValue{getStoredUint(entity, stringID)};
 

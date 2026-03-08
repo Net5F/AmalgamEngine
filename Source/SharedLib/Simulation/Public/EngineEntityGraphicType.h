@@ -13,7 +13,8 @@ namespace AM
  */
 enum class EngineEntityGraphicType : Uint8 {
     NotSet,
-    /** Note: All graphic sets are expected to contain the South Idle graphic. */
+    /** Note: All graphic sets are expected to contain the South Idle graphic.
+     */
     Idle,
     Run,
     Crouch,

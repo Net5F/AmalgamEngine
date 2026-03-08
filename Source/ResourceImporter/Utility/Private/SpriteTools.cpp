@@ -13,23 +13,23 @@ namespace AM
 {
 namespace ResourceImporter
 {
-BoundingBox 
-SpriteTools::calcSpriteStageWorldExtent(const SDL_FRect& spriteImageExtent,
-    const SDL_FPoint& stageOrigin)
+BoundingBox
+    SpriteTools::calcSpriteStageWorldExtent(const SDL_FRect& spriteImageExtent,
+                                            const SDL_FPoint& stageOrigin)
 {
     // There are 3 options for how we could've sized the stage:
-    //   1. Clamp max values to stay within the image bounds (would form an 
+    //   1. Clamp max values to stay within the image bounds (would form an
     //      irregular shape in-world).
     //   2. Form a world-space axis-aligned box starting at the origin, make it
     //      as large as possible while never leaving the image bounds.
-    //   3. Same as #2, but make it oversized so the whole image (below the 
+    //   3. Same as #2, but make it oversized so the whole image (below the
     //      origin) is within the stage.
-    // We chose to go with #3, because it lets us use the whole image, and 
-    // is easier to implement than #1. The downside is that it lets you draw 
-    // boxes that go outside of the image, but that's easy to avoid if you 
+    // We chose to go with #3, because it lets us use the whole image, and
+    // is easier to implement than #1. The downside is that it lets you draw
+    // boxes that go outside of the image, but that's easy to avoid if you
     // don't want to.
 
-    // Find the screen-space position of the images bottom corners, relative 
+    // Find the screen-space position of the images bottom corners, relative
     // to the origin.
     SDL_FPoint bottomLeft{-1.f * stageOrigin.x,
                           spriteImageExtent.h - stageOrigin.y};
@@ -45,10 +45,11 @@ SpriteTools::calcSpriteStageWorldExtent(const SDL_FRect& spriteImageExtent,
     BoundingBox stageWorldExtent{{0, 0, 0}, {0, 0, 0}};
     stageWorldExtent.max.x = worldBottomRight.x;
     stageWorldExtent.max.y = worldBottomLeft.y;
-    // Z must span from the lowest point on the screen (maxX, maxY, 0), to 
+    // Z must span from the lowest point on the screen (maxX, maxY, 0), to
     // the top of the image.
     float originToMaxY{Transforms::worldToScreen(
-        {worldBottomRight.x, worldBottomLeft.y, 0}, 1.f).y};
+                           {worldBottomRight.x, worldBottomLeft.y, 0}, 1.f)
+                           .y};
     stageWorldExtent.max.z
         = Transforms::screenYToWorldZ((stageOrigin.y + originToMaxY), 1.0);
 
@@ -83,8 +84,7 @@ SDL_Texture* SpriteTools::generateSpriteSheetTexture(
         fullImagePath += sprite.imagePath;
         SDL_Texture* spriteTexture{};
         if (sprite.premultiplyAlpha) {
-            spriteTexture
-                = loadAndPremultiplyTexture(fullImagePath);
+            spriteTexture = loadAndPremultiplyTexture(fullImagePath);
         }
         else {
             spriteTexture = IMG_LoadTexture(AUI::Core::getRenderer(),
@@ -101,9 +101,9 @@ SDL_Texture* SpriteTools::generateSpriteSheetTexture(
 
         // Copy the sprite into the sheet texture;
         SDL_FRect sourceRect{0, 0, sprite.textureExtent.w,
-                            sprite.textureExtent.h};
+                             sprite.textureExtent.h};
         SDL_RenderTexture(AUI::Core::getRenderer(), spriteTexture, &sourceRect,
-                       &(sprite.textureExtent));
+                          &(sprite.textureExtent));
 
         // Clean up the sprite texture.
         SDL_DestroyTexture(spriteTexture);
@@ -126,8 +126,8 @@ SDL_Texture*
 
     // If the surface isn't ARGB8888, convert it.
     if (spriteSurface->format != SDL_PIXELFORMAT_ARGB8888) {
-        SDL_Surface* newSurface{SDL_ConvertSurface(
-            spriteSurface, SDL_PIXELFORMAT_ARGB8888)};
+        SDL_Surface* newSurface{
+            SDL_ConvertSurface(spriteSurface, SDL_PIXELFORMAT_ARGB8888)};
         SDL_DestroySurface(spriteSurface);
         spriteSurface = newSurface;
     }

@@ -11,7 +11,7 @@ namespace Client
 /**
  * An instance of a single visual effect.
  *
- * Typically, this will be attached to an entity to display a temporary graphic, 
+ * Typically, this will be attached to an entity to display a temporary graphic,
  * e.g. showing a heal graphic when an entity uses a health item.
  *
  * When the graphic is done playing, this effect is automatically destroyed.

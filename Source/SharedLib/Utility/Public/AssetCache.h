@@ -26,10 +26,10 @@ public:
 
     /**
      * If a texture with the given resource ID is in the cache, returns it.
-     * If not and the resource ID is a valid file path to an image, adds the 
+     * If not and the resource ID is a valid file path to an image, adds the
      * image to the cache and returns it.
      *
-     * @param resourceID An abstract resource ID (for textures added using 
+     * @param resourceID An abstract resource ID (for textures added using
      *                   addTexture()), or the full path to an image file.
      * @param scaleMode The filtering/scaling mode that this texture should use.
      * @return A valid texture if one was found, else nullptr.
@@ -41,7 +41,7 @@ public:
      * Adds the given texture to the cache, using the given ID.
      * If a texture already exists with the given ID, it will be overwritten.
      *
-     * Note: The texture will be copied, so the given pointer does not need 
+     * Note: The texture will be copied, so the given pointer does not need
      *       to remain valid.
      * @return A managed copy of the given texture.
      */

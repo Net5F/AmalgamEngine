@@ -26,7 +26,7 @@ struct EditorTerrainGraphicSet {
     /** The numeric IDs for each graphic in this set.
         If a graphic isn't provided, it should be set to NULL_GRAPHIC_ID. */
     std::array<GraphicID, Terrain::Height::Count> graphicIDs{
-        /* NULL_GRAPHIC_ID */ };
+        /* NULL_GRAPHIC_ID */};
 };
 
 } // namespace ResourceImporter

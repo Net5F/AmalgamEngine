@@ -19,7 +19,7 @@ namespace Server
 {
 
 /**
- * Retrieves all persisted component types that the entity possesses from 
+ * Retrieves all persisted component types that the entity possesses from
  * TypeList and pushes them into componentVec.
  *
  * Note: This is a free function to reduce includes in the header.
@@ -58,7 +58,7 @@ SaveSystem::SaveSystem(const SimulationContext& inSimContext)
 
 void SaveSystem::saveIfNecessary()
 {
-    // If enough time has passed and a backup isn't still underway, save 
+    // If enough time has passed and a backup isn't still underway, save
     // everything to the database.
     if ((saveTimer.getTime() >= Config::SAVE_PERIOD_S)
         && !(world.database->backupIsInProgress())) {
@@ -89,8 +89,8 @@ void SaveSystem::itemUpdated(ItemID itemID)
 
 void SaveSystem::saveNonClientEntities()
 {
-    // Note: If doing a full save ever starts taking too long, we can add 
-    //       an observer that tracks changes to non-client entities and only 
+    // Note: If doing a full save ever starts taking too long, we can add
+    //       an observer that tracks changes to non-client entities and only
     //       save those.
 
     // Queue all of our entity save queries.
@@ -110,11 +110,11 @@ void SaveSystem::saveNonClientEntities()
         projectComponents.clear();
 
         addComponentsToVector<EnginePersistedComponentTypes,
-                              EnginePersistedComponent>(
-            world.registry, entity, engineComponents);
+                              EnginePersistedComponent>(world.registry, entity,
+                                                        engineComponents);
         addComponentsToVector<ProjectPersistedComponentTypes,
-                              ProjectPersistedComponent>(
-            world.registry, entity, projectComponents);
+                              ProjectPersistedComponent>(world.registry, entity,
+                                                         projectComponents);
 
         workBuffer1.clear();
         workBuffer2.clear();
@@ -133,9 +133,8 @@ void SaveSystem::saveItems()
 {
     // Remove duplicates from the vector.
     std::sort(updatedItems.begin(), updatedItems.end());
-    updatedItems.erase(
-        std::unique(updatedItems.begin(), updatedItems.end()),
-        updatedItems.end());
+    updatedItems.erase(std::unique(updatedItems.begin(), updatedItems.end()),
+                       updatedItems.end());
 
     // Queue all of our item save queries.
     for (ItemID itemID : updatedItems) {

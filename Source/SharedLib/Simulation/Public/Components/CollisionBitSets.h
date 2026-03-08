@@ -25,7 +25,8 @@ public:
                             entt::entity entity, entt::registry& registry);
 
     /**
-     * Sets the layers that this entity will scan for collisions during movement.
+     * Sets the layers that this entity will scan for collisions during
+     * movement.
      */
     void setCollisionMask(CollisionLayerBitSet inCollisionMask);
 

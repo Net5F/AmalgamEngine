@@ -20,11 +20,7 @@ static constexpr std::array<BoundingBox, Terrain::Height::Count> TERRAIN_BOXES{
 
 /** World-space height offsets for each height value. */
 static constexpr std::array<float, Terrain::Height::Count> HEIGHT_VALUES{
-    0,
-    ONE_THIRD_HEIGHT,
-    TWO_THIRD_HEIGHT,
-    HEIGHT
-};
+    0, ONE_THIRD_HEIGHT, TWO_THIRD_HEIGHT, HEIGHT};
 
 Terrain::Height Terrain::getHeight(Value value)
 {

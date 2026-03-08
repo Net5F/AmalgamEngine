@@ -143,8 +143,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             break;
         }
         case EngineMessageType::CastRequest: {
-            dispatchWithNetID<CastRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithNetID<CastRequest>(netID, {messageBuffer, messageSize},
+                                           networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {

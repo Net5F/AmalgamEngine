@@ -71,7 +71,7 @@ private:
         for. */
     std::vector<entt::entity> entitiesToSend;
 
-    /** Observes updates to movement sync-relevant components so we know when 
+    /** Observes updates to movement sync-relevant components so we know when
         to sync. */
     EnttObserver movementSyncObserver;
 };

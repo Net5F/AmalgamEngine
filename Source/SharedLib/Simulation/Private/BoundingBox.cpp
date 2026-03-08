@@ -106,7 +106,7 @@ bool BoundingBox::intersects(const Cylinder& cylinder) const
         return false;
     }
 
-    // The cylinder intersects along the Z axis. The rest of the test now 
+    // The cylinder intersects along the Z axis. The rest of the test now
     // reduces to a 2D circle/rectangle intersection.
 
     // Get the X and Y distances between the centers.
@@ -177,33 +177,34 @@ BoundingBox::RayIntersectReturn
                             const Vector3& inverseRayDirection, float tMinBound,
                             float tMaxBound) const
 {
-    // Slab Algorithm Ref: 
+    // Slab Algorithm Ref:
     // https://medium.com/@bromanz/another-view-on-the-classic-ray-aabb-intersection-algorithm-for-bvh-traversal-41125138b525
     // https://technik90.blogspot.com/2018/06/the-other-pathtracer-4-optimizing-aabb.html
 
     Vector3 t0{(min - rayOrigin) * inverseRayDirection};
     Vector3 t1{(max - rayOrigin) * inverseRayDirection};
-    
+
     Vector3 tEnter{Math::min(t0, t1)};
     Vector3 tExit{Math::max(t1, t0)};
 
     // We compare against tMinBound/tMaxBound so that, if the intersecting time
-    // interval is not within [tMinBound, tMaxBound], either tMin will be 
-    // brought above tMax, or tMax will be brought below tMin, causing the 
+    // interval is not within [tMinBound, tMaxBound], either tMin will be
+    // brought above tMax, or tMax will be brought below tMin, causing the
     // intersection check (tMax >= tMin) to return false.
     //
     // Example: Define tSlabMin = max(tEnter), tSlabMax = min(tExit).
-    //          Let [tSlabMin, tSlabMax]   = [2, 4], 
+    //          Let [tSlabMin, tSlabMax]   = [2, 4],
     //              [tMinBound, tMaxBound] = [0, 1].
     //          Note that the result ([2, 4]) is outside of the bounds.
     //
     //          tLastEnter = max(tMin, tSlabMin) = max(0, 2) = 2
     //          tFirstExit = min(tMax, tSlabMax), = min(1, 4) = 1
     //
-    //          We return (tFirstExit >= tLastEnter) -> return (1 >= 2) -> false.
+    //          We return (tFirstExit >= tLastEnter) -> return (1 >= 2) ->
+    //          false.
     //
-    // Note: There are also some cases where tMin/tMax get clamped to the 
-    //       bounds, such as when rayOrigin is inside this box, or when the 
+    // Note: There are also some cases where tMin/tMax get clamped to the
+    //       bounds, such as when rayOrigin is inside this box, or when the
     //       bounds end before the exit is reached.
     float tMin{
         std::max(tMinBound, std::max(std::max(tEnter.x, tEnter.y), tEnter.z))};
@@ -242,7 +243,8 @@ BoundingBox BoundingBox::moveTo(const Vector3& newMin) const
     return newBox;
 }
 
-BoundingBox BoundingBox::moveBottomCenterTo(const Vector3& newBottomCenter) const
+BoundingBox
+    BoundingBox::moveBottomCenterTo(const Vector3& newBottomCenter) const
 {
     BoundingBox newBox{*this};
     Vector3 lengths{xLength(), yLength(), zLength()};

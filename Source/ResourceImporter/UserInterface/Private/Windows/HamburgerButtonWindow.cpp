@@ -22,7 +22,8 @@ HamburgerButtonWindow::HamburgerButtonWindow(MainScreen& inScreen)
 
     /* Buttons. */
     hamburgerButton.normalImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "HamburgerButton/Normal.png", SDL_SCALEMODE_LINEAR);
+        Paths::TEXTURE_DIR + "HamburgerButton/Normal.png",
+        SDL_SCALEMODE_LINEAR);
     hamburgerButton.hoveredImage.setSimpleImage(
         Paths::TEXTURE_DIR + "HamburgerButton/Hovered.png",
         SDL_SCALEMODE_LINEAR);

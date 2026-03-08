@@ -16,8 +16,7 @@ namespace ResourceImporter
 static constexpr float SLOT_WIDTH{156};
 
 EntityGraphicSetEditView::EntityGraphicSetEditView(
-    DataModel& inDataModel,
-                                       const LibraryWindow& inLibraryWindow)
+    DataModel& inDataModel, const LibraryWindow& inLibraryWindow)
 : AUI::Window({320, 58, 1297, 1022}, "EntityGraphicSetEditView")
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
@@ -42,8 +41,9 @@ EntityGraphicSetEditView::EntityGraphicSetEditView(
     topText.setText("Entity Graphic Set");
 
     styleText(modifyText);
-    modifyText.setText("To modify: select a sprite or animation in the Library window, then "
-                       "press one of the Assign buttons.");
+    modifyText.setText(
+        "To modify: select a sprite or animation in the Library window, then "
+        "press one of the Assign buttons.");
     styleText(clearText);
     clearText.setText("To clear: click an empty area to clear your selection, "
                       "then press one of the Assign buttons.");
@@ -74,7 +74,7 @@ EntityGraphicSetEditView::EntityGraphicSetEditView(
 void EntityGraphicSetEditView::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
-    // Check if the new active item is an entity graphic set and return early if 
+    // Check if the new active item is an entity graphic set and return early if
     // not.
     const EditorEntityGraphicSet* newActiveGraphicSet{
         get_if<EditorEntityGraphicSet>(&newActiveItem)};
@@ -172,7 +172,7 @@ void EntityGraphicSetEditView::styleText(AUI::Text& text)
 
 void EntityGraphicSetEditView::initGraphicContainer()
 {
-    // Fill the container with a slot widget for each EntityGraphicType 
+    // Fill the container with a slot widget for each EntityGraphicType
     // and Rotation::Direction.
     graphicContainer.clear();
     iterateEntityGraphicTypes([&](EntityGraphicType graphicType) {
@@ -214,7 +214,7 @@ void EntityGraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
         // Get the graphic's first sprite.
         const EditorSprite* sprite{graphic.getFirstSprite()};
         if (!sprite) {
-            // Graphic doesn't have a sprite (empty animation). Leave the 
+            // Graphic doesn't have a sprite (empty animation). Leave the
             // image blank.
             slot.spriteImage.setIsVisible(false);
             return;

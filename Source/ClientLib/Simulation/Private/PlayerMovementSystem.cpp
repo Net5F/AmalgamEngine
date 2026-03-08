@@ -24,7 +24,8 @@ namespace AM
 {
 namespace Client
 {
-PlayerMovementSystem::PlayerMovementSystem(const SimulationContext& inSimContext)
+PlayerMovementSystem::PlayerMovementSystem(
+    const SimulationContext& inSimContext)
 : simulation{inSimContext.simulation}
 , world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
@@ -44,7 +45,7 @@ void PlayerMovementSystem::processMovement()
     // If we're online, process any updates from the server.
     if (!Config::RUN_OFFLINE) {
         // Apply any player entity updates from the server.
-        // If an update is applied, the player entity's actual components will 
+        // If an update is applied, the player entity's actual components will
         // be moved back in time to match the update's state.
         Uint32 lastUpdateTick{processPlayerUpdates()};
 
@@ -172,8 +173,8 @@ void PlayerMovementSystem::printMismatchInfo(Uint32 lastUpdateTick)
 
     LOG_INFO("Predicted position mismatched after replay: (%.6f, "
              "%.6f, %.6f) -> (%.6f, %.6f, %.6f)",
-             previousPosition.x, previousPosition.y,
-             previousPosition.z, position.x, position.y, position.z);
+             previousPosition.x, previousPosition.y, previousPosition.z,
+             position.x, position.y, position.z);
     LOG_INFO("lastUpdateTick: %u", lastUpdateTick);
 }
 

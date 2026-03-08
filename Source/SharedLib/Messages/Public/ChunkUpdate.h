@@ -17,9 +17,9 @@ public:
         EngineMessageType::ChunkUpdate};
 
     /** Used as a "we should never hit this" cap on the number of chunks that
-        we request at once. 9 is for the current chunk and all surrounding chunks 
-        in the X/Y directions, 20 is a large number to cap how many levels the 
-        map can have in the Z direction. */
+        we request at once. 9 is for the current chunk and all surrounding
+       chunks in the X/Y directions, 20 is a large number to cap how many levels
+       the map can have in the Z direction. */
     static constexpr std::size_t MAX_CHUNKS{9 * 20};
 
     /** The chunks that the client should load. */

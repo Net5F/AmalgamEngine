@@ -108,8 +108,8 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     graphicSetModel.floorAdded.connect<&LibraryWindow::onFloorAdded>(*this);
     graphicSetModel.wallAdded.connect<&LibraryWindow::onWallAdded>(*this);
     graphicSetModel.objectAdded.connect<&LibraryWindow::onObjectAdded>(*this);
-    graphicSetModel.graphicSetRemoved.connect<&LibraryWindow::onGraphicSetRemoved>(
-        *this);
+    graphicSetModel.graphicSetRemoved
+        .connect<&LibraryWindow::onGraphicSetRemoved>(*this);
     EntityGraphicSetModel& entityModel{dataModel.entityGraphicSetModel};
     entityModel.entityAdded.connect<&LibraryWindow::onEntityAdded>(*this);
     entityModel.entityRemoved.connect<&LibraryWindow::onEntityRemoved>(*this);
@@ -142,7 +142,7 @@ const std::vector<LibraryListItem*>& LibraryWindow::getSelectedListItems() const
 void LibraryWindow::onFocusLost(AUI::FocusLostType focusLostType)
 {
     // Deselect all of our selected list items.
-    // Note: We need to save a copy of the vector and clear it so that the 
+    // Note: We need to save a copy of the vector and clear it so that the
     //       librarySelectedItemsChanged signal is accurate.
     std::vector<LibraryListItem*> tempSelectedListItems(selectedListItems);
     selectedListItems.clear();
@@ -162,7 +162,7 @@ AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
         if (selectedListItems.size() == 0) {
             return AUI::EventResult{.wasHandled{false}};
         }
-        // If any animations are selected, do nothing (animations can't be 
+        // If any animations are selected, do nothing (animations can't be
         // deleted, users need to delete their sprites instead).
         for (LibraryListItem* listItem : selectedListItems) {
             if (listItem->type == LibraryListItem::Type::Animation) {
@@ -244,9 +244,10 @@ void LibraryWindow::onSpriteAdded(SpriteID spriteID, const EditorSprite& sprite,
     spriteListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
         processSelectedListItem(selectedListItem);
     });
-    spriteListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
-        processDeselectedListItem(deselectedListItem);
-    });
+    spriteListItem->setOnDeselected(
+        [this](LibraryListItem* deselectedListItem) {
+            processDeselectedListItem(deselectedListItem);
+        });
     spriteListItem->setOnActivated(
         [this, spriteID](LibraryListItem* activatedListItem) {
             // Set this item's associated sprite as the active item.
@@ -260,7 +261,7 @@ void LibraryWindow::onSpriteAdded(SpriteID spriteID, const EditorSprite& sprite,
 }
 
 void LibraryWindow::onAnimationAdded(AnimationID animationID,
-    const EditorAnimation& animation)
+                                     const EditorAnimation& animation)
 {
     // Construct a new list item for this animation.
     auto animationListItem{
@@ -277,13 +278,12 @@ void LibraryWindow::onAnimationAdded(AnimationID animationID,
     });
     animationListItem->setOnDeselected(
         [this](LibraryListItem* deselectedListItem) {
-        processDeselectedListItem(deselectedListItem);
-    });
-    animationListItem->setOnActivated(
-        [this, animationID](LibraryListItem*) {
-            // Set this list item's associated animation as the active item.
-            dataModel.setActiveAnimation(animationID);
+            processDeselectedListItem(deselectedListItem);
         });
+    animationListItem->setOnActivated([this, animationID](LibraryListItem*) {
+        // Set this list item's associated animation as the active item.
+        dataModel.setActiveAnimation(animationID);
+    });
 
     // Add the new list item to the appropriate container.
     auto& listItemContainer{static_cast<LibraryCollapsibleContainer&>(
@@ -304,13 +304,14 @@ void LibraryWindow::onBoundingBoxAdded(BoundingBoxID boundingBoxID,
 
     boundingBoxListItem->setLeftPadding(32);
 
-    boundingBoxListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
-        processSelectedListItem(selectedListItem);
-    });
+    boundingBoxListItem->setOnSelected(
+        [this](LibraryListItem* selectedListItem) {
+            processSelectedListItem(selectedListItem);
+        });
     boundingBoxListItem->setOnDeselected(
         [this](LibraryListItem* deselectedListItem) {
-        processDeselectedListItem(deselectedListItem);
-    });
+            processDeselectedListItem(deselectedListItem);
+        });
     boundingBoxListItem->setOnActivated(
         [this, boundingBoxID](LibraryListItem*) {
             // Set this list item's associated bounding box as the active item.
@@ -376,9 +377,10 @@ void LibraryWindow::onGraphicSetAdded(Uint16 graphicSetID, const T& graphicSet)
 
     graphicSetListItem->setLeftPadding(32);
 
-    graphicSetListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
-        processSelectedListItem(selectedListItem);
-    });
+    graphicSetListItem->setOnSelected(
+        [this](LibraryListItem* selectedListItem) {
+            processSelectedListItem(selectedListItem);
+        });
     graphicSetListItem->setOnActivated(
         [this, graphicSetType, graphicSetID](LibraryListItem*) {
             // Set this list item's associated graphic set as the active item.
@@ -408,9 +410,9 @@ void LibraryWindow::onEntityAdded(EntityGraphicSetID graphicSetID,
     });
     entityListItem->setOnDeselected(
         [this](LibraryListItem* deselectedListItem) {
-        // Note: Deselect is handled in OnSelected and FocusLost.
-        selectedItemsChangedSig.publish(selectedListItems);
-    });
+            // Note: Deselect is handled in OnSelected and FocusLost.
+            selectedItemsChangedSig.publish(selectedListItems);
+        });
     entityListItem->setOnActivated([this, graphicSetID](LibraryListItem*) {
         // Set this list item's associated graphic set as the active item.
         dataModel.setActiveGraphicSet(GraphicSet::Type::Entity, graphicSetID);
@@ -543,7 +545,8 @@ void LibraryWindow::onBoundingBoxRemoved(BoundingBoxID boundingBoxID)
     boundsListItemMap.erase(boundsIt);
 }
 
-void LibraryWindow::onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID)
+void LibraryWindow::onGraphicSetRemoved(GraphicSet::Type type,
+                                        Uint16 graphicSetID)
 {
     auto& listItemMap{listItemMaps[toListItemType(type)]};
     auto graphicSetIt{listItemMap.find(graphicSetID)};
@@ -643,8 +646,8 @@ void LibraryWindow::onSpriteDisplayNameChanged(
     spriteListItem.text.setText(newDisplayName);
 }
 
-void LibraryWindow::onAnimationDisplayNameChanged(AnimationID animationID,
-    const std::string& newDisplayName)
+void LibraryWindow::onAnimationDisplayNameChanged(
+    AnimationID animationID, const std::string& newDisplayName)
 {
     auto& animationListItemMap{listItemMaps[LibraryListItem::Type::Animation]};
     auto animationListItemIt{animationListItemMap.find(animationID)};
@@ -672,7 +675,8 @@ void LibraryWindow::onBoundingBoxDisplayNameChanged(
 }
 
 void LibraryWindow::onGraphicSetDisplayNameChanged(
-    GraphicSet::Type type, Uint16 graphicSetID, const std::string& newDisplayName)
+    GraphicSet::Type type, Uint16 graphicSetID,
+    const std::string& newDisplayName)
 {
     LibraryListItem::Type graphicSetListItemType{toListItemType(type)};
     auto& graphicSetListItemMap{listItemMaps[graphicSetListItemType]};
@@ -754,7 +758,7 @@ void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
     bool ctrlIsHeld{keyStates[SDL_SCANCODE_LCTRL]
                     || keyStates[SDL_SCANCODE_RCTRL]};
 
-    // If we're shift or ctrl+clicking and have existing selections, check if 
+    // If we're shift or ctrl+clicking and have existing selections, check if
     // the new selection is the same type.
     if ((shiftIsHeld || ctrlIsHeld) && !(selectedListItems.empty())
         && (selectedListItems[0]->type != selectedListItem->type)) {
@@ -763,7 +767,7 @@ void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
         return;
     }
 
-    // If this is a shift+click, select all items between the current selection 
+    // If this is a shift+click, select all items between the current selection
     // and the new one.
     if (shiftIsHeld) {
         // TODO: Implement.
@@ -800,7 +804,7 @@ void LibraryWindow::processDeselectedListItem(
     LibraryListItem* deselectedListItem)
 {
     // If the item is present in selectedListItems, erase it.
-    // Note: If this event originated in onFocusLost(), the list item will 
+    // Note: If this event originated in onFocusLost(), the list item will
     //       already be erased.
     auto it{std::ranges::find(selectedListItems, deselectedListItem)};
     if (it != selectedListItems.end()) {
@@ -843,7 +847,8 @@ void LibraryWindow::removeListItem(LibraryListItem* listItem)
             break;
         }
         case LibraryListItem::Type::Wall: {
-            graphicSetModel.remWall(static_cast<WallGraphicSetID>(listItem->ID));
+            graphicSetModel.remWall(
+                static_cast<WallGraphicSetID>(listItem->ID));
             break;
         }
         case LibraryListItem::Type::Object: {
@@ -857,7 +862,7 @@ void LibraryWindow::removeListItem(LibraryListItem* listItem)
             break;
         }
         default: {
-            // Note: We purposely don't support deleting animations, since 
+            // Note: We purposely don't support deleting animations, since
             //       they're automatically managed based on sprite filenames.
             LOG_FATAL("Unsupported list item type.");
         }
@@ -889,7 +894,8 @@ LibraryListItem::Type
     return LibraryListItem::Type::None;
 }
 
-LibraryWindow::Category LibraryWindow::toCategory(GraphicSet::Type graphicSetType)
+LibraryWindow::Category
+    LibraryWindow::toCategory(GraphicSet::Type graphicSetType)
 {
     switch (graphicSetType) {
         case GraphicSet::Type::Terrain: {

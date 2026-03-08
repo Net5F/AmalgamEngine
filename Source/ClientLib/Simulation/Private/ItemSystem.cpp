@@ -26,7 +26,7 @@ ItemSystem::ItemSystem(const SimulationContext& inSimContext)
 , combineItemsQueue{inSimContext.networkEventDispatcher}
 {
     // Load all items from ItemCache.bin into ItemData.
-    // Note: We need to check that the items aren't already loaded, since this 
+    // Note: We need to check that the items aren't already loaded, since this
     //       system will be re-constructed by Simulation when we disconnect.
     if (itemData.getAllItems().empty()) {
         loadItemCache();
@@ -48,7 +48,7 @@ void ItemSystem::processItemUpdates()
     // Process any waiting item definition updates.
     ItemUpdate itemUpdate{};
     while (itemUpdateQueue.pop(itemUpdate)) {
-        // Load the given item definition into ItemData, overwriting any 
+        // Load the given item definition into ItemData, overwriting any
         // existing item if present.
         Item item{.displayName = itemUpdate.displayName,
                   .stringID = itemUpdate.stringID,

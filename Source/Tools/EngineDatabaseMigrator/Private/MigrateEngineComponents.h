@@ -16,7 +16,7 @@ class MigrateEngineComponents
 {
 public:
     /**
-     * Migrates any engine entity components in the given database from 
+     * Migrates any engine entity components in the given database from
      * currentVersion to desiredVersion.
      */
     static MigrationStatus migrate(SQLite::Database& database,

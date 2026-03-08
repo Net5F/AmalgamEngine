@@ -54,8 +54,8 @@ namespace AM
  *   LOG_FATAL: Print file name, line number, and the given string. In debug
  *              and release this will also std::abort().
  *
- * Use LOG_INFO for general printing, LOG_DEBUG for debug info, LOG_ERROR for 
- * recoverable errors (make sure you write appropriate recovery logic), and 
+ * Use LOG_INFO for general printing, LOG_DEBUG for debug info, LOG_ERROR for
+ * recoverable errors (make sure you write appropriate recovery logic), and
  * LOG_FATAL for unrecoverable errors.
  * Generally, we'll start error cases as LOG_FATAL, then switch them to
  * LOG_ERROR if there's some expected failure that we can't yet fix.

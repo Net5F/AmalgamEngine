@@ -122,8 +122,9 @@ private:
                                        const std::string& newDisplayName);
     void onBoundingBoxDisplayNameChanged(BoundingBoxID boundingBoxID,
                                          const std::string& newDisplayName);
-    void onGraphicSetDisplayNameChanged(GraphicSet::Type type, Uint16 graphicSetID,
-                                       const std::string& newDisplayName);
+    void onGraphicSetDisplayNameChanged(GraphicSet::Type type,
+                                        Uint16 graphicSetID,
+                                        const std::string& newDisplayName);
     void onEntityDisplayNameChanged(EntityGraphicSetID graphicSetID,
                                     const std::string& newDisplayName);
     void onIconDisplayNameChanged(IconID iconID,

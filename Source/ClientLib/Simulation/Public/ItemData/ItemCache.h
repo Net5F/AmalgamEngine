@@ -13,9 +13,8 @@ namespace Client
  *
  * Holds a list of items in a serializable form.
  */
-struct ItemCache
-{
-    /** Used as a "we should never hit this" cap on the number of items in the 
+struct ItemCache {
+    /** Used as a "we should never hit this" cap on the number of items in the
         cache. */
     static constexpr std::size_t MAX_ITEMS{10000};
 

@@ -12,8 +12,8 @@ namespace AM
 /**
  * Identifies a castable.
  *
- * Castables fall into one of 3 types (item interaction, entity interaction, 
- * spell), and are associated with an enum value. Only one castable can be 
+ * Castables fall into one of 3 types (item interaction, entity interaction,
+ * spell), and are associated with an enum value. Only one castable can be
  * assigned to each type+value, so this ID is unique.
  */
 using CastableID

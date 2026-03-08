@@ -65,7 +65,7 @@ InventoryHelper::AddResult
                                      entt::entity entityToAddTo,
                                      bool sendFailureMessage)
 {
-    if (const Item * item{itemData.getItem(itemID)}) {
+    if (const Item* item{itemData.getItem(itemID)}) {
         return addItemToEntity(item->numericID, count, entityToAddTo);
     }
 
@@ -159,15 +159,15 @@ InventoryHelper::RemoveResult
     RemoveResult result{};
     const char* message{};
     if (item && inventory) {
-        result = RemoveResult::InsufficientItemCount; 
+        result = RemoveResult::InsufficientItemCount;
         message = "Failed to remove item: Insufficient amount.";
     }
     else if (inventory) {
-        result = RemoveResult::InventoryNotFound; 
+        result = RemoveResult::InventoryNotFound;
         message = "Failed to remove item: Entity has no Inventory component.";
     }
     else {
-        result = RemoveResult::ItemNotFound; 
+        result = RemoveResult::ItemNotFound;
         message = "Failed to remove item: Item not found.";
     }
 

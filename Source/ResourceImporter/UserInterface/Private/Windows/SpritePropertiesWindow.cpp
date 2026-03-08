@@ -103,10 +103,10 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
 
     auto styleLabel
         = [&](AUI::Text& label, const std::string& text, float fontSize) {
-        label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
-        label.setColor({255, 255, 255, 255});
-        label.setText(text);
-    };
+              label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
+              label.setColor({255, 255, 255, 255});
+              label.setText(text);
+          };
     styleLabel(windowLabel, "Sprite Properties", 21);
     windowLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
 
@@ -119,7 +119,8 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
         textInput.setPadding({0, 8, 0, 8});
     };
     styleTextInput(nameInput);
-    // Note: Display name is auto-generated from image name and can't be changed.
+    // Note: Display name is auto-generated from image name and can't be
+    // changed.
     nameInput.disable();
 
     /* Bounding box selection. */
@@ -188,7 +189,8 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
     spriteModel.spriteModelBoundsIDChanged
         .connect<&SpritePropertiesWindow::onSpriteModelBoundsIDChanged>(*this);
     spriteModel.spriteCustomModelBoundsChanged
-        .connect<&SpritePropertiesWindow::onSpriteCustomModelBoundsChanged>(*this);
+        .connect<&SpritePropertiesWindow::onSpriteCustomModelBoundsChanged>(
+            *this);
     spriteModel.spriteRemoved.connect<&SpritePropertiesWindow::onSpriteRemoved>(
         *this);
     spriteModel.spriteCollisionEnabledChanged
@@ -285,7 +287,8 @@ void SpritePropertiesWindow::onSpriteModelBoundsIDChanged(
         return;
     }
 
-    // Whether they're enabled or not, the fields should show the correct bounds.
+    // Whether they're enabled or not, the fields should show the correct
+    // bounds.
     const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
 
     if (newModelBoundsID) {
@@ -379,7 +382,7 @@ void SpritePropertiesWindow::onLibrarySelectedItemsChanged(
             != boundingBoxNameLabel.asString())) {
         boundingBoxButton.text.setText("Assign");
     }
-    // If we have a shared bounding box assigned, allow the user to switch 
+    // If we have a shared bounding box assigned, allow the user to switch
     // to a custom bounding box.
     else if (dataModel.spriteModel.getSprite(activeSpriteID).modelBoundsID
              != NULL_BOUNDING_BOX_ID) {
@@ -425,7 +428,7 @@ void SpritePropertiesWindow::onBoundingBoxButtonPressed()
     const std::string buttonText{boundingBoxButton.text.asString()};
     if (buttonText == "Assign") {
         // If a bounding box is selected, assign it to the active animation.
-        // Note: This just uses the first selected graphic. Multi-select is 
+        // Note: This just uses the first selected graphic. Multi-select is
         //       ignored.
         const auto& selectedListItems{libraryWindow.getSelectedListItems()};
         bool boundingBoxIsSelected{false};
@@ -433,7 +436,8 @@ void SpritePropertiesWindow::onBoundingBoxButtonPressed()
             if (selectedItem->type == LibraryListItem::Type::BoundingBox) {
                 boundingBoxIsSelected = true;
                 spriteModel.setSpriteModelBoundsID(
-                    activeSpriteID, static_cast<BoundingBoxID>(selectedItem->ID));
+                    activeSpriteID,
+                    static_cast<BoundingBoxID>(selectedItem->ID));
 
                 break;
             }
@@ -448,7 +452,7 @@ void SpritePropertiesWindow::onBoundingBoxButtonPressed()
         }
     }
     else if (buttonText == "Save as") {
-        // If the sprite is using a custom bounding box, open the "Save as" 
+        // If the sprite is using a custom bounding box, open the "Save as"
         // menu.
         const EditorSprite& sprite{spriteModel.getSprite(activeSpriteID)};
         if (sprite.modelBoundsID == NULL_BOUNDING_BOX_ID) {

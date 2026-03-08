@@ -10,11 +10,11 @@ namespace Server
 /**
  * The lua environment for running dialogue choice condition scripts.
  *
- * Condition scripts are much more limited than other dialogue scripts. They 
+ * Condition scripts are much more limited than other dialogue scripts. They
  * only have access to getters, and will always be made into the form:
  * "r = (given script)" where r must hold a boolean type after evaluation.
  *
- * Contains additional members that are set by the script runner to pass 
+ * Contains additional members that are set by the script runner to pass
  * relevant data to the environment's bound functions.
  */
 struct DialogueChoiceConditionLua {

@@ -34,7 +34,7 @@ public:
     void enable();
 
     /**
-     * Disables this gizmo, causing it to ignore user input and render as 
+     * Disables this gizmo, causing it to ignore user input and render as
      * semi-transparent.
      */
     void disable();
@@ -43,10 +43,11 @@ public:
      * Sets the size of the sprite image that this gizmo is drawing over.
      * The resulting extent will be centered within this widget.
      */
-    void setSpriteImageSize(float logicalSpriteWidth, float logicalSpriteHeight);
+    void setSpriteImageSize(float logicalSpriteWidth,
+                            float logicalSpriteHeight);
 
     /**
-     * Sets the stage's screen-space origin offset, relative to the top left of 
+     * Sets the stage's screen-space origin offset, relative to the top left of
      * the image.
      */
     void setStageOrigin(const SDL_FPoint& inLogicalStageOrigin);
@@ -55,9 +56,9 @@ public:
      * Sets this gizmo to match newPoint.
      */
     void setPoint(const Vector3& newPoint);
-    
+
     /**
-     * Returns the sprite image extent that was set by the last call to 
+     * Returns the sprite image extent that was set by the last call to
      * setSpriteImageSize(), centered within this widget.
      */
     const SDL_FRect& getLogicalCenteredSpriteExtent() const;
@@ -99,11 +100,11 @@ private:
 
     /** How opaque a disabled gizmo will be. */
     static constexpr float DISABLED_ALPHA_FACTOR{0.25f};
-    
+
     void refreshScaling();
 
     /**
-     * Updates stageWorldExtent to match the current stageOrigin and widget 
+     * Updates stageWorldExtent to match the current stageOrigin and widget
      * size.
      */
     void updateStageExtent();
@@ -126,7 +127,7 @@ private:
     /** The point that this gizmo is representing. */
     Vector3 point;
 
-    /** If false, this widget should ignore all interactions and render as 
+    /** If false, this widget should ignore all interactions and render as
         semi-transparent. */
     bool isEnabled;
 
@@ -140,7 +141,7 @@ private:
         top left of this widget. */
     SDL_FRect logicalSpriteImageExtent;
 
-    /** The stage's screen-space origin offset, relative to the top left of 
+    /** The stage's screen-space origin offset, relative to the top left of
         the image. */
     SDL_FPoint logicalStageOrigin;
 

@@ -18,7 +18,7 @@ public:
      *
      * On init failure, prints the error and aborts.
      */
-	SDLRenderer(SDL_Window* window, const char* name);
+    SDLRenderer(SDL_Window* window, const char* name);
 
     ~SDLRenderer();
 

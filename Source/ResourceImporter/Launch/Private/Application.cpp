@@ -40,15 +40,18 @@ Application::Application()
 
     // Set fullscreen mode.
     switch (Config::FULLSCREEN_MODE) {
-        case 0:
+        case 0: {
             SDLHelpers::setWindowFullscreen(sdlWindow.get(), 0);
             break;
-        case 1:
+        }
+        case 1: {
             SDLHelpers::setWindowFullscreen(sdlWindow.get(),
                                             SDL_WINDOW_FULLSCREEN);
             break;
-        default:
+        }
+        default: {
             LOG_FATAL("Invalid fullscreen value: %d", Config::FULLSCREEN_MODE);
+        }
     }
 
     // Set up our event filter.
@@ -127,7 +130,7 @@ bool Application::enoughTimeTillNextCall(double minimumTime)
 
 bool Application::filterEvents(void*, SDL_Event*)
 {
-    //Application* app{static_cast<Application*>(userData)};
+    // Application* app{static_cast<Application*>(userData)};
 
     // Currently no events that we care to filter.
     //

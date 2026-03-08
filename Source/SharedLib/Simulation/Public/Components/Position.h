@@ -9,7 +9,7 @@ namespace AM
  *
  * All entities possess a Position component.
  *
- * Note: An entity's graphics will be aligned with its position (specifically, 
+ * Note: An entity's graphics will be aligned with its position (specifically,
  *       the graphic's alignment anchor will be centered on the position).
  */
 struct Position : Vector3 {

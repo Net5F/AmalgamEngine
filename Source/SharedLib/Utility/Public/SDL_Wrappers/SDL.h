@@ -15,7 +15,7 @@ public:
      *
      * On init failure, prints the error and aborts.
      */
-	SDL(Uint32 flags);
+    SDL(Uint32 flags);
 
     ~SDL();
 };

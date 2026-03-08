@@ -25,14 +25,14 @@ struct TilePosition : public DiscretePosition<DiscreteImpl::TileTag> {
 
     explicit TilePosition(const ChunkPosition& chunkPosition);
 
-    /** Returns the world point at this tile's origin (the least extreme 
+    /** Returns the world point at this tile's origin (the least extreme
         point along all axes). */
     Vector3 getOriginPoint() const;
 
     /** Returns the world point at the 3D center of this tile. */
     Vector3 getCenterPoint() const;
 
-    /** Returns the world point centered in the X and Y axis, but at the 
+    /** Returns the world point centered in the X and Y axis, but at the
         lowest Z position of this tile. */
     Vector3 getCenteredBottomPoint() const;
 

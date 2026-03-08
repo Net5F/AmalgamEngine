@@ -24,16 +24,16 @@ struct CastStarted {
     /** The castable that is being cast. */
     CastableID castableID{};
 
-    // Note: We don't send the item ID because it doesn't seem like it'd ever 
-    //       be useful (it's only useful to the server when handling the cast). 
+    // Note: We don't send the item ID because it doesn't seem like it'd ever
+    //       be useful (it's only useful to the server when handling the cast).
     //       If a use case comes up for it, we can add it.
 
     /** The target entity. If castableID is an EntityInteractionType, this will
-        always be present. Otherwise, this will be filled if the client has a 
+        always be present. Otherwise, this will be filled if the client has a
         current target. */
     entt::entity targetEntity{entt::null};
 
-    /** The target position. If the Castable has a targetToolType that selects 
+    /** The target position. If the Castable has a targetToolType that selects
         a position, this will be filled.*/
     Vector3 targetPosition{};
 };

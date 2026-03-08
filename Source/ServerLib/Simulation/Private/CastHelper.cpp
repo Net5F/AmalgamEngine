@@ -66,7 +66,7 @@ CastFailureType
         return failureType;
     }
 
-    // Add a CastState to the entity (we checked above that they aren't already 
+    // Add a CastState to the entity (we checked above that they aren't already
     // casting).
     world.registry.emplace<CastState>(
         params.casterEntity,
@@ -95,13 +95,13 @@ CastFailureType
         return failureType;
     }
 
-    // We check above that the target entity is valid if one was provided, but 
+    // We check above that the target entity is valid if one was provided, but
     // entity interactions require a target entity. Check that it's non-null.
     if (params.targetEntity == entt::null) {
         return CastFailureType::InvalidTargetEntity;
     }
 
-    // Add a CastState to the entity (we checked above that they aren't already 
+    // Add a CastState to the entity (we checked above that they aren't already
     // casting).
     world.registry.emplace<CastState>(
         params.casterEntity,
@@ -129,13 +129,13 @@ CastFailureType CastHelper::castSpell(const CastSpellParams& params)
         return failureType;
     }
 
-    // We check above that the target entity is valid if one was provided, but 
+    // We check above that the target entity is valid if one was provided, but
     // entity interactions require a target entity. Check that it's non-null.
     if (params.targetEntity == entt::null) {
         return CastFailureType::InvalidTargetEntity;
     }
 
-    // Add a CastState to the entity (we checked above that they aren't already 
+    // Add a CastState to the entity (we checked above that they aren't already
     // casting).
     world.registry.emplace<CastState>(
         params.casterEntity,
@@ -175,7 +175,7 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     entt::registry& registry{world.registry};
 
     // Check that the caster entity exists.
-    // Note: This should only be able to fail if a non-CastSystem caller 
+    // Note: This should only be able to fail if a non-CastSystem caller
     //       doesn't fill the struct properly.
     if (!(registry.valid(casterEntity))) {
         return CastFailureType::InvalidCasterEntity;
@@ -184,7 +184,7 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     // If this isn't an instant cast, check that the caster isn't moving.
     const Position& casterPosition{registry.get<Position>(casterEntity)};
     if (castable.castTime != 0) {
-        // Note: Since we compare to the previous tick's position, it takes an 
+        // Note: Since we compare to the previous tick's position, it takes an
         //       extra tick after movement stops before we let casts go through.
         //       We consider this to be fine.
         const PreviousPosition* previousPosition{
@@ -270,21 +270,21 @@ bool CastHelper::isInLineOfSight(entt::entity casterEntity,
                                  const Vector3& casterPosition,
                                  const Vector3& targetPosition)
 {
-    // Find the start/end points for a raycast. If the entities have a 
+    // Find the start/end points for a raycast. If the entities have a
     // Collision, use a point at the top of it to approximate their head.
     // If not, fall back to their Position.
     Vector3 casterPoint{casterPosition};
-    if (const Collision
-        * casterCollision{world.registry.try_get<Collision>(casterEntity)}) {
+    if (const Collision* casterCollision{
+            world.registry.try_get<Collision>(casterEntity)}) {
         casterPoint = casterCollision->worldBounds.getTopCenterPoint();
     }
     Vector3 targetPoint{targetPosition};
-    if (const Collision
-        * targetCollision{world.registry.try_get<Collision>(targetEntity)}) {
+    if (const Collision* targetCollision{
+            world.registry.try_get<Collision>(targetEntity)}) {
         targetPoint = targetCollision->worldBounds.getTopCenterPoint();
     }
 
-    // If the ray hits anything besides the target, return false. If not, 
+    // If the ray hits anything besides the target, return false. If not,
     // return true.
     std::array<entt::entity, 1> entitiesToExclude{targetEntity};
     bool objectWasHit{world.collisionLocator.raycastAny(
@@ -301,12 +301,12 @@ bool CastHelper::isInLineOfSight(entt::entity casterEntity,
                                  const Vector3& casterPosition,
                                  const Vector3& targetPosition)
 {
-    // Find the start/end points for a raycast. If the entity has a 
+    // Find the start/end points for a raycast. If the entity has a
     // Collision, use a point at the top of it to approximate their head.
     // If not, fall back to their Position.
     Vector3 casterPoint{casterPosition};
-    if (const Collision
-        * casterCollision{world.registry.try_get<Collision>(casterEntity)}) {
+    if (const Collision* casterCollision{
+            world.registry.try_get<Collision>(casterEntity)}) {
         casterPoint = casterCollision->worldBounds.getTopCenterPoint();
     }
 

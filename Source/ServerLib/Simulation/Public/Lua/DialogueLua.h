@@ -10,14 +10,14 @@ namespace AM
 namespace Server
 {
 /**
- * The lua environment for running both dialogue topic scripts and dialogue 
+ * The lua environment for running both dialogue topic scripts and dialogue
  * choice action scripts.
  *
- * Contains additional members that are set by the script runner to pass 
+ * Contains additional members that are set by the script runner to pass
  * relevant data to the environment's bound functions.
  */
 struct DialogueLua {
-    /** Lua environment for dialogue topic and choice action script 
+    /** Lua environment for dialogue topic and choice action script
         processing.
         Global variables:
           "self": The ID of the entity that is delivering the dialogue.

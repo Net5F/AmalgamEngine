@@ -11,9 +11,9 @@ namespace AM
 /**
  * A variant that holds the proterties that may be attached to an item.
  *
- * Note: Since the engine doesn't have any properties to provide, we can just 
- *       alias the project list. This lets us avoid migration issues without 
- *       having to persist the property lists separately (like we do for 
+ * Note: Since the engine doesn't have any properties to provide, we can just
+ *       alias the project list. This lets us avoid migration issues without
+ *       having to persist the property lists separately (like we do for
  *       entity components).
  */
 using ItemProperty

@@ -10,9 +10,9 @@ namespace Server
 /**
  * Tracks the tick number when this entity was last saved.
  *
- * An example of usage is our CastCooldown component. It lazily updates its 
- * timestamps, so if it gets saved on e.g. tick 500, it may have last been 
- * updated on tick 450. When we load the component, we need to update it to 
+ * An example of usage is our CastCooldown component. It lazily updates its
+ * timestamps, so if it gets saved on e.g. tick 500, it may have last been
+ * updated on tick 450. When we load the component, we need to update it to
  * account for those 50 elapsed ticks. We can do that by using this timestamp.
  */
 struct SaveTimestamp {

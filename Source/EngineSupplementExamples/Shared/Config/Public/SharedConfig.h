@@ -26,7 +26,7 @@ public:
     static constexpr std::size_t MAX_ENTITIES{1100};
 
     /** The max number of interactions that an entity can support.
-        Interactions are the options that show up when you right-click an 
+        Interactions are the options that show up when you right-click an
         entity or item. */
     static constexpr std::size_t MAX_ENTITY_INTERACTIONS{64};
 
@@ -43,7 +43,8 @@ public:
     static constexpr std::size_t TILE_WORLD_HEIGHT{84};
 
     /** The x and y axis width, in tiles, of our chunks.
-        Note: This doesn't apply to the z axis. Chunks are always 1 tile tall. */
+        Note: This doesn't apply to the z axis. Chunks are always 1 tile tall.
+     */
     static constexpr std::size_t CHUNK_WIDTH{16};
 
     /** The number of tiles in a chunk. */
@@ -53,7 +54,7 @@ public:
         partitioning grid (EntityLocator). */
     static constexpr std::size_t ENTITY_LOCATOR_CELL_WIDTH{4};
 
-    /** The z axis width, in tiles, of a cell in our entity spatial partitioning 
+    /** The z axis width, in tiles, of a cell in our entity spatial partitioning
         grid (EntityLocator). */
     static constexpr std::size_t ENTITY_LOCATOR_CELL_HEIGHT{2};
 
@@ -61,7 +62,7 @@ public:
         partitioning grid (CollisionLocator). */
     static constexpr std::size_t COLLISION_LOCATOR_CELL_WIDTH{4};
 
-    /** The z axis width, in tiles, of a cell in our collision spatial 
+    /** The z axis width, in tiles, of a cell in our collision spatial
         partitioning grid (CollisionLocator). */
     static constexpr std::size_t COLLISION_LOCATOR_CELL_HEIGHT{2};
 
@@ -83,13 +84,13 @@ public:
     /** The maximum negative Z velocity that entities can reach. */
     static constexpr float TERMINAL_VELOCITY{-300};
 
-    /** The amount of velocity that's added to the player if they try to move 
+    /** The amount of velocity that's added to the player if they try to move
         while falling straight through the air, e.g. after jumping straight up.
-        This is a constant instead of being affected by runspeed, because it's 
+        This is a constant instead of being affected by runspeed, because it's
         intended to be a consistent, small movement. */
     static constexpr float VERTICAL_FALL_MOVE_VELOCITY{15};
 
-    /** The distance above a casting target circle that will be included in 
+    /** The distance above a casting target circle that will be included in
         the area of effect. */
     static constexpr float CAST_TARGET_CYLINDER_HEIGHT{3};
     static constexpr float CAST_TARGET_CYLINDER_HALF_HEIGHT{
@@ -103,7 +104,7 @@ public:
 
     /** The standard range for entity interactions, such as "Talk".
         This is the max distance between the caster and the target entity.
-        This will be the range of all engine-provided entity interactions, and 
+        This will be the range of all engine-provided entity interactions, and
         you can choose to use it for project interactions as well. */
     static constexpr float CAST_ENTITY_INTERACTION_STANDARD_RANGE{
         TILE_WORLD_WIDTH};
@@ -145,9 +146,9 @@ public:
     static constexpr unsigned int TILE_FACE_SCREEN_WIDTH{256};
     /** The height of the top face of a tile in screen coordinates. */
     static constexpr unsigned int TILE_FACE_SCREEN_HEIGHT{128};
-    /** The height of the side of a tile in screen coordinates, i.e. how tall 
+    /** The height of the side of a tile in screen coordinates, i.e. how tall
         the world-space z axis height of a tile should appear on screen.
-        Since Z coordinate contribution to the screen Y axis is linear, 
+        Since Z coordinate contribution to the screen Y axis is linear,
         this / TILE_WORLD_HEIGHT can be thought of as our "Z scaling factor" */
     static constexpr unsigned int TILE_SIDE_SCREEN_HEIGHT{168};
 

@@ -22,7 +22,8 @@ struct ItemInitRequest {
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The item's display name. Not guaranteed to be unique. Shown in the UI. */
+    /** The item's display name. Not guaranteed to be unique. Shown in the UI.
+     */
     std::string displayName{"Null"};
 
     /** The item's unique string ID.  */

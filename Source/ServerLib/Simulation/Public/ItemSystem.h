@@ -32,7 +32,7 @@ public:
     ItemSystem(const SimulationContext& inSimContext);
 
     /**
-     * Processes the "Use On" item interactions (combine items, use item on 
+     * Processes the "Use On" item interactions (combine items, use item on
      * entity).
      */
     void processUseItemInteractions();

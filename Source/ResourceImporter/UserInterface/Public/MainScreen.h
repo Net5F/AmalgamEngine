@@ -43,7 +43,7 @@ public:
     MainScreen(DataModel& inDataModel);
 
     /**
-     * Opens a confirmation dialog with a "Confirm" button and a "Cancel" 
+     * Opens a confirmation dialog with a "Confirm" button and a "Cancel"
      * button.
      *
      * @param bodyText The main dialog text.

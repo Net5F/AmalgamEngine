@@ -10,8 +10,7 @@ namespace Client
 /**
  * An event to show that the simulation has started running.
  */
-struct SimulationStarted
-{
+struct SimulationStarted {
 };
 
 } // namespace Client

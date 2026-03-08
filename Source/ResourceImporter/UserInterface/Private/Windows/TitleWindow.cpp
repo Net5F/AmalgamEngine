@@ -55,7 +55,7 @@ void TitleWindow::onOpenButtonPressed()
     errorText.setIsVisible(false);
 
     // Open the file select dialog and save the selected path.
-    // Note: This will block the main thread, but that's fine. Our 
+    // Note: This will block the main thread, but that's fine. Our
     //       PeriodicUpdaters in Application are set up to skip late steps.
     nfdchar_t* selectedPath{nullptr};
     nfdresult_t result = NFD::PickFolder(selectedPath);

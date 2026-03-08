@@ -24,7 +24,8 @@ public:
     EntityGraphicSetModel(DataModel& inDataModel);
 
     /**
-     * Attempts to load the "entities" section of the given json into this model.
+     * Attempts to load the "entities" section of the given json into this
+     * model.
      *
      * @return true if successful. If false, getErrorString() will return more
      *         information.
@@ -43,7 +44,7 @@ public:
     bool addEntity();
 
     /**
-     * Removes the entity graphic set with the given ID from the associated 
+     * Removes the entity graphic set with the given ID from the associated
      * map.
      *
      * Error if the given ID isn't present in the map.
@@ -82,12 +83,12 @@ private:
     bool parseEntityGraphicSet(const nlohmann::json& graphicSetJson);
 
     /**
-     * Checks if the given name is unique among all entity graphic sets in the 
+     * Checks if the given name is unique among all entity graphic sets in the
      * model.
      *
-     * @param graphicSetID  The ID of the graphic set that might get displayName.
-     *                      If it already is set to displayName, it won't be 
-     *                      counted as non-unique.
+     * @param graphicSetID  The ID of the graphic set that might get
+     * displayName. If it already is set to displayName, it won't be counted as
+     * non-unique.
      * @param displayName  The display name that the graphic set will be set to.
      */
     bool graphicSetNameIsUnique(EntityGraphicSetID graphicSetID,
@@ -95,9 +96,10 @@ private:
 
     DataModel& dataModel;
 
-    // Note: These all use Uint16 instead of the specific ID type, so we can 
+    // Note: These all use Uint16 instead of the specific ID type, so we can
     //       interact with them generically.
-    /** Maps entity IDs -> the entity graphic sets that we currently have loaded.
+    /** Maps entity IDs -> the entity graphic sets that we currently have
+     * loaded.
      */
     std::map<EntityGraphicSetID, EditorEntityGraphicSet> entityMap;
 

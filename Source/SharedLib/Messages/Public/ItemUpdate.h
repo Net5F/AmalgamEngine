@@ -20,7 +20,8 @@ struct ItemUpdate {
 
     // Note: See Item.h for more info on all of these.
 
-    /** The item's display name. Not guaranteed to be unique. Shown in the UI. */
+    /** The item's display name. Not guaranteed to be unique. Shown in the UI.
+     */
     std::string displayName{"Null"};
 
     /** The item's unique string ID.  */
@@ -37,7 +38,7 @@ struct ItemUpdate {
 
     /** The custom interactions that this item supports.
         The first interaction in this list is the default interaction.
-        Built-in interactions aren't present in this vector, and will instead 
+        Built-in interactions aren't present in this vector, and will instead
         be added by the UI. */
     std::vector<ItemInteractionType> supportedInteractions{};
 

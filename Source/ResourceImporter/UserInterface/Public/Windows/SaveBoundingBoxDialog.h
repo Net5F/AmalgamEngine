@@ -18,7 +18,7 @@ class DataModel;
 /**
  * A confirmation dialog for saving BoundingBoxes to the Library.
  *
- * Opened by using the "Save as" button in the Sprite or Animation properties 
+ * Opened by using the "Save as" button in the Sprite or Animation properties
  * panels.
  */
 class SaveBoundingBoxDialog : public AUI::Window
@@ -29,7 +29,7 @@ public:
     virtual ~SaveBoundingBoxDialog() = default;
 
     /**
-     * Sets the model bounds that should be saved when the "Save" button is 
+     * Sets the model bounds that should be saved when the "Save" button is
      * pressed, and the callback that should be called afterwards.
      */
     void setSaveData(const BoundingBox& inModelBoundsToSave,

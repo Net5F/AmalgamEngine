@@ -88,13 +88,13 @@ void SDLHelpers::renderThickLine(SDL_Renderer* renderer, const SDL_FPoint& min,
 
     // Calc a normalized vector perpendicular to the line, with a magnitude
     // of half the desired line thickness.
-    // Note: If we ever end up needing to do 2D vector normalization and such 
+    // Note: If we ever end up needing to do 2D vector normalization and such
     //       again, make a Vector2 class to handle it.
     const float halfThickness{thickness / 2.f};
     SDL_FPoint perpVector{(-diff.y / length * halfThickness),
                           (diff.x / length * halfThickness)};
 
-    // The desired thick line is a rect. Calc the verts of the rect, using the 
+    // The desired thick line is a rect. Calc the verts of the rect, using the
     // perpendicular vector to step from the given line to the rect's corners.
     SDL_FColor fColor{colorToFColor(color)};
     std::array<SDL_Vertex, 4> verts{

@@ -23,7 +23,8 @@ namespace AM
 {
 namespace Server
 {
-ClientConnectionSystem::ClientConnectionSystem(const SimulationContext& inSimContext)
+ClientConnectionSystem::ClientConnectionSystem(
+    const SimulationContext& inSimContext)
 : simulation{inSimContext.simulation}
 , world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
@@ -105,11 +106,10 @@ void ClientConnectionSystem::processDisconnectEvent(
     const ClientDisconnected& clientDisconnected)
 {
     // Find the disconnected client's associated entity.
-    auto disconnectedEntityIt{
-        world.netIDMap.find(clientDisconnected.clientID)};
+    auto disconnectedEntityIt{world.netIDMap.find(clientDisconnected.clientID)};
     if (disconnectedEntityIt != world.netIDMap.end()) {
         // Found the entity. Destroy it and remove it from the network ID map.
-        // Note: This will cause it to be removed from the entity locator, 
+        // Note: This will cause it to be removed from the entity locator,
         //       triggering ClientAOISystem to tell peers to delete it.
         entt::entity disconnectedEntity{disconnectedEntityIt->second};
         world.registry.destroy(disconnectedEntity);

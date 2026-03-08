@@ -13,10 +13,10 @@ namespace AM
 {
 
 /**
- * Sent by the server in response to a Talk interaction or a dialogue choice 
+ * Sent by the server in response to a Talk interaction or a dialogue choice
  * selection.
- * 
- * Contains the response dialogue and choices that should be displayed to the 
+ *
+ * Contains the response dialogue and choices that should be displayed to the
  * client.
  */
 struct DialogueResponse {
@@ -30,13 +30,14 @@ struct DialogueResponse {
     static constexpr std::size_t MAX_CHOICES{50};
     static constexpr std::size_t MAX_CHOICE_TEXT_LENGTH{500};
 
-    /** The entity that is talking (i.e. the entity that was interacted with). */
+    /** The entity that is talking (i.e. the entity that was interacted with).
+     */
     entt::entity entity{entt::null};
 
     /** The index of this topic within the entity's Dialogue::topics. */
     Uint8 topicIndex{0};
 
-    /** The dialogue events that comprise both the response to the previously 
+    /** The dialogue events that comprise both the response to the previously
         selected choice (if there was one), and the current topic. */
     std::vector<DialogueEvent> dialogueEvents{};
 
@@ -63,13 +64,12 @@ void serialize(S& serializer, DialogueResponse& dialogueResponse)
 {
     serializer.value4b(dialogueResponse.entity);
     serializer.value1b(dialogueResponse.topicIndex);
-    serializer.container(
-        dialogueResponse.dialogueEvents,
-        DialogueResponse::MAX_DIALOGUE_EVENTS,
-        [](S& serializer, DialogueEvent& event) {
-            // Note: This calls serialize() for each type.
-            serializer.ext(event, bitsery::ext::StdVariant{});
-        });
+    serializer.container(dialogueResponse.dialogueEvents,
+                         DialogueResponse::MAX_DIALOGUE_EVENTS,
+                         [](S& serializer, DialogueEvent& event) {
+                             // Note: This calls serialize() for each type.
+                             serializer.ext(event, bitsery::ext::StdVariant{});
+                         });
     serializer.container(dialogueResponse.choices,
                          DialogueResponse::MAX_CHOICES);
 }

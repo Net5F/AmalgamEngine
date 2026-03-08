@@ -11,7 +11,7 @@ namespace Client
 /**
  * Holds a sprite's rendering-related data.
  *
- * We store any rendering-only data separately, so the server can optimally 
+ * We store any rendering-only data separately, so the server can optimally
  * access only the data it needs.
  *
  * See Sprite.h for the rest of the sprite data.
@@ -29,7 +29,7 @@ struct SpriteRenderData {
     SDL_FRect textureExtent{0, 0, 0, 0};
 
     /** The actual-space point within the sprite where the "stage" starts.
-        The "stage" is the coordinate space that we overlay onto the sprite 
+        The "stage" is the coordinate space that we overlay onto the sprite
         image. */
     SDL_FPoint stageOrigin{0, 0};
 

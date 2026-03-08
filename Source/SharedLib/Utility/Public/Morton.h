@@ -4,11 +4,11 @@
 
 /**
  * Functions for calculating morton codes.
- * 
- * Note: We exclude the 3D morton codes because they aren't useful to us 
- *       (they waste a lot of space if your extent isn't a cube, and our Z 
+ *
+ * Note: We exclude the 3D morton codes because they aren't useful to us
+ *       (they waste a lot of space if your extent isn't a cube, and our Z
  *       is almost always going to be a lot smaller than X/Y).
- *       If we ever care to use them, we can add them and change the naming 
+ *       If we ever care to use them, we can add them and change the naming
  *       convention (e.g. encode2D32/decode2D32).
  */
 namespace AM
@@ -17,14 +17,13 @@ class Morton
 {
 public:
     template<typename T>
-    struct Result2D
-    {
+    struct Result2D {
         T x{};
         T y{};
     };
 
     /**
-     * Returns a morton code for values in the range [0, 15] using a lookup 
+     * Returns a morton code for values in the range [0, 15] using a lookup
      * table.
      */
     static Uint8 encode16x16(Uint8 x, Uint8 y);

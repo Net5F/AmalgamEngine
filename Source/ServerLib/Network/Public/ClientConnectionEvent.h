@@ -23,10 +23,9 @@ struct ClientDisconnected {
     NetworkID clientID{0};
 };
 
-/** Used to synchronize connect/disconnect events. Without this, we may observe 
+/** Used to synchronize connect/disconnect events. Without this, we may observe
     a disconnect for a client before processing the connect event. */
-using ClientConnectionEvent
-    = std::variant<ClientConnected, ClientDisconnected>;
+using ClientConnectionEvent = std::variant<ClientConnected, ClientDisconnected>;
 
 } // End namespace Server
 } // End namespace AM

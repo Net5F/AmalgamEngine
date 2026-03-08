@@ -28,7 +28,7 @@ public:
     std::array<Tile, SharedConfig::CHUNK_TILE_COUNT> tiles{};
 
     /**
-     * Returns the tile at the given tile coordinate offset (with respect to 
+     * Returns the tile at the given tile coordinate offset (with respect to
      * this chunk's origin).
      */
     Tile& getTile(Uint16 tileOffsetX, Uint16 tileOffsetY);
@@ -37,7 +37,7 @@ public:
 private:
     /**
      * Returns a morton code for the given x and y.
-     * We use morton codes to lay out our tiles in a more cache-friendly way 
+     * We use morton codes to lay out our tiles in a more cache-friendly way
      * since we're likely to be accessing neighbors at the same time.
      */
     Uint32 mortonEncode(Uint16 x, Uint16 y) const;

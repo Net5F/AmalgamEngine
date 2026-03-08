@@ -88,9 +88,8 @@ void AVSystem::updateAVEntities()
     // Process the current phase for each A/V entity.
     auto view{world.avRegistry.view<Position, PreviousPosition, AVEntityState,
                                     GraphicState, ClientGraphicState>()};
-    for (auto [entity, position, previousPosition, avEntityState,
-               graphicState, clientGraphicState] :
-         view.each()) {
+    for (auto [entity, position, previousPosition, avEntityState, graphicState,
+               clientGraphicState] : view.each()) {
         // If the current phase has completed, increment to the next.
         if (!incrementPhaseIfNecessary(avEntityState, position, graphicState,
                                        clientGraphicState, currentTime)) {
@@ -124,17 +123,16 @@ bool AVSystem::incrementPhaseIfNecessary(AVEntityState& avEntityState,
     const AVEntity& avEntity{avEntityState.avEntity.get()};
     const AVEntity::Phase& lastPhase{
         avEntity.phases.at(avEntityState.currentPhaseIndex)};
-    std::optional<Position> lastTargetOpt{
-        AVEntityHelpers::getTargetPosition(
-            lastPhase.behavior, avEntityState.targetEntity,
-            static_cast<Position>(avEntityState.targetPosition), position,
-            world.registry, false)};
+    std::optional<Position> lastTargetOpt{AVEntityHelpers::getTargetPosition(
+        lastPhase.behavior, avEntityState.targetEntity,
+        static_cast<Position>(avEntityState.targetPosition), position,
+        world.registry, false)};
     if (!lastTargetOpt) {
         return false;
     }
     Position lastTargetPosition{lastTargetOpt.value()};
 
-    // If the entity has reached the completion condition for this phase, 
+    // If the entity has reached the completion condition for this phase,
     // move to the next phase.
     const EntityGraphicSet& lastGraphicSet{
         graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
@@ -200,7 +198,7 @@ bool AVSystem::updateAVEntity(const AVEntityState& avEntityState,
     auto& [desiredGraphicType, desiredGraphicDirection]
         = graphicStateOpt.value();
 
-    // If the desired direction is None, getGraphicState is telling us to use 
+    // If the desired direction is None, getGraphicState is telling us to use
     // the previous direction.
     if (desiredGraphicDirection == Rotation::Direction::None) {
         desiredGraphicDirection = clientGraphicState.graphicDirection;
@@ -220,7 +218,7 @@ bool AVSystem::updateAVEntity(const AVEntityState& avEntityState,
     }
     if (newGraphic.direction != clientGraphicState.graphicDirection) {
         clientGraphicState.graphicDirection = newGraphic.direction;
-        // Note: We don't reset the animation start time, since we want e.g. 
+        // Note: We don't reset the animation start time, since we want e.g.
         //       a run animation to play smoothly when changing direction.
     }
 

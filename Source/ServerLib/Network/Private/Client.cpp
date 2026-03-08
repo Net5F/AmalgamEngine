@@ -196,10 +196,10 @@ Client::ReceiveResult Client::receiveMessage()
                   "Skipped an adjustment iteration. Logic must be flawed.");
 
         // Save the message type and size.
-        messageType = headerBuf[CLIENT_HEADER_SIZE +
-        MessageHeaderIndex::MessageType];
-        messageSize = ByteTools::read16(&(headerBuf[CLIENT_HEADER_SIZE +
-            MessageHeaderIndex::Size]));
+        messageType
+            = headerBuf[CLIENT_HEADER_SIZE + MessageHeaderIndex::MessageType];
+        messageSize = ByteTools::read16(
+            &(headerBuf[CLIENT_HEADER_SIZE + MessageHeaderIndex::Size]));
         AM_ASSERT(messageSize <= CLIENT_MAX_MESSAGE_SIZE,
                   "Tried to receive too large of a message. messageSize: %u, "
                   "CLIENT_MAX_MESSAGE_SIZE: %u",
@@ -216,7 +216,7 @@ Client::ReceiveResult Client::receiveMessage()
             bufferToUse = smallReceiveBuffer.data();
         }
         else {
-            // Large message, we may not receive it all at once. Acquire a 
+            // Large message, we may not receive it all at once. Acquire a
             // buffer to compose in.
             largeReceiveBuffer = bufferPool.acquire();
             bufferToUse = largeReceiveBuffer->data();
@@ -241,7 +241,9 @@ Client::ReceiveResult Client::receiveMessage()
     if (compositionIndex == messageSize) {
         NetworkStats::recordBytesReceived(CLIENT_HEADER_SIZE
                                           + MESSAGE_HEADER_SIZE + messageSize);
-        return {NetworkResult::Success, messageType, {bufferToUse, messageSize}};
+        return {NetworkResult::Success,
+                messageType,
+                {bufferToUse, messageSize}};
     }
 
     return {NetworkResult::MessageNotComplete};

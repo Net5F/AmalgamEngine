@@ -103,7 +103,7 @@ private:
     /** Lua environment for item init script processing. */
     std::unique_ptr<ItemInitLua> itemInitLua;
 
-    /** Lua environment for dialogue topic and choice action script 
+    /** Lua environment for dialogue topic and choice action script
         processing. */
     std::unique_ptr<DialogueLua> dialogueLua;
 

@@ -121,8 +121,8 @@ void TileMap::saveChunkToSnapshot(const Chunk& chunk,
     // Copy all of the chunk's tile layers into the snapshot.
     chunkSnapshot.tileLayers.resize(chunk.tileLayerCount);
     std::size_t tileLayersIndex{0};
-    for (std::size_t tileIndex{0};
-         tileIndex < SharedConfig::CHUNK_TILE_COUNT; tileIndex++) {
+    for (std::size_t tileIndex{0}; tileIndex < SharedConfig::CHUNK_TILE_COUNT;
+         tileIndex++) {
         // Add this tile's layer count.
         const Tile& tile{chunk.tiles[tileIndex]};
         chunkSnapshot.tileLayerCounts[tileIndex]

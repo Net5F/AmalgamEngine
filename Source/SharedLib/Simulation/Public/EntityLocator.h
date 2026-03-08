@@ -20,11 +20,11 @@ struct BoundingBox;
  * Used to quickly determine which entities are located within a given extent
  * of the world.
  *
- * This locator only tracks entities, and it tracks them by their Position 
- * component. This is commonly used for networking-related queries (e.g. find all
- * entities that are within a given AoI, so we can send them network updates).
- * All entities have a Position, so they will be tracked by this locator.
- * For Collision-related queries for both entities and tile layers, see 
+ * This locator only tracks entities, and it tracks them by their Position
+ * component. This is commonly used for networking-related queries (e.g. find
+ * all entities that are within a given AoI, so we can send them network
+ * updates). All entities have a Position, so they will be tracked by this
+ * locator. For Collision-related queries for both entities and tile layers, see
  * CollisionLocator.h.
  *
  * Internally, entities are organized into "cells", each of which has a size
@@ -42,10 +42,10 @@ public:
     void setGridSize(const TileExtent& tileExtent);
 
     /**
-     * Adds the given entity to this locator at the given position, or updates 
+     * Adds the given entity to this locator at the given position, or updates
      * it if it's already added.
      *
-     * @return true if successful, else false (position outside of locator 
+     * @return true if successful, else false (position outside of locator
      *         bounds).
      */
     bool updateEntity(entt::entity entity, const Position& position);
@@ -86,8 +86,7 @@ public:
     /**
      * Overload for BoundingBox.
      */
-    std::vector<entt::entity>&
-        getEntitiesBroad(const BoundingBox& boundingBox);
+    std::vector<entt::entity>& getEntitiesBroad(const BoundingBox& boundingBox);
 
     /**
      * Overload for TileExtent.
@@ -97,8 +96,7 @@ public:
     /**
      * Overload for ChunkExtent.
      */
-    std::vector<entt::entity>&
-        getEntitiesBroad(const ChunkExtent& chunkExtent);
+    std::vector<entt::entity>& getEntitiesBroad(const ChunkExtent& chunkExtent);
 
 private:
     /** The width of a grid cell in world units. */

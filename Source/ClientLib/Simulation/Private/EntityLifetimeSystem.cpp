@@ -29,7 +29,8 @@ namespace AM
 namespace Client
 {
 
-EntityLifetimeSystem::EntityLifetimeSystem(const SimulationContext& inSimContext)
+EntityLifetimeSystem::EntityLifetimeSystem(
+    const SimulationContext& inSimContext)
 : simulation{inSimContext.simulation}
 , world{inSimContext.simulation.getWorld()}
 , graphicData{inSimContext.graphicData}

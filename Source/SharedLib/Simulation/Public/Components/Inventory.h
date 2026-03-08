@@ -16,8 +16,8 @@ struct ItemCombination;
  * All client entities have an inventory. Non-client entities may or may not
  * have one.
  *
- * Note: This isn't auto-replicated, because it's only relevant to the server, 
- *       and to the client that owns it. Instead, the client adds an Inventory 
+ * Note: This isn't auto-replicated, because it's only relevant to the server,
+ *       and to the client that owns it. Instead, the client adds an Inventory
  *       for the player entity, and we send custom messages to replicate it.
  */
 struct Inventory {
@@ -57,7 +57,7 @@ public:
      * @return true if the item was added, else false (inventory is full).
      *
      * Note: This doesn't check if itemID is a valid item.
-     * Note: On the Server, you likely don't want to call this directly. See 
+     * Note: On the Server, you likely don't want to call this directly. See
      *       InventoryHelpers.h.
      */
     bool addItem(ItemID itemID, Uint8 count, Uint8 maxStackSize);
@@ -68,7 +68,7 @@ public:
      * @return true if the item was removed, else false (slot index isn't valid,
      *         count is 0).
      *
-     * Note: On the Server, you likely don't want to call this directly. See 
+     * Note: On the Server, you likely don't want to call this directly. See
      *       InventoryHelpers.h.
      */
     bool removeItem(Uint8 slotIndex, Uint8 count);

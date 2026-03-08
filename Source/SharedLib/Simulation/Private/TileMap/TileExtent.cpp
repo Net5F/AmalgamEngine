@@ -29,23 +29,24 @@ TileExtent::TileExtent(const DiscreteExtent<DiscreteImpl::TileTag>& tileExtent)
 
 TileExtent::TileExtent(const ChunkExtent& chunkExtent)
 : DiscreteExtent<DiscreteImpl::TileTag>(
-    static_cast<int>(chunkExtent.x * SharedConfig::CHUNK_WIDTH),
-    static_cast<int>(chunkExtent.y * SharedConfig::CHUNK_WIDTH), chunkExtent.z,
-    static_cast<int>(chunkExtent.xLength * SharedConfig::CHUNK_WIDTH),
-    static_cast<int>(chunkExtent.yLength * SharedConfig::CHUNK_WIDTH),
-    chunkExtent.zLength)
+      static_cast<int>(chunkExtent.x * SharedConfig::CHUNK_WIDTH),
+      static_cast<int>(chunkExtent.y * SharedConfig::CHUNK_WIDTH),
+      chunkExtent.z,
+      static_cast<int>(chunkExtent.xLength * SharedConfig::CHUNK_WIDTH),
+      static_cast<int>(chunkExtent.yLength * SharedConfig::CHUNK_WIDTH),
+      chunkExtent.zLength)
 {
 }
 
 TileExtent::TileExtent(const CellExtent& cellExtent, std::size_t cellWidthTiles,
                        std::size_t cellHeightTiles)
 : DiscreteExtent<DiscreteImpl::TileTag>(
-    static_cast<int>(cellExtent.x * cellWidthTiles),
-    static_cast<int>(cellExtent.y * cellWidthTiles),
-    static_cast<int>(cellExtent.z * cellHeightTiles),
-    static_cast<int>(cellExtent.xLength * cellWidthTiles),
-    static_cast<int>(cellExtent.yLength * cellWidthTiles),
-    static_cast<int>(cellExtent.zLength * cellHeightTiles))
+      static_cast<int>(cellExtent.x * cellWidthTiles),
+      static_cast<int>(cellExtent.y * cellWidthTiles),
+      static_cast<int>(cellExtent.z * cellHeightTiles),
+      static_cast<int>(cellExtent.xLength * cellWidthTiles),
+      static_cast<int>(cellExtent.yLength * cellWidthTiles),
+      static_cast<int>(cellExtent.zLength * cellHeightTiles))
 {
 }
 
@@ -56,14 +57,14 @@ TileExtent::TileExtent(const BoundingBox& boundingBox)
     static constexpr float TILE_HEIGHT{
         static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
 
-    // Note: One could imagine doing the opposite logic here (if a box is 
+    // Note: One could imagine doing the opposite logic here (if a box is
     //       exactly touching the edge of a tile, include it in the extent).
-    //       However, this would make it so that a box with the exact bounds 
-    //       of a tile would convert into an extent that includes every tile 
+    //       However, this would make it so that a box with the exact bounds
+    //       of a tile would convert into an extent that includes every tile
     //       around it, which seems unexpected.
 
     // To account for float precision issues: add the epsilon to each min value,
-    // then round down. If the box is within epsilon range of a tile in the 
+    // then round down. If the box is within epsilon range of a tile in the
     // negative direction, it won't be included in this extent.
     x = static_cast<int>(std::floor(
         (boundingBox.min.x + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));

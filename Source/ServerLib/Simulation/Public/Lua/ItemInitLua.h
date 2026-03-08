@@ -13,7 +13,7 @@ namespace Server
 /**
  * The lua environment for running item init scripts.
  *
- * Contains additional members that are set by the script runner to pass 
+ * Contains additional members that are set by the script runner to pass
  * relevant data to the environment's bound functions.
  */
 struct ItemInitLua {

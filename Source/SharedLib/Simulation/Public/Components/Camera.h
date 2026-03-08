@@ -24,11 +24,11 @@ struct Camera {
     MovementBehavior behavior{MovementBehavior::CenterOnEntity};
 
     /** The position that the camera is pointing at.
-        Since our camera always faces the same direction, it's more useful to 
+        Since our camera always faces the same direction, it's more useful to
         track the target than it is to track the camera's own position. */
     Position target{};
 
-    /** The position that the camera was previously pointing at. Used for 
+    /** The position that the camera was previously pointing at. Used for
         lerping in the renderer. */
     PreviousPosition prevTarget{};
 
@@ -36,7 +36,7 @@ struct Camera {
         This is the total viewable area, at any zoom amount. */
     BoundingBox viewBounds{};
 
-    /** The camera's view extent in screen space, calculated during the last 
+    /** The camera's view extent in screen space, calculated during the last
         render tick in Renderer::getLerpedCamera(). */
     SDL_FRect screenExtent{0, 0, 0, 0};
 

@@ -8,13 +8,13 @@ namespace AM
 {
 
 /**
- * The types of graphics that may be displayed to represent an entity, 
+ * The types of graphics that may be displayed to represent an entity,
  * depending on what that entity's state is.
  *
- * Each entity graphic type can face 8 directions, depending on the entity's 
+ * Each entity graphic type can face 8 directions, depending on the entity's
  * Rotation component.
  *
- * Controls the graphic types that show up for entity graphic sets in  
+ * Controls the graphic types that show up for entity graphic sets in
  * ResourceImporter.
  */
 enum class EntityGraphicType : Uint8 {
@@ -30,7 +30,7 @@ enum class EntityGraphicType : Uint8 {
     PROJECT_START = static_cast<Uint8>(EngineEntityGraphicType::PROJECT_START),
     // MyGraphicType,
 
-    PROJECT_END 
+    PROJECT_END
 };
 
 } // End namespace AM

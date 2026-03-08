@@ -43,7 +43,7 @@ void DialogueSystem::processTalkInteraction(const CastInfo& castInfo)
     const Dialogue* dialogue{
         world.registry.try_get<Dialogue>(castInfo.targetEntity)};
     if (!dialogue) {
-        // Note: This can happen if the init script has an addTalkInteraction() 
+        // Note: This can happen if the init script has an addTalkInteraction()
         //       but doesn't have any topic() declarations.
         network.serializeAndSend(
             castInfo.clientID,
@@ -54,7 +54,7 @@ void DialogueSystem::processTalkInteraction(const CastInfo& castInfo)
     AM_ASSERT(dialogue->topics.size() > 0,
               "Dialogue should always have at least 1 topic.");
 
-    // Run the topic script, following any setNextTopic() and pushing dialogue 
+    // Run the topic script, following any setNextTopic() and pushing dialogue
     // events into the response.
     DialogueResponse dialogueResponse{castInfo.targetEntity, 0};
     dialogueLua.luaState["self"] = castInfo.targetEntity;
@@ -106,7 +106,8 @@ void DialogueSystem::processDialogueChoice(
     const Dialogue::Choice& choice{
         choiceTopic.choices[choiceRequest.choiceIndex]};
 
-    // Run the choice's action script, pushing dialogue events into the response.
+    // Run the choice's action script, pushing dialogue events into the
+    // response.
     DialogueResponse dialogueResponse{choiceRequest.targetEntity, 0};
     dialogueLua.luaState["self"] = choiceRequest.targetEntity;
     dialogueLua.luaState["target"] = clientEntity;
@@ -117,8 +118,9 @@ void DialogueSystem::processDialogueChoice(
                                   choiceRequest.choiceIndex,
                                   choiceRequest.netID)};
 
-    // If the choice contained a valid setNextTopic(), run the next topic script, 
-    // following any setNextTopic and pushing dialogue events into the response.
+    // If the choice contained a valid setNextTopic(), run the next topic
+    // script, following any setNextTopic and pushing dialogue events into the
+    // response.
     std::size_t topicNavigationCount{1};
     TopicPair lastTopic{};
     while (nextTopic.topic && (topicNavigationCount < TOPIC_NAVIGATION_MAX)) {
@@ -128,7 +130,7 @@ void DialogueSystem::processDialogueChoice(
         topicNavigationCount++;
     }
 
-    // If any topics were ran, add the last topic's index and choices to the 
+    // If any topics were ran, add the last topic's index and choices to the
     // response.
     if (lastTopic.topic) {
         dialogueResponse.topicIndex = lastTopic.topicIndex;
@@ -141,13 +143,12 @@ void DialogueSystem::processDialogueChoice(
     network.serializeAndSend(choiceRequest.netID, dialogueResponse);
 }
 
-DialogueSystem::TopicPair
-    DialogueSystem::runChoice(const Dialogue& dialogue,
-                              const Dialogue::Choice& choice,
-                              std::string_view choiceTopicName,
-                              Uint8 choiceIndex, NetworkID clientID)
+DialogueSystem::TopicPair DialogueSystem::runChoice(
+    const Dialogue& dialogue, const Dialogue::Choice& choice,
+    std::string_view choiceTopicName, Uint8 choiceIndex, NetworkID clientID)
 {
-    // Run the choice's action script, pushing dialogue events into the response.
+    // Run the choice's action script, pushing dialogue events into the
+    // response.
     dialogueLua.nextTopicName = "";
     auto scriptResult{dialogueLua.luaState.script(choice.actionScript,
                                                   &sol::script_pass_on_error)};
@@ -186,9 +187,9 @@ DialogueSystem::TopicPair
     return {nullptr};
 }
 
-DialogueSystem::TopicPair
-    DialogueSystem::runTopic(const Dialogue& dialogue,
-                             const Dialogue::Topic& topic, NetworkID clientID)
+DialogueSystem::TopicPair DialogueSystem::runTopic(const Dialogue& dialogue,
+                                                   const Dialogue::Topic& topic,
+                                                   NetworkID clientID)
 {
     // Run the topic script, pushing dialogue events into the response.
     dialogueLua.nextTopicName = "";
@@ -236,7 +237,7 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
     const Dialogue* dialogue{
         registry.try_get<Dialogue>(choiceRequest.targetEntity)};
     if (!dialogue) {
-        // This can happen if the init script has an addTalkInteraction() 
+        // This can happen if the init script has an addTalkInteraction()
         // but doesn't have any topic() declarations.
         network.serializeAndSend(
             choiceRequest.netID,
@@ -248,11 +249,10 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
              || (choiceRequest.choiceIndex
                  >= dialogue->topics[choiceRequest.topicIndex]
                         .choices.size())) {
-        // This can happen if the entity is re-initialized while a client is 
+        // This can happen if the entity is re-initialized while a client is
         // talking to it, and some topics or choices are removed.
-        network.serializeAndSend(
-            choiceRequest.netID,
-            SystemMessage{"Invalid dialogue request."});
+        network.serializeAndSend(choiceRequest.netID,
+                                 SystemMessage{"Invalid dialogue request."});
         return nullptr;
     }
 
@@ -304,7 +304,7 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
         return false;
     }
     else if (!(conditionResult.get<bool>())) {
-        // We only send this error when appropriate (when the player somehow 
+        // We only send this error when appropriate (when the player somehow
         // selects a choice that shouldn't have been sent to them).
         if (sendAccessErrorMessage) {
             network.serializeAndSend(

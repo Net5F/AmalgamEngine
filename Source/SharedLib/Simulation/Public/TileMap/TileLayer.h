@@ -17,7 +17,7 @@ struct TileLayer {
     /** The types of layers that our tiles support. */
     enum Type : Uint8 {
         Terrain,
-        /** Floors are display-only, they have no collision. They're used for 
+        /** Floors are display-only, they have no collision. They're used for
             things like grass, carpets, flooring, etc. */
         Floor,
         Wall,
@@ -26,9 +26,9 @@ struct TileLayer {
         None
     };
 
-    /** If type == Floor or Object, this is how far this layer is offset from 
+    /** If type == Floor or Object, this is how far this layer is offset from
         its tile position.
-        Note: Terrain and Walls don't use this. Terrain is always aligned to 
+        Note: Terrain and Walls don't use this. Terrain is always aligned to
               the tile, and Walls always match the Terrain height. */
     TileOffset tileOffset{};
 
@@ -37,21 +37,21 @@ struct TileLayer {
     Type type{};
 
     /** A value that describes this layer's graphic.
-        For all types except Terrain, this is simply an index into 
+        For all types except Terrain, this is simply an index into
         graphicSet.graphics. For Terrain, this is a bit-packed value.
-        For Terrain, cast this to Terrain::Value. For Walls, cast this to 
+        For Terrain, cast this to Terrain::Value. For Walls, cast this to
         Wall::Type. For Floors and Objects, cast this to Rotation::Direction.
         Note: It'd be more intuitive to put this after graphicSet, but alignment
               would cause this struct to be larger if we did so. */
     Uint8 graphicValue{0};
 
     /** A polymorphic reference to this layer's graphic set.
-        Each layer type maps directly to a single graphic set type, e.g. Floor 
+        Each layer type maps directly to a single graphic set type, e.g. Floor
         layers -> FloorGraphicSet. */
     std::reference_wrapper<const GraphicSet> graphicSet;
 
     /**
-     * Casts graphicSet to the appropriate type and returns 
+     * Casts graphicSet to the appropriate type and returns
      * graphicSet.graphics[graphicIndex].
      */
     GraphicRef getGraphic() const;

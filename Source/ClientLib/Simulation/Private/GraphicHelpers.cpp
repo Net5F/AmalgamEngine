@@ -18,9 +18,9 @@ GraphicHelpers::GraphicReturn GraphicHelpers::getGraphicOrFallback(
     // The set doesn't have the desired graphic. Find the closest match.
 
     // #### Ordinal Strafing ####
-    // If the new rotation is an ordinal direction and the current direction 
+    // If the new rotation is an ordinal direction and the current direction
     // includes that direction, don't change it.
-    // This will cause a "strafe" effect when moving ordinally, if the 
+    // This will cause a "strafe" effect when moving ordinally, if the
     // ordinal graphics are missing but the cardinal are present.
     bool isDesiredSW{(desiredDirection == Rotation::Direction::SouthWest)};
     bool isDesiredNW{(desiredDirection == Rotation::Direction::NorthWest)};
@@ -34,7 +34,7 @@ GraphicHelpers::GraphicReturn GraphicHelpers::getGraphicOrFallback(
         || (isDesiredNW && (isCurrentNorth || isCurrentWest))
         || (isDesiredNE && (isCurrentNorth || isCurrentEast))
         || (isDesiredSE && (isCurrentSouth || isCurrentEast))) {
-        // Try to use the current graphic. Otherwise, fall back to the Idle 
+        // Try to use the current graphic. Otherwise, fall back to the Idle
         // graphic (the graphic set may have changed).
         if (graphicSet.contains(currentType, currentDirection)) {
             return {currentType, currentDirection};
@@ -46,8 +46,8 @@ GraphicHelpers::GraphicReturn GraphicHelpers::getGraphicOrFallback(
     }
 
     // #### Ordinal -> Cardinal ####
-    // If the new rotation is an ordinal direction, try to use a cardinal 
-    // direction. 
+    // If the new rotation is an ordinal direction, try to use a cardinal
+    // direction.
     if ((isDesiredSW || isDesiredSE)
         && graphicSet.contains(desiredType, Rotation::Direction::South)) {
         return {desiredType, Rotation::Direction::South};
@@ -58,14 +58,14 @@ GraphicHelpers::GraphicReturn GraphicHelpers::getGraphicOrFallback(
     }
 
     // #### Idle With Desired Direction ####
-    // If the graphic set contains an Idle graphic for the desired direction, 
+    // If the graphic set contains an Idle graphic for the desired direction,
     // use it.
     if (graphicSet.contains(EntityGraphicType::Idle, desiredDirection)) {
         return {EntityGraphicType::Idle, desiredDirection};
     }
 
     // #### Idle With Ordinal -> Cardinal ####
-    // If the new rotation is an ordinal direction, try to use a cardinal 
+    // If the new rotation is an ordinal direction, try to use a cardinal
     // direction with an Idle graphic.
     if ((isDesiredSW || isDesiredSE)
         && graphicSet.contains(EntityGraphicType::Idle,

@@ -16,7 +16,7 @@ public:
      * replacing spaces with underscores.
      *
      * Note: This uses an out param instead of returning the string because it's
-     *       used in performance-sensitive situations where we need to re-use 
+     *       used in performance-sensitive situations where we need to re-use
      *       a pre-allocated string.
      */
     static void deriveStringID(std::string_view displayName, std::string& dest);
@@ -32,7 +32,7 @@ public:
     static std::string_view getFileNameNoExtension(std::string_view filePath);
 
     /**
-     * Returns true if pathA starts with the characters in pathB, ignoring 
+     * Returns true if pathA starts with the characters in pathB, ignoring
      * differences in slash type used ('/' vs '\').
      */
     static bool pathStartsWith(std::string_view pathA, std::string_view pathB);

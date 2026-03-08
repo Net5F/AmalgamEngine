@@ -174,8 +174,8 @@ void SpriteEditView::onSpriteCustomModelBoundsChanged(
     boundingBoxGizmo.setBoundingBox(newCustomModelBounds);
 }
 
-void SpriteEditView::onSpriteStageOriginChanged(SpriteID spriteID,
-                                                const SDL_FPoint& newStageOrigin)
+void SpriteEditView::onSpriteStageOriginChanged(
+    SpriteID spriteID, const SDL_FPoint& newStageOrigin)
 {
     // If the sprite isn't active or isn't set to custom bounds, do nothing.
     const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
@@ -204,8 +204,7 @@ void SpriteEditView::onSpriteRemoved(SpriteID spriteID)
     }
 }
 
-void SpriteEditView::onGizmoBoundingBoxUpdated(
-    const BoundingBox& updatedBounds)
+void SpriteEditView::onGizmoBoundingBoxUpdated(const BoundingBox& updatedBounds)
 {
     if (activeSpriteID != NULL_SPRITE_ID) {
         // If the sprite isn't set to use a custom model, do nothing (should

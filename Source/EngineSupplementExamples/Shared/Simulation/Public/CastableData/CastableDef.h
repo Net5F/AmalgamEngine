@@ -9,12 +9,14 @@ namespace AM
 {
 
 /**
- * Use this class to define all of the castables in your project (item 
+ * Use this class to define all of the castables in your project (item
  * interactions, entity interactions, and spells).
  */
-class CastableDef {
+class CastableDef
+{
 public:
-    static void defineCastables(const GraphicDataBase& graphicData,
+    static void defineCastables(
+        const GraphicDataBase& graphicData,
         std::function<void(CastableID, const Castable&)> addCastable)
     {
         // Fireball
@@ -28,12 +30,12 @@ public:
                 //.castCompleteGraphicType{EntityGraphicType::Crouch}
             };
 
-            //VisualEffect visualEffect{
-            //    .graphicID{toGraphicID(
-            //        graphicData.getAnimation("explosion").numericID)},
-            //    .loopMode{VisualEffect::LoopMode::Loop},
-            //    .loopTime{3}};
-            //castable.castCompleteVisualEffects.emplace_back(visualEffect);
+            // VisualEffect visualEffect{
+            //     .graphicID{toGraphicID(
+            //         graphicData.getAnimation("explosion").numericID)},
+            //     .loopMode{VisualEffect::LoopMode::Loop},
+            //     .loopTime{3}};
+            // castable.castCompleteVisualEffects.emplace_back(visualEffect);
 
             AVEntity avEntity{.startDistance{10}, .canMoveVertically{true}};
             AVEntity::Phase phase{

@@ -11,14 +11,15 @@ namespace ResourceImporter
 GraphicID EditorGraphicRef::getGraphicID() const
 {
     GraphicID graphicID{NULL_GRAPHIC_ID};
-    std::visit(VariantTools::Overload{
-        [&](std::reference_wrapper<const EditorSprite> sprite) {
-            graphicID = toGraphicID(sprite.get().numericID);
-        },
-        [&](std::reference_wrapper<const EditorAnimation> animation) {
-            graphicID = toGraphicID(animation.get().numericID);
-        }
-    }, *this);
+    std::visit(
+        VariantTools::Overload{
+            [&](std::reference_wrapper<const EditorSprite> sprite) {
+                graphicID = toGraphicID(sprite.get().numericID);
+            },
+            [&](std::reference_wrapper<const EditorAnimation> animation) {
+                graphicID = toGraphicID(animation.get().numericID);
+            }},
+        *this);
 
     return graphicID;
 }
@@ -63,31 +64,34 @@ const BoundingBox& EditorGraphicRef::getModelBounds(
 const EditorSprite* EditorGraphicRef::getFirstSprite() const
 {
     const EditorSprite* spritePtr{nullptr};
-    std::visit(VariantTools::Overload{
-        [&](std::reference_wrapper<const EditorSprite> sprite) {
-            spritePtr = &(sprite.get());
-        },
-        [&](std::reference_wrapper<const EditorAnimation> animation) {
-            if (animation.get().frames.size() > 0) {
-                spritePtr = &(animation.get().frames[0].sprite.get());
-            }
-        }
-    }, *this);
+    std::visit(
+        VariantTools::Overload{
+            [&](std::reference_wrapper<const EditorSprite> sprite) {
+                spritePtr = &(sprite.get());
+            },
+            [&](std::reference_wrapper<const EditorAnimation> animation) {
+                if (animation.get().frames.size() > 0) {
+                    spritePtr = &(animation.get().frames[0].sprite.get());
+                }
+            }},
+        *this);
 
     return spritePtr;
 }
 
-const EditorSprite* EditorGraphicRef::getSpriteAtTime(double animationTime) const
+const EditorSprite*
+    EditorGraphicRef::getSpriteAtTime(double animationTime) const
 {
     const EditorSprite* spritePtr{nullptr};
-    std::visit(VariantTools::Overload{
-        [&](std::reference_wrapper<const EditorSprite> sprite) {
-            spritePtr = &(sprite.get());
-        },
-        [&](std::reference_wrapper<const EditorAnimation> animation) {
-            spritePtr = animation.get().getSpriteAtTime(animationTime);
-        }
-    }, *this);
+    std::visit(
+        VariantTools::Overload{
+            [&](std::reference_wrapper<const EditorSprite> sprite) {
+                spritePtr = &(sprite.get());
+            },
+            [&](std::reference_wrapper<const EditorAnimation> animation) {
+                spritePtr = animation.get().getSpriteAtTime(animationTime);
+            }},
+        *this);
 
     return spritePtr;
 }

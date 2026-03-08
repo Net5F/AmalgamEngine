@@ -63,8 +63,8 @@ void NetworkSimulation::disconnect()
 
 void NetworkSimulation::tick()
 {
-    // If the server connection isn't established, do nothing (we don't want 
-    // to try to read the server var while connect() is potentially running 
+    // If the server connection isn't established, do nothing (we don't want
+    // to try to read the server var while connect() is potentially running
     // on another thread).
     if (!serverConnected) {
         return;
@@ -81,8 +81,8 @@ void NetworkSimulation::tick()
 
 void NetworkSimulation::receiveAndProcess()
 {
-    // If the server connection isn't established, do nothing (we don't want 
-    // to try to read the server var while connect() is potentially running 
+    // If the server connection isn't established, do nothing (we don't want
+    // to try to read the server var while connect() is potentially running
     // on another thread).
     if (!serverConnected) {
         return;
@@ -243,7 +243,8 @@ void NetworkSimulation::processBatch()
     }
 }
 
-void NetworkSimulation::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
+void NetworkSimulation::adjustIfNeeded(Sint8 receivedTickAdj,
+                                       Uint8 receivedAdjIteration)
 {
     if (receivedTickAdj != 0) {
         Uint8 currentAdjIteration{adjustmentIteration};
@@ -254,8 +255,8 @@ void NetworkSimulation::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjI
             // Set the adjustment to be applied.
             tickAdjustment += receivedTickAdj;
             isApplyingTickAdjustment = true;
-            //LOG_INFO("Received tick adjustment: %d, iteration: %u",
-            //         receivedTickAdj, receivedAdjIteration);
+            // LOG_INFO("Received tick adjustment: %d, iteration: %u",
+            //          receivedTickAdj, receivedAdjIteration);
         }
         else if (receivedAdjIteration > currentAdjIteration) {
             if (isApplyingTickAdjustment) {

@@ -37,7 +37,7 @@ constexpr auto constructAndFillArray(T&& x)
 /** A scratch buffer used while processing string IDs.
     Must be file-local so it can be accessed by const functions. */
 std::string workStringID{};
-}
+} // namespace
 
 namespace AM
 {
@@ -195,11 +195,12 @@ const EntityGraphicSet&
     return *(it->second);
 }
 
-const TerrainGraphicSet& GraphicDataBase::getTerrainGraphicSet(
-    TerrainGraphicSetID numericID) const
+const TerrainGraphicSet&
+    GraphicDataBase::getTerrainGraphicSet(TerrainGraphicSetID numericID) const
 {
     if (numericID >= terrainGraphicSets.size()) {
-        LOG_ERROR("Invalid numeric ID while getting graphic set: %d", numericID);
+        LOG_ERROR("Invalid numeric ID while getting graphic set: %d",
+                  numericID);
         return terrainGraphicSets[0];
     }
 
@@ -210,7 +211,8 @@ const FloorGraphicSet&
     GraphicDataBase::getFloorGraphicSet(FloorGraphicSetID numericID) const
 {
     if (numericID >= floorGraphicSets.size()) {
-        LOG_ERROR("Invalid numeric ID while getting graphic set: %d", numericID);
+        LOG_ERROR("Invalid numeric ID while getting graphic set: %d",
+                  numericID);
         return floorGraphicSets[0];
     }
 
@@ -221,7 +223,8 @@ const WallGraphicSet&
     GraphicDataBase::getWallGraphicSet(WallGraphicSetID numericID) const
 {
     if (numericID >= wallGraphicSets.size()) {
-        LOG_ERROR("Invalid numeric ID while getting graphic set: %d", numericID);
+        LOG_ERROR("Invalid numeric ID while getting graphic set: %d",
+                  numericID);
         return wallGraphicSets[0];
     }
 
@@ -232,7 +235,8 @@ const ObjectGraphicSet&
     GraphicDataBase::getObjectGraphicSet(ObjectGraphicSetID numericID) const
 {
     if (numericID >= objectGraphicSets.size()) {
-        LOG_ERROR("Invalid numeric ID while getting graphic set: %d", numericID);
+        LOG_ERROR("Invalid numeric ID while getting graphic set: %d",
+                  numericID);
         return objectGraphicSets[0];
     }
 
@@ -243,7 +247,8 @@ const EntityGraphicSet&
     GraphicDataBase::getEntityGraphicSet(EntityGraphicSetID numericID) const
 {
     if (numericID >= entityGraphicSets.size()) {
-        LOG_ERROR("Invalid numeric ID while getting graphic set: %d", numericID);
+        LOG_ERROR("Invalid numeric ID while getting graphic set: %d",
+                  numericID);
         return entityGraphicSets[0];
     }
 
@@ -261,12 +266,14 @@ const std::vector<TerrainGraphicSet>&
     return terrainGraphicSets;
 }
 
-const std::vector<FloorGraphicSet>& GraphicDataBase::getAllFloorGraphicSets() const
+const std::vector<FloorGraphicSet>&
+    GraphicDataBase::getAllFloorGraphicSets() const
 {
     return floorGraphicSets;
 }
 
-const std::vector<WallGraphicSet>& GraphicDataBase::getAllWallGraphicSets() const
+const std::vector<WallGraphicSet>&
+    GraphicDataBase::getAllWallGraphicSets() const
 {
     return wallGraphicSets;
 }
@@ -352,20 +359,20 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
                                    &animations[animation.numericID]);
     }
     for (const TerrainGraphicSet& set : terrainGraphicSets) {
-        terrainGraphicSetStringMap.emplace(
-            set.stringID, &terrainGraphicSets[set.numericID]);
+        terrainGraphicSetStringMap.emplace(set.stringID,
+                                           &terrainGraphicSets[set.numericID]);
     }
     for (const FloorGraphicSet& set : floorGraphicSets) {
         floorGraphicSetStringMap.emplace(set.stringID,
-                                        &floorGraphicSets[set.numericID]);
+                                         &floorGraphicSets[set.numericID]);
     }
     for (const WallGraphicSet& set : wallGraphicSets) {
         wallGraphicSetStringMap.emplace(set.stringID,
-                                       &wallGraphicSets[set.numericID]);
+                                        &wallGraphicSets[set.numericID]);
     }
     for (const ObjectGraphicSet& set : objectGraphicSets) {
         objectGraphicSetStringMap.emplace(set.stringID,
-                                         &objectGraphicSets[set.numericID]);
+                                          &objectGraphicSets[set.numericID]);
     }
     for (const EntityGraphicSet& set : entityGraphicSets) {
         entityGraphicSetStringMap.emplace(set.stringID,
@@ -376,7 +383,7 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
 void GraphicDataBase::resizeVectors(const nlohmann::json& json)
 {
     // For each category of graphics, find the max ID and resize the vector.
-    // Note: We have to find the max ID instead of just getting the array 
+    // Note: We have to find the max ID instead of just getting the array
     //       size because there may be ID gaps.
 
     // Sprite
@@ -406,8 +413,8 @@ void GraphicDataBase::resizeVectors(const nlohmann::json& json)
         TerrainGraphicSetID terrainID{terrainJson.value().at("numericID")};
         maxTerrainID = std::max(maxTerrainID, terrainID);
     }
-    TerrainGraphicSet terrainGraphicSet{.graphics{
-        constructAndFillArray<Terrain::Height::Count>(nullSprite)}};
+    TerrainGraphicSet terrainGraphicSet{
+        .graphics{constructAndFillArray<Terrain::Height::Count>(nullSprite)}};
     terrainGraphicSets.resize(maxTerrainID + 1, terrainGraphicSet);
 
     // Floors
@@ -416,9 +423,8 @@ void GraphicDataBase::resizeVectors(const nlohmann::json& json)
         FloorGraphicSetID floorID{floorJson.value().at("numericID")};
         maxFloorID = std::max(maxFloorID, floorID);
     }
-    FloorGraphicSet floorGraphicSet{
-        .graphics{constructAndFillArray<FloorGraphicSet::VARIATION_COUNT>(
-            nullSprite)}};
+    FloorGraphicSet floorGraphicSet{.graphics{
+        constructAndFillArray<FloorGraphicSet::VARIATION_COUNT>(nullSprite)}};
     floorGraphicSets.resize(maxFloorID + 1, floorGraphicSet);
 
     // Walls
@@ -437,9 +443,8 @@ void GraphicDataBase::resizeVectors(const nlohmann::json& json)
         ObjectGraphicSetID objectID{objectJson.value().at("numericID")};
         maxObjectID = std::max(maxObjectID, objectID);
     }
-    ObjectGraphicSet objectGraphicSet{
-        .graphics{constructAndFillArray<ObjectGraphicSet::VARIATION_COUNT>(
-            nullSprite)}};
+    ObjectGraphicSet objectGraphicSet{.graphics{
+        constructAndFillArray<ObjectGraphicSet::VARIATION_COUNT>(nullSprite)}};
     objectGraphicSets.resize(maxObjectID + 1, objectGraphicSet);
 
     // Entities
@@ -491,8 +496,8 @@ void GraphicDataBase::parseAnimation(const nlohmann::json& animationJson)
     animation.loopStartFrame = animationJson.at("loopStartFrame");
 
     // Add the frames.
-    // Note: If the animation is empty, the importer will give it a single 
-    //       frame with the null sprite. This gets handled the same as any 
+    // Note: If the animation is empty, the importer will give it a single
+    //       frame with the null sprite. This gets handled the same as any
     //       other sprite by the renderer.
     const auto& frameNumbersJson{animationJson.at("frameNumbers")};
     const auto& spriteIdsJson{animationJson.at("spriteIDs")};
@@ -515,7 +520,8 @@ void GraphicDataBase::parseAnimation(const nlohmann::json& animationJson)
     animation.modelBounds.max.z = animationJson.at("modelBounds").at("maxZ");
 }
 
-void GraphicDataBase::parseTerrainGraphicSet(const nlohmann::json& graphicSetJson)
+void GraphicDataBase::parseTerrainGraphicSet(
+    const nlohmann::json& graphicSetJson)
 {
     // Add a graphic set to the appropriate vector.
     TerrainGraphicSetID numericID{graphicSetJson.at("numericID")};
@@ -543,8 +549,7 @@ void GraphicDataBase::parseTerrainGraphicSet(const nlohmann::json& graphicSetJso
     }
 }
 
-void GraphicDataBase::parseFloorGraphicSet(
-    const nlohmann::json& graphicSetJson)
+void GraphicDataBase::parseFloorGraphicSet(const nlohmann::json& graphicSetJson)
 {
     // Add a graphic set to the appropriate vector.
     FloorGraphicSetID numericID{graphicSetJson.at("numericID")};

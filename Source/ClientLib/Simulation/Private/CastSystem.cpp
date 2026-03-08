@@ -51,8 +51,8 @@ void CastSystem::processCasts()
         castFailedQueue.pop();
     }
 
-    while (const CastCooldownInit
-           * castCooldownInit{castCooldownInitQueue.peek()}) {
+    while (const CastCooldownInit* castCooldownInit{
+        castCooldownInitQueue.peek()}) {
         handleCastCooldownInit(*castCooldownInit);
         castCooldownInitQueue.pop();
     }
@@ -63,7 +63,7 @@ void CastSystem::processCasts()
 
 void CastSystem::processUICasts()
 {
-    // Note: This setup is a little weird (we pop from CastHelper queue, then 
+    // Note: This setup is a little weird (we pop from CastHelper queue, then
     //       pass the struct to a CastHelper function), but we need the return
     //       type so we can signal failures.
 
@@ -124,11 +124,10 @@ void CastSystem::handleCastStarted(const CastStarted& castStarted)
 void CastSystem::handleCastFailed(const CastFailed& castFailed)
 {
     // Try to match the failed cast info with an ongoing cast.
-    if (auto* castState{world.registry.try_get<ClientCastState>(
-            castFailed.casterEntity)}) {
-        if (castState->castInfo.castable->castableID
-            == castFailed.castableID) {
-            // If the failure is a type that results in the cast ending, 
+    if (auto* castState{
+            world.registry.try_get<ClientCastState>(castFailed.casterEntity)}) {
+        if (castState->castInfo.castable->castableID == castFailed.castableID) {
+            // If the failure is a type that results in the cast ending,
             // kill the cast.
             if (castFailed.castFailureType != CastFailureType::AlreadyCasting) {
                 world.registry.erase<ClientCastState>(castFailed.casterEntity);
@@ -146,9 +145,9 @@ void CastSystem::handleCastCooldownInit(
     const CastCooldownInit& castCooldownInit)
 {
     // Apply the given CastCooldown to the player entity.
-    // Note: We only receive this message for the player entity, never any 
+    // Note: We only receive this message for the player entity, never any
     //       other entity.
-    // Note: We may be replacing a predicted cooldown by doing this, but the 
+    // Note: We may be replacing a predicted cooldown by doing this, but the
     //       server-given cooldown will be more accurate anyway.
     world.registry.emplace_or_replace<CastCooldown>(
         world.playerEntity, castCooldownInit.castCooldown);
@@ -183,7 +182,7 @@ void CastSystem::updateCasts()
         // If the cast has reached its finish time, finish it.
         if ((castState.state == ClientCastState::State::Casting)
             && (currentTick == castState.endTick)) {
-            // Note: We only check pre-finish cast validity on the server, to 
+            // Note: We only check pre-finish cast validity on the server, to
             //       avoid rejecting casts that may succeed.
             finishCast(castState);
             continue;
@@ -200,13 +199,13 @@ void CastSystem::updateCasts()
 
 void CastSystem::startCast(ClientCastState& castState)
 {
-    // Note: CastHelper ensures that castState.castInfo.casterEntity is the 
+    // Note: CastHelper ensures that castState.castInfo.casterEntity is the
     //       same entity that owns castState.
 
     // If this cast triggers the GCD, track it.
-    // Note: If CastCooldown gets created here, its lastUpdateTick will be set 
+    // Note: If CastCooldown gets created here, its lastUpdateTick will be set
     //       to currentTick.
-    // Note: CastCooldown may get created here even if it isn't used. That's 
+    // Note: CastCooldown may get created here even if it isn't used. That's
     //       fine, the entity has at least shown the capability to cast things.
     CastInfo& castInfo{castState.castInfo};
     Uint32 currentTick{simulation.getCurrentTick()};
@@ -237,8 +236,8 @@ void CastSystem::cancelCast(ClientCastState& castState)
         world.registry.get<CastCooldown>(castInfo.casterEntity)};
     castCooldown.gcdTicksRemaining = 0;
 
-    // If the caster is the player entity, signal the failure to the UI (the 
-    // server doesn't send failure messages for the player entity, since we 
+    // If the caster is the player entity, signal the failure to the UI (the
+    // server doesn't send failure messages for the player entity, since we
     // can detect them ourself).
     if (castInfo.casterEntity == world.playerEntity) {
         simEventDispatcher.trigger(CastFailed{
@@ -272,8 +271,7 @@ void CastSystem::finishCast(ClientCastState& castState)
         castState.state = ClientCastState::State::CastComplete;
         castState.endTick = castCompleteEndTick;
     }
-    else
-    {
+    else {
         // No valid graphic, end the cast.
         world.registry.erase<ClientCastState>(castState.castInfo.casterEntity);
     }
@@ -297,7 +295,7 @@ Uint32 CastSystem::getCastCompleteEndTick(entt::entity entity,
         return 0;
     }
 
-    // Check that the entity's graphic set has the Castable's "cast complete" 
+    // Check that the entity's graphic set has the Castable's "cast complete"
     // graphic type.
     const EntityGraphicSet& graphicSet{
         graphicData.getEntityGraphicSet(graphicState->graphicSetID)};
@@ -309,8 +307,8 @@ Uint32 CastSystem::getCastCompleteEndTick(entt::entity entity,
 
     // Check that the graphic array has at least one graphic.
     // Note: We use the first non-null graphic from the array, which may not
-    //       match the entity's current direction. We assume that all 
-    //       directions of this graphic type have the same length, so it 
+    //       match the entity's current direction. We assume that all
+    //       directions of this graphic type have the same length, so it
     //       shouldn't matter.
     const GraphicRef* graphic{nullptr};
     for (const GraphicRef& graphicRef : graphicArrIt->second) {
@@ -324,7 +322,7 @@ Uint32 CastSystem::getCastCompleteEndTick(entt::entity entity,
     }
 
     // Check that the graphic is an animation (we use the animation's length to
-    // know how long to be in the "cast complete" state, so we can't support 
+    // know how long to be in the "cast complete" state, so we can't support
     // individual sprites).
     const auto* animation{
         std::get_if<std::reference_wrapper<const Animation>>(graphic)};
@@ -351,8 +349,7 @@ void CastSystem::playAVEffects(const CastInfo& castInfo)
     }
 
     // If this castable spawns AV entities, add them to the A/V registry.
-    for (const AVEntity& avEntity :
-         castInfo.castable->castCompleteAVEntities) {
+    for (const AVEntity& avEntity : castInfo.castable->castCompleteAVEntities) {
         // If this entity def has no phases, skip it.
         if (avEntity.phases.empty()) {
             continue;

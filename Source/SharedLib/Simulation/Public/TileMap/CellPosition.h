@@ -29,7 +29,7 @@ struct CellPosition : public DiscretePosition<DiscreteImpl::CellTag> {
                           float cellHeight);
 
     /**
-     * Calculates the position of the cell that contains the given tile 
+     * Calculates the position of the cell that contains the given tile
      * position.
      *
      * @param cellWidthTiles The width of a cell, in tiles.

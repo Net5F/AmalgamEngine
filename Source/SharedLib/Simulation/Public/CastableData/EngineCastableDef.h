@@ -10,10 +10,11 @@ namespace AM
 {
 
 /**
- * Defines all of the engine-provided castables (item interactions, entity 
+ * Defines all of the engine-provided castables (item interactions, entity
  * interactions, and spells).
  */
-class EngineCastableDef {
+class EngineCastableDef
+{
 public:
     static void
         defineCastables(const GraphicDataBase&,

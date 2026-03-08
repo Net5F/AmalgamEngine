@@ -22,11 +22,11 @@ const Tile& Chunk::getTile(Uint16 tileOffsetX, Uint16 tileOffsetY) const
 
 Uint32 Chunk::mortonEncode(Uint16 x, Uint16 y) const
 {
-    // If x and y fit in our lookup table, use it. Otherwise, calculate it 
+    // If x and y fit in our lookup table, use it. Otherwise, calculate it
     // at runtime.
     if constexpr (SharedConfig::CHUNK_WIDTH <= 16) {
         return Morton::encode16x16(static_cast<Uint8>(x),
-                                        static_cast<Uint8>(y));
+                                   static_cast<Uint8>(y));
     }
     else {
         return Morton::encode32(x, y);

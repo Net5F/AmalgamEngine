@@ -23,10 +23,10 @@ struct ClientGraphicState;
 /**
  * Updates audio/visual effects and entities.
  *
- * A/V effects are attached to a particular entity, and follow that entity 
+ * A/V effects are attached to a particular entity, and follow that entity
  * around for a set period of time. These are used for e.g. a power-up effect.
  *
- * A/V entities are spawned as local-only entities, and have a set of logic 
+ * A/V entities are spawned as local-only entities, and have a set of logic
  * to perform before being destroyed. These are used for e.g. a blizzard spell.
  */
 class AVSystem
@@ -69,8 +69,7 @@ private:
      * Updates the given A/V entity to the next tick.
      * @return false if the update was invalid and the entity should be deleted.
      */
-    bool updateAVEntity(const AVEntityState& avEntityState,
-                        Position& position,
+    bool updateAVEntity(const AVEntityState& avEntityState, Position& position,
                         PreviousPosition& previousPosition,
                         GraphicState& graphicState,
                         ClientGraphicState& clientGraphicState);

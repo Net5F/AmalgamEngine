@@ -16,7 +16,7 @@ namespace AM
 
 /**
  * Base class for Client::GraphicData and Server::GraphicData.
- * Loads the shared graphics data from ResourceData.json into memory and 
+ * Loads the shared graphics data from ResourceData.json into memory and
  * provides an interface for accessing it.
  *
  * The data in this class is immutable. To modify it, edit ResourceData.json
@@ -34,42 +34,42 @@ public:
 
     /**
      * Returns the sprite with the given string ID.
-     * Errors in debug if the given ID doesn't exist, returns the null sprite 
+     * Errors in debug if the given ID doesn't exist, returns the null sprite
      * in release.
      */
     const Sprite& getSprite(std::string_view stringID) const;
 
     /**
      * Returns the sprite with the given numeric ID.
-     * Errors in debug if the given ID doesn't exist, returns the null sprite 
+     * Errors in debug if the given ID doesn't exist, returns the null sprite
      * in release.
      */
     const Sprite& getSprite(SpriteID numericID) const;
 
     /**
      * Returns the animation with the given string ID.
-     * Errors in debug if the given ID doesn't exist, returns the null 
+     * Errors in debug if the given ID doesn't exist, returns the null
      * animation in release.
      */
     const Animation& getAnimation(std::string_view stringID) const;
 
     /**
      * Returns the animation with the given numeric ID.
-     * Errors in debug if the given ID doesn't exist, returns the null 
+     * Errors in debug if the given ID doesn't exist, returns the null
      * animation in release.
      */
     const Animation& getAnimation(AnimationID numericID) const;
 
     /**
      * Returns the graphic with the given numeric ID.
-     * Errors in debug if the given ID doesn't exist, returns the null 
+     * Errors in debug if the given ID doesn't exist, returns the null
      * graphic in release.
      */
     GraphicRef getGraphic(GraphicID numericID) const;
 
     /**
      * Returns the graphic set with the given string ID.
-     * Errors in debug if the given ID doesn't exist, returns the null set 
+     * Errors in debug if the given ID doesn't exist, returns the null set
      * in release.
      */
     const TerrainGraphicSet&
@@ -87,7 +87,8 @@ public:
      */
     const TerrainGraphicSet&
         getTerrainGraphicSet(TerrainGraphicSetID numericID) const;
-    const FloorGraphicSet& getFloorGraphicSet(FloorGraphicSetID numericID) const;
+    const FloorGraphicSet&
+        getFloorGraphicSet(FloorGraphicSetID numericID) const;
     const WallGraphicSet& getWallGraphicSet(WallGraphicSetID numericID) const;
     const ObjectGraphicSet&
         getObjectGraphicSet(ObjectGraphicSetID numericID) const;
@@ -120,7 +121,7 @@ protected:
     void parseJson(const nlohmann::json& json);
 
     /**
-     * Resizes the vectors to fit the graphics and graphic sets in the given 
+     * Resizes the vectors to fit the graphics and graphic sets in the given
      * json.
      */
     void resizeVectors(const nlohmann::json& json);

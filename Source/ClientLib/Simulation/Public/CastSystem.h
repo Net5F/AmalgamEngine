@@ -51,7 +51,7 @@ private:
     void handleCastFailed(const CastFailed& castFailed);
 
     /**
-     * Initializes the player entity's CastCooldown component to the given 
+     * Initializes the player entity's CastCooldown component to the given
      * state.
      */
     void handleCastCooldownInit(const CastCooldownInit& castCooldownInit);
@@ -67,19 +67,19 @@ private:
     void startCast(ClientCastState& castState);
 
     /**
-     * Cancels the current cast, resetting cooldowns and sending error signals 
+     * Cancels the current cast, resetting cooldowns and sending error signals
      * appropriately.
      */
     void cancelCast(ClientCastState& castState);
 
     /**
-     * Finishes the given cast, either ending it or continuing on to the "cast 
+     * Finishes the given cast, either ending it or continuing on to the "cast
      * complete" state.
      */
     void finishCast(ClientCastState& castState);
 
     /**
-     * Returns the tick when the given entity should end the "cast complete" 
+     * Returns the tick when the given entity should end the "cast complete"
      * graphic of the given Castable, assuming they start on the current tick.
      *
      * Returns 0 if the given entity doesn't have a "cast complete" graphic.
@@ -88,7 +88,7 @@ private:
                                   const Castable& castable);
 
     /**
-     * Handles playing AV effects and creating AV entities for the given 
+     * Handles playing AV effects and creating AV entities for the given
      * finished cast.
      */
     void playAVEffects(const CastInfo& castInfo);

@@ -21,7 +21,7 @@ class LibraryWindow;
  *
  * Allows the user to edit the active graphic set's graphic slots.
  *
- * Note: This is separate from GraphicSetEditView because entity graphic sets 
+ * Note: This is separate from GraphicSetEditView because entity graphic sets
  *       have significant differences from the others.
  */
 class EntityGraphicSetEditView : public AUI::Window
@@ -31,11 +31,11 @@ public:
     // Public interface
     //-------------------------------------------------------------------------
     EntityGraphicSetEditView(DataModel& inDataModel,
-                       const LibraryWindow& inLibraryWindow);
+                             const LibraryWindow& inLibraryWindow);
 
 private:
     /**
-     * If the new active item is an entity graphic set, loads it's data into 
+     * If the new active item is an entity graphic set, loads it's data into
      * this panel.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
@@ -46,7 +46,7 @@ private:
     void onEntityRemoved(EntityGraphicSetID graphicSetID);
 
     /**
-     * (If ID matches active set) Sets the given graphic type to the given 
+     * (If ID matches active set) Sets the given graphic type to the given
      * graphic, adding or removing slot widgets as necessary.
      */
     void onEntitySlotChanged(EntityGraphicSetID graphicSetID,
@@ -55,7 +55,7 @@ private:
                              GraphicID newGraphicID);
 
     /**
-     * Attempts to assign the currently selected library item to the 
+     * Attempts to assign the currently selected library item to the
      * given graphic type's slot.
      */
     void onAssignButtonPressed(EntityGraphicType graphicType,
@@ -67,7 +67,8 @@ private:
     void styleText(AUI::Text& text);
 
     /**
-     * Fills graphicContainer with empty slot widgets for each EntityGraphicType.
+     * Fills graphicContainer with empty slot widgets for each
+     * EntityGraphicType.
      */
     void initGraphicContainer();
 
@@ -77,19 +78,19 @@ private:
     void fillSlotGraphicData(GraphicSetSlot& slot, GraphicID graphicID);
 
     /**
-     * Converts an entity graphic type and rotation into the associated 
+     * Converts an entity graphic type and rotation into the associated
      * graphicContainer index.
      */
     std::size_t toIndex(EntityGraphicType graphicType,
                         Rotation::Direction direction);
 
     /**
-     * Iterates all of the engine and project entity graphic types, skipping the 
+     * Iterates all of the engine and project entity graphic types, skipping the
      * gaps.
      *
      * @param callback A callback of form void(EntityGraphicType).
      *
-     * Note: If we ever need this elsewhere, we can move it to 
+     * Note: If we ever need this elsewhere, we can move it to
      *       EntityGraphicType.h.
      */
     template<typename Func>
@@ -111,7 +112,7 @@ private:
     AUI::Text modifyText;
     AUI::Text clearText;
 
-    /** Holds a slot for each EntityGraphicType and Rotation::Direction, in 
+    /** Holds a slot for each EntityGraphicType and Rotation::Direction, in
         order. */
     AUI::VerticalGridContainer graphicContainer;
 

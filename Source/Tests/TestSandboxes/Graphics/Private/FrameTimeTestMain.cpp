@@ -230,7 +230,7 @@ void Window::drawgraph()
     SDL_SetRenderDrawColor(renderer, 100, 100, 220, 200);
     SDL_RenderDrawLine(renderer, 0, graph_mid_y, width, graph_mid_y);
 
-#define TRANSFORM_X(I) ((int) floor((I) *graph_x_step + 0.5))
+#define TRANSFORM_X(I) ((int) floor((I) * graph_x_step + 0.5))
 #define TRANSFORM_Y(S)                                                         \
     (height - 1 - (int) floor(((S) / (1. / 60. * 2)) * graph_height + 0.5))
 

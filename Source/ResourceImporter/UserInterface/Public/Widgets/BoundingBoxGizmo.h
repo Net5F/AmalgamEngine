@@ -34,7 +34,7 @@ public:
     void enable();
 
     /**
-     * Disables this gizmo, causing it to ignore user input and render as 
+     * Disables this gizmo, causing it to ignore user input and render as
      * semi-transparent.
      */
     void disable();
@@ -43,10 +43,11 @@ public:
      * Sets the size of the sprite image that this gizmo is drawing over.
      * The resulting extent will be centered within this widget.
      */
-    void setSpriteImageSize(float logicalSpriteWidth, float logicalSpriteHeight);
+    void setSpriteImageSize(float logicalSpriteWidth,
+                            float logicalSpriteHeight);
 
     /**
-     * Sets the stage's screen-space origin offset, relative to the top left of 
+     * Sets the stage's screen-space origin offset, relative to the top left of
      * the image.
      */
     void setStageOrigin(const SDL_FPoint& inLogicalStageOrigin);
@@ -55,9 +56,9 @@ public:
      * Sets this gizmo to match newBoundingBox.
      */
     void setBoundingBox(const BoundingBox& newBoundingBox);
-    
+
     /**
-     * Returns the sprite image extent that was set by the last call to 
+     * Returns the sprite image extent that was set by the last call to
      * setSpriteImageSize(), centered within this widget.
      */
     const SDL_FRect& getLogicalCenteredSpriteExtent() const;
@@ -66,11 +67,12 @@ public:
     // Callback registration
     //-------------------------------------------------------------------------
     /**
-     * @param inOnBoundingBoxUpdated A callback that expects the updated 
+     * @param inOnBoundingBoxUpdated A callback that expects the updated
      *                               bounding box.
      */
     void setOnBoundingBoxUpdated(
-        std::function<void(const BoundingBox& updatedBounds)> inOnBoundingBoxUpdated);
+        std::function<void(const BoundingBox& updatedBounds)>
+            inOnBoundingBoxUpdated);
 
     //-------------------------------------------------------------------------
     // Base class overrides
@@ -108,11 +110,11 @@ private:
      * The list of our clickable controls.
      */
     enum class Control { None, Position, X, Y, Z };
-    
+
     void refreshScaling();
 
     /**
-     * Updates stageWorldExtent to match the current stageOrigin and widget 
+     * Updates stageWorldExtent to match the current stageOrigin and widget
      * size.
      */
     void updateStageExtent();
@@ -144,8 +146,8 @@ private:
     void updateZBounds(float mouseScreenYPos);
 
     /**
-     * Transforms the vertices in the current boundingBox from world space 
-     * to screen space, scales them to the current UI scaling, and offsets 
+     * Transforms the vertices in the current boundingBox from world space
+     * to screen space, scales them to the current UI scaling, and offsets
      * them using the current offsets.
      *
      * The finished points are pushed into the given vector in the order:
@@ -153,8 +155,8 @@ private:
      *     (minX, maxY, maxZ), (maxX, maxY, maxZ), (maxX, minY, maxZ),
      *     (minX, minY, maxZ)
      */
-    void
-        calcBoundingBoxScreenPoints(std::array<SDL_FPoint, 7>& boundsScreenPoints);
+    void calcBoundingBoxScreenPoints(
+        std::array<SDL_FPoint, 7>& boundsScreenPoints);
 
     /**
      * Moves the control extents to their proper screen position.
@@ -194,7 +196,7 @@ private:
     /** The bounding box that this gizmo is representing. */
     BoundingBox boundingBox;
 
-    /** If false, this widget should ignore all interactions and render as 
+    /** If false, this widget should ignore all interactions and render as
         semi-transparent. */
     bool isEnabled;
 
@@ -214,7 +216,7 @@ private:
         top left of this widget. */
     SDL_FRect logicalSpriteImageExtent;
 
-    /** The stage's screen-space origin offset, relative to the top left of 
+    /** The stage's screen-space origin offset, relative to the top left of
         the image. */
     SDL_FPoint logicalStageOrigin;
 

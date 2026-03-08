@@ -15,7 +15,7 @@ bool StoredValues::storeValue(std::string_view stringID, Uint32 newValue,
         return false;
     }
 
-    // If we're setting the value to 0, don't add it to the map (default values 
+    // If we're setting the value to 0, don't add it to the map (default values
     // don't need to be stored).
     if (newValue == 0) {
         // If the value already exists, erase it.

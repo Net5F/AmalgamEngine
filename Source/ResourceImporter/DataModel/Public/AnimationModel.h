@@ -25,7 +25,7 @@ public:
     AnimationModel(DataModel& inDataModel);
 
     /**
-     * Attempts to load the "animations" section of the given json into this 
+     * Attempts to load the "animations" section of the given json into this
      * model.
      *
      * @return true if successful. If false, getErrorString() will return more
@@ -40,7 +40,7 @@ public:
     void save(nlohmann::json& json);
 
     /**
-     * Returns an animation with the given name. If it doesn't already exist, 
+     * Returns an animation with the given name. If it doesn't already exist,
      * a new empty animation will be created.
      */
     const EditorAnimation& addOrGetAnimation(std::string_view displayName);
@@ -56,16 +56,16 @@ public:
     const EditorAnimation* getAnimation(std::string_view displayName) const;
 
     // Animation properties.
-    // Note: We don't offer a setter for DisplayName because it should always 
+    // Note: We don't offer a setter for DisplayName because it should always
     //       be based on the sprite image filename.
     void setAnimationFrameCount(AnimationID animationID, Uint8 newFrameCount);
     void setAnimationFps(AnimationID animationID, Uint8 newFps);
     void setAnimationLoopStartFrame(AnimationID animationID,
                                     Uint8 newLoopStartFrame);
     void setAnimationModelBoundsID(AnimationID animationID,
-                                BoundingBoxID newModelBoundsID);
+                                   BoundingBoxID newModelBoundsID);
     void setAnimationCustomModelBounds(AnimationID animationID,
-                                    const BoundingBox& newModelBounds);
+                                       const BoundingBox& newModelBounds);
     void setAnimationCollisionEnabled(AnimationID animationID,
                                       bool newCollisionEnabled);
     void setAnimationEntityAlignmentAnchor(
@@ -73,8 +73,8 @@ public:
         const std::optional<Vector3>& newEntityAlignmentAnchor);
     /**
      * Adds the given sprite as a frame in the given animation.
-     * The sprite will be added to the first empty frame. If there are no 
-     * empty frames, the animation will be made longer by 1 frame to make 
+     * The sprite will be added to the first empty frame. If there are no
+     * empty frames, the animation will be made longer by 1 frame to make
      * room.
      */
     void addAnimationFrame(AnimationID animationID, const EditorSprite& sprite);
@@ -105,13 +105,13 @@ private:
     /**
      * Checks if the given name is unique among all animations in the model.
      *
-     * @param animationID  The ID of the animation that might get displayName. 
-     *                     If it already is set to displayName, it won't be 
+     * @param animationID  The ID of the animation that might get displayName.
+     *                     If it already is set to displayName, it won't be
      *                     counted as non-unique.
      * @param displayName  The display name that the animation will be set to.
      */
     bool animationNameIsUnique(AnimationID animationID,
-                                 const std::string& displayName);
+                               const std::string& displayName);
 
     /**
      * Adds a new animation with the given name and returns it.
@@ -138,13 +138,11 @@ private:
     //-------------------------------------------------------------------------
     // Signals
     //-------------------------------------------------------------------------
-    entt::sigh<void(AnimationID animationID,
-                    const EditorAnimation& animation)>
+    entt::sigh<void(AnimationID animationID, const EditorAnimation& animation)>
         animationAddedSig;
     entt::sigh<void(AnimationID animationID)> animationRemovedSig;
 
-    entt::sigh<void(AnimationID animationID,
-                    const std::string& newDisplayName)>
+    entt::sigh<void(AnimationID animationID, const std::string& newDisplayName)>
         animationDisplayNameChangedSig;
     entt::sigh<void(AnimationID animationID, Uint8 newFrameCount)>
         animationFrameCountChangedSig;
@@ -157,7 +155,8 @@ private:
         animationFrameChangedSig;
     entt::sigh<void(AnimationID animationID, BoundingBoxID newModelBoundsID)>
         animationModelBoundsIDChangedSig;
-    entt::sigh<void(AnimationID animationID, const BoundingBox& newCustomModelBounds)>
+    entt::sigh<void(AnimationID animationID,
+                    const BoundingBox& newCustomModelBounds)>
         animationCustomModelBoundsChangedSig;
     entt::sigh<void(AnimationID animationID, bool newCollisionEnabled)>
         animationCollisionEnabledChangedSig;
@@ -175,8 +174,7 @@ public:
         animationAdded;
 
     /** An animation was removed from the model. */
-    entt::sink<entt::sigh<void(AnimationID animationID)>>
-        animationRemoved;
+    entt::sink<entt::sigh<void(AnimationID animationID)>> animationRemoved;
 
     /** An animation's display name has changed. */
     entt::sink<entt::sigh<void(AnimationID animationID,
@@ -203,8 +201,8 @@ public:
         animationFrameChanged;
 
     /** An animation's bounding box ID has changed. */
-    entt::sink<
-        entt::sigh<void(AnimationID animationID, BoundingBoxID newModelBoundsID)>>
+    entt::sink<entt::sigh<void(AnimationID animationID,
+                               BoundingBoxID newModelBoundsID)>>
         animationModelBoundsIDChanged;
 
     /** A animation's custom bounding box has changed. */
@@ -217,7 +215,7 @@ public:
         entt::sigh<void(AnimationID animationID, bool newCollisionEnabled)>>
         animationCollisionEnabledChanged;
 
-    /** An animation's entity alignment anchor has been added, removed, or 
+    /** An animation's entity alignment anchor has been added, removed, or
         updated. */
     entt::sink<entt::sigh<void(
         AnimationID animationID,

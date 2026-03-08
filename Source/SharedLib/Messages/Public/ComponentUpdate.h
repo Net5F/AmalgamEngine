@@ -24,11 +24,11 @@ struct ComponentUpdate {
     /** The entity's ID. */
     entt::entity entity{entt::null};
 
-    /** The entity's constructed or updated components (we treat them the 
+    /** The entity's constructed or updated components (we treat them the
         same). */
     std::vector<ReplicatedComponent> updatedComponents{};
 
-    /** The indices (from ReplicatedComponentTypes) of any of the entity's 
+    /** The indices (from ReplicatedComponentTypes) of any of the entity's
         components that were destroyed. */
     std::vector<Uint8> destroyedComponents{};
 };

@@ -29,7 +29,7 @@ EntityMover::EntityMover(const entt::registry& inRegistry,
 
 void EntityMover::moveEntity(const MoveEntityParams& params)
 {
-    // If no inputs are pressed and they aren't falling, nothing needs to 
+    // If no inputs are pressed and they aren't falling, nothing needs to
     // be done.
     if (params.inputStates.none() && !(params.movement.isFalling)) {
         params.movement.velocity = {0, 0, 0};
@@ -46,14 +46,14 @@ void EntityMover::moveEntity(const MoveEntityParams& params)
         params.collisionBitSets.getCollisionMask(), params.deltaSeconds)};
 
     // Update their bounding box and position.
-    // Note: The entity's position is relative to the model bounds stage, not 
-    //       the model bounds directly. Because of this, we can't just get 
+    // Note: The entity's position is relative to the model bounds stage, not
+    //       the model bounds directly. Because of this, we can't just get
     //       the X/Y position from the center of the resolved bounds.
     //       We can get the Z position directly from it, though.
     params.position += (resolvedBounds.min - params.collision.worldBounds.min);
     params.position.z = resolvedBounds.min.z;
-    // Note: Since clients calc bounds from the replicated position, we need to 
-    //       use the same math here (instead of using resolvedBounds directly) 
+    // Note: Since clients calc bounds from the replicated position, we need to
+    //       use the same math here (instead of using resolvedBounds directly)
     //       or the float result may end up slightly different.
     params.collision.worldBounds = Transforms::modelToWorldEntity(
         params.collision.modelBounds, params.position);
@@ -81,9 +81,9 @@ BoundingBox EntityMover::resolveCollisions(
         movement.velocity * static_cast<float>(deltaSeconds))};
 
     // Calc an extent that encompasses the entire potential movement.
-    // Note: We add epsilon so that, if a box exactly lines up with the line  
+    // Note: We add epsilon so that, if a box exactly lines up with the line
     //       where two tiles meet, both tiles will be included.
-    //       See the note in TileExtent(BoundingBox) for info on why this isn't 
+    //       See the note in TileExtent(BoundingBox) for info on why this isn't
     //       the standard behavior.
     BoundingBox broadPhaseBounds{currentBounds.unionWith(desiredBounds)
                                      .expandBy(MovementHelpers::WORLD_EPSILON)};
@@ -93,7 +93,7 @@ BoundingBox EntityMover::resolveCollisions(
     broadPhaseTileExtent
         = broadPhaseTileExtent.intersectWith(tileMap.getTileExtent());
 
-    // Collect the volumes of all static entities and tiles that intersect 
+    // Collect the volumes of all static entities and tiles that intersect
     // the broad phase bounds.
     auto& broadPhaseMatches{
         collisionLocator.getCollisions(broadPhaseTileExtent, collisionMask)};
@@ -114,18 +114,18 @@ BoundingBox EntityMover::resolveCollisions(
         }
     }
 
-    // If the entity is in the air, maintain their X/Y velocity. This lets 
+    // If the entity is in the air, maintain their X/Y velocity. This lets
     // them continue moving, even if they temporarily get hung up on something
     // (e.g. hitting their feet on a wall while trying to jump onto it).
-    // If the entity is grounded, this won't do anything (their X/Y velocity 
+    // If the entity is grounded, this won't do anything (their X/Y velocity
     // will be overwritten on the next tick).
     movement.velocity.x = originalVelocity.x;
     movement.velocity.y = originalVelocity.y;
 
-    // If the final resolved bounds are outside of the map bounds, reject the 
+    // If the final resolved bounds are outside of the map bounds, reject the
     // move.
     if (!tileMap.getTileExtent().contains(resolvedBounds)) {
-        // We need to reset their velocity so they don't get stuck if they 
+        // We need to reset their velocity so they don't get stuck if they
         // were jumping.
         movement.velocity = {};
         return currentBounds;
@@ -159,8 +159,8 @@ EntityMover::NarrowPhaseResult EntityMover::narrowPhase(
         const BoundingBox& currentBox{currentBounds};
         const BoundingBox& otherBox{otherVolumeInfo->collisionVolume};
 
-        // Calc the distances required for currentBox to enter and exit 
-        // otherBox along each axis, then calc the time intervals where 
+        // Calc the distances required for currentBox to enter and exit
+        // otherBox along each axis, then calc the time intervals where
         // each axis is intersecting.
         if (realVelocity.x > 0.f) {
             entryDistance.x = otherBox.min.x - currentBox.max.x;
@@ -179,7 +179,7 @@ EntityMover::NarrowPhaseResult EntityMover::narrowPhase(
                  || currentBox.min.x >= otherBox.max.x) {
             continue;
         }
-        // Else velocity == 0 and the boxes are intersecting. Entry/exit times 
+        // Else velocity == 0 and the boxes are intersecting. Entry/exit times
         // are defaulted to (-inf, inf) to handle this case.
 
         if (realVelocity.y > 0.f) {
@@ -216,20 +216,19 @@ EntityMover::NarrowPhaseResult EntityMover::narrowPhase(
             continue;
         }
 
-        // Determine if the time intervals ever overlap eachother within the 
-        // range [0, remainingTime] (i.e. if the boxes ever intersect in all 3 
+        // Determine if the time intervals ever overlap eachother within the
+        // range [0, remainingTime] (i.e. if the boxes ever intersect in all 3
         // axes during our desired movement).
         float maxEntryTime{
             std::max({entryTimes.x, entryTimes.y, entryTimes.z})};
-        float minExitTime{
-            std::min({exitTimes.x, exitTimes.y, exitTimes.z})};
+        float minExitTime{std::min({exitTimes.x, exitTimes.y, exitTimes.z})};
 
         // No-collision cases:
-        //   1. If maxEntry > minExit, all axes haven't entered until after 
+        //   1. If maxEntry > minExit, all axes haven't entered until after
         //      one has already left.
-        //   2. If all entry times are < 0, the boxes are either already 
+        //   2. If all entry times are < 0, the boxes are either already
         //      colliding or have passed eachother.
-        //   3. If maxEntryTime > remainingTime, a collision won't happen 
+        //   3. If maxEntryTime > remainingTime, a collision won't happen
         //      during this movement.
         if (maxEntryTime > minExitTime
             || (entryTimes.x < 0.f && entryTimes.y < 0.f && entryTimes.z < 0.f)
@@ -238,7 +237,7 @@ EntityMover::NarrowPhaseResult EntityMover::narrowPhase(
             continue;
         }
 
-        // There was a collision. Find the axis of rejection by determining 
+        // There was a collision. Find the axis of rejection by determining
         // which axis collided last, then use the opposite sign of our velocity
         // along that axis to get a surface normal.
         Vector3 normal{};
@@ -263,7 +262,7 @@ EntityMover::NarrowPhaseResult EntityMover::narrowPhase(
     Vector3 resolvedDistance{realVelocity * collisionTime};
     BoundingBox resolvedBounds{currentBounds.translateBy(resolvedDistance)};
 
-    // Due to float precision loss, the resolved bounds may actually be 
+    // Due to float precision loss, the resolved bounds may actually be
     // slightly clipped inside the other bounds. To resolve this, move backwards
     // by an amount equal to our epsilon.
     static constexpr Vector3 BACKOFF_AMOUNT{MovementHelpers::WORLD_EPSILON,
@@ -277,7 +276,7 @@ EntityMover::NarrowPhaseResult EntityMover::narrowPhase(
         movement.jumpCount = 0;
     }
 
-    // Set the velocity such that they'll slide along the collided surface 
+    // Set the velocity such that they'll slide along the collided surface
     // on the next tick.
     movement.velocity = movement.velocity.slide(normalToUse);
 

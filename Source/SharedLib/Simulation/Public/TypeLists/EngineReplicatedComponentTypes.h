@@ -19,16 +19,16 @@ namespace AM
  *
  * When a client comes in range of an entity, an init message will be sent that
  * includes the components in this list (if the entity possesses any of them).
- * All client-relevant components must be added to this list, since there's 
+ * All client-relevant components must be added to this list, since there's
  * no other way to send a component during this "init" event.
- * 
- * If you want a component to additionally be sent whenever it's patch()'d, 
- * replace()'d, and destroy()'d, add it to EngineObservedComponentTypes. 
+ *
+ * If you want a component to additionally be sent whenever it's patch()'d,
+ * replace()'d, and destroy()'d, add it to EngineObservedComponentTypes.
  * If you do choose to observe a component, it still must be added to this list.
- * We enforce this because it always makes sense to init a component if you're 
+ * We enforce this because it always makes sense to init a component if you're
  * going to observe it.
- * Alternatively, you can handle updates with your own system/messages to gain 
- * some performance (we do this for intense components like Movement and 
+ * Alternatively, you can handle updates with your own system/messages to gain
+ * some performance (we do this for intense components like Movement and
  * Rotation).
  *
  * Note: We handle Position separately because every entity is guaranteed to

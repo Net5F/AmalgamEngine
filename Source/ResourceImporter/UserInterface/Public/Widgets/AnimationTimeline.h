@@ -17,7 +17,7 @@ struct EditorSprite;
 
 /**
  * The animation timeline used by AnimationEditStage.
- * 
+ *
  * Lets users add sprites to an animation.
  */
 class AnimationTimeline : public AUI::Widget
@@ -35,13 +35,13 @@ public:
     void setFrame(Uint8 frameNumber, bool hasSprite);
 
     /**
-     * If an animation isn't currently playing, plays the active animation 
+     * If an animation isn't currently playing, plays the active animation
      * from the start. If an animation is currently playing, pauses it.
      */
     void playOrPauseAnimation();
 
     /**
-     * @return The currently selected frame (the one that the scrubber is 
+     * @return The currently selected frame (the one that the scrubber is
      *         hovering over).
      */
     Uint8 getSelectedFrameNumber() const;
@@ -50,21 +50,21 @@ public:
     // Callback registration
     //-------------------------------------------------------------------------
     /**
-     * @param inOnSelectionChanged A callback that expects the new selected 
+     * @param inOnSelectionChanged A callback that expects the new selected
      *                             frame's number.
      */
     void setOnSelectionChanged(
         std::function<void(Uint8 selectedFrameNumber)> inOnSelectionChanged);
 
     /**
-     * @param inOnLoopStartFrameChanged A callback that expects the new 
+     * @param inOnLoopStartFrameChanged A callback that expects the new
      *                                  loop start frame.
      */
     void setOnLoopStartFrameChanged(
         std::function<void(Uint8 newLoopStartFrame)> inOnLoopStartFrameChanged);
 
     /**
-     * @param inOnSpriteMoved A callback that expects the old and new frame 
+     * @param inOnSpriteMoved A callback that expects the old and new frame
      *                        indices.
      */
     void setOnSpriteMoved(
@@ -84,7 +84,7 @@ private:
      */
     void onFrameScrubberDragged(const SDL_FPoint& cursorPosition);
 
-    // TODO: We're trying this to see if it's performant enough. If updating 
+    // TODO: We're trying this to see if it's performant enough. If updating
     //       while dragging is too slow, we can do it like SpriteDrag
     /**
      * If the handle has been dragged far enough, changes the loop value.
@@ -98,13 +98,13 @@ private:
                              const SDL_FPoint& cursorPosition);
 
     /**
-     * If a frame containing a sprite has been dragged far enough, visually 
+     * If a frame containing a sprite has been dragged far enough, visually
      * moves the frame circle to the new hovered frame.
      */
     void onSpriteDragged(Uint8 frameNumber, const SDL_FPoint& cursorPosition);
 
     /**
-     * If the cursor is over a frame other than originSpriteDragFrameNumber, 
+     * If the cursor is over a frame other than originSpriteDragFrameNumber,
      * moves the sprite into that frame.
      */
     void onSpriteDragReleased(Uint8 frameNumber,
@@ -125,7 +125,7 @@ private:
      */
     void setLoopHandlePosition(Uint8 frameNumber);
 
-    /** 
+    /**
      * Returns which frame the given cursor position is aligned with.
      */
     Uint8 getCursorFrame(const SDL_FPoint& cursorPosition);
@@ -139,7 +139,7 @@ private:
     AUI::HorizontalGridContainer frameContainer;
 
     /** Used to select how many frames will be looped.
-        Note: This needs to be behind frameScrubber since it's double-tall to 
+        Note: This needs to be behind frameScrubber since it's double-tall to
               account for the handle (even though we don't render it). */
     TimelineHandle loopHandle;
 
@@ -155,7 +155,7 @@ private:
     /** If a sprite is being dragged, this holds the original frame number. */
     Uint8 originSpriteDragFrameNumber;
 
-    /** If a sprite is being dragged, this holds the current frame number that 
+    /** If a sprite is being dragged, this holds the current frame number that
         the sprite is being dragged over. */
     Uint8 currentSpriteDragFrameNumber;
 

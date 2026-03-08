@@ -24,7 +24,7 @@ public:
      * Creates a new item with the given data.
      * If referenceItem.numericID == NULL_ITEM_ID, uses the next sequential ID.
      *
-     * Note: If no stringID is given, it will be derived from referenceItem's 
+     * Note: If no stringID is given, it will be derived from referenceItem's
      *       displayName.
      *
      * @param referenceItem The item to copy when creating the new item.
@@ -35,15 +35,15 @@ public:
                            std::string_view initScript);
 
     /**
-     * Updates the item at referenceItem.numericID to match the given item, 
+     * Updates the item at referenceItem.numericID to match the given item,
      * then increments its version number.
      *
-     * Note: If no stringID is given, it will be derived from referenceItem's 
+     * Note: If no stringID is given, it will be derived from referenceItem's
      *       displayName.
      *
      * @param referenceItem The item to copy when creating the new item.
-     * @return If no item with the given ID exists or referenceItem's 
-     *         displayName is changed but already taken, returns nullptr. 
+     * @return If no item with the given ID exists or referenceItem's
+     *         displayName is changed but already taken, returns nullptr.
      *         Else, returns the updated item.
      */
     const Item* updateItem(const Item& referenceItem,
@@ -51,8 +51,8 @@ public:
 
     /**
      * Overload to handle init scripts.
-     * Note: Doing it this way means the signals will go out before the init 
-     *       script is added to the map. If this becomes an issue, we can 
+     * Note: Doing it this way means the signals will go out before the init
+     *       script is added to the map. If this becomes an issue, we can
      *       move it into the base class and just have the client pass "".
      */
     const Item* loadItem(const Item& referenceItem, ItemVersion version,
@@ -61,7 +61,7 @@ public:
     /**
      * Returns an item's init script.
      *
-     * @return If no item with the given ID exists, returns {}. Else, returns 
+     * @return If no item with the given ID exists, returns {}. Else, returns
      *         the item's init script.
      */
     const ItemInitScript& getItemInitScript(ItemID numericID) const;
@@ -72,7 +72,7 @@ private:
     using ItemDataBase::loadItem;
 
     /** Each item's init script, indexed by their numeric IDs.
-        Note: We split this from the Item class to reduce size and because it 
+        Note: We split this from the Item class to reduce size and because it
               isn't really part of an item's definition. */
     std::unordered_map<ItemID, ItemInitScript> itemInitScriptMap;
 

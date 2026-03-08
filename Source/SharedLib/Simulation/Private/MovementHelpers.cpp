@@ -36,8 +36,8 @@ Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
     updatedVelocity.z
         = std::max(updatedVelocity.z, SharedConfig::TERMINAL_VELOCITY);
 
-    // If the entity had Z velocity prior to this update, assume they're 
-    // falling. When they collide with the ground, this will be set to false 
+    // If the entity had Z velocity prior to this update, assume they're
+    // falling. When they collide with the ground, this will be set to false
     // by the collision logic.
     if (movement.velocity.z != 0) {
         movement.isFalling = true;
@@ -188,14 +188,14 @@ Vector3
 
     // True if the entity is jumping while already in the air.
     bool isAirJumping{movement.isFalling && didJump};
-    // True if the entity is moving vertically through the air, e.g. after 
+    // True if the entity is moving vertically through the air, e.g. after
     // jumping straight up.
     bool isVerticalFalling{movement.isFalling && (updatedVelocity.x == 0)
                            && (updatedVelocity.y == 0)};
 
-    // If they're on the ground, or just air jumped, or are falling vertically, 
+    // If they're on the ground, or just air jumped, or are falling vertically,
     // calc their new X/Y velocity.
-    // Note: The only other case is that they're falling through the air, in 
+    // Note: The only other case is that they're falling through the air, in
     //       which case they'll keep traveling with their current X/Y velocity.
     if (!(movement.isFalling) || isAirJumping || isVerticalFalling) {
         // Direction values. 0 == no movement, 1 == movement.

@@ -15,8 +15,8 @@ namespace AM
 using ReplicatedComponentTypes
     = boost::mp11::mp_append<EngineReplicatedComponentTypes,
                              ProjectReplicatedComponentTypes>;
-// Note: This limit is only to prevent data sizes from getting larger. If we 
-//       let there be more than 256 components, every component's index would 
+// Note: This limit is only to prevent data sizes from getting larger. If we
+//       let there be more than 256 components, every component's index would
 //       start taking 2B instead of 1B.
 static_assert(boost::mp11::mp_size<ReplicatedComponentTypes>::value
                   <= (SDL_MAX_UINT8 + 1),

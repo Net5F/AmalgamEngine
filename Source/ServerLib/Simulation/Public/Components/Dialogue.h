@@ -13,9 +13,10 @@ namespace Server
  * Holds the list of topics that make up an entity's dialogue tree.
  *
  * Instead of an actual tree structure, we use a stateless look-up table.
- * When a client requests to begin a dialogue with an entity, the server sends 
- * them the first topic in that entity's topics vector. The client can then 
- * request that a choice be selected, which may result in a new topic being sent.
+ * When a client requests to begin a dialogue with an entity, the server sends
+ * them the first topic in that entity's topics vector. The client can then
+ * request that a choice be selected, which may result in a new topic being
+ * sent.
  */
 struct Dialogue {
     /** Used as a "we should never hit this" cap on the container lengths. */
@@ -31,9 +32,9 @@ struct Dialogue {
      * A choice that the player can make.
      */
     struct Choice {
-        /** If non-empty, contains a condition script that must be ran against 
+        /** If non-empty, contains a condition script that must be ran against
             the player entity to check if they may access this choice.
-            Condition scripts will have "r =" prepended to them before running, 
+            Condition scripts will have "r =" prepended to them before running,
             and must evaluate to a boolean value. */
         std::string conditionScript{};
 
@@ -64,11 +65,11 @@ struct Dialogue {
     std::unordered_map<std::string, Uint8> topicIndices{};
 
     /** The available dialogue topics.
-        Topics are added to this vector based on their order in the entity's 
-        init script. The first topic will be the one sent in response to the 
+        Topics are added to this vector based on their order in the entity's
+        init script. The first topic will be the one sent in response to the
         Talk interaction. The rest are only reachable using setNextTopic().
-        Note: There should always be at least 1 topic present, since we only 
-              construct the Dialogue component when we have a topic to add, and 
+        Note: There should always be at least 1 topic present, since we only
+              construct the Dialogue component when we have a topic to add, and
               you can't remove topics. */
     std::vector<Topic> topics{};
 };

@@ -114,7 +114,7 @@ private:
     /**
      * Pushes the given entity sprite into the sorting vector.
      * @param T An entt::entity or AVEntityID.
-     * @return true if a sprite was pushed, else false (sprite was outside of 
+     * @return true if a sprite was pushed, else false (sprite was outside of
      *         the screen bounds).
      */
     template<typename T>
@@ -125,7 +125,7 @@ private:
                           Rotation::Direction graphicDirection);
 
     /**
-     * Returns the current sprite for the given entity data, or nullptr if 
+     * Returns the current sprite for the given entity data, or nullptr if
      * the entity doesn't have a sprite to display.
      * Updates clientGraphicState's data if necessary.
      */
@@ -133,7 +133,7 @@ private:
                                   ClientGraphicState& clientGraphicState);
 
     /**
-     * If the given entity has any visual effects, pushes them into 
+     * If the given entity has any visual effects, pushes them into
      * entityVisualEffects.
      */
     void pushEntityVisualEffects(entt::entity entity, const Position& position,
@@ -216,7 +216,7 @@ private:
     struct EntityVisualEffectIndex {
         /** The entity that the effects belong to. */
         entt::entity entity{};
-        /** The first index in entityVisualEffects that contains effects for 
+        /** The first index in entityVisualEffects that contains effects for
             this entity. */
         std::size_t startIndex{};
         /** The number of effects. */
@@ -228,11 +228,11 @@ private:
     /** Holds the current frame's entity visual effects. */
     std::vector<VisualEffectRenderInfo> entityVisualEffects;
 
-    /** The global timestamp that we're using during the current render 
+    /** The global timestamp that we're using during the current render
         frame. */
     double lastAnimationTimestamp;
 
-    /** The global timestamp that we used during the last render frame. 
+    /** The global timestamp that we used during the last render frame.
         Allows us to calculate time deltas. */
     double currentAnimationTimestamp;
 };

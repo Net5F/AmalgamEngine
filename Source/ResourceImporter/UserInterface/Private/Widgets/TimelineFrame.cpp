@@ -61,7 +61,7 @@ void TimelineFrame::render(const SDL_FPoint& windowTopLeft)
     // If this frame has a sprite, render the circle.
     if (hasSprite) {
         SDL_FPoint frameCenter{(finalExtent.x + (finalExtent.w / 2)),
-                              (finalExtent.y + (finalExtent.h / 2))};
+                               (finalExtent.y + (finalExtent.h / 2))};
         float radius{AUI::ScalingHelpers::logicalToActual(7.f)};
         SDLHelpers::renderHexagon(AUI::Core::getRenderer(), frameCenter, radius,
                                   SDL_Color{64, 64, 64, 255});
@@ -69,9 +69,9 @@ void TimelineFrame::render(const SDL_FPoint& windowTopLeft)
 }
 
 AUI::EventResult TimelineFrame::onMouseDown(AUI::MouseButtonType buttonType,
-                                           const SDL_FPoint& cursorPosition)
+                                            const SDL_FPoint& cursorPosition)
 {
-    // If the right mouse button was pressed and we have a sprite to drag, 
+    // If the right mouse button was pressed and we have a sprite to drag,
     // start dragging.
     if ((buttonType == AUI::MouseButtonType::Right) && hasSprite) {
         isDragging = true;
@@ -97,14 +97,14 @@ AUI::EventResult TimelineFrame::onMouseDown(AUI::MouseButtonType buttonType,
 
 AUI::EventResult
     TimelineFrame::onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                     const SDL_FPoint& cursorPosition)
+                                      const SDL_FPoint& cursorPosition)
 {
     // We treat additional clicks as regular MouseDown events.
     return onMouseDown(buttonType, cursorPosition);
 }
 
 AUI::EventResult TimelineFrame::onMouseUp(AUI::MouseButtonType buttonType,
-                                         const SDL_FPoint& cursorPosition)
+                                          const SDL_FPoint& cursorPosition)
 {
     if (isDragging) {
         isDragging = false;

@@ -24,7 +24,7 @@ enum class CastFailureType : Uint8 {
     LineOfSight,
     /** The target item does not exist. */
     InvalidItem,
-    /** The target item or entity doesn't support the requested interaction 
+    /** The target item or entity doesn't support the requested interaction
         type. */
     InteractionNotSupported,
     /** The caster entity doesn't exist. */
@@ -44,24 +44,24 @@ enum class CastFailureType : Uint8 {
  */
 inline const char* getCastFailureString(CastFailureType failureType)
 {
-    // Note: We only add strings for failure types that the user can do 
-    //       something about. Internal failures due to e.g. bugs shouldn't be 
+    // Note: We only add strings for failure types that the user can do
+    //       something about. Internal failures due to e.g. bugs shouldn't be
     //       sent to the user.
     switch (failureType) {
         case CastFailureType::AlreadyCasting:
             return "A cast is already underway.";
-        // Note: We don't add a failure message for OnCooldown because there 
+        // Note: We don't add a failure message for OnCooldown because there
         //       should already be something in the UI to show cooldowns.
-        //case CastFailureType::OnCooldown:
+        // case CastFailureType::OnCooldown:
         case CastFailureType::OutOfRange:
             return "Out of range.";
-        case CastFailureType::LineOfSight: 
+        case CastFailureType::LineOfSight:
             return "Target not in line of sight.";
         case CastFailureType::InvalidTargetEntity:
             return "You have no target.";
         case CastFailureType::Movement:
             return "Can't do that while moving.";
-        // Note: This occurs client-side when you use a cast type that doesn't 
+        // Note: This occurs client-side when you use a cast type that doesn't
         //       have an associated Castable object.
         case CastFailureType::InvalidCastable:
             return "Cast failed: Please set a Castable object for this cast "

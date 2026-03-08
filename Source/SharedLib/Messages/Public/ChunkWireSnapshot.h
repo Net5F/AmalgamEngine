@@ -9,7 +9,7 @@
 namespace AM
 {
 /**
- * Similar to ChunkSnapshot, but to save space uses the numeric ID of graphic 
+ * Similar to ChunkSnapshot, but to save space uses the numeric ID of graphic
  * in the palette instead of their string ID.
  *
  * Since the integer ID isn't persistable, this struct is only suitable for
@@ -26,10 +26,10 @@ public:
         TileLayer::Type layerType{TileLayer::Type::None};
 
         /** The layer's graphic value.
-            For all types except Terrain, this is simply an index into 
+            For all types except Terrain, this is simply an index into
             graphicSet.graphics. For Terrain, this is a bit-packed value.
-            For Terrain, cast this to Terrain::Value. For Walls, cast this to 
-            Wall::Type. For Floors and Objects, cast this to 
+            For Terrain, cast this to Terrain::Value. For Walls, cast this to
+            Wall::Type. For Floors and Objects, cast this to
             Rotation::Direction. */
         Uint8 graphicValue{0};
     };
@@ -52,15 +52,15 @@ public:
         major order. */
     std::array<Uint8, SharedConfig::CHUNK_TILE_COUNT> tileLayerCounts{};
 
-    /** This vector's elements are indices into the palette, each index  
+    /** This vector's elements are indices into the palette, each index
         representing a tile layer that is owned by a tile in this chunk.
-        These layers are ordered by tile coordinate in morton order, and by 
+        These layers are ordered by tile coordinate in morton order, and by
         the usual bottom-to-top type order within each tile.
-        To iterate, use tileLayerCounts to determine how many layers belong to 
+        To iterate, use tileLayerCounts to determine how many layers belong to
         each tile. */
     std::vector<Uint8> tileLayers{};
 
-    /** The tile offset for each Floor and Object tile layer in tileLayers, 
+    /** The tile offset for each Floor and Object tile layer in tileLayers,
         stored in the order that they'll be encountered while iterating. */
     std::vector<TileOffset> tileOffsets{};
 

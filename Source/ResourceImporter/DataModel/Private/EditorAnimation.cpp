@@ -7,8 +7,8 @@ namespace AM
 namespace ResourceImporter
 {
 
-const BoundingBox&
-    EditorAnimation::getModelBounds(const BoundingBoxModel& boundingBoxModel) const
+const BoundingBox& EditorAnimation::getModelBounds(
+    const BoundingBoxModel& boundingBoxModel) const
 {
     if (modelBoundsID) {
         return boundingBoxModel.getBoundingBox(modelBoundsID).modelBounds;
@@ -19,7 +19,7 @@ const BoundingBox&
 }
 
 const EditorSprite* EditorAnimation::getSpriteAtTime(double animationTime) const
-{ 
+{
     if (frames.size() == 0) {
         return nullptr;
     }
@@ -35,8 +35,8 @@ const EditorSprite* EditorAnimation::getSpriteAtTime(double animationTime) const
     // Find the sprite closest to, but not surpassing, the desired frame.
     const EditorSprite* sprite{&(frames[0].sprite.get())};
     for (std::size_t i{0}; i < (frames.size() - 1); ++i) {
-        if ((frames[i].frameNumber <= desiredFrame) && 
-            (frames[i + 1].frameNumber > desiredFrame)) {
+        if ((frames[i].frameNumber <= desiredFrame)
+            && (frames[i + 1].frameNumber > desiredFrame)) {
             sprite = &(frames[i].sprite.get());
             break;
         }
@@ -54,7 +54,7 @@ const EditorSprite* EditorAnimation::getSpriteAtFrame(Uint8 frameNumber) const
             return &(it->sprite.get());
         }
         else if (it->frameNumber < frameNumber) {
-            // The desired frame wasn't found, but a previous frame with a 
+            // The desired frame wasn't found, but a previous frame with a
             // sprite was found.
             return &(it->sprite.get());
         }

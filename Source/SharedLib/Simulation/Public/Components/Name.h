@@ -7,7 +7,7 @@ namespace AM
 /**
  * Represents an entity's name.
  *
- * All client/server-synchronized entities have a name. Client-only A/V 
+ * All client/server-synchronized entities have a name. Client-only A/V
  * entities don't have names.
  */
 struct Name {

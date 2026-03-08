@@ -13,15 +13,15 @@ class World;
 
 /**
  * A per-entity key-value store.
- * 
+ *
  * Values are identified in scripts using their string ID (see World::
- * storedValueIDMap). We map string ID -> numeric ID for storage, to save 
+ * storedValueIDMap). We map string ID -> numeric ID for storage, to save
  * space and avoid allocations.
- * 
+ *
  * Global values are also supported (see World::globalStoredValueMap).
  */
 struct StoredValues {
-    /** Used as a "we should never hit this" cap on the number of values that 
+    /** Used as a "we should never hit this" cap on the number of values that
         component can hold. */
     static constexpr std::size_t MAX_STORED_VALUES{SDL_MAX_UINT16};
 
@@ -37,12 +37,12 @@ struct StoredValues {
      *
      * If newValue == 0 (the default value), the value will be deleted.
      *
-     * Note: Stored values are often cast to different types, but their 
+     * Note: Stored values are often cast to different types, but their
      *       underlying type is always Uint32.
      *
      * @param stringID The string ID of the value to add or overwrite.
      * @param newValue The new value to use.
-     * @return True if the value was successfully set, else false (value with 
+     * @return True if the value was successfully set, else false (value with
      *         the given ID doesn't exist and value limit is reached).
      */
     bool storeValue(std::string_view stringID, Uint32 newValue, World& world);
@@ -50,11 +50,11 @@ struct StoredValues {
     /**
      * Gets a stored value.
      *
-     * Note: Stored values are often cast to different types, but their 
+     * Note: Stored values are often cast to different types, but their
      *       underlying type is always Uint32.
-     * 
+     *
      * @param stringID The string ID of the value to get.
-     * @return The requested value. If not found, returns 0 (the default value 
+     * @return The requested value. If not found, returns 0 (the default value
      *         that the value would have if it existed).
      */
     Uint32 getStoredValue(std::string_view stringID, World& world);

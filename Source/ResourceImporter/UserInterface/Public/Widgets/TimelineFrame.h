@@ -11,7 +11,7 @@ namespace ResourceImporter
 /**
  * An individual frame in the animation timeline.
  *
- * Frames can be selected by clicking on them. For frames that contain sprites, 
+ * Frames can be selected by clicking on them. For frames that contain sprites,
  * you can right click and drag to move the sprite to a different frame.
  */
 class TimelineFrame : public AUI::Widget
@@ -39,21 +39,21 @@ public:
 
     /**
      * Called when this frame is right clicked while it has a sprite.
-     * @param inOnSpriteDragStarted A callback that expects the cursor's current 
+     * @param inOnSpriteDragStarted A callback that expects the cursor's current
      *                              position.
      */
     void setOnSpriteDragStarted(
         std::function<void(const SDL_FPoint&)> inOnSpriteDragStarted);
 
     /**
-     * @param inOnSpriteDragged A callback that expects the cursor's current 
+     * @param inOnSpriteDragged A callback that expects the cursor's current
      *                          position.
      */
     void setOnSpriteDragged(
         std::function<void(const SDL_FPoint&)> inOnSpriteDragged);
 
     /**
-     * @param inOnSpriteDragReleased A callback that expects the cursor's 
+     * @param inOnSpriteDragReleased A callback that expects the cursor's
      *                               current position.
      */
     void setOnSpriteDragReleased(
@@ -65,10 +65,11 @@ public:
     void render(const SDL_FPoint& windowTopLeft) override;
 
     AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
-                            const SDL_FPoint& cursorPosition) override;
+                                 const SDL_FPoint& cursorPosition) override;
 
-    AUI::EventResult onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                   const SDL_FPoint& cursorPosition) override;
+    AUI::EventResult
+        onMouseDoubleClick(AUI::MouseButtonType buttonType,
+                           const SDL_FPoint& cursorPosition) override;
 
     AUI::EventResult onMouseUp(AUI::MouseButtonType buttonType,
                                const SDL_FPoint& cursorPosition) override;

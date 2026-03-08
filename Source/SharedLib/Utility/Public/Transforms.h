@@ -35,18 +35,18 @@ public:
     static float worldZToScreenY(float zCoord, float zoomFactor);
 
     /**
-     * Converts a point in screen space to a point in world space, with 
+     * Converts a point in screen space to a point in world space, with
      * Z == 0.
-     * Note: Since this is just a simple conversion, we don't do any bounds 
+     * Note: Since this is just a simple conversion, we don't do any bounds
      *       checking. It's on you to make sure the returned value is valid.
      */
     static Vector3 screenToWorldMinimum(const SDL_FPoint& screenPoint,
                                         const Camera& camera);
 
     /**
-     * Converts a point in screen space to a point in world space, with 
+     * Converts a point in screen space to a point in world space, with
      * Z == camera.target.z.
-     * @return If screenPoint doesn't intersect the camera's view bounds, 
+     * @return If screenPoint doesn't intersect the camera's view bounds,
      *         returns null.
      */
     static std::optional<Vector3>
@@ -56,14 +56,14 @@ public:
     /**
      * Converts a point in screen space to a ray in world space.
      * @return If successful, returns a ray starting at the closest intersection
-     *         between screenPoint and the camera's view bounds, pointing in 
+     *         between screenPoint and the camera's view bounds, pointing in
      *         the normalized direction that the camera is facing.
-     *         If screenPoint doesn't intersect the camera's view bounds, 
+     *         If screenPoint doesn't intersect the camera's view bounds,
      *         returns null.
      *
      * Note: This can return null if the camera is zoomed out. We don't change
-     *       the camera position or expand the view bounds when zooming (zoom 
-     *       is just done by scaling), so you can end up seeing outside of the 
+     *       the camera position or expand the view bounds when zooming (zoom
+     *       is just done by scaling), so you can end up seeing outside of the
      *       camera's view bounds.
      */
     static std::optional<Ray> screenToWorldRay(const SDL_FPoint& screenPoint,
@@ -91,7 +91,8 @@ public:
     //-------------------------------------------------------------------------
     // Constants
     //-------------------------------------------------------------------------
-    /** The scaling factor to use when going from world tiles to screen tiles. */
+    /** The scaling factor to use when going from world tiles to screen tiles.
+     */
     static constexpr float TILE_FACE_WIDTH_WORLD_TO_SCREEN{
         static_cast<float>(SharedConfig::TILE_FACE_SCREEN_WIDTH)
         / SharedConfig::TILE_WORLD_WIDTH};
@@ -102,7 +103,8 @@ public:
         static_cast<float>(SharedConfig::TILE_SIDE_SCREEN_HEIGHT)
         / SharedConfig::TILE_WORLD_HEIGHT};
 
-    /** The scaling factor to use when going from screen tiles to world tiles. */
+    /** The scaling factor to use when going from screen tiles to world tiles.
+     */
     static constexpr float TILE_FACE_WIDTH_SCREEN_TO_WORLD{
         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
         / SharedConfig::TILE_FACE_SCREEN_WIDTH};

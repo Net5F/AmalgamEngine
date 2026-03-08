@@ -20,7 +20,7 @@ struct Interaction {
 
     /**
      * Adds the given interaction to supportedInteractions.
-     * @return true if the interaction was added, else false (already present 
+     * @return true if the interaction was added, else false (already present
      *         or array was full).
      */
     bool add(EntityInteractionType newInteraction);

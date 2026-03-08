@@ -64,16 +64,15 @@ public:
     void remObject(ObjectGraphicSetID objectID);
 
     const EditorTerrainGraphicSet& getTerrain(TerrainGraphicSetID terrainID);
-    const EditorFloorGraphicSet&
-        getFloor(FloorGraphicSetID floorID);
+    const EditorFloorGraphicSet& getFloor(FloorGraphicSetID floorID);
     const EditorWallGraphicSet& getWall(WallGraphicSetID wallID);
     const EditorObjectGraphicSet& getObject(ObjectGraphicSetID objectID);
 
     // Graphic set properties.
     void setGraphicSetDisplayName(GraphicSet::Type type, Uint16 graphicSetID,
-                                 const std::string& newDisplayName);
+                                  const std::string& newDisplayName);
     void setGraphicSetSlot(GraphicSet::Type type, Uint16 graphicSetID,
-                          std::size_t index, GraphicID newGraphicID);
+                           std::size_t index, GraphicID newGraphicID);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
@@ -89,9 +88,9 @@ public:
 private:
     // Parsing functions.
     /**
-     * @param graphicSetJson  The json to parse. Must be a valid graphic set
-     *                        section from ResourceData.json, for the appropriate
-     *                        set type.
+     * @param graphicSetJson The json to parse. Must be a valid graphic set
+     *                       section from ResourceData.json, for the
+     *                       appropriate set type.
      */
     bool parseTerrainGraphicSet(const nlohmann::json& graphicSetJson);
     bool parseFloorGraphicSet(const nlohmann::json& graphicSetJson);
@@ -105,31 +104,31 @@ private:
     std::map<Uint16, T>& getMapForGraphicSetType();
 
     /**
-     * Checks if the given name is unique among all graphic sets of the same 
+     * Checks if the given name is unique among all graphic sets of the same
      * type in the model.
      *
-     * @param graphicSetID  The ID of the graphic set that might get displayName.
-     *                      If it already is set to displayName, it won't be 
-     *                      counted as non-unique.
+     * @param graphicSetID  The ID of the graphic set that might get
+     * displayName. If it already is set to displayName, it won't be counted as
+     * non-unique.
      * @param displayName  The display name that the graphic set will be set to.
      */
     template<typename T>
     bool graphicSetNameIsUnique(Uint16 graphicSetID,
-                               const std::string& displayName);
+                                const std::string& displayName);
 
     /**
      * Implementation for setGraphicSetDisplayName().
      */
     template<typename T>
     void setGraphicSetDisplayName(GraphicSet::Type type, Uint16 graphicSetID,
-                                 const std::string& newDisplayName);
+                                  const std::string& newDisplayName);
 
     /**
      * Implementation for setGraphicSetSlot().
      */
     template<typename T>
     void setGraphicSetSlot(GraphicSet::Type type, Uint16 graphicSetID,
-                          std::size_t index, GraphicID newGraphicID);
+                           std::size_t index, GraphicID newGraphicID);
 
     // Save functions.
     void saveTerrain(nlohmann::json& json);
@@ -139,20 +138,21 @@ private:
 
     DataModel& dataModel;
 
-    // Note: These all use Uint16 instead of the specific ID type, so we can 
+    // Note: These all use Uint16 instead of the specific ID type, so we can
     //       interact with them generically.
-    /** Maps terrain IDs -> the terrain graphic sets that we currently have 
+    /** Maps terrain IDs -> the terrain graphic sets that we currently have
         loaded. */
     std::map<Uint16, EditorTerrainGraphicSet> terrainMap;
 
-    /** Maps floor IDs -> the floor graphic sets that we currently have loaded. 
+    /** Maps floor IDs -> the floor graphic sets that we currently have loaded.
      */
     std::map<Uint16, EditorFloorGraphicSet> floorMap;
 
     /** Maps wall IDs -> the wall graphic sets that we currently have loaded. */
     std::map<Uint16, EditorWallGraphicSet> wallMap;
 
-    /** Maps object IDs -> the object graphic sets that we currently have loaded.
+    /** Maps object IDs -> the object graphic sets that we currently have
+     * loaded.
      */
     std::map<Uint16, EditorObjectGraphicSet> objectMap;
 
@@ -184,8 +184,8 @@ private:
 
     entt::sigh<void(GraphicSet::Type type, Uint16 graphicSetID)>
         graphicSetRemovedSig;
-    entt::sigh<void(GraphicSet::Type type, Uint16 graphicSetID, std::size_t index,
-                    GraphicID newGraphicID)>
+    entt::sigh<void(GraphicSet::Type type, Uint16 graphicSetID,
+                    std::size_t index, GraphicID newGraphicID)>
         graphicSetSlotChangedSig;
     entt::sigh<void(GraphicSet::Type type, Uint16 graphicSetID,
                     const std::string& newDisplayName)>
@@ -196,9 +196,8 @@ public:
     // Signal Sinks
     //-------------------------------------------------------------------------
     /** A terrain graphic set was added to the model. */
-    entt::sink<
-        entt::sigh<void(TerrainGraphicSetID terrainID,
-                        const EditorTerrainGraphicSet& terrain)>>
+    entt::sink<entt::sigh<void(TerrainGraphicSetID terrainID,
+                               const EditorTerrainGraphicSet& terrain)>>
         terrainAdded;
     /** A floor graphic set was added to the model. */
     entt::sink<entt::sigh<void(FloorGraphicSetID floorID,

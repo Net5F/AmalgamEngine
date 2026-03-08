@@ -20,7 +20,7 @@ CastableData::CastableData(const GraphicDataBase& graphicData)
     CastableDef::defineCastables(
         graphicData, [&](const Castable& castable) { addCastable(castable); });
 
-    // Note: We intentionally don't have a "null castable", because we want the 
+    // Note: We intentionally don't have a "null castable", because we want the
     //       getters to return nullptr if there isn't a real castable to return.
 }
 

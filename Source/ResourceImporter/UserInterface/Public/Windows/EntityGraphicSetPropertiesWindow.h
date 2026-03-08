@@ -20,7 +20,7 @@ class DataModel;
  *
  * Allows the user to edit the active graphic set's properties.
  *
- * Note: This is separate from GraphicSetPropertiesWindow because entity 
+ * Note: This is separate from GraphicSetPropertiesWindow because entity
  *       graphic sets have significant differences from the others.
  */
 class EntityGraphicSetPropertiesWindow : public AUI::Window
@@ -34,14 +34,14 @@ public:
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------
-    /** All fields below directly match a data field in the 
+    /** All fields below directly match a data field in the
         EditorEntityGraphicSet class. */
     AUI::Text nameLabel;
     MainTextInput nameInput;
 
 private:
     /**
-     * If the new active item is an entity graphic set, loads it's data into 
+     * If the new active item is an entity graphic set, loads it's data into
      * this window.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
@@ -52,7 +52,7 @@ private:
     void onEntityRemoved(EntityGraphicSetID graphicSetID);
 
     /**
-     * (If ID matches active set) Updates this panel with the active graphic 
+     * (If ID matches active set) Updates this panel with the active graphic
      * set's new properties.
      */
     void onEntityDisplayNameChanged(EntityGraphicSetID graphicSetID,

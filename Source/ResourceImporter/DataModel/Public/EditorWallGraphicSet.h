@@ -26,8 +26,7 @@ struct EditorWallGraphicSet {
     /** The numeric IDs for each graphic in this set.
         Walls require the 4 types of wall graphics that our modular wall
         system uses. */
-    std::array<GraphicID, Wall::Type::Count> graphicIDs{
-        /* NULL_GRAPHIC_ID */ };
+    std::array<GraphicID, Wall::Type::Count> graphicIDs{/* NULL_GRAPHIC_ID */};
 };
 
 } // namespace ResourceImporter

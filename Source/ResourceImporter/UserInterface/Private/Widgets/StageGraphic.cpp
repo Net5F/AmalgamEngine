@@ -73,7 +73,7 @@ void StageGraphic::updateStageScreenPoints(
         // Offset the point.
         point.x += finalXOffset;
         point.y += finalYOffset;
-        
+
         // Update the graphic's coordinate.
         stageCoords[i].x = point.x;
         stageCoords[i].y = point.y;

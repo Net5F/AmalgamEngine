@@ -53,7 +53,7 @@ public:
                              Uint8 graphicValue);
 
     /**
-     * Removes any layers with a matching type and graphic index, regardless 
+     * Removes any layers with a matching type and graphic index, regardless
      * of their graphic set or offset.
      *
      * @return The number of matching layers that were removed.
@@ -77,7 +77,7 @@ public:
 
     /**
      * @return This tile's layers of the given type, if it has any.
-     * Note: This span will be invalidated if you add, remove, or clear any 
+     * Note: This span will be invalidated if you add, remove, or clear any
      *       of this tile's layers.
      */
     std::span<TileLayer> getLayers(TileLayer::Type layerType);
@@ -90,7 +90,7 @@ public:
     const std::vector<TileLayer>& getAllLayers() const;
 
     /**
-     * Returns a pointer to the first matching layer in this tile. If one isn't 
+     * Returns a pointer to the first matching layer in this tile. If one isn't
      * found, returns nullptr.
      */
     TileLayer* findLayer(TileLayer::Type layerType, Uint8 graphicValue);
@@ -105,7 +105,7 @@ public:
 private:
     // TODO: Maybe eventually switch to an alternative vector type that
     //       has a smaller footprint but only supports forward iterators.
-    /** The graphic layers that are on this tile, sorted by their 
+    /** The graphic layers that are on this tile, sorted by their
         TileLayer::Type in increasing order. */
     std::vector<TileLayer> layers{};
 };

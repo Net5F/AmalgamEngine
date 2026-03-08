@@ -84,7 +84,7 @@ CastFailureType
         return failureType;
     }
 
-    // Add a ClientCastState to the entity (we replace in case they're in the 
+    // Add a ClientCastState to the entity (we replace in case they're in the
     // CastComplete state).
     world.registry.emplace_or_replace<ClientCastState>(
         world.playerEntity,
@@ -117,13 +117,13 @@ CastFailureType
         return failureType;
     }
 
-    // We check above that the target entity is valid if one was provided, but 
+    // We check above that the target entity is valid if one was provided, but
     // entity interactions require a target entity. Check that it's non-null.
     if (params.targetEntity == entt::null) {
         return CastFailureType::InvalidTargetEntity;
     }
 
-    // Add a ClientCastState to the entity (we replace in case they're in the 
+    // Add a ClientCastState to the entity (we replace in case they're in the
     // CastComplete state).
     world.registry.emplace_or_replace<ClientCastState>(
         world.playerEntity,
@@ -155,13 +155,13 @@ CastFailureType CastHelper::castSpell(const CastSpellParams& params)
         return failureType;
     }
 
-    // We check above that the target entity is valid if one was provided, but 
+    // We check above that the target entity is valid if one was provided, but
     // entity interactions require a target entity. Check that it's non-null.
     if (params.targetEntity == entt::null) {
         return CastFailureType::InvalidTargetEntity;
     }
 
-    // Add a ClientCastState to the entity (we replace in case they're in the 
+    // Add a ClientCastState to the entity (we replace in case they're in the
     // CastComplete state).
     world.registry.emplace_or_replace<ClientCastState>(
         world.playerEntity,
@@ -185,7 +185,7 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     entt::registry& registry{world.registry};
 
     // Check that the caster entity exists.
-    // Note: This should only be able to fail if a non-CastSystem caller 
+    // Note: This should only be able to fail if a non-CastSystem caller
     //       doesn't fill the struct properly.
     if (!(registry.valid(casterEntity))) {
         return CastFailureType::InvalidCasterEntity;
@@ -194,7 +194,7 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     // If this isn't an instant cast, check that the caster isn't moving.
     const Position& casterPosition{registry.get<Position>(casterEntity)};
     if (castable.castTime != 0) {
-        // Note: Since we compare to the previous tick's position, it takes an 
+        // Note: Since we compare to the previous tick's position, it takes an
         //       extra tick after movement stops before we let casts go through.
         //       We consider this to be fine.
         const PreviousPosition* previousPosition{
@@ -229,7 +229,7 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     }
 
     // If the Castable uses a target entity, validate it.
-    // Note: We only check LoS on the server, to avoid rejecting casts that 
+    // Note: We only check LoS on the server, to avoid rejecting casts that
     //       may succeed.
     if ((castable.targetType == Castable::TargetType::Entity)
         || ((castable.targetType == Castable::TargetType::SelfOrEntity)
@@ -261,5 +261,5 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     return CastFailureType::None;
 };
 
-} // namespace Client 
+} // namespace Client
 } // namespace AM

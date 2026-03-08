@@ -36,8 +36,8 @@ void TimelineHandle::setRenderLine(bool inRenderLine)
 }
 
 void TimelineHandle::arrange(const SDL_FPoint& startPosition,
-                               const SDL_FRect& availableExtent,
-                               AUI::WidgetLocator* widgetLocator)
+                             const SDL_FRect& availableExtent,
+                             AUI::WidgetLocator* widgetLocator)
 {
     // Run the normal arrange step.
     Widget::arrange(startPosition, availableExtent, widgetLocator);
@@ -47,9 +47,9 @@ void TimelineHandle::arrange(const SDL_FPoint& startPosition,
         return;
     }
 
-    // Note: One could imagine creating widgets to wrap these graphics so 
+    // Note: One could imagine creating widgets to wrap these graphics so
     //       they could be automatically managed by the layout system.
-    //       It seems very heavyweight to add them to the widget tree just 
+    //       It seems very heavyweight to add them to the widget tree just
     //       for layout/rendering though, so we handle this manually.
     SDL_FRect rectOffsetExtent{rectLogicalExtent};
     rectOffsetExtent.x += logicalExtent.x;
@@ -87,7 +87,7 @@ void TimelineHandle::render(const SDL_FPoint& windowTopLeft)
 }
 
 AUI::EventResult TimelineHandle::onMouseDown(AUI::MouseButtonType buttonType,
-                                           const SDL_FPoint& cursorPosition)
+                                             const SDL_FPoint& cursorPosition)
 {
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
@@ -101,14 +101,14 @@ AUI::EventResult TimelineHandle::onMouseDown(AUI::MouseButtonType buttonType,
 
 AUI::EventResult
     TimelineHandle::onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                     const SDL_FPoint& cursorPosition)
+                                       const SDL_FPoint& cursorPosition)
 {
     // We treat additional clicks as regular MouseDown events.
     return onMouseDown(buttonType, cursorPosition);
 }
 
 AUI::EventResult TimelineHandle::onMouseUp(AUI::MouseButtonType buttonType,
-                                             const SDL_FPoint& cursorPosition)
+                                           const SDL_FPoint& cursorPosition)
 {
     if (isDragging) {
         isDragging = false;

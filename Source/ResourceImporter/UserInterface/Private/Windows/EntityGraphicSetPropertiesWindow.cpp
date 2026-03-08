@@ -14,7 +14,8 @@ namespace AM
 {
 namespace ResourceImporter
 {
-EntityGraphicSetPropertiesWindow::EntityGraphicSetPropertiesWindow(DataModel& inDataModel)
+EntityGraphicSetPropertiesWindow::EntityGraphicSetPropertiesWindow(
+    DataModel& inDataModel)
 : AUI::Window({1617, 0, 303, 518}, "EntityGraphicSetPropertiesWindow")
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
@@ -53,7 +54,8 @@ EntityGraphicSetPropertiesWindow::EntityGraphicSetPropertiesWindow(DataModel& in
 
     // When the active graphic set is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
-        .connect<&EntityGraphicSetPropertiesWindow::onActiveLibraryItemChanged>(*this);
+        .connect<&EntityGraphicSetPropertiesWindow::onActiveLibraryItemChanged>(
+            *this);
     dataModel.entityGraphicSetModel.entityRemoved
         .connect<&EntityGraphicSetPropertiesWindow::onEntityRemoved>(*this);
     dataModel.entityGraphicSetModel.entityDisplayNameChanged
@@ -64,7 +66,7 @@ EntityGraphicSetPropertiesWindow::EntityGraphicSetPropertiesWindow(DataModel& in
 void EntityGraphicSetPropertiesWindow::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
-    // Check if the new active item is an entity graphic set and return early if 
+    // Check if the new active item is an entity graphic set and return early if
     // not.
     const EditorEntityGraphicSet* newActiveGraphicSet{
         get_if<EditorEntityGraphicSet>(&newActiveItem)};
@@ -76,7 +78,7 @@ void EntityGraphicSetPropertiesWindow::onActiveLibraryItemChanged(
 
     activeGraphicSetID = newActiveGraphicSet->numericID;
 
-    // Update all of our property fields to match the new active graphic 
+    // Update all of our property fields to match the new active graphic
     // set's data.
     nameInput.setText(newActiveGraphicSet->displayName);
 }

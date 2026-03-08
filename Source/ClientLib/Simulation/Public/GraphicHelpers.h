@@ -19,8 +19,8 @@ public:
         Rotation::Direction direction{};
     };
     /**
-     * Tries to return a graphic from graphicSet, matching the desired graphic 
-     * type and direction. If the set doesn't have a graphic in that slot, 
+     * Tries to return a graphic from graphicSet, matching the desired graphic
+     * type and direction. If the set doesn't have a graphic in that slot,
      * returns the closest matching graphic.
      */
     static GraphicReturn getGraphicOrFallback(
@@ -31,4 +31,3 @@ public:
 
 } // End namespace Client
 } // End namespace AM
-

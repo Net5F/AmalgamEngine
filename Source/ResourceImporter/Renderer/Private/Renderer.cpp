@@ -28,8 +28,8 @@ void Renderer::render()
 
 bool Renderer::handleOSEvent(SDL_Event& event)
 {
-    //switch (event.type) {
-		// TODO: Handle window events.
+    // switch (event.type) {
+    //  TODO: Handle window events.
     //}
 
     return false;

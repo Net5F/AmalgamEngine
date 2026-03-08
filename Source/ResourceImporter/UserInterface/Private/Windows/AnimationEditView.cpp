@@ -96,7 +96,8 @@ AnimationEditView::AnimationEditView(
     animationModel.animationModelBoundsIDChanged
         .connect<&AnimationEditView::onAnimationModelBoundsIDChanged>(*this);
     animationModel.animationCustomModelBoundsChanged
-        .connect<&AnimationEditView::onAnimationCustomModelBoundsChanged>(*this);
+        .connect<&AnimationEditView::onAnimationCustomModelBoundsChanged>(
+            *this);
     animationModel.animationEntityAlignmentAnchorChanged
         .connect<&AnimationEditView::onAnimationEntityAlignmentAnchorChanged>(
             *this);
@@ -144,8 +145,8 @@ void AnimationEditView::onActiveLibraryItemChanged(
 
     activeAnimationID = newActiveAnimation->numericID;
 
-    // Note: All sprites in an animation must have the same textureExtent and 
-    //       stageOrigin, so we can calculate everything once here instead of 
+    // Note: All sprites in an animation must have the same textureExtent and
+    //       stageOrigin, so we can calculate everything once here instead of
     //       needing to re-calc whenever the sprite changes.
 
     // Set up the gizmos with the new animation's size and data.
@@ -178,8 +179,7 @@ void AnimationEditView::onActiveLibraryItemChanged(
     const SDL_FRect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
     SDL_FRect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
         boundingBoxGizmo.getLogicalCenteredSpriteExtent())};
-    stageGraphic.updateStage(firstSprite.textureExtent,
-                             firstSprite.stageOrigin,
+    stageGraphic.updateStage(firstSprite.textureExtent, firstSprite.stageOrigin,
                              {(gizmoClippedExtent.x + actualSpriteExtent.x),
                               (gizmoClippedExtent.y + actualSpriteExtent.y)});
 
@@ -216,8 +216,8 @@ void AnimationEditView::onAnimationLoopStartFrameChanged(
 }
 
 void AnimationEditView::onAnimationFrameChanged(AnimationID animationID,
-                                                 Uint8 frameNumber,
-                                                 const EditorSprite* newSprite)
+                                                Uint8 frameNumber,
+                                                const EditorSprite* newSprite)
 {
     if (animationID == activeAnimationID) {
         bool hasSprite{newSprite != nullptr};
@@ -243,7 +243,8 @@ void AnimationEditView::onAnimationModelBoundsIDChanged(
     }
 
     // Whether it's enabled or not, the gizmo should show the correct bounds.
-    const EditorAnimation& animation{dataModel.animationModel.getAnimation(animationID)};
+    const EditorAnimation& animation{
+        dataModel.animationModel.getAnimation(animationID)};
     const BoundingBox& newModelBounds{
         animation.getModelBounds(dataModel.boundingBoxModel)};
 
@@ -298,7 +299,7 @@ void AnimationEditView::onGizmoBoundingBoxUpdated(
     const BoundingBox& updatedBounds)
 {
     if (activeAnimationID) {
-        // If the animation isn't set to use a custom model, do nothing (should 
+        // If the animation isn't set to use a custom model, do nothing (should
         // never happen since the gizmo should be disabled).
         const EditorAnimation& animation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
@@ -316,7 +317,7 @@ void AnimationEditView::onGizmoEntityAlignmentAnchorUpdated(
     const Vector3& updatedEntityAlignmentAnchor)
 {
     if (activeAnimationID) {
-        // If the animation isn't set to use an anchor, do nothing (should 
+        // If the animation isn't set to use an anchor, do nothing (should
         // never happen since the gizmo should be disabled).
         const EditorAnimation& animation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
@@ -364,7 +365,7 @@ void AnimationEditView::onTimelineSelectionChanged(Uint8 selectedFrameNumber)
                              {(gizmoClippedExtent.x + actualSpriteExtent.x),
                               (gizmoClippedExtent.y + actualSpriteExtent.y)});
 
-    // Note: Since all sprites in an animation are guaranteed to be the same 
+    // Note: Since all sprites in an animation are guaranteed to be the same
     //       size, we don't need to update the gizmo bounds.
 }
 

@@ -10,7 +10,7 @@ namespace AM
 {
 
 /**
- * This function is called when an entity is trying to cast something. Use it 
+ * This function is called when an entity is trying to cast something. Use it
  * to check if the entity meets the Castable's requirements.
  *
  * @return true if casterEntity is allowed to cast castable. Else, false.
@@ -25,7 +25,7 @@ inline bool validateCast(entt::entity casterEntity, const Castable& castable,
     // }
 
     // If casterEntity doesn't meet one of the requirements, return false.
-    //for (const Castable::Requirement& requirement : castable.requirements) {
+    // for (const Castable::Requirement& requirement : castable.requirements) {
     //    switch (requirement.type) {
     //        case CastableRequirementType::StatStrength:
     //            if (stats.strength < requirementValue) {

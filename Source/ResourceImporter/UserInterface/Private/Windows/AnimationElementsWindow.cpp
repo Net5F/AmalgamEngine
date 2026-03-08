@@ -42,22 +42,21 @@ AnimationElementsWindow::AnimationElementsWindow(MainScreen& inScreen,
 
     auto styleLabel
         = [&](AUI::Text& label, const std::string& text, float fontSize) {
-        label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
-        label.setColor({255, 255, 255, 255});
-        label.setText(text);
-    };
+              label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
+              label.setColor({255, 255, 255, 255});
+              label.setText(text);
+          };
     styleLabel(windowLabel, "Animation Elements", 21);
     windowLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
 
     /* List items */
-    boundingBoxListItem.setOnSelected(
-        [this](AnimationElementsListItem*) {
-            // Deselect the other list items and signal the new selection.
-            entityAlignmentAnchorListItem.deselect();
-            if (onListItemSelected) {
-                onListItemSelected(ElementType::BoundingBox);
-            }
-        });
+    boundingBoxListItem.setOnSelected([this](AnimationElementsListItem*) {
+        // Deselect the other list items and signal the new selection.
+        entityAlignmentAnchorListItem.deselect();
+        if (onListItemSelected) {
+            onListItemSelected(ElementType::BoundingBox);
+        }
+    });
     entityAlignmentAnchorListItem.setOnSelected(
         [this](AnimationElementsListItem*) {
             // Deselect the other list items and signal the new selection.
@@ -131,7 +130,7 @@ void AnimationElementsWindow::onActiveLibraryItemChanged(
 
     activeAnimationID = newActiveAnimation->numericID;
 
-    // Update all of our property fields to match the new active animation's 
+    // Update all of our property fields to match the new active animation's
     // data.
     updateAnchorListItemState(newActiveAnimation->entityAlignmentAnchor);
 
@@ -168,7 +167,7 @@ void AnimationElementsWindow::updateAnchorListItemState(
         addEntityAlignmentAnchorButton.setIsVisible(false);
     }
     else {
-        // Anchor is null. Disable the anchor list item, show the '+' icon, 
+        // Anchor is null. Disable the anchor list item, show the '+' icon,
         // and select the default list item.
         entityAlignmentAnchorListItem.disable();
         boundingBoxListItem.select();

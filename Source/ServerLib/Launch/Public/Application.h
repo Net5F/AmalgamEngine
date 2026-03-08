@@ -118,10 +118,10 @@ private:
     // Module Extensions
     //-------------------------------------------------------------------------
     /** Contains the project's extension functions.
-        Allows the project to provide code and have it be called at the 
+        Allows the project to provide code and have it be called at the
         appropriate time.
         Note: This class guarantees that these extensions will be set and non-
-              null before the loop starts running. This means we don't need to 
+              null before the loop starts running. This means we don't need to
               null check the extension pointers in any class. */
     std::unique_ptr<IMessageProcessorExtension> messageProcessorExtension;
     std::unique_ptr<ISimulationExtension> simulationExtension;

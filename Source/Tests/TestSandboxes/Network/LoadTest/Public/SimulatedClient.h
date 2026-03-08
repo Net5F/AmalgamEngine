@@ -41,7 +41,7 @@ private:
     WorldSimulation worldSim;
     PeriodicCaller simCaller;
 
-    /** If true, this client is connected to the server and we've processed the 
+    /** If true, this client is connected to the server and we've processed the
         ConnectionResponse. */
     std::atomic<bool> isConnected;
 };

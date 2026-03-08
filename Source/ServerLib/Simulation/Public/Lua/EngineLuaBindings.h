@@ -134,18 +134,18 @@ private:
     /**
      * Adds a dialogue choice.
      * @param displayText The text to display for this choice.
-     * @param actionScript The actions to run if this choice is successfully 
+     * @param actionScript The actions to run if this choice is successfully
      *                     selected.
      */
     void choice(std::string_view displayText, std::string_view actionScript);
 
     /**
      * Adds a conditional dialogue choice.
-     * The condition will be used both when checking if the choice should be 
+     * The condition will be used both when checking if the choice should be
      * sent, and when validating an incoming request to select the choice.
      * @param conditionScript The condition to check against.
      * @param displayText The text to display for this choice.
-     * @param actionScript The actions to run if this choice is successfully 
+     * @param actionScript The actions to run if this choice is successfully
      *                     selected.
      */
     void choiceIf(std::string_view conditionScript,
@@ -155,7 +155,7 @@ private:
     // Shared
     //-------------------------------------------------------------------------
     /**
-     * Attempts to add the given item to the first available slot in 
+     * Attempts to add the given item to the first available slot in
      * entityToAddTo's inventory.
      * @return true if the item was successfully added, else false (inventory
      *         didn't exist, inventory was full).
@@ -172,7 +172,7 @@ private:
                     Uint8 count);
 
     /**
-     * Returns the count for the given item across all slots in the given 
+     * Returns the count for the given item across all slots in the given
      * entity's inventory.
      */
     std::size_t getItemCount(entt::entity entityToCount,
@@ -182,12 +182,12 @@ private:
      * Adds a new value, or overwrites an existing value.
      *
      * If newValue == 0 (the default value), the value will be deleted.
-     * 
-     * Note: There's no type safety with stored values. If you call storeInt 
-     *       on a value that was previously set as a bool, it will be  
+     *
+     * Note: There's no type safety with stored values. If you call storeInt
+     *       on a value that was previously set as a bool, it will be
      *       overwritten without issue.
      *
-     * @param entity The entity to store the value to. If == entt::null, the 
+     * @param entity The entity to store the value to. If == entt::null, the
      *               the value will be stored to the global store instead.
      * @param stringID The string ID of the value to add or overwrite.
      * @param newValue The new value to use.
@@ -211,15 +211,15 @@ private:
 
     /**
      * Gets a stored value.
-     * 
-     * Note: There's no type safety with stored values. If you call getStoredInt 
-     *       on a value that was previously set as a bool, it will be returned 
+     *
+     * Note: There's no type safety with stored values. If you call getStoredInt
+     *       on a value that was previously set as a bool, it will be returned
      *       as an int without issue.
      *
-     * @param entity The entity to get the value from. If == entt::null, the 
+     * @param entity The entity to get the value from. If == entt::null, the
      *               the value will be retrieved from the global store instead.
      * @param stringID The string ID of the value to get.
-     * @return The requested value. If not found, returns 0 (the default value 
+     * @return The requested value. If not found, returns 0 (the default value
      *         that the flag would have if it existed).
      */
     Uint32 getStoredUint(entt::entity entity, std::string_view stringID);
@@ -236,9 +236,9 @@ private:
 
     /**
      * Sets a bit in a bit set to the given value.
-     * Note: We take bitSet as a Uint32, since Lua doesn't have a matching 
-     *       concept and it's more efficient to 
-     *       
+     * Note: We take bitSet as a Uint32, since Lua doesn't have a matching
+     *       concept and it's more efficient to
+     *
      */
     void setBit(std::reference_wrapper<Uint32> bitSet, Uint8 bitToSet,
                 bool newValue);
@@ -250,7 +250,7 @@ private:
 
     /**
      * Returns the current time in seconds since 0 UTC (Jan 1, 1970).
-     * Note: We define our own function instead of using Lua's os.time because 
+     * Note: We define our own function instead of using Lua's os.time because
      *       many of the os library functions are not safe to expose to users.
      */
     Uint32 getCurrentTime();
@@ -270,13 +270,13 @@ private:
     World& world;
     Network& network;
 
-    /** Used to run dialogue choice scripts. Only supports the choice() function.
-        Since its interface never needs to be extended, and this class is the 
-        only one that uses it, we can keep it private to this class. */
+    /** Used to run dialogue choice scripts. Only supports the choice()
+       function. Since its interface never needs to be extended, and this class
+       is the only one that uses it, we can keep it private to this class. */
     std::unique_ptr<sol::state> dialogueChoiceLua;
 
-    /** If we're in the middle of running a dialogue choice script, this holds 
-        the topic from the entity's Dialogue::topics that we're currently 
+    /** If we're in the middle of running a dialogue choice script, this holds
+        the topic from the entity's Dialogue::topics that we're currently
         adding to. */
     Dialogue::Topic* currentDialogueTopic;
 

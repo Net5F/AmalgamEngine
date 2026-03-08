@@ -20,8 +20,8 @@ class LibraryWindow;
 class LibraryListItem;
 
 /**
- * The properties window shown when the user loads an animation from the Library.
- * Allows the user to edit the active animation's properties.
+ * The properties window shown when the user loads an animation from the
+ * Library. Allows the user to edit the active animation's properties.
  */
 class AnimationPropertiesWindow : public AUI::Window
 {
@@ -35,7 +35,7 @@ public:
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------
-    /** All fields below directly match a data field in the EditorAnimation 
+    /** All fields below directly match a data field in the EditorAnimation
         class. See fields below for more info. */
     AUI::Text nameLabel;
     MainTextInput nameInput;
@@ -90,15 +90,14 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If ID matches active animation) Updates this panel with the active 
+     * (If ID matches active animation) Updates this panel with the active
      * animation's new properties.
      */
     void onAnimationDisplayNameChanged(AnimationID animationID,
                                        const std::string& newDisplayName);
     void onAnimationFrameCountChanged(AnimationID animationID,
                                       Uint8 newFrameCount);
-    void onAnimationFpsChanged(AnimationID animationID,
-                               Uint8 newFps);
+    void onAnimationFpsChanged(AnimationID animationID, Uint8 newFps);
     void onAnimationLoopStartFrameChanged(AnimationID animationID,
                                           Uint8 newLoopStartFrame);
     void onAnimationModelBoundsIDChanged(AnimationID animationID,

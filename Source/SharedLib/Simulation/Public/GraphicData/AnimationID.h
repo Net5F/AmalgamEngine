@@ -9,7 +9,7 @@ namespace AM
 using AnimationID = Uint16;
 
 /**
- * The ID of the "null animation", or the ID used to indicate that an animation 
+ * The ID of the "null animation", or the ID used to indicate that an animation
  * is not present.
  *
  * Note: Since the null ID is 0, you can do null checks like "if (animationID)".

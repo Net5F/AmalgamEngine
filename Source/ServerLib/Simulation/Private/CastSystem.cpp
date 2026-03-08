@@ -38,7 +38,7 @@ CastSystem::CastSystem(const SimulationContext& inSimContext)
     playerCastCooldownObserver.on_construct<ClientSimData>()
         .on_construct<CastCooldown>();
 
-    // Note: When CastCooldown is loaded from the DB, it gets initialized in 
+    // Note: When CastCooldown is loaded from the DB, it gets initialized in
     //       World::initTimerComponents.
 }
 
@@ -46,8 +46,8 @@ void CastSystem::sendCastCooldownInits()
 {
     // If a player CastCooldown was constructed, send the initial state to that
     // player.
-    // Note: This may happen when the player first logs in, or when they first 
-    //       cast a Castable with a cooldown (since we don't add CastCooldown 
+    // Note: This may happen when the player first logs in, or when they first
+    //       cast a Castable with a cooldown (since we don't add CastCooldown
     //       to every entity).
     for (entt::entity entity : playerCastCooldownObserver) {
         if (!(world.registry.all_of<ClientSimData, CastCooldown>(entity))) {
@@ -74,7 +74,7 @@ void CastSystem::processCasts()
 void CastSystem::processCastRequests()
 {
     // Sort or process any waiting cast requests.
-    while (CastRequest* castRequest{castRequestQueue.peek()}) {
+    while (CastRequest * castRequest{castRequestQueue.peek()}) {
         // If the castable doesn't exist, drop this request.
         const Castable* castable{
             castableData.getCastable(castRequest->castableID)};
@@ -89,7 +89,7 @@ void CastSystem::processCastRequests()
             SorterBase::ValidityResult result{
                 castRequestSorter.push(*castRequest, castRequest->tickNum)};
 
-            // If the cast request was late, process it immediately (it may 
+            // If the cast request was late, process it immediately (it may
             // still succeed).
             if (result != SorterBase::ValidityResult::Valid) {
                 processCastRequest(*castRequest);
@@ -128,15 +128,14 @@ void CastSystem::processCastRequest(const CastRequest& castRequest)
 
     // Try to perform the cast.
     CastFailureType result{CastFailureType::None};
-    if (auto* type{
-            std::get_if<ItemInteractionType>(&castRequest.castableID)}) {
+    if (auto* type{std::get_if<ItemInteractionType>(&castRequest.castableID)}) {
         result = world.castHelper.castItemInteraction(
             {*type, clientEntity, castRequest.slotIndex,
              castRequest.targetEntity, castRequest.targetPosition,
              castRequest.netID});
     }
-    else if (auto* type{std::get_if<EntityInteractionType>(
-                 &castRequest.castableID)}) {
+    else if (auto* type{
+                 std::get_if<EntityInteractionType>(&castRequest.castableID)}) {
         result = world.castHelper.castEntityInteraction(
             {*type, clientEntity, castRequest.targetEntity,
              castRequest.targetPosition, castRequest.netID});
@@ -153,8 +152,7 @@ void CastSystem::processCastRequest(const CastRequest& castRequest)
     // If the cast failed, send the failure to the caster.
     if (result != CastFailureType::None) {
         network.serializeAndSend<CastFailed>(
-            castRequest.netID,
-            {clientEntity, castRequest.castableID, result});
+            castRequest.netID, {clientEntity, castRequest.castableID, result});
     }
 }
 
@@ -173,8 +171,8 @@ void CastSystem::updateCasts()
 
         // If the entity has moved, cancel the cast.
         Position& position{world.registry.get<Position>(entity)};
-        if (PreviousPosition* prevPosition{
-                world.registry.try_get<PreviousPosition>(entity)}) {
+        if (PreviousPosition
+            * prevPosition{world.registry.try_get<PreviousPosition>(entity)}) {
             if (position != *prevPosition) {
                 cancelCast(castState);
                 continue;
@@ -197,10 +195,10 @@ void CastSystem::updateCasts()
 
 void CastSystem::startCast(CastState& castState)
 {
-    // Note: CastHelper ensures that castState.castInfo.casterEntity is the 
+    // Note: CastHelper ensures that castState.castInfo.casterEntity is the
     //       same entity that owns castState.
 
-    // If this castable has any visuals, send a CastStarted to all nearby 
+    // If this castable has any visuals, send a CastStarted to all nearby
     // clients.
     // Note: If it has no visuals, there's no reason for a client to replicate
     //       it. Thus, we can skip sending the message.
@@ -212,7 +210,7 @@ void CastSystem::startCast(CastState& castState)
     // If this cast triggers the GCD, track it.
     // Note: If CastCooldown gets created here, its lastUpdateTick will be
     //       set to currentTick.
-    // Note: CastCooldown may get created here even if it isn't used. That's 
+    // Note: CastCooldown may get created here even if it isn't used. That's
     //       fine, the entity has at least shown the capability to cast things.
     Uint32 currentTick{simulation.getCurrentTick()};
     CastCooldown& castCooldown{world.registry.get_or_emplace<CastCooldown>(
@@ -236,9 +234,9 @@ void CastSystem::startCast(CastState& castState)
 
 void CastSystem::cancelCast(CastState& castState)
 {
-    // If this castable has any visuals, send a CastFailed to all 
+    // If this castable has any visuals, send a CastFailed to all
     // nearby clients.
-    // Note: If it has no visuals, there's no reason for a client 
+    // Note: If it has no visuals, there's no reason for a client
     //       to replicate it. Thus, we can skip sending the message.
     CastInfo& castInfo{castState.castInfo};
     if (castInfo.castable->hasVisuals()) {
@@ -337,7 +335,7 @@ void CastSystem::sendCastFailed(CastState& castState,
     }
 
     // Send the update to all nearby clients.
-    // Note: We skip the caster since clients predict all of the same types 
+    // Note: We skip the caster since clients predict all of the same types
     //       of failure for their own player entity.
     auto view{world.registry.view<Position, ClientSimData>()};
     for (entt::entity entity : *entitiesInRange) {

@@ -16,7 +16,8 @@ namespace AM
 namespace Client
 {
 
-ComponentUpdateSystem::ComponentUpdateSystem(const SimulationContext& inSimContext)
+ComponentUpdateSystem::ComponentUpdateSystem(
+    const SimulationContext& inSimContext)
 : simulation{inSimContext.simulation}
 , world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
@@ -94,8 +95,8 @@ void ComponentUpdateSystem::processComponentUpdate(
     }
 
     // Destroy any destroyed components.
-    // Note: We use remove instead of erase, since it's possible to receive a 
-    //       destroy message without ever receiving a construct message (the 
+    // Note: We use remove instead of erase, since it's possible to receive a
+    //       destroy message without ever receiving a construct message (the
     //       component was constructed and destroyed on the same tick).
     for (Uint8 componentIndex : componentUpdate.destroyedComponents) {
         boost::mp11::mp_with_index<
@@ -134,8 +135,8 @@ void ComponentUpdateSystem::onGraphicStateUpdated(entt::registry& registry,
     world.collisionLocator.updateEntity(entity, collision.worldBounds,
                                         collisionBitSets.getCollisionLayers());
 
-    // Default the entity's current graphic type to Idle South since it 
-    // always must be valid and we don't know if the new graphic set has 
+    // Default the entity's current graphic type to Idle South since it
+    // always must be valid and we don't know if the new graphic set has
     // the old type.
     // GraphicSystem will set it to a real value the next time it runs.
     clientGraphicState.graphicType = EntityGraphicType::Idle;
@@ -145,7 +146,7 @@ void ComponentUpdateSystem::onGraphicStateUpdated(entt::registry& registry,
 void ComponentUpdateSystem::onCollisionBitSetsUpdated(entt::registry& registry,
                                                       entt::entity entity)
 {
-    // Note: We assume that an entity with a CollisionBitSets always has a 
+    // Note: We assume that an entity with a CollisionBitSets always has a
     //       Collision.
     const auto [collision, collisionBitSets]
         = registry.get<Collision, CollisionBitSets>(entity);

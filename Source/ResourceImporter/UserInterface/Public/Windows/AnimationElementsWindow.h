@@ -30,12 +30,7 @@ public:
     /**
      * The types of elements items that we hold in this window.
      */
-    enum ElementType {
-        BoundingBox,
-        EntityAlignmentAnchor,
-        Count,
-        None
-    };
+    enum ElementType { BoundingBox, EntityAlignmentAnchor, Count, None };
 
     //-------------------------------------------------------------------------
     // Public interface
@@ -66,7 +61,7 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If ID matches active animation) Updates this window with the active 
+     * (If ID matches active animation) Updates this window with the active
      * animation's new properties.
      */
     void onAnimationEntityAlignmentAnchorChanged(

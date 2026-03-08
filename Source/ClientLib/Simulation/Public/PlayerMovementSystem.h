@@ -18,16 +18,16 @@ class Network;
  * Processes movement update messages for the player's entity and moves the
  * entity appropriately.
  *
- * Since the player entity is simulated in the future (in relation to the 
+ * Since the player entity is simulated in the future (in relation to the
  * server), any situation where the player's movement changes in a way that we
- * can't predict (buffs/debuffs, gear changes, etc), we potentially will fall 
+ * can't predict (buffs/debuffs, gear changes, etc), we potentially will fall
  * out of sync.
- * We soft-solve this by having the server "announce" changes instead of 
- * immediately performing them. Instead of immediately applying the debuff, the 
- * server must announce "this debuff will apply on tick X". This gives the 
- * the client time to receive the message and apply the change on the same tick 
+ * We soft-solve this by having the server "announce" changes instead of
+ * immediately performing them. Instead of immediately applying the debuff, the
+ * server must announce "this debuff will apply on tick X". This gives the
+ * the client time to receive the message and apply the change on the same tick
  * as the server.
- * If the client receives the message late, a desync is unavoidable. The client 
+ * If the client receives the message late, a desync is unavoidable. The client
  * must request a resync and deal with whatever rubberbanding occurs.
  */
 class PlayerMovementSystem
@@ -60,7 +60,7 @@ private:
      * Processes a single tick of player entity movement.
      *
      * @param inputStates The input state to use to move the entity.
-     *                 
+     *
      */
     void movePlayerEntity(const Input::StateArr& inputStates);
 

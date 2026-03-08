@@ -84,7 +84,7 @@ void ItemSystem::processItemUpdates()
             std::unique(updatedItems.begin(), updatedItems.end()),
             updatedItems.end());
 
-        // TODO: Instead of iterating each inventory slot, find a way to 
+        // TODO: Instead of iterating each inventory slot, find a way to
         //       sort and efficiently search for matches.
         // If any player's inventory contains an updated item, send the new
         // definition.
@@ -129,9 +129,9 @@ void ItemSystem::itemUpdated(ItemID itemID)
 void ItemSystem::examineItem(const CastInfo& castInfo)
 {
     // Send the item's description.
-    // Note: Since all items have a description, you could imagine sending it  
-    //       with the initial ItemUpdate. To save data, we send it when 
-    //       requested instead (we assume that people are rarely going to 
+    // Note: Since all items have a description, you could imagine sending it
+    //       with the initial ItemUpdate. To save data, we send it when
+    //       requested instead (we assume that people are rarely going to
     //       examine items, compared to how often we send ItemUpdates).
     network.serializeAndSend(castInfo.clientID,
                              SystemMessage{castInfo.item->description});
@@ -145,8 +145,8 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
     if (clientEntity != entt::null) {
         // If the combination is successful, tell the client.
         auto& inventory{world.registry.get<Inventory>(clientEntity)};
-        const ItemCombination* combination{inventory.combineItems(
-            sourceSlotIndex, targetSlotIndex, itemData)};
+        const ItemCombination* combination{
+            inventory.combineItems(sourceSlotIndex, targetSlotIndex, itemData)};
         if (combination) {
             ItemID resultItemID{combination->resultItemID};
             const Item* item{itemData.getItem(resultItemID)};
@@ -185,7 +185,7 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
 
         // If the entity has a non-empty handler, run it.
         if (const ItemHandler* itemHandler{
-                world.registry.try_get<ItemHandler>( targetEntity)};
+                world.registry.try_get<ItemHandler>(targetEntity)};
             itemHandler && !(itemHandler->handlerScript.script.empty())) {
             runEntityItemHandlerScript(clientID, clientEntity, targetEntity,
                                        item, itemHandler->handlerScript);
@@ -261,8 +261,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
         errorType = ItemError::StringIDMissing;
     }
     // Check that the string ID isn't taken by another item.
-    else if (const Item*
-                 item{itemData.getItem(itemChangeRequest.stringID)};
+    else if (const Item* item{itemData.getItem(itemChangeRequest.stringID)};
              item && (item->numericID != itemChangeRequest.itemID)) {
         errorType = ItemError::StringIDInUse;
     }
@@ -316,7 +315,7 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
     bool itemWasFound{false};
     std::visit(
         [&](auto& itemID) {
-            if (const Item * item{itemData.getItem(itemID)}) {
+            if (const Item* item{itemData.getItem(itemID)}) {
                 itemWasFound = true;
                 network.serializeAndSend(
                     itemDataRequest.netID,

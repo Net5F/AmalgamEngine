@@ -57,7 +57,7 @@ public:
      * If entityToAddTo is a client entity, sends an update message.
      *
      * @param sendFailureMessage If true and result != Success, a message will
-     *                           be sent to entityToAddTo (if its a client 
+     *                           be sent to entityToAddTo (if its a client
      *                           entity) to communicate the failure.
      */
     AddResult addItemToEntity(ItemID itemID, Uint8 count,
@@ -68,7 +68,7 @@ public:
      * Overload for string IDs.
      *
      * @param sendFailureMessage If true and result != Success, a message will
-     *                           be sent to entityToAddTo (if its a client 
+     *                           be sent to entityToAddTo (if its a client
      *                           entity) to communicate the failure.
      */
     AddResult addItemToEntity(std::string_view itemID, Uint8 count,
@@ -81,7 +81,7 @@ public:
      * If entityToAddTo is a client entity, sends an update message.
      *
      * @param sendFailureMessage If true and result != Success, a message will
-     *                           be sent to entityToRemoveFrom (if its a client 
+     *                           be sent to entityToRemoveFrom (if its a client
      *                           entity) to communicate the failure.
      */
     RemoveResult removeItemFromEntity(Uint8 slotIndex, Uint8 count,
@@ -98,7 +98,7 @@ public:
      * If entityToAddTo is a client entity, sends an update message.
      *
      * @param sendFailureMessage If true and result != Success, a message will
-     *                           be sent to entityToRemoveFrom (if its a client 
+     *                           be sent to entityToRemoveFrom (if its a client
      *                           entity) to communicate the failure.
      */
     RemoveResult removeItemFromEntity(std::string_view itemID, Uint8 count,

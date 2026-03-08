@@ -60,13 +60,13 @@ public:
 
     /**
      * Returns a reference to the graphic with the given ID.
-     * Note: This would normally belong to a specific model, but graphics may 
+     * Note: This would normally belong to a specific model, but graphics may
      *       be either a Sprite or Animation (which each have their own model).
      */
     EditorGraphicRef getGraphic(GraphicID graphicID);
 
-    // Note: Each of these "setActive" functions affect the current active 
-    //       library item. There's only 1 active library item at a time, these 
+    // Note: Each of these "setActive" functions affect the current active
+    //       library item. There's only 1 active library item at a time, these
     //       are only set up like this because they aren't easily templated.
     /** Sets the current active library item to the given sprite sheet. */
     void setActiveSpriteSheet(int newActiveSpriteSheetID);

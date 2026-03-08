@@ -91,7 +91,7 @@ void PointGizmo::arrange(const SDL_FPoint& startPosition,
 {
     // Note: This custom arrange isn't really needed, since ResourceImporter
     //       isn't likely to change screen size at runtime. It's nice to keep
-    //       as an example though, of what to do if you have custom graphics 
+    //       as an example though, of what to do if you have custom graphics
     //       that rely on clippedExtent for layout.
 
     // Run the normal arrange step.
@@ -195,7 +195,7 @@ AUI::EventResult PointGizmo::onMouseMove(const SDL_FPoint& cursorPosition)
 
     // Apply the offset to the mouse position and convert to logical space.
     SDL_FPoint offsetMousePoint{cursorPosition.x - finalXOffset,
-                               cursorPosition.y - finalYOffset};
+                                cursorPosition.y - finalYOffset};
     offsetMousePoint = AUI::ScalingHelpers::actualToLogical(offsetMousePoint);
 
     // Convert the screen-space mouse point to world space.
@@ -270,7 +270,7 @@ void PointGizmo::updatePoint(const Position& mouseWorldPos)
     x = mouseWorldPos.x;
     y = mouseWorldPos.y;
 
-    // If we moved below the model-space origin (0, 0), bring the point back 
+    // If we moved below the model-space origin (0, 0), bring the point back
     // in.
     if (x < 0) {
         x = 0;
@@ -288,7 +288,7 @@ void PointGizmo::updatePoint(const Position& mouseWorldPos)
     }
 
     // Signal the updated point.
-    // Note: We don't update our internal point until our owner saves the 
+    // Note: We don't update our internal point until our owner saves the
     //       update in the model and it signals us.
     if (onPointUpdated) {
         onPointUpdated(updatedPoint);

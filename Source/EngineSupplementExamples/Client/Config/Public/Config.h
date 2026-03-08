@@ -72,9 +72,9 @@ public:
     static constexpr unsigned int LOGICAL_SCREEN_HEIGHT{1080};
 
     /**
-     * Sets the quality of scaling/filtering algorithm used for sprite 
+     * Sets the quality of scaling/filtering algorithm used for sprite
      * textures (i.e any textures rendered by Renderer).
-     * 
+     *
      * UI textures ignore this setting.
      */
     static constexpr SDL_ScaleMode SPRITE_SCALING_QUALITY{SDL_SCALEMODE_LINEAR};
@@ -101,7 +101,7 @@ public:
     static constexpr std::array<float, 8> ZOOM_LEVELS{0.25, 0.5, 0.75, 1,
                                                       1.25, 1.5, 1.75, 2};
 
-    /** The index in the ZOOM_LEVELS vector that the camera should initially 
+    /** The index in the ZOOM_LEVELS vector that the camera should initially
         be set to. */
     static constexpr std::size_t DEFAULT_ZOOM_LEVEL_INDEX{3};
 };

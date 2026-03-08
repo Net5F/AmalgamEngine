@@ -41,8 +41,8 @@ public:
         to keep in sync with the server. */
     entt::registry registry;
 
-    /** Audio/visual entity data registry. A/V entities are processed 
-        by AVSystem and aren't synchronized with the server and other 
+    /** Audio/visual entity data registry. A/V entities are processed
+        by AVSystem and aren't synchronized with the server and other
         clients. */
     entt::basic_registry<AVEntityID> avRegistry;
 
@@ -53,7 +53,7 @@ public:
         position. */
     EntityLocator entityLocator;
 
-    /** Spatial partitioning grid for efficiently locating entities and tile 
+    /** Spatial partitioning grid for efficiently locating entities and tile
         layers by their collision volumes. */
     CollisionLocator collisionLocator;
 

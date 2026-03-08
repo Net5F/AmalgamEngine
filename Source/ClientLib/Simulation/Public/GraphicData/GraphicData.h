@@ -43,15 +43,15 @@ public:
         getAnimationRenderData(AnimationID numericID) const;
 
     /**
-     * Returns an appropriate world-space offset to use when rendering the 
+     * Returns an appropriate world-space offset to use when rendering the
      * given graphic from the given set.
      *
      * If the graphic is an Animation, its alignment offset will be returned.
-     * If the graphic is a Sprite, {0, 0, 0} will be returned (Sprites don't 
+     * If the graphic is a Sprite, {0, 0, 0} will be returned (Sprites don't
      * support alignment offsets).
      *
-     * Note: Alignment offsets aren't used by the sim. Instead, it just centers 
-     *       IdleSouth's modelBounds on the entity's Position. The renderer 
+     * Note: Alignment offsets aren't used by the sim. Instead, it just centers
+     *       IdleSouth's modelBounds on the entity's Position. The renderer
      *       then needs to do some work to make sure the sprite lines up.
      */
     Vector3 getRenderAlignmentOffset(EntityGraphicSetID setID,

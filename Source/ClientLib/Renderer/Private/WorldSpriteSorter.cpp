@@ -118,7 +118,7 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
 
                 // Push all of this tile's sprites into the appropriate vectors.
                 // Note: tile will be nullptr if the chunk is empty.
-                if (const Tile * tile{world.tileMap.cgetTile(tilePosition)}) {
+                if (const Tile* tile{world.tileMap.cgetTile(tilePosition)}) {
                     pushTerrainSprites(*tile, camera, tilePosition);
                     pushFloorSprite(*tile, camera, tilePosition);
                     pushWallSprites(*tile, camera, tilePosition);
@@ -175,12 +175,10 @@ void WorldSpriteSorter::gatherServerEntitySpriteInfo(const Camera& camera,
     entt::registry& registry{world.registry};
 
     // Gather all graphical entities.
-    auto view
-        = registry.view<Position, GraphicState, ClientGraphicState>();
+    auto view = registry.view<Position, GraphicState, ClientGraphicState>();
     for (entt::entity entity : view) {
         auto [position, graphicState, clientGraphicState]
-            = view.get<Position, GraphicState, ClientGraphicState>(
-                entity);
+            = view.get<Position, GraphicState, ClientGraphicState>(entity);
 
         // If this entity has a PreviousPosition, calc a lerp'd position.
         Position renderPosition{position};
@@ -246,10 +244,11 @@ void WorldSpriteSorter::gatherAVEntitySpriteInfo(const Camera& camera,
     }
 }
 
-void WorldSpriteSorter::pushTerrainSprites(
-    const Tile& tile, const Camera& camera, const TilePosition& tilePosition)
+void WorldSpriteSorter::pushTerrainSprites(const Tile& tile,
+                                           const Camera& camera,
+                                           const TilePosition& tilePosition)
 {
-    // Note: Each tile can only have 1 terrain, but we get a span just to 
+    // Note: Each tile can only have 1 terrain, but we get a span just to
     //       follow the pattern of the other types.
     std::span<const TileLayer> terrains{
         tile.getLayers(TileLayer::Type::Terrain)};
@@ -283,8 +282,7 @@ void WorldSpriteSorter::pushTerrainSprites(
 void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
                                         const TilePosition& tilePosition)
 {
-    std::span<const TileLayer> floors{
-        tile.getLayers(TileLayer::Type::Floor)};
+    std::span<const TileLayer> floors{tile.getLayers(TileLayer::Type::Floor)};
     for (const TileLayer& floor : floors) {
         GraphicRef graphic{floor.getGraphic()};
         if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
@@ -301,7 +299,7 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
                                         const TilePosition& tilePosition)
 {
     // Make this wall match the tile's terrain height.
-    // Note: Walls don't normally use offsets, but it's convenient to do it 
+    // Note: Walls don't normally use offsets, but it's convenient to do it
     //       this way.
     TileOffset tileOffset{0, 0, getTerrainHeight(tilePosition)};
 
@@ -384,7 +382,7 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
         layerID.tilePosition, layerID.tileOffset, renderData, camera)};
 
     // If this is a Terrain layer, offset it based on its starting height.
-    // Note: We only need to do this visually, Terrain::calcWorldBounds adds 
+    // Note: We only need to do this visually, Terrain::calcWorldBounds adds
     //       start height to the bounds appropriately below.
     if (layerID.type == TileLayer::Type::Terrain) {
         Terrain::Height startHeight{
@@ -412,13 +410,13 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     // Calc the sprite's world bounds.
     BoundingBox worldBounds{};
     if (layerID.type == TileLayer::Type::Terrain) {
-        // For terrain, we ignore the sprite's modelBounds and instead 
+        // For terrain, we ignore the sprite's modelBounds and instead
         // generate a bounding volume based on the terrain type.
         worldBounds = Terrain::calcWorldBounds(layerID.tilePosition,
                                                layerID.graphicValue);
     }
     else if (layerID.type == TileLayer::Type::Floor) {
-        // For floors, we ignore the sprite's modelBounds and instead 
+        // For floors, we ignore the sprite's modelBounds and instead
         // generate a flat, tile-sized bounding volume.
         worldBounds = Floor::calcWorldBounds(layerID.tilePosition);
     }
@@ -434,8 +432,8 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     worldBounds.max.z += layerID.tileOffset.z;
 
     // Push the sprite to be sorted.
-    spritesToSort.emplace_back(sprite, worldObjectID, worldBounds,
-                               screenExtent, colorMod);
+    spritesToSort.emplace_back(sprite, worldObjectID, worldBounds, screenExtent,
+                               colorMod);
 }
 
 const Sprite*
@@ -492,7 +490,7 @@ void WorldSpriteSorter::pushEntitySprite(T entity, const Position& position,
     // If the sprite is on screen, push the render info.
     if (isWithinScreenBounds(screenExtent, camera)) {
         // Get a box for this entity, to use for sorting.
-        // Note: We sort using the standard collision model bounds (from 
+        // Note: We sort using the standard collision model bounds (from
         //       IdleSouth). We could instead use the current sprite, but
         //       that would open us up to potentially sorting boxes that are
         //       clipping inside of eachother.
@@ -518,10 +516,9 @@ void WorldSpriteSorter::pushEntityVisualEffects(entt::entity entity,
                                                 const Position& position,
                                                 const Camera& camera)
 {
-    // If this entity has any visual effects, calculate their screen extent 
+    // If this entity has any visual effects, calculate their screen extent
     // and pass them to the callback.
-    if (AVEffects*
-          avEffects{world.registry.try_get<AVEffects>(entity)}) {
+    if (AVEffects * avEffects{world.registry.try_get<AVEffects>(entity)}) {
         // Push an index entry for this entity.
         entityVisualEffectIndices.emplace_back(entity,
                                                entityVisualEffects.size(),
@@ -584,7 +581,7 @@ void WorldSpriteSorter::calcDepthDependencies()
                 SpriteSortInfo& spriteA{spritesToSort[i]};
                 SpriteSortInfo& spriteB{spritesToSort[j]};
 
-                // If an A/V entity is intersecting something, consider the 
+                // If an A/V entity is intersecting something, consider the
                 // A/V entity to be in front.
                 if (std::holds_alternative<AVEntityID>(spriteB.spriteOwnerID)
                     && spriteB.worldBounds.intersects(spriteA.worldBounds)) {

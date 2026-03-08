@@ -29,16 +29,16 @@ struct CastRequest {
     /** The castable that's being cast. */
     CastableID castableID{};
 
-    /** If castableID is an ItemInteractionType, this is the inventory slot of 
+    /** If castableID is an ItemInteractionType, this is the inventory slot of
         the item that is being used. */
     Uint8 slotIndex{0};
 
-    /** The target entity. If castableID is an EntityInteractionType, this 
-        must always be present. Otherwise, this should be filled if the client 
+    /** The target entity. If castableID is an EntityInteractionType, this
+        must always be present. Otherwise, this should be filled if the client
         has a current target. */
     entt::entity targetEntity{entt::null};
 
-    /** The target position. If the requested Castable has a targetToolType 
+    /** The target position. If the requested Castable has a targetToolType
         that selects a position, this must be filled. */
     Vector3 targetPosition{};
 

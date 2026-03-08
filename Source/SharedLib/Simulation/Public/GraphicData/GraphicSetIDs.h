@@ -8,11 +8,11 @@ namespace AM
 /**
  * A graphic set's numeric ID.
  *
- * These IDs aren't super useful since we cast to Uint16 all the time for 
- * generic code, but they at least give a solid indication that each graphic 
+ * These IDs aren't super useful since we cast to Uint16 all the time for
+ * generic code, but they at least give a solid indication that each graphic
  * set type has its own ID space.
  *
- * If we ever care to, we can replace everywhere we cast to Uint16 with a 
+ * If we ever care to, we can replace everywhere we cast to Uint16 with a
  * variant that contains these types.
  */
 using TerrainGraphicSetID = Uint16;
@@ -25,7 +25,8 @@ using EntityGraphicSetID = Uint16;
  * The ID of the "null graphic set", or the ID used to indicate that a graphic
  * set is not present.
  *
- * Note: Since the null ID is 0, you can do null checks like "if (graphicSetID)".
+ * Note: Since the null ID is 0, you can do null checks like "if
+ * (graphicSetID)".
  */
 static constexpr TerrainGraphicSetID NULL_TERRAIN_GRAPHIC_SET_ID{0};
 static constexpr FloorGraphicSetID NULL_FLOOR_GRAPHIC_SET_ID{0};

@@ -19,8 +19,8 @@ void MigrationRunner::migrate(SQLite::Database& database,
         unsigned int versionNumber{
             static_cast<unsigned int>(getVersionQuery.getColumn(2).getInt())};
 
-        // Match the name to one of our expected names and check the version 
-        // number. If it's newer than the code, fail immediately. If it's 
+        // Match the name to one of our expected names and check the version
+        // number. If it's newer than the code, fail immediately. If it's
         // older, perform the required migrations.
         for (const auto& migrationInfo : migrationInfoVec) {
             if (migrationInfo.name == name) {

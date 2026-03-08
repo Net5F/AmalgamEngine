@@ -18,7 +18,8 @@ namespace AM
 {
 namespace Server
 {
-ComponentChangeSystem::ComponentChangeSystem(const SimulationContext& inSimContext)
+ComponentChangeSystem::ComponentChangeSystem(
+    const SimulationContext& inSimContext)
 : world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
 , graphicData{inSimContext.graphicData}
@@ -67,9 +68,8 @@ void ComponentChangeSystem::processChangeRequests()
             continue;
         }
 
-        registry.replace<GraphicState>(
-            graphicStateChangeRequest.entity,
-            graphicStateChangeRequest.graphicState);
+        registry.replace<GraphicState>(graphicStateChangeRequest.entity,
+                                       graphicStateChangeRequest.graphicState);
     }
 }
 
@@ -108,7 +108,7 @@ void ComponentChangeSystem::onGraphicStateUpdated(entt::registry& registry,
 void ComponentChangeSystem::onCollisionBitSetsUpdated(entt::registry& registry,
                                                       entt::entity entity)
 {
-    // Note: We assume that an entity with a CollisionBitSets always has a 
+    // Note: We assume that an entity with a CollisionBitSets always has a
     //       Collision.
     const auto [collision, collisionBitSets]
         = registry.get<Collision, CollisionBitSets>(entity);

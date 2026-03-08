@@ -79,8 +79,8 @@ void AnimationTimeline::setFrameCount(Uint8 newFrameCount)
         setFrameScrubberPosition(newFrameCount - 1);
     }
 
-    // Note: If loopStartFrame is larger than newFrameCount, the model handles 
-    //       updating and signalling it before the frame count signal is 
+    // Note: If loopStartFrame is larger than newFrameCount, the model handles
+    //       updating and signalling it before the frame count signal is
     //       emitted.
 }
 
@@ -95,7 +95,7 @@ void AnimationTimeline::setFrame(Uint8 frameNumber, bool hasSprite)
         static_cast<TimelineFrame&>(*frameContainer[frameNumber])};
     frame.hasSprite = hasSprite;
 
-    // If the frame is currently selected, refresh it so the user gets notified 
+    // If the frame is currently selected, refresh it so the user gets notified
     // of the sprite change.
     if (frameNumber == selectedFrameNumber) {
         setFrameScrubberPosition(selectedFrameNumber);
@@ -147,8 +147,7 @@ void AnimationTimeline::onTick(double)
 
     // If enough time has passed, go to the next frame.
     animationAccumulator += animationTimer.getTimeAndReset();
-    double animationTimestepS{1
-                              / static_cast<double>(activeAnimation->fps)};
+    double animationTimestepS{1 / static_cast<double>(activeAnimation->fps)};
     while (animationAccumulator > animationTimestepS) {
         // If we're already at the last frame, loop or end the animation.
         Uint8 frameCount{activeAnimation->frameCount};
@@ -214,7 +213,7 @@ void AnimationTimeline::onFrameScrubberDragged(const SDL_FPoint& cursorPosition)
 
     Uint8 cursorFrame{getCursorFrame(cursorPosition)};
 
-    // If the cursor isn't aligned with the current selected frame, select the 
+    // If the cursor isn't aligned with the current selected frame, select the
     // new one.
     if ((cursorFrame != selectedFrameNumber)
         && (cursorFrame < frameContainer.size())) {
@@ -231,17 +230,17 @@ void AnimationTimeline::onLoopHandleDragged(const SDL_FPoint& cursorPosition)
 
     Uint8 cursorFrame{getCursorFrame(cursorPosition)};
 
-    // If the cursor isn't aligned with the current loop frame, select the 
+    // If the cursor isn't aligned with the current loop frame, select the
     // new one.
-    // Note: The loop handle can go 1 frame past the timeline, to set 
+    // Note: The loop handle can go 1 frame past the timeline, to set
     //       loopFrameCount to 0.
     if ((cursorFrame != activeAnimation->loopStartFrame)
         && (cursorFrame <= frameContainer.size())) {
         setLoopHandlePosition(cursorFrame);
 
         // If the user set a callback, call it.
-        // Note: We do this here instead of in setLoopHandlePosition because 
-        //       we only want to signal the change on drag (i.e. not when 
+        // Note: We do this here instead of in setLoopHandlePosition because
+        //       we only want to signal the change on drag (i.e. not when
         //       setLoopStartFrame() is called).
         if (onLoopStartFrameChanged) {
             onLoopStartFrameChanged(cursorFrame);
@@ -260,14 +259,14 @@ void AnimationTimeline::onSpriteDragStarted(Uint8 frameNumber,
 void AnimationTimeline::onSpriteDragged(Uint8 frameNumber,
                                         const SDL_FPoint& cursorPosition)
 {
-    // If the cursor is over a new frame, reset the old frame's circle 
+    // If the cursor is over a new frame, reset the old frame's circle
     // and add one to the new frame.
     Uint8 cursorFrame{getCursorFrame(cursorPosition)};
     if (cursorFrame != currentSpriteDragFrameNumber) {
         TimelineFrame& oldCurrentFrame{static_cast<TimelineFrame&>(
             *frameContainer[currentSpriteDragFrameNumber])};
-        TimelineFrame& newCurrentFrame{static_cast<TimelineFrame&>(
-            *frameContainer[cursorFrame])};
+        TimelineFrame& newCurrentFrame{
+            static_cast<TimelineFrame&>(*frameContainer[cursorFrame])};
 
         // If we're moving from the origin frame, remove its marker.
         if (currentSpriteDragFrameNumber == originSpriteDragFrameNumber) {
@@ -275,7 +274,7 @@ void AnimationTimeline::onSpriteDragged(Uint8 frameNumber,
         }
         else {
             // Not the origin frame, return it to whatever it was.
-            // Note: We don't use getSpriteAtFrame() because it may return a 
+            // Note: We don't use getSpriteAtFrame() because it may return a
             //       sprite from a previous frame.
             auto expandedFrameVector{activeAnimation->getExpandedFrameVector()};
             oldCurrentFrame.hasSprite
@@ -312,7 +311,7 @@ void AnimationTimeline::onSpriteDragReleased(Uint8 frameNumber,
 
 void AnimationTimeline::refreshFrames()
 {
-    // Fill the frame container with empty frames to match the animation's frame 
+    // Fill the frame container with empty frames to match the animation's frame
     // count.
     frameContainer.clear();
     numberContainer.clear();
@@ -325,9 +324,10 @@ void AnimationTimeline::refreshFrames()
         frame->setOnSpriteDragged([&, i](const SDL_FPoint& cursorPosition) {
             onSpriteDragged(i, cursorPosition);
         });
-        frame->setOnSpriteDragReleased([&, i](const SDL_FPoint& cursorPosition) {
-            onSpriteDragReleased(i, cursorPosition);
-        });
+        frame->setOnSpriteDragReleased(
+            [&, i](const SDL_FPoint& cursorPosition) {
+                onSpriteDragReleased(i, cursorPosition);
+            });
 
         // Darken every 5th frame and add a number above it.
         if (i % 5 == 0) {
@@ -405,8 +405,8 @@ Uint8 AnimationTimeline::getCursorFrame(const SDL_FPoint& cursorPosition)
         / TimelineFrame::LOGICAL_WIDTH)};
 
     // Clamp to valid values.
-    cursorFrame = std::clamp(cursorFrame, 0,
-                             static_cast<int>(frameContainer.size()));
+    cursorFrame
+        = std::clamp(cursorFrame, 0, static_cast<int>(frameContainer.size()));
 
     return static_cast<Uint8>(cursorFrame);
 }

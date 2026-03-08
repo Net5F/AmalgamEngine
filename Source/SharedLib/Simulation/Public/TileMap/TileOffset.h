@@ -9,14 +9,14 @@ namespace AM
 /**
  * An integer offset, relative to a tile coordinate.
  *
- * Among other uses, Floor and Object tile layers use this offset to support 
- * them being placed anywhere within a tile. Terrain and Walls can't be offset 
+ * Among other uses, Floor and Object tile layers use this offset to support
+ * them being placed anywhere within a tile. Terrain and Walls can't be offset
  * (Terrain is always aligned to the tile, Walls are always aligned to the top
  * face of the terrain).
  *
  * This offset will never be greater than the size of a tile.
  *
- * Note: Since world units are normally floats, this offset has limited 
+ * Note: Since world units are normally floats, this offset has limited
  *       resolution. This is fine in our use cases.
  */
 struct TileOffset {

@@ -5,10 +5,9 @@
 namespace AM
 {
 
-// Raycast strategies. Defined in the CollisionLocator namespace so they have 
+// Raycast strategies. Defined in the CollisionLocator namespace so they have
 // access to the locator's private members.
-struct CollisionLocator::RaycastStrategyIntersectAny
-{
+struct CollisionLocator::RaycastStrategyIntersectAny {
     RaycastStrategyIntersectAny(CollisionLocator& inCollisionLocator);
 
     bool isDone() const;
@@ -26,8 +25,7 @@ private:
     CollisionLocator& collisionLocator;
 };
 
-struct CollisionLocator::RaycastStrategyIntersectFirst
-{
+struct CollisionLocator::RaycastStrategyIntersectFirst {
     RaycastStrategyIntersectFirst(CollisionLocator& inCollisionLocator);
 
     bool isDone() const;
@@ -47,8 +45,7 @@ private:
     CollisionLocator& collisionLocator;
 };
 
-struct CollisionLocator::RaycastStrategyIntersectAll
-{
+struct CollisionLocator::RaycastStrategyIntersectAll {
     RaycastStrategyIntersectAll(CollisionLocator& inCollisionLocator);
 
     bool isDone() const;

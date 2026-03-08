@@ -67,12 +67,12 @@ public:
      * The sprite's name will be derived from its filename. If the name ends in
      * "_<n>", the new sprite will also be added to an Animation.
      *
-     * @param imageRelPath The relative path to the sprite's individual image 
+     * @param imageRelPath The relative path to the sprite's individual image
      *                     file.
      * @param parentSheetID The ID of the sprite's parent sprite sheet.
-     * @param stageOriginX/Y Where the stage should begin, relative to the top 
+     * @param stageOriginX/Y Where the stage should begin, relative to the top
      *                       left of the sprite image.
-     * @param premultiplyAlpha If true, this sprite will have its alpha 
+     * @param premultiplyAlpha If true, this sprite will have its alpha
      *                         premultiplied.
      *
      * @return true if successful. If false, getErrorString() will return more
@@ -99,7 +99,7 @@ public:
                                    const std::string& newDisplayName);
 
     // Sprite properties.
-    // Note: We don't offer a setter for DisplayName because it should always 
+    // Note: We don't offer a setter for DisplayName because it should always
     //       be based on the image filename.
     void setSpriteModelBoundsID(SpriteID spriteID,
                                 BoundingBoxID newModelBoundsID);
@@ -116,7 +116,7 @@ public:
     const std::string& getErrorString();
 
 private:
-    // Note: These are named differently to disambiguate them, since they aren't 
+    // Note: These are named differently to disambiguate them, since they aren't
     //       accessible outside of this class.
     EditorSpriteSheet& mgetSpriteSheet(SpriteSheetID sheetID);
     EditorSprite& mgetSprite(SpriteID spriteID);
@@ -142,8 +142,8 @@ private:
     /**
      * Checks if the given name is unique among all sprite sheets in the model.
      *
-     * @param spriteSheetID The ID of the sprite sheet that might get 
-     *                      displayName. If it already is set to displayName, 
+     * @param spriteSheetID The ID of the sprite sheet that might get
+     *                      displayName. If it already is set to displayName,
      *                      it won't be counted as non-unique.
      * @param displayName The display name that the sprite will be set to.
      */
@@ -161,14 +161,14 @@ private:
     bool spriteNameIsUnique(SpriteID spriteID, const std::string& displayName);
 
     /**
-     * Sets the texture position of each sprite in the given sheet, and sets the 
+     * Sets the texture position of each sprite in the given sheet, and sets the
      * sheet's size.
      */
     void refreshSpriteSheet(EditorSpriteSheet& spriteSheet);
 
     /**
-     * If the given sprite is named such that it should be added to an 
-     * animation, adds it. If the animation doesn't already exist, it will be 
+     * If the given sprite is named such that it should be added to an
+     * animation, adds it. If the animation doesn't already exist, it will be
      * created.
      */
     void addSpriteToAnimationIfNecessary(const EditorSprite& sprite);
@@ -186,7 +186,7 @@ private:
     int getFrameNumber(const std::string& displayName);
 
     /**
-     * Derives an Animation display name from a given Sprite's display name by 
+     * Derives an Animation display name from a given Sprite's display name by
      * removing the trailing frame number.
      */
     std::string_view deriveAnimationName(std::string_view spriteDisplayName);

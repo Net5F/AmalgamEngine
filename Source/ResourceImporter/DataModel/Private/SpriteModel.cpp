@@ -46,14 +46,14 @@ SpriteModel::SpriteModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
 , spriteStageOriginChanged{spriteStageOriginChangedSig}
 , spritePremultiplyAlphaChanged{spritePremultiplyAlphaChangedSig}
 {
-    // Reserve the null sprite and sheet's ID (the engine provides it in code, 
+    // Reserve the null sprite and sheet's ID (the engine provides it in code,
     // so we don't need it in the json).
     spriteIDPool.reserveID();
     sheetIDPool.reserveID();
 
-    // Check that ARGB8888 is supported (it should always be, but just to be 
+    // Check that ARGB8888 is supported (it should always be, but just to be
     // safe).
-    // Note: We standardize on ARGB8888 for our texture generation, so it 
+    // Note: We standardize on ARGB8888 for our texture generation, so it
     //       doesn't vary based on the host platform.
     SDL_PropertiesID props{SDL_GetRendererProperties(sdlRenderer)};
     const SDL_PixelFormat* pixelFormats{
@@ -146,11 +146,11 @@ void SpriteModel::save(nlohmann::json& json)
                 = sprite.modelBoundsID;
 
             // Add the model-space bounds.
-            // Note: This will either be a shared bounding box or a custom one 
+            // Note: This will either be a shared bounding box or a custom one
             //       depending on modelBoundsID. In either case, we always save
-            //       to modelBounds because that's what the engine uses. 
+            //       to modelBounds because that's what the engine uses.
             const BoundingBox& spriteModelBounds{
-                sprite.getModelBounds(dataModel.boundingBoxModel)}; 
+                sprite.getModelBounds(dataModel.boundingBoxModel)};
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minX"]
                 = spriteModelBounds.min.x;
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxX"]
@@ -234,7 +234,7 @@ void SpriteModel::remSpriteSheet(SpriteSheetID sheetID)
     }
 
     // Erase all of the sheet's sprites.
-    // Note: We need to make a copy of the IDs vector, since the original 
+    // Note: We need to make a copy of the IDs vector, since the original
     //       will be modified as we iterate.
     std::vector<SpriteID> spriteIDs{sheetIt->second.spriteIDs};
     for (SpriteID spriteID : spriteIDs) {
@@ -258,7 +258,7 @@ bool SpriteModel::addSprite(const std::string& imageRelPath,
                             const std::string& stageOriginY,
                             bool premultiplyAlpha)
 {
-    // Get the file name from the image path (we use the file name as the 
+    // Get the file name from the image path (we use the file name as the
     // sprite's display name).
     std::string displayName{StringTools::getFileNameNoExtension(imageRelPath)};
 
@@ -291,13 +291,13 @@ bool SpriteModel::addSprite(const std::string& imageRelPath,
         return false;
     }
 
-    // If the sprite is going to be added to an existing animation, validate 
+    // If the sprite is going to be added to an existing animation, validate
     // the texture size (all sprites in an animation must be the same size).
     if (getFrameNumber(displayName) != -1) {
         AnimationModel& animationModel{dataModel.animationModel};
         std::string_view animationName{deriveAnimationName(displayName)};
-        if (const EditorAnimation
-            * animation{animationModel.getAnimation(animationName)}) {
+        if (const EditorAnimation* animation{
+                animationModel.getAnimation(animationName)}) {
             // Sprite is going to be added to this animation. Validate size.
             for (const auto& frame : animation->frames) {
                 const SDL_FRect& animTextureExtent{
@@ -398,8 +398,7 @@ const EditorSpriteSheet&
 {
     auto spriteSheetIt{spriteSheetMap.find(sheetID)};
     if (spriteSheetIt == spriteSheetMap.end()) {
-        LOG_FATAL("Tried to get sprite sheet with invalid ID: %d",
-                  sheetID);
+        LOG_FATAL("Tried to get sprite sheet with invalid ID: %d", sheetID);
     }
 
     return spriteSheetIt->second;
@@ -457,7 +456,7 @@ void SpriteModel::setSpriteModelBoundsID(SpriteID spriteID,
 }
 
 void SpriteModel::setSpriteCustomModelBounds(SpriteID spriteID,
-                                       const BoundingBox& newModelBounds)
+                                             const BoundingBox& newModelBounds)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
@@ -533,8 +532,7 @@ EditorSpriteSheet& SpriteModel::mgetSpriteSheet(SpriteSheetID sheetID)
 {
     auto spriteSheetIt{spriteSheetMap.find(sheetID)};
     if (spriteSheetIt == spriteSheetMap.end()) {
-        LOG_FATAL("Tried to get sprite sheet with invalid ID: %d",
-                  sheetID);
+        LOG_FATAL("Tried to get sprite sheet with invalid ID: %d", sheetID);
     }
 
     return spriteSheetIt->second;
@@ -628,17 +626,17 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     sprite.textureExtent.w = spriteJson.at("textureExtent").at("w");
     sprite.textureExtent.h = spriteJson.at("textureExtent").at("h");
 
-    // Add the stage origin. 
+    // Add the stage origin.
     sprite.stageOrigin.x = spriteJson.at("stageX");
     sprite.stageOrigin.y = spriteJson.at("stageY");
-    
+
     // Add collisionEnabled.
     sprite.collisionEnabled = spriteJson.at("collisionEnabled");
 
     // Add modelBoundsID.
     sprite.modelBoundsID = spriteJson.at("modelBoundsID");
 
-    // Default our custom bounds to the saved modelBounds, regardless of 
+    // Default our custom bounds to the saved modelBounds, regardless of
     // whether we use a shared bounding box or not.
     sprite.customModelBounds.min.x = spriteJson.at("modelBounds").at("minX");
     sprite.customModelBounds.max.x = spriteJson.at("modelBounds").at("maxX");
@@ -650,7 +648,7 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     // Add premultiplyAlpha.
     sprite.premultiplyAlpha = spriteJson.at("premultiplyAlpha");
 
-    // Note: We signal from parseSpriteSheet() instead of here, so that the 
+    // Note: We signal from parseSpriteSheet() instead of here, so that the
     //       sheet can be signalled first.
 
     return true;
@@ -659,7 +657,7 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
 bool SpriteModel::spriteSheetNameIsUnique(SpriteSheetID spriteSheetID,
                                           const std::string& displayName)
 {
-    // If the desired name is already in the map, and the owner of the name 
+    // If the desired name is already in the map, and the owner of the name
     // isn't the given ID, the name isn't unique.
     auto it{spriteSheetNameMap.find(displayName)};
     if ((it != spriteSheetNameMap.end()) && (it->second != spriteSheetID)) {
@@ -673,7 +671,7 @@ bool SpriteModel::spriteSheetNameIsUnique(SpriteSheetID spriteSheetID,
 bool SpriteModel::spriteNameIsUnique(SpriteID spriteID,
                                      const std::string& displayName)
 {
-    // If the desired name is already in the map, and the owner of the name 
+    // If the desired name is already in the map, and the owner of the name
     // isn't the given ID, the name isn't unique.
     auto it{spriteNameMap.find(displayName)};
     if ((it != spriteNameMap.end()) && (it->second != spriteID)) {
@@ -686,9 +684,9 @@ bool SpriteModel::spriteNameIsUnique(SpriteID spriteID,
 
 void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
 {
-    // Algorithm: For now, we just build a grid where each cell is large 
+    // Algorithm: For now, we just build a grid where each cell is large
     //            enough to fit the largest sprite.
-    //            Ideally, this would more intelligently pack the sprites to 
+    //            Ideally, this would more intelligently pack the sprites to
     //            minimize empty space.
 
     // If there are no sprites, exit early.
@@ -715,7 +713,7 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
     maxSpriteWidth += 2;
     maxSpriteHeight += 2;
 
-    // Find the power of two that our texture's side lengths should equal, in 
+    // Find the power of two that our texture's side lengths should equal, in
     // order to fit all of the sprites (assuming a square grid).
     int spriteCount{static_cast<int>(spriteSheet.spriteIDs.size())};
     int spritesPerRow{};
@@ -724,20 +722,21 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
 
         // Determine how many sprites can fit with this side length.
         spritesPerRow = static_cast<int>(gridSideLength / maxSpriteWidth);
-        int spritesPerColumn{static_cast<int>(gridSideLength / maxSpriteHeight)};
+        int spritesPerColumn{
+            static_cast<int>(gridSideLength / maxSpriteHeight)};
         if ((spritesPerRow < 1) || (spritesPerColumn < 1)) {
             // Can't fit any, continue to the next power of two.
             continue;
         }
 
-        // If this power of two can fit all of the sprites, set it as our 
+        // If this power of two can fit all of the sprites, set it as our
         // texture size.
         int gridCellCount{spritesPerRow * spritesPerColumn};
         if (gridCellCount >= spriteCount) {
             spriteSheet.textureWidth = gridSideLength;
             spriteSheet.textureHeight = gridSideLength;
 
-            // If we're only going to fill half of the sheet or less, halve the 
+            // If we're only going to fill half of the sheet or less, halve the
             // height to save space.
             if (spriteCount <= (gridCellCount / 2)) {
                 if (spriteCount == 1) {
@@ -760,7 +759,7 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
         sprite.textureExtent.x = (gridX * maxSpriteWidth);
         sprite.textureExtent.y = (gridY * maxSpriteHeight);
 
-        // If the next sprite would go past the edge of the grid, wrap to the 
+        // If the next sprite would go past the edge of the grid, wrap to the
         // next row.
         gridX++;
         if (gridX == spritesPerRow) {
@@ -772,11 +771,11 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
 
 void SpriteModel::addSpriteToAnimationIfNecessary(const EditorSprite& sprite)
 {
-    // If the sprite's display name contains a frame number, add it to an 
+    // If the sprite's display name contains a frame number, add it to an
     // animation.
-    // Note: Since we don't want to re-arrange someone's animation if they've 
-    //       changed the order, we just add the sprite to the end. If we're 
-    //       bulk adding sprites to an animation, the file system should serve 
+    // Note: Since we don't want to re-arrange someone's animation if they've
+    //       changed the order, we just add the sprite to the end. If we're
+    //       bulk adding sprites to an animation, the file system should serve
     //       them to us in order anyway.
     if (getFrameNumber(sprite.displayName) != -1) {
         // Name contains a frame number. Derive the associated animation's name.
@@ -798,8 +797,8 @@ void SpriteModel::remSpriteFromAnimationIfNecessary(const EditorSprite& sprite)
         // Name contains a frame number. Get the animation.
         std::string_view animationName{deriveAnimationName(sprite.displayName)};
         AnimationModel& animationModel{dataModel.animationModel};
-        if (const EditorAnimation
-            * animation{animationModel.getAnimation(animationName)}) {
+        if (const EditorAnimation* animation{
+                animationModel.getAnimation(animationName)}) {
             // Find which frame the sprite is in.
             // Note: This may be different than the frame number in the sprite's
             //       name, since frames can be reordered.
@@ -829,7 +828,7 @@ void SpriteModel::remSpriteFromAnimationIfNecessary(const EditorSprite& sprite)
 
 int SpriteModel::getFrameNumber(const std::string& displayName)
 {
-    // If the sprite's name ends in "_n" where n is a positive number, return 
+    // If the sprite's name ends in "_n" where n is a positive number, return
     // it.
     if (auto pos{displayName.find_last_of('_')}; pos != displayName.npos) {
         // Get the string following the '_' and convert it to an integer.

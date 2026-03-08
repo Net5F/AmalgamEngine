@@ -8,8 +8,8 @@ namespace AM
  * Represents an entity's collision bounds (a.k.a collision box, or just
  * collision).
  *
- * When an entity is constructed, we set this component's modelBounds to match 
- * the Idle South model bounds of SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET. 
+ * When an entity is constructed, we set this component's modelBounds to match
+ * the Idle South model bounds of SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET.
  * This makes it easy for project devs to define the default entity collision.
  * If the project dev wants different default collision for different entities,
  * they can handle it in a project system.
@@ -21,7 +21,7 @@ namespace AM
  */
 struct Collision {
     /** Model-space bounding box. Defines the entity's 3D volume.
-        Note: When an entity's graphic set is updated, we automatically update 
+        Note: When an entity's graphic set is updated, we automatically update
               this field to match the new set's Idle South. */
     BoundingBox modelBounds{};
 

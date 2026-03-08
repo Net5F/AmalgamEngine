@@ -48,13 +48,13 @@ struct BoundingBox {
      * Returns a point centered on this bounding box in the X and Y axis, and
      * at this box's minimum Z value.
      *
-     * Note: This matches the placement of an entity's Position component, in 
+     * Note: This matches the placement of an entity's Position component, in
      *       relation to the entity's bounding volume.
      */
     Vector3 getBottomCenterPoint() const;
 
     /**
-     * Returns a point centered on this bounding box in the X and Y axis, and 
+     * Returns a point centered on this bounding box in the X and Y axis, and
      * at this box's maximum Z value.
      */
     Vector3 getTopCenterPoint() const;
@@ -63,7 +63,7 @@ struct BoundingBox {
      * Returns a point at the center of this bounding box.
      *
      * Note: This center point is different than an entity's Position component.
-     *       This one is centered in all axis, while an entity's Position is 
+     *       This one is centered in all axis, while an entity's Position is
      *       centered in the X/Y but is at the minimum Z.
      */
     Vector3 get3DCenterPoint() const;
@@ -104,11 +104,10 @@ struct BoundingBox {
      */
     bool intersects(const Vector3& start, const Vector3& end) const;
 
-    struct RayIntersectReturn
-    {
+    struct RayIntersectReturn {
         /** If true, an intersection occurred. */
         bool didIntersect{};
-        /** If didIntersect == true, this is the t value where the ray first 
+        /** If didIntersect == true, this is the t value where the ray first
             intersects the box.
             If the ray origin is inside the box, this will be <= 0 and
             clamped to tMinBound. */
@@ -119,12 +118,12 @@ struct BoundingBox {
         float tMax{};
     };
     /**
-     * Looks for an intersection between this box and the given ray, within the 
+     * Looks for an intersection between this box and the given ray, within the
      * range [tMinBound, tMaxBound].
      *
      * Note: If you're going to constrain to a magnitude-independent range like
-     *       [0, 1], remember to normalize the ray's direction before taking the 
-     *       reciprocal. However, if the magnitude is important to your 
+     *       [0, 1], remember to normalize the ray's direction before taking the
+     *       reciprocal. However, if the magnitude is important to your
      *       calculations (e.g. if you want to compare the resultant tMin to a
      *       distance), don't normalize.
      */
@@ -132,7 +131,7 @@ struct BoundingBox {
                                   float tMaxBound) const;
 
     /**
-     * Looks for an intersection between this box and the given ray, within the 
+     * Looks for an intersection between this box and the given ray, within the
      * range [tMinBound, tMaxBound].
      *
      * Note: See intersects(Ray) for a note on normalization.
@@ -164,10 +163,10 @@ struct BoundingBox {
     [[nodiscard]] BoundingBox moveTo(const Vector3& newMin) const;
 
     /**
-     * Returns this box with its bottom center moved to the given point 
+     * Returns this box with its bottom center moved to the given point
      * (centered along X/Y axis, min.z == newBottomCenter.z).
      *
-     * Note: This matches the placement of an entity's Position component, in 
+     * Note: This matches the placement of an entity's Position component, in
      *       relation to the entity's bounding volume.
      */
     [[nodiscard]] BoundingBox
@@ -184,7 +183,7 @@ struct BoundingBox {
     [[nodiscard]] BoundingBox unionWith(const BoundingBox& other) const;
 
     /**
-     * Returns this box with its size increased by the given amount in all 
+     * Returns this box with its size increased by the given amount in all
      * directions.
      */
     [[nodiscard]] BoundingBox expandBy(float amountToExpandBy) const;

@@ -37,7 +37,7 @@ struct ChunkWireSnapshot;
  * Persisted tile map data is loaded from TileMap.bin.
  *
  * When updating tiles, all of the following are handled by this class:
- *   1. If adding layers and the tile's parent chunk doesn't already exist, 
+ *   1. If adding layers and the tile's parent chunk doesn't already exist,
  *      creates it.
  *   2. Updates the tile's layers as requested.
  *   3. Rebuilds the tile's collision if necessary.
@@ -86,8 +86,7 @@ public:
                   const FloorGraphicSet& graphicSet,
                   Rotation::Direction rotation);
     void addFloor(const TilePosition& tilePosition,
-                  const TileOffset& tileOffset,
-                  const std::string& graphicSetID,
+                  const TileOffset& tileOffset, const std::string& graphicSetID,
                   Rotation::Direction rotation);
     void addFloor(const TilePosition& tilePosition,
                   const TileOffset& tileOffset, Uint16 graphicSetID,
@@ -215,18 +214,18 @@ public:
     void clear();
 
     /**
-     * Returns a const pointer to the chunk at the given coordinates, or nullptr 
+     * Returns a const pointer to the chunk at the given coordinates, or nullptr
      * if the chunk doesn't exist (out of bounds, empty).
-     * Note: Make sure to nullptr check these! Chunks are commonly empty. 
+     * Note: Make sure to nullptr check these! Chunks are commonly empty.
      */
     const Chunk* getChunk(const ChunkPosition& chunkPosition) const;
     /** This lets us call getChunk on a non-const TileMap& without casting. */
     const Chunk* cgetChunk(const ChunkPosition& chunkPosition) const;
 
     /**
-     * Returns a const pointer to the tile at the given coordinates, or nullptr 
+     * Returns a const pointer to the tile at the given coordinates, or nullptr
      * if the tile doesn't exist (out of bounds, parent chunk is empty).
-     * Note: Make sure to nullptr check these! Chunks are commonly empty. 
+     * Note: Make sure to nullptr check these! Chunks are commonly empty.
      */
     const Tile* getTile(const TilePosition& tilePosition) const;
     const Tile* cgetTile(const TilePosition& tilePosition) const;
@@ -244,7 +243,7 @@ public:
     /**
      * If true, when a tile is updated, its collision will be rebuilt.
      *
-     * If false, the user must manually call rebuildDirtyTileCollision() after 
+     * If false, the user must manually call rebuildDirtyTileCollision() after
      * finishing all of their tile updates.
      *
      * When set from false to true, rebuildDirtyTileCollision() is called.
@@ -252,10 +251,10 @@ public:
     void setAutoRebuildCollision(bool newAutoRebuildCollision);
 
     /**
-     * Rebuilds the collision of any tiles that have been updated since the 
+     * Rebuilds the collision of any tiles that have been updated since the
      * last time this was called (while autoRebuildCollision is disabled).
      *
-     * You normally don't need to call this manually, since it's called when 
+     * You normally don't need to call this manually, since it's called when
      * autoRebuildCollision is re-enabled.
      */
     void rebuildDirtyTileCollision();
@@ -286,26 +285,25 @@ protected:
     enum class ChunkError {
         /** The given position was outside of the map bounds. */
         InvalidPosition,
-        /** The requested chunk (or the parent chunk of the requested tile) 
+        /** The requested chunk (or the parent chunk of the requested tile)
             does not exist. */
         NotFound
     };
 
     /**
-     * Returns a reference to the chunk at the given coordinates, or an 
+     * Returns a reference to the chunk at the given coordinates, or an
      * appropriate error.
      */
     std::expected<std::reference_wrapper<Chunk>, ChunkError>
         getChunk(const ChunkPosition& chunkPosition);
 
-    struct ChunkTilePair
-    {
+    struct ChunkTilePair {
         /** The tile's parent chunk. */
         std::reference_wrapper<Chunk> chunk;
         std::reference_wrapper<Tile> tile;
     };
     /**
-     * Returns a reference to the tile at the given coordinates, or an 
+     * Returns a reference to the tile at the given coordinates, or an
      * appropriate error.
      */
     std::expected<ChunkTilePair, ChunkError>
@@ -319,28 +317,27 @@ protected:
                   const TilePosition& tilePosition);
 
     /**
-     * Returns a pointer to the chunk at the given coordinates, creating the 
+     * Returns a pointer to the chunk at the given coordinates, creating the
      * chunk if it doesn't already exist.
      * If chunkPosition is outside of the map bounds, returns nullptr.
      */
     Chunk* getOrCreateChunk(const ChunkPosition& chunkPosition);
 
-    struct ChunkTilePtrPair
-    {
+    struct ChunkTilePtrPair {
         /** The tile's parent chunk. */
         Chunk* chunk{nullptr};
         Tile* tile{nullptr};
     };
     /**
-     * Returns a pointer to the chunk and tile at the given coordinates, creating
-     * the parent chunk if it doesn't already exist.
-     * If tilePosition is outside of the map bounds, returns {nullptr, nullptr}.
+     * Returns a pointer to the chunk and tile at the given coordinates,
+     * creating the parent chunk if it doesn't already exist. If tilePosition is
+     * outside of the map bounds, returns {nullptr, nullptr}.
      */
     ChunkTilePtrPair getOrCreateTile(const TilePosition& tilePosition);
 
     /**
      * Adds the given layer to the specified tile.
-     * @return The tile that was added, or nullptr (tilePosition was outside of 
+     * @return The tile that was added, or nullptr (tilePosition was outside of
      *         the map bounds).
      */
     Tile* addTileLayer(const TilePosition& tilePosition,
@@ -375,7 +372,7 @@ protected:
     /**
      * Removes any layers with a matching offset, type, graphic index, and
      * graphic set from the specified tile.
-     * @return The tile that was removed from, or nullptr (tilePosition was 
+     * @return The tile that was removed from, or nullptr (tilePosition was
      *         outside of the map bounds, layer didn't exist).
      */
     Tile* remTileLayer(const TilePosition& tilePosition,
@@ -385,7 +382,7 @@ protected:
     /**
      * Removes any layers with a matching, type, graphic index, and graphic set
      * from the specified tile.
-     * @return The tile that was removed from, or nullptr (tilePosition was 
+     * @return The tile that was removed from, or nullptr (tilePosition was
      *         outside of the map bounds, layer didn't exist).
      */
     Tile* remTileLayer(const TilePosition& tilePosition,
@@ -413,7 +410,7 @@ protected:
                       Uint8 graphicValue);
 
     /**
-     * Removes any layers with a matching type and graphic index, regardless 
+     * Removes any layers with a matching type and graphic index, regardless
      * of their graphic set or offset.
      * @return true if the tile had any matching layers to remove, else false.
      */
@@ -435,7 +432,7 @@ protected:
 
     /**
      * Clears the given layer types from the given tile.
-     * @return If any layers were cleared, returns the tile. Else, nullptr 
+     * @return If any layers were cleared, returns the tile. Else, nullptr
      *         (tilePosition is outside of map bounds).
      */
     Tile* clearTileLayersInternal(
@@ -452,7 +449,7 @@ protected:
     /**
      * Returns a bool array of layer types to clear, based on the given
      * list of type enums.
-     * We do things this way because it's more convenient for the caller to 
+     * We do things this way because it's more convenient for the caller to
      * pass a list of type enums than an array of bools.
      */
     std::array<bool, TileLayer::Type::Count> toBoolArray(

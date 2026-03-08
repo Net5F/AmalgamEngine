@@ -39,13 +39,12 @@ struct Animation {
     /** This animation's framerate (frames per second). */
     Uint8 fps{0};
 
-    /** When the animation completes, it will loop to this frame and continue 
+    /** When the animation completes, it will loop to this frame and continue
         playing. If == frameCount, no frames will be looped.
         Must always be <= frameCount. */
     Uint8 loopStartFrame{0};
 
-    struct Frame
-    {
+    struct Frame {
         Uint8 frameNumber{0};
         std::reference_wrapper<const Sprite> sprite;
     };
@@ -59,7 +58,7 @@ struct Animation {
     bool collisionEnabled{false};
 
     /** This animation's model-space bounding volume.
-        Note: Tiles use these bounds, but entities use the bounds defined by 
+        Note: Tiles use these bounds, but entities use the bounds defined by
               their Collision component. */
     BoundingBox modelBounds{};
 

@@ -46,13 +46,12 @@ ComponentSyncSystem::ComponentSyncSystem(const SimulationContext& inSimContext)
     boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
         using ComponentType = decltype(I);
         constexpr std::size_t typeIndex{
-            boost::mp11::mp_find<ObservedComponentTypes,
-                                 ComponentType>::value};
+            boost::mp11::mp_find<ObservedComponentTypes, ComponentType>::value};
 
         // TODO: If a client is near an entity when it's constructed, it'll
         //       receive both an EntityInit and a ComponentUpdate (from the
-        //       construct observer). It'd be nice if we could find a way to just
-        //       send one, but until then it isn't a huge cost.
+        //       construct observer). It'd be nice if we could find a way to
+        //       just send one, but until then it isn't a huge cost.
         updateObservers[typeIndex].bind(world.registry);
         updateObservers[typeIndex]
             .template on_construct<ComponentType>()
@@ -69,22 +68,21 @@ void ComponentSyncSystem::sendUpdates()
 
     entt::registry& registry{world.registry};
 
-    // TODO: We build a message for each updated entity, even if it doesn't 
+    // TODO: We build a message for each updated entity, even if it doesn't
     //       exist anymore or there aren't any clients nearby to send it to.
-    //       There may be ways to optimize by making it client-by-client like 
+    //       There may be ways to optimize by making it client-by-client like
     //       MovementSyncSystem.
-    // Build a ComponentUpdate for each entity that has constructed, updated, 
+    // Build a ComponentUpdate for each entity that has constructed, updated,
     // or destroyed components.
     boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
         using ComponentType = decltype(I);
         constexpr std::size_t observedTypeIndex{
-            boost::mp11::mp_find<ObservedComponentTypes,
-                                 ComponentType>::value};
+            boost::mp11::mp_find<ObservedComponentTypes, ComponentType>::value};
         constexpr std::size_t replicatedTypeIndex{
             boost::mp11::mp_find<ReplicatedComponentTypes,
                                  ComponentType>::value};
 
-        // For each entity that has a constructed or updated component of this 
+        // For each entity that has a constructed or updated component of this
         // type, push the component into the entity's message.
         for (entt::entity entity : updateObservers[observedTypeIndex]) {
             // If the entity no longer has this component (it was constructed/
@@ -105,7 +103,7 @@ void ComponentSyncSystem::sendUpdates()
             }
         }
 
-        // For each entity that has a destroyed component of this type, push 
+        // For each entity that has a destroyed component of this type, push
         // the component into the entity's message.
         // Note: The message uses the index from ReplicatedComponentTypes.
         for (entt::entity entity : destroyObservers[observedTypeIndex]) {

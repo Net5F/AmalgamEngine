@@ -26,7 +26,8 @@ struct ItemChangeRequest {
     /** The ID of the item to change. */
     ItemID itemID{NULL_ITEM_ID};
 
-    /** The item's display name. Not guaranteed to be unique. Shown in the UI. */
+    /** The item's display name. Not guaranteed to be unique. Shown in the UI.
+     */
     std::string displayName{"Null"};
 
     /** The item's unique string ID.  */

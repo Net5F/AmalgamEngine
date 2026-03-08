@@ -38,14 +38,14 @@ public:
     virtual ~ItemDataBase() = default;
 
     /**
-     * Creates a new item or updates an existing one. The resulting item will 
+     * Creates a new item or updates an existing one. The resulting item will
      * exactly match referenceItem, with a version matching the given version.
      *
-     * Note: Unlike createItem() and updateItem(), this copies referenceItem's 
-     *       IDs and version number with no modification. Only use this when 
-     *       loading from the database/cache, or when a client is loading a 
+     * Note: Unlike createItem() and updateItem(), this copies referenceItem's
+     *       IDs and version number with no modification. Only use this when
+     *       loading from the database/cache, or when a client is loading a
      *       server-given item definition.
-     * 
+     *
      * @param referenceItem The item to copy when creating the new item.
      * @param version The item's current version number.
      * @return The new item.

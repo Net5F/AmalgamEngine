@@ -74,8 +74,8 @@ bool Renderer::handleOSEvent(SDL_Event& event)
     }
 
     // The project didn't handle the event. Handle it ourselves.
-    //switch (event.type) {
-		// TODO: Handle window events.
+    // switch (event.type) {
+    // TODO: Handle window events.
     //}
 
     return false;
@@ -138,7 +138,7 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
         }
 
         // For debugging: Render the sprite's bounding box.
-        //drawBoundingBox(spriteInfo.worldBounds, camera);
+        // drawBoundingBox(spriteInfo.worldBounds, camera);
     }
 }
 
@@ -157,18 +157,18 @@ void Renderer::renderSprite(const SpriteSortInfo& spriteInfo)
             SDL_ComposeCustomBlendMode(
                 SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
                 SDL_BLENDOPERATION_ADD, SDL_BLENDFACTOR_ONE,
-                SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
-                SDL_BLENDOPERATION_ADD)};
+                SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD)};
         SDL_SetTextureBlendMode(renderData.texture.get(),
                                 premultipliedAlphaBlendMode);
         SDL_RenderTexture(sdlRenderer, renderData.texture.get(),
-                        &(renderData.textureExtent), &(spriteInfo.screenExtent));
+                          &(renderData.textureExtent),
+                          &(spriteInfo.screenExtent));
     }
     else {
-        SDL_SetTextureBlendMode(renderData.texture.get(),
-                                SDL_BLENDMODE_BLEND);
+        SDL_SetTextureBlendMode(renderData.texture.get(), SDL_BLENDMODE_BLEND);
         SDL_RenderTexture(sdlRenderer, renderData.texture.get(),
-                        &(renderData.textureExtent), &(spriteInfo.screenExtent));
+                          &(renderData.textureExtent),
+                          &(spriteInfo.screenExtent));
     }
 
     // If the UI gave us a color mod to apply, render an additional sprite
@@ -176,15 +176,13 @@ void Renderer::renderSprite(const SpriteSortInfo& spriteInfo)
     if (colorMod.r > 0 || colorMod.g > 0 || colorMod.b > 0) {
         SDL_SetTextureColorMod(renderData.texture.get(), colorMod.r, colorMod.g,
                                colorMod.b);
-        SDL_SetTextureBlendMode(renderData.texture.get(),
-                                SDL_BLENDMODE_ADD);
+        SDL_SetTextureBlendMode(renderData.texture.get(), SDL_BLENDMODE_ADD);
 
         SDL_RenderTexture(sdlRenderer, renderData.texture.get(),
-                        &(renderData.textureExtent),
-                        &(spriteInfo.screenExtent));
+                          &(renderData.textureExtent),
+                          &(spriteInfo.screenExtent));
 
-        SDL_SetTextureBlendMode(renderData.texture.get(),
-                                SDL_BLENDMODE_BLEND);
+        SDL_SetTextureBlendMode(renderData.texture.get(), SDL_BLENDMODE_BLEND);
         SDL_SetTextureColorMod(renderData.texture.get(), 255, 255, 255);
     }
 
@@ -194,8 +192,7 @@ void Renderer::renderSprite(const SpriteSortInfo& spriteInfo)
 
 void Renderer::renderEntityVisualEffects(entt::entity entity)
 {
-    const auto& visualEffects{
-        worldSpriteSorter.getEntityVisualEffects(entity)};
+    const auto& visualEffects{worldSpriteSorter.getEntityVisualEffects(entity)};
     for (const auto& visualEffect : visualEffects) {
         const SpriteRenderData& renderData{
             graphicData.getSpriteRenderData(visualEffect.spriteID)};
@@ -204,31 +201,30 @@ void Renderer::renderEntityVisualEffects(entt::entity entity)
         if (renderData.premultiplyAlpha) {
             static SDL_BlendMode premultipliedAlphaBlendMode{
                 SDL_ComposeCustomBlendMode(
-                    SDL_BLENDFACTOR_ONE,
-                    SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+                    SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
                     SDL_BLENDOPERATION_ADD, SDL_BLENDFACTOR_ONE,
                     SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
                     SDL_BLENDOPERATION_ADD)};
             SDL_SetTextureBlendMode(renderData.texture.get(),
                                     premultipliedAlphaBlendMode);
             SDL_RenderTexture(sdlRenderer, renderData.texture.get(),
-                            &(renderData.textureExtent),
-                            &(visualEffect.screenExtent));
+                              &(renderData.textureExtent),
+                              &(visualEffect.screenExtent));
         }
         else {
             SDL_SetTextureBlendMode(renderData.texture.get(),
                                     SDL_BLENDMODE_BLEND);
             SDL_RenderTexture(sdlRenderer, renderData.texture.get(),
-                            &(renderData.textureExtent),
-                            &(visualEffect.screenExtent));
+                              &(renderData.textureExtent),
+                              &(visualEffect.screenExtent));
         }
     }
 }
 
 void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
 {
-    // If the bounding box is flat, don't render it (this avoids rendering the 
-    // floor tile bounds, which typically aren't what you're trying to see). 
+    // If the bounding box is flat, don't render it (this avoids rendering the
+    // floor tile bounds, which typically aren't what you're trying to see).
     if (box.isEmpty()) {
         return;
     }

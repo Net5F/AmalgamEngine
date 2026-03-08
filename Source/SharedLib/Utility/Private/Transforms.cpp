@@ -57,7 +57,7 @@ std::optional<Vector3>
     Transforms::screenToWorldTarget(const SDL_FPoint& screenPoint,
                                     const Camera& camera)
 {
-    // Find the t where a ray cast from screenPoint intersects the camera 
+    // Find the t where a ray cast from screenPoint intersects the camera
     // target's Z plane.
     if (std::optional<Ray> rayOpt{screenToWorldRay(screenPoint, camera)}) {
         Ray& ray{rayOpt.value()};
@@ -99,7 +99,7 @@ std::optional<Ray> Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
 
     Vector3 viewBoundsIntersection{rayToCamera.getPointAtT(tMax)};
 
-    // Return a ray that starts at the intersected position and points towards 
+    // Return a ray that starts at the intersected position and points towards
     // the minimum.
     return Ray{viewBoundsIntersection, -rayToCamera.direction.x,
                -rayToCamera.direction.y, -rayToCamera.direction.z};

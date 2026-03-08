@@ -21,24 +21,23 @@ namespace AM
 /** The max size that a message batch can be, after compression.
     2^15 because the BatchSize field is 16 bits long, and the high bit is
     reserved.
-    SharedConfig::MAX_BATCH_SIZE will typically be smaller than this, and it 
-    is an uncompressed max so this will usually not be reached. We just use it 
+    SharedConfig::MAX_BATCH_SIZE will typically be smaller than this, and it
+    is an uncompressed max so this will usually not be reached. We just use it
     for safety checks. */
 static constexpr std::size_t MAX_BATCH_WIRE_SIZE{(2 << 14) - 1};
 
-/** The max size that a client message can be (server messages are instead 
-    bound by total batch size). 2^16 because the message Size field is 16 bits 
+/** The max size that a client message can be (server messages are instead
+    bound by total batch size). 2^16 because the message Size field is 16 bits
     long.
-    We allow this to be a very large number, despite the performance 
-    implications, because clients should only be sending large messages when 
+    We allow this to be a very large number, despite the performance
+    implications, because clients should only be sending large messages when
     a dev is modifying the world, e.g. when updating a dialogue script. */
 static constexpr std::size_t CLIENT_MAX_MESSAGE_SIZE{(2 << 15) - 1};
 
-/** The maximum number of bytes we can send as a single packet. Messages 
+/** The maximum number of bytes we can send as a single packet. Messages
     larger than this will likely be split into multiple packets, potentially
     leading to them not arriving at the same time. */
 static constexpr std::size_t ETHERNET_MTU{1460};
-
 
 //--------------------------------------------------------------------------
 // Headers

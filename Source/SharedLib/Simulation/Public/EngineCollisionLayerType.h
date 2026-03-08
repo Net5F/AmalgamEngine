@@ -12,11 +12,10 @@ using CollisionLayerBitSet = Uint16;
 /**
  * The collision layer types that the engine provides.
  *
- * Note: Don't use this enum directly, use CollisionLayerType (it combines the 
+ * Note: Don't use this enum directly, use CollisionLayerType (it combines the
  *       engine's and the project's collision layer types)
  */
-struct EngineCollisionLayerType
-{
+struct EngineCollisionLayerType {
     enum Value : Uint16 {
         /** Terrain and Wall tile layers. */
         TerrainWall = 1 << 0,

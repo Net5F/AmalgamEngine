@@ -31,7 +31,7 @@ void WorldObjectLocator::addWorldObject(const WorldObjectID& objectID,
     CellExtent boxCellExtent(objectWorldBounds, CELL_WORLD_WIDTH,
                              CELL_WORLD_HEIGHT);
 
-    // Make sure each length is at least 1, or else the box won't be added to 
+    // Make sure each length is at least 1, or else the box won't be added to
     // any cells.
     // (This occurs if the box forms a plane.)
     if (boxCellExtent.xLength < 1) {
@@ -61,7 +61,7 @@ WorldObjectID
     // DDA Algorithm Ref: https://lodev.org/cgtutor/raycasting.html
     //                    https://www.youtube.com/watch?v=NbSee-XM7WA
 
-    // Cast a world-space ray from the plane formed by camera.target.z to the 
+    // Cast a world-space ray from the plane formed by camera.target.z to the
     // given point on the screen.
     std::optional<Ray> rayOpt{
         Transforms::screenToWorldRay(screenPoint, camera)};
@@ -79,10 +79,10 @@ WorldObjectID
     const float cellStepY{cellStepX};
     const float cellStepZ{unitStepZ * CELL_WORLD_HEIGHT};
 
-    // These hold the t values where the next intersection occurs in each 
+    // These hold the t values where the next intersection occurs in each
     // direction.
-    // Note: Dividing by CELL_WORLD_ gives us a ratio of total cell size, 
-    //       which we can then multiply by cellStep to get "how much of a 
+    // Note: Dividing by CELL_WORLD_ gives us a ratio of total cell size,
+    //       which we can then multiply by cellStep to get "how much of a
     //       step would we have to make along the ray to reach the next cell".
     CellPosition currentCellPosition(TilePosition(ray.origin),
                                      Config::WORLD_OBJECT_LOCATOR_CELL_WIDTH,
@@ -137,7 +137,7 @@ WorldObjectID
             currentCellPosition.x -= 1;
         }
         else if ((nextIntersectionY < nextIntersectionX)
-            && (nextIntersectionY < nextIntersectionZ)) {
+                 && (nextIntersectionY < nextIntersectionZ)) {
             nextIntersectionY += cellStepY;
             currentCellPosition.y -= 1;
         }

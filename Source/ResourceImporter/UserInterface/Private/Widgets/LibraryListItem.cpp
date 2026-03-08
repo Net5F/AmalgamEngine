@@ -157,7 +157,7 @@ AUI::EventResult
     }
 
     // If the user set a callback for this event, call it.
-    // Note: We don't activate if shift or ctrl is held, since the user is 
+    // Note: We don't activate if shift or ctrl is held, since the user is
     //       likely trying to quickly select multiple items.
     if (onActivated && !modifierKeyIsHeld()) {
         onActivated(this);

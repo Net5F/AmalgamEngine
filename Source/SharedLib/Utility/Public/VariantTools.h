@@ -17,6 +17,6 @@ struct Overload : Ts... {
 template<class... Ts>
 Overload(Ts...) -> Overload<Ts...>;
 
-}
+} // namespace VariantTools
 
 } // End namespace AM

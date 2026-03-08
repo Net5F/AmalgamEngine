@@ -17,7 +17,7 @@ struct AVEffects {
     std::vector<VisualEffectState> visualEffects{};
 
     /** This entity's currently active audio effects. */
-    //std::vector<AVEffect> avEffects{};
+    // std::vector<AVEffect> avEffects{};
 };
 
 } // namespace Client

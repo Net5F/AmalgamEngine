@@ -53,7 +53,7 @@ bool EntityLocator::updateEntity(entt::entity entity, const Position& position)
             return true;
         }
         else {
-            // Cell position isn't the same. Remove the entity from the old 
+            // Cell position isn't the same. Remove the entity from the old
             // cell.
             clearEntityFromCell(entity, entityIt->second);
         }
@@ -76,7 +76,7 @@ void EntityLocator::removeEntity(entt::entity entity)
     // If we aren't already tracking this entity, error.
     auto entityIt{entityMap.find(entity)};
     if (entityIt == entityMap.end()) {
-        // Note: Since every entity has a position, we expect them to always 
+        // Note: Since every entity has a position, we expect them to always
         //       be in this locator.
         LOG_ERROR("Tried to remove entity that wasn't added to this locator.");
         return;
@@ -159,7 +159,7 @@ std::vector<entt::entity>&
         }
     }
 
-    // Note: We don't need to de-duplicate since an entity's Position will only 
+    // Note: We don't need to de-duplicate since an entity's Position will only
     //       ever be in one cell at a time.
 
     return returnVector;
@@ -200,7 +200,7 @@ std::vector<entt::entity>&
         }
     }
 
-    // Note: We don't need to de-duplicate since an entity's Position will only 
+    // Note: We don't need to de-duplicate since an entity's Position will only
     //       ever be in one cell at a time.
 
     return returnVector;

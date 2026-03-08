@@ -10,11 +10,10 @@ namespace AM
  *
  * For client-specific graphic state, see ClientGraphicState.
  *
- * The entity's collision box and mouse hit detection area (in build mode) are 
+ * The entity's collision box and mouse hit detection area (in build mode) are
  * derived from this state.
  */
-struct GraphicState
-{
+struct GraphicState {
     EntityGraphicSetID graphicSetID{NULL_ENTITY_GRAPHIC_SET_ID};
 };
 

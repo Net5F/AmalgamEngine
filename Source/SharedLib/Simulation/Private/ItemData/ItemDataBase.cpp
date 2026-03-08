@@ -15,7 +15,7 @@ ItemDataBase::ItemDataBase()
 , itemCreated{itemCreatedSig}
 , itemUpdated{itemUpdatedSig}
 {
-    // Note: We intentionally don't have a "null item", because we want the 
+    // Note: We intentionally don't have a "null item", because we want the
     //       getters to return nullptr if there isn't a real item to return.
 }
 

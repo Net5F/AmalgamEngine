@@ -19,7 +19,7 @@ public:
     // Public interface
     //-------------------------------------------------------------------------
     /**
-     * @param logicalWidth The widget's width. Only affects the text width, the 
+     * @param logicalWidth The widget's width. Only affects the text width, the
      *                     other elements are all centered.
      */
     GraphicSetSlot(float logicalWidth);

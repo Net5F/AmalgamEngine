@@ -14,8 +14,7 @@ namespace AM
 namespace DM
 {
 
-enum class MigrationStatus
-{
+enum class MigrationStatus {
     Success,
     /** A migration function is missing. */
     ImplementationMissing,
@@ -23,9 +22,8 @@ enum class MigrationStatus
     DatabaseError
 };
 
-struct MigrationInfo
-{
-    /** The name of this piece of data. Should match the "name" column in the 
+struct MigrationInfo {
+    /** The name of this piece of data. Should match the "name" column in the
         "versions" table. */
     std::string name{};
 
@@ -41,14 +39,14 @@ struct MigrationInfo
 };
 
 /**
- * Runs the migration process, checking for out of date data and calling the 
+ * Runs the migration process, checking for out of date data and calling the
  * appropriate migration functions.
  */
 class MigrationRunner
 {
 public:
     /**
-     * Performs any necessary migrations on the given database, using the given 
+     * Performs any necessary migrations on the given database, using the given
      * migration info.
      */
     static void migrate(SQLite::Database& database,

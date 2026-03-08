@@ -40,10 +40,10 @@ SpriteSheetPropertiesWindow::SpriteSheetPropertiesWindow(MainScreen& inScreen,
 
     auto styleLabel
         = [&](AUI::Text& label, const std::string& text, float fontSize) {
-        label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
-        label.setColor({255, 255, 255, 255});
-        label.setText(text);
-    };
+              label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
+              label.setColor({255, 255, 255, 255});
+              label.setText(text);
+          };
     styleLabel(windowLabel, "Sprite Sheet Properties", 21);
     windowLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
 
@@ -102,7 +102,7 @@ void SpriteSheetPropertiesWindow::onSheetRemoved(SpriteSheetID parentSheetID)
 void SpriteSheetPropertiesWindow::onAddImagesButtonPressed()
 {
     // Open the file select dialog and save the selected paths.
-    // Note: This will block the main thread, but that's fine. Our 
+    // Note: This will block the main thread, but that's fine. Our
     //       PeriodicUpdaters in Application are set up to skip late steps.
     NFD::UniquePathSet selectedPaths{};
     nfdfilteritem_t filterItem[1] = {{"Supported Image Types", "png, jpg"}};
@@ -130,7 +130,7 @@ void SpriteSheetPropertiesWindow::onAddImagesButtonPressed()
                 return;
             }
 
-            // Trim the full path down to a path relative to the working 
+            // Trim the full path down to a path relative to the working
             // IndividualSprites directory.
             paths.at(i) = path.get();
             paths.at(i) = paths.at(i).substr(spritesDirSize);

@@ -17,29 +17,30 @@ namespace AM
 /**
  * A single item's definition.
  *
- * Items have "interactions", and "properties". Interactions define what users 
- * can do with the item, and properties hold data that can be used while 
+ * Items have "interactions", and "properties". Interactions define what users
+ * can do with the item, and properties hold data that can be used while
  * handling interactions.
- * The engine provides some generic interactions and properties, and more can 
+ * The engine provides some generic interactions and properties, and more can
  * be defined by the project.
  *
- * Items are typically defined using a Lua "init script". After that, all 
- * logic is handled in C++. We use this pattern because it provides a good 
+ * Items are typically defined using a Lua "init script". After that, all
+ * logic is handled in C++. We use this pattern because it provides a good
  * balance between expressiveness, developer effort, and performance.
  *
- * When an interaction occurs, an event will be pushed into a queue. A system 
- * can then use Simulation::popItemInteractionRequest() to handle the 
+ * When an interaction occurs, an event will be pushed into a queue. A system
+ * can then use Simulation::popItemInteractionRequest() to handle the
  * interaction.
- * Built-in interactions like "Examine", "Combine", and "Use" are handled 
+ * Built-in interactions like "Examine", "Combine", and "Use" are handled
  * automatically by the engine, outside of the queue system.
- * When an item is used on an entity, that entity's "item handler" Lua script 
+ * When an item is used on an entity, that entity's "item handler" Lua script
  * will be ran.
  */
 struct Item {
-    /** The item's display name. Not guaranteed to be unique. Shown in the UI. */
+    /** The item's display name. Not guaranteed to be unique. Shown in the UI.
+     */
     std::string displayName{"Null"};
 
-    /** The item's unique string ID. This ID will be consistent, and can be 
+    /** The item's unique string ID. This ID will be consistent, and can be
         used for persistent state. */
     std::string stringID{"null"};
 
@@ -58,7 +59,7 @@ struct Item {
 
     /** The custom interactions that this item supports.
         The first interaction in this list is the default interaction.
-        Built-in interactions aren't present in this vector, and will instead 
+        Built-in interactions aren't present in this vector, and will instead
         be added by the UI. */
     std::vector<ItemInteractionType> supportedInteractions{};
 
@@ -74,7 +75,7 @@ struct Item {
 
     /**
      * Adds the given interaction to supportedInteractions.
-     * @return true if the interaction was added, else false (already present 
+     * @return true if the interaction was added, else false (already present
      *         or array was full).
      */
     bool addInteraction(ItemInteractionType newInteraction);
@@ -100,7 +101,7 @@ struct Item {
 
     /**
      * Returns the number of interactions that this item supports.
-     * Note: This must be used because the always-present interactions (UseOn, 
+     * Note: This must be used because the always-present interactions (UseOn,
      *       Destroy, Examine) aren't stored in supportedInteractions.
      */
     std::size_t getInteractionCount() const;
@@ -182,7 +183,7 @@ struct Item {
 template<typename S>
 void serialize(S& serializer, Item& item)
 {
-    // Note: We only serialize items for persistance. For replication, we use 
+    // Note: We only serialize items for persistance. For replication, we use
     //       ItemUpdate.
 
     serializer.text1b(item.displayName, Item::MAX_DISPLAY_NAME_LENGTH);

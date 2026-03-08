@@ -93,8 +93,7 @@ void NpcMovementSystem::moveAllNpcs()
     auto movementGroup{EnttGroups::getMovementGroup(world.registry)};
     for (auto [entity, input, position, previousPosition, movement,
                movementMods, rotation, collision, collisionBitSets,
-               graphicState] :
-         movementGroup.each()) {
+               graphicState] : movementGroup.each()) {
         // Save their old position.
         previousPosition = position;
 

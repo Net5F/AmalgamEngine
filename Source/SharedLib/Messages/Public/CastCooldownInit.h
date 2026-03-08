@@ -7,7 +7,7 @@ namespace AM
 {
 /**
  * Sent by the server when a client needs their full list of cast cooldowns.
- * After the full list is sent, the client can update it locally as casts are 
+ * After the full list is sent, the client can update it locally as casts are
  * completed.
  */
 struct CastCooldownInit {

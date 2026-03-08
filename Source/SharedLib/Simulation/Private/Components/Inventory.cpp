@@ -12,7 +12,7 @@ Inventory::Inventory(Uint8 inSize)
 
 bool Inventory::addItem(ItemID itemID, Uint8 count, Uint8 maxStackSize)
 {
-    // If there's an existing slot with the same item type and enough room, 
+    // If there's an existing slot with the same item type and enough room,
     // add to it.
     for (ItemSlot& slot : slots) {
         Uint16 combinedCount{static_cast<Uint16>(slot.count + count)};
@@ -122,7 +122,7 @@ const ItemCombination* Inventory::combineItems(Uint8 sourceSlotIndex,
         return nullptr;
     }
 
-    // Get the items in the given slots. If either item no longer exists, do 
+    // Get the items in the given slots. If either item no longer exists, do
     // nothing.
     ItemID sourceItemID{slots[sourceSlotIndex].ID};
     ItemID targetItemID{slots[targetSlotIndex].ID};

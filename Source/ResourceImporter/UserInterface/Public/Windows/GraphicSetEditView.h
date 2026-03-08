@@ -17,8 +17,8 @@ class DataModel;
 class LibraryWindow;
 
 /**
- * The center stage shown when the user loads a Floor, Floor Covering, Wall, 
- * or Object graphic set from the Library. Entity graphic sets use 
+ * The center stage shown when the user loads a Floor, Floor Covering, Wall,
+ * or Object graphic set from the Library. Entity graphic sets use
  * EntityGraphicSetEditView.
  *
  * Allows the user to edit the active graphic set's graphic slots.
@@ -44,20 +44,21 @@ private:
     void onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID);
 
     /**
-     * (If type/ID matches active set) Sets the given index to the given graphic.
+     * (If type/ID matches active set) Sets the given index to the given
+     * graphic.
      */
     void onGraphicSetSlotChanged(GraphicSet::Type type, Uint16 graphicSetID,
-                                std::size_t index, GraphicID newGraphicID);
+                                 std::size_t index, GraphicID newGraphicID);
 
     /**
      * Loads the given graphic set's data onto this stage.
      */
     template<typename T>
     void loadActiveGraphicSet(GraphicSet::Type graphicSetType,
-                             const T& newActiveGraphicSet);
+                              const T& newActiveGraphicSet);
 
     /**
-     * Attempts to assign the currently selected library item to the 
+     * Attempts to assign the currently selected library item to the
      * given slot.
      */
     void onAssignButtonPressed(std::size_t slotIndex);

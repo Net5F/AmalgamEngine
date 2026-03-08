@@ -57,11 +57,11 @@ AddSpriteDialog::AddSpriteDialog(MainScreen& inMainScreen,
     /* Stage origin entry. */
     auto styleLabel
         = [&](AUI::Text& label, const std::string& text, float fontSize) {
-        label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
-        label.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
-        label.setColor({255, 255, 255, 255});
-        label.setText(text);
-    };
+              label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
+              label.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
+              label.setColor({255, 255, 255, 255});
+              label.setText(text);
+          };
     styleLabel(stageOriginXLabel, "Stage Origin X", 21);
 
     auto styleTextInput = [&](AUI::TextInput& textInput) {

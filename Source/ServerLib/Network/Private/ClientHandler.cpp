@@ -209,7 +209,7 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
 
         // If there's data waiting, try to receive all messages from the
         // client.
-        // Note: We can only receive one message at a time, since select() 
+        // Note: We can only receive one message at a time, since select()
         //       (checkSockets) only tells us data is available, not how much.
         if (clientPtr->dataIsReady()) {
             Client::ReceiveResult result{clientPtr->receiveMessage()};

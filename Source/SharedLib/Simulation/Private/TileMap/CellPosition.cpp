@@ -26,9 +26,9 @@ CellPosition::CellPosition(
 CellPosition::CellPosition(const Vector3& worldPoint, float cellWidth,
                            float cellHeight)
 : DiscretePosition<DiscreteImpl::CellTag>(
-    static_cast<int>(std::floor(worldPoint.x / cellWidth)),
-    static_cast<int>(std::floor(worldPoint.y / cellWidth)),
-    static_cast<int>(std::floor(worldPoint.z / cellHeight)))
+      static_cast<int>(std::floor(worldPoint.x / cellWidth)),
+      static_cast<int>(std::floor(worldPoint.y / cellWidth)),
+      static_cast<int>(std::floor(worldPoint.z / cellHeight)))
 {
 }
 
@@ -36,12 +36,12 @@ CellPosition::CellPosition(const TilePosition& tilePosition,
                            std::size_t cellWidthTiles,
                            std::size_t cellHeightTiles)
 : DiscretePosition<DiscreteImpl::CellTag>(
-    static_cast<int>(
-        std::floor(tilePosition.x / static_cast<float>(cellWidthTiles))),
-    static_cast<int>(
-        std::floor(tilePosition.y / static_cast<float>(cellWidthTiles))),
-    static_cast<int>(
-        std::floor(tilePosition.z / static_cast<float>(cellHeightTiles))))
+      static_cast<int>(
+          std::floor(tilePosition.x / static_cast<float>(cellWidthTiles))),
+      static_cast<int>(
+          std::floor(tilePosition.y / static_cast<float>(cellWidthTiles))),
+      static_cast<int>(
+          std::floor(tilePosition.z / static_cast<float>(cellHeightTiles))))
 {
 }
 

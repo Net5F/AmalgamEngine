@@ -221,7 +221,7 @@ void Network::serializeAndSend(const T& messageStruct)
                                  + Serialize::measureSize(messageStruct)};
     if (totalMessageSize > CLIENT_MAX_MESSAGE_SIZE) {
         LOG_INFO("Tried to send a too-large message. Size: %u, max: %u",
-                  totalMessageSize, CLIENT_MAX_MESSAGE_SIZE);
+                 totalMessageSize, CLIENT_MAX_MESSAGE_SIZE);
         return;
     }
 

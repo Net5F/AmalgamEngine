@@ -57,7 +57,7 @@ public:
     static constexpr float SPAWN_POINT_GROUP_OFFSET_X{500};
     static constexpr float SPAWN_POINT_GROUP_OFFSET_Y{500};
 
-    /** How often the world's data (tile map, entities, etc) should be saved, 
+    /** How often the world's data (tile map, entities, etc) should be saved,
         in seconds. */
     static constexpr float SAVE_PERIOD_S{60 * 15};
 

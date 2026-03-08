@@ -46,8 +46,8 @@ public:
 private:
     /** Extra room so that we don't run into reuse issues when almost all IDs
         are reserved.
-        Note: Eventually, we should determine when old IDs are guaranteed to 
-              be safe to reuse (maybe after 1 tick?). This needs to also 
+        Note: Eventually, we should determine when old IDs are guaranteed to
+              be safe to reuse (maybe after 1 tick?). This needs to also
               guarantee that the ID will be cleared from any clients. */
     static constexpr std::size_t ID_SAFETY_BUFFER{100};
 

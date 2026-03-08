@@ -81,7 +81,7 @@ void AnimationElementsListItem::deselect()
         return;
     }
 
-    // A different list item must have been selected, so we know that we 
+    // A different list item must have been selected, so we know that we
     // aren't hovered. Go to normal.
     setCurrentState(State::Normal);
 
@@ -115,8 +115,9 @@ void AnimationElementsListItem::setOnDeselected(
     onDeselected = std::move(inOnDeselected);
 }
 
-AUI::EventResult AnimationElementsListItem::onMouseDown(AUI::MouseButtonType buttonType,
-                                              const SDL_FPoint&)
+AUI::EventResult
+    AnimationElementsListItem::onMouseDown(AUI::MouseButtonType buttonType,
+                                           const SDL_FPoint&)
 {
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
