@@ -86,6 +86,11 @@ public:
      */
     static void renderHexagon(SDL_Renderer* renderer, const SDL_FPoint& center,
                               float radius, const SDL_Color& color);
+
+    /**
+     * Returns true if the given rect has a positive area.
+     */
+    static bool hasPositiveArea(const SDL_FRect& rect);
 };
 
 } // namespace AM

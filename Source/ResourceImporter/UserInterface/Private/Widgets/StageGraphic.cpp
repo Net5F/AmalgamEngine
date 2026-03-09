@@ -2,6 +2,7 @@
 #include "SpriteTools.h"
 #include "Transforms.h"
 #include "BoundingBox.h"
+#include "SDLHelpers.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
 
@@ -27,7 +28,7 @@ void StageGraphic::updateStage(const SDL_FRect& spriteTextureExtent,
 void StageGraphic::render(const SDL_FPoint& windowTopLeft)
 {
     // If this widget is fully clipped, don't render it.
-    if (SDL_RectEmptyFloat(&clippedExtent)) {
+    if (!SDLHelpers::hasPositiveArea(clippedExtent)) {
         return;
     }
 

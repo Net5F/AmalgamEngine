@@ -48,20 +48,14 @@ endif()
 file(COPY ${PROJECT_SOURCE_DIR}/Resources/ResourceImporter/Common/Assets/
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Assets/)
 
-# On Windows, copy the SDL2 DLLs into the build folder so we can run our executable.
+# On Windows, copy the SDL3 DLLs into the build folder so we can run our executable.
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    list(APPEND SDL2_DLL_PATHS 
-         ${SDL2_DIR}/lib/x64/
-         ${SDL2_IMAGE_INCLUDE_DIR}/../lib/x64
-         ${SDL2_MIXER_INCLUDE_DIR}/../lib/x64
-         ${SDL2_TTF_INCLUDE_DIR}/../lib/x64
-         ${SDL2_GFX_INCLUDE_DIR}/../lib/x64
-    )
-
-    foreach(DLL_PATH ${SDL2_DLL_PATHS})
-        file(GLOB SDL2_DLLS ${DLL_PATH}/*.dll)
-        file(COPY ${SDL2_DLLS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-    endforeach()
+    add_custom_command(TARGET ResourceImporter POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			$<TARGET_RUNTIME_DLLS:ResourceImporter>
+			$<TARGET_FILE_DIR:ResourceImporter>
+		COMMAND_EXPAND_LISTS
+	)
 endif()
 
 # Build all of the subdirectories
@@ -76,7 +70,9 @@ add_subdirectory(Utility)
 # Install Step (Packaging the application)
 ###############################################################################
 # Define an install step that copies the executable and all resources.
-install(TARGETS ResourceImporter RUNTIME DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)
+install(TARGETS ResourceImporter
+        RUNTIME_DEPENDENCY_SET resource_importer_deps
+        RUNTIME DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/ResourceImporter/Common/
         DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)
 
@@ -85,12 +81,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/ResourceImporter/Windows/
             DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)
 
-    # On Windows, we provide the SDL2 DLLs.
-    foreach(DLL_PATH ${SDL2_DLL_PATHS})
-        install(DIRECTORY ${DLL_PATH}/
-                DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter
-                FILES_MATCHING PATTERN "*.dll")
-    endforeach()
+    # On Windows, we provide the SDL3 DLLs.
+    install(RUNTIME_DEPENDENCY_SET resource_importer_deps
+		    DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/ResourceImporter/Linux/
             DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)

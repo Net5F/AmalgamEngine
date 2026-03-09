@@ -143,4 +143,9 @@ void SDLHelpers::renderHexagon(SDL_Renderer* renderer, const SDL_FPoint& center,
                        static_cast<int>(indices.size()));
 }
 
+bool SDLHelpers::hasPositiveArea(const SDL_FRect& rect)
+{
+    return (rect.w > 0.0f) && (rect.h > 0.0f);
+}
+
 } // namespace AM

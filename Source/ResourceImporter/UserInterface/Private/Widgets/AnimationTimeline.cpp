@@ -1,6 +1,7 @@
 #include "AnimationTimeline.h"
 #include "EditorAnimation.h"
 #include "TimelineFrame.h"
+#include "SDLHelpers.h"
 #include "Paths.h"
 #include "AMAssert.h"
 #include "AUI/ScalingHelpers.h"
@@ -175,7 +176,7 @@ void AnimationTimeline::onTick(double)
 void AnimationTimeline::render(const SDL_FPoint& windowTopLeft)
 {
     // If this widget is fully clipped, don't render it.
-    if (SDL_RectEmptyFloat(&clippedExtent)) {
+    if (!SDLHelpers::hasPositiveArea(clippedExtent)) {
         return;
     }
 
