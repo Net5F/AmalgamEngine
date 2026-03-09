@@ -28,7 +28,7 @@ void StageGraphic::updateStage(const SDL_FRect& spriteTextureExtent,
 void StageGraphic::render(const SDL_FPoint& windowTopLeft)
 {
     // If this widget is fully clipped, don't render it.
-    if (!SDLHelpers::hasPositiveArea(clippedExtent)) {
+    if (SDL_RectEmptyFloat(&clippedExtent)) {
         return;
     }
 

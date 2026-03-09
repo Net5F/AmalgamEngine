@@ -44,7 +44,7 @@ void TimelineHandle::arrange(const SDL_FPoint& startPosition,
     Widget::arrange(startPosition, availableExtent, widgetLocator);
 
     // If this widget is fully clipped, return early.
-    if (!SDLHelpers::hasPositiveArea(clippedExtent)) {
+    if (SDL_RectEmptyFloat(&clippedExtent)) {
         return;
     }
 
@@ -71,7 +71,7 @@ void TimelineHandle::render(const SDL_FPoint& windowTopLeft)
     SDL_SetRenderDrawBlendMode(AUI::Core::getRenderer(), SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), color.r, color.g, color.b,
                            color.a);
-    if (SDLHelpers::hasPositiveArea(rectClippedExtent)) {
+    if (!SDL_RectEmptyFloat(&rectClippedExtent)) {
         SDL_FRect finalExtent{rectClippedExtent};
         finalExtent.x += windowTopLeft.x;
         finalExtent.y += windowTopLeft.y;
@@ -79,7 +79,7 @@ void TimelineHandle::render(const SDL_FPoint& windowTopLeft)
     }
 
     // Render the line.
-    if (renderLine && SDLHelpers::hasPositiveArea(lineClippedExtent)) {
+    if (renderLine && !SDL_RectEmptyFloat(&lineClippedExtent)) {
         SDL_FRect finalExtent{lineClippedExtent};
         finalExtent.x += windowTopLeft.x;
         finalExtent.y += windowTopLeft.y;
