@@ -100,7 +100,7 @@ void SDLHelpers::renderThickLine(SDL_Renderer* renderer, const SDL_FPoint& min,
     std::array<SDL_Vertex, 4> verts{
         SDL_Vertex{{min.x + perpVector.x, min.y + perpVector.y}, fColor},
         {{min.x - perpVector.x, min.y - perpVector.y}, fColor},
-        {{max.x + perpVector.x, max.y + perpVector.y}, fColor},
+        {{max.x - perpVector.x, max.y - perpVector.y}, fColor},
         {{max.x + perpVector.x, max.y + perpVector.y}, fColor}};
 
     // Render the rect.
@@ -120,13 +120,17 @@ void SDLHelpers::renderHexagon(SDL_Renderer* renderer, const SDL_FPoint& center,
         SDL_FPoint{1.0f, 0.0f}, {0.5f, SQRT3_2},   {-0.5f, SQRT3_2},
         {-1.0f, 0.0f},          {-0.5f, -SQRT3_2}, {0.5f, -SQRT3_2}};
 
-    // Calculate our verts from the unit hexagon and given parameters.
+    // Set up the center vert.
     SDL_FColor fColor{colorToFColor(color)};
     std::array<SDL_Vertex, 7> verts{};
+    verts[0].position = center;
+    verts[0].color = fColor;
+
+    // Calculate the rest of the verts from the unit hexagon and given radius.
     for (int i{0}; i < UNIT_HEXAGON.size(); ++i) {
-        verts[i].position.x = center.x + (UNIT_HEXAGON[i].x * radius);
-        verts[i].position.y = center.y + (UNIT_HEXAGON[i].y * radius);
-        verts[i].color = fColor;
+        verts[i + 1].position.x = center.x + (UNIT_HEXAGON[i].x * radius);
+        verts[i + 1].position.y = center.y + (UNIT_HEXAGON[i].y * radius);
+        verts[i + 1].color = fColor;
     }
 
     // Set up the triangle fan indices.

@@ -21,11 +21,17 @@ public:
     /**
      * Updates the stage graphic to match the given extent and origin.
      *
+     * The finished points are set in stageCoords in the order:
+     *     (minX, minY, minZ), (maxX, minY, minZ), (maxX, maxY, minZ),
+     *     (minX, maxY, minZ)
+     *
      * @param spriteTextureExtent The texture extent from the sprite data.
      * @param stageOrigin The stage origin from the sprite data.
      * @param actualSpriteImageOffset Where the sprite image will start,
      *        relative to the top left of this widget and scaled to actual
      *        (screen-relative) size.
+     *
+     * @post stageCoords is updated to the new position and ready for rendering.
      */
     void updateStage(const SDL_FRect& spriteTextureExtent,
                      const SDL_FPoint& stageOrigin,
@@ -39,26 +45,6 @@ public:
 private:
     /** The transparency value for the stage graphic. */
     static constexpr float STAGE_ALPHA{127};
-
-    /**
-     * Transforms the vertices that make up the stage's bottom face from world
-     * space to screen space, scales them to the current UI scaling, and
-     * offsets them using the current offsets.
-     *
-     * The finished points are set in the given array in the order:
-     *     (minX, minY, minZ), (maxX, minY, minZ), (maxX, maxY, minZ),
-     *     (minX, maxY, minZ)
-     *
-     * @post stageCoords is updated to the new position.
-     */
-    void updateStageScreenPoints(const SDL_FRect& spriteTextureExtent,
-                                 const SDL_FPoint& stageOrigin,
-                                 const SDL_FPoint& logicalSpriteImageOffset);
-
-    /**
-     * Moves the stage graphic coords to their proper screen position.
-     */
-    void moveStageGraphic(std::vector<SDL_FPoint>& stageScreenPoints);
 
     /**
      * Renders the stage's bottom face.

@@ -20,26 +20,9 @@ void StageGraphic::updateStage(const SDL_FRect& spriteTextureExtent,
                                const SDL_FPoint& stageOrigin,
                                const SDL_FPoint& actualSpriteImageOffset)
 {
-    // Update where the stage is on the screen, for our generated graphics.
-    updateStageScreenPoints(spriteTextureExtent, stageOrigin,
-                            actualSpriteImageOffset);
-}
-
-void StageGraphic::render(const SDL_FPoint& windowTopLeft)
-{
-    // If this widget is fully clipped, don't render it.
-    if (SDL_RectEmptyFloat(&clippedExtent)) {
-        return;
-    }
-
-    renderStage(windowTopLeft);
-}
-
-void StageGraphic::updateStageScreenPoints(
-    const SDL_FRect& spriteTextureExtent, const SDL_FPoint& stageOrigin,
-    const SDL_FPoint& actualSpriteImageOffset)
-{
-    /* Transform the world positions to screen points. */
+    // We need to update where the stage is on the screen for our generated 
+    // graphics. To do that, we must transform the stage's world positions to 
+    // screen points.
     std::array<SDL_FPoint, 4> screenPoints{};
 
     // Push the points in the correct order.
@@ -65,20 +48,34 @@ void StageGraphic::updateStageScreenPoints(
     float finalXOffset{actualSpriteImageOffset.x + actualStageOrigin.x};
     float finalYOffset{actualSpriteImageOffset.y + actualStageOrigin.y};
 
-    // Scale and offset each point, then push it into the return vector.
+    // Scale and offset each point, then update stageCoords.
     for (std::size_t i{0}; i < screenPoints.size(); ++i) {
+        SDL_FPoint& screenPoint{screenPoints[i]};
+
         // Scale and round the point.
-        point.x = std::round(AUI::ScalingHelpers::logicalToActual(point.x));
-        point.y = std::round(AUI::ScalingHelpers::logicalToActual(point.y));
+        screenPoint.x
+            = std::round(AUI::ScalingHelpers::logicalToActual(screenPoint.x));
+        screenPoint.y
+            = std::round(AUI::ScalingHelpers::logicalToActual(screenPoint.y));
 
         // Offset the point.
-        point.x += finalXOffset;
-        point.y += finalYOffset;
+        screenPoint.x += finalXOffset;
+        screenPoint.y += finalYOffset;
 
         // Update the graphic's coordinate.
-        stageCoords[i].x = point.x;
-        stageCoords[i].y = point.y;
+        stageCoords[i].x = screenPoint.x;
+        stageCoords[i].y = screenPoint.y;
     }
+}
+
+void StageGraphic::render(const SDL_FPoint& windowTopLeft)
+{
+    // If this widget is fully clipped, don't render it.
+    if (SDL_RectEmptyFloat(&clippedExtent)) {
+        return;
+    }
+
+    renderStage(windowTopLeft);
 }
 
 void StageGraphic::renderStage(const SDL_FPoint& windowTopLeft)
@@ -88,7 +85,8 @@ void StageGraphic::renderStage(const SDL_FPoint& windowTopLeft)
     for (std::size_t i{0}; i < verts.size(); ++i) {
         verts[i].position.x = stageCoords[i].x + windowTopLeft.x;
         verts[i].position.y = stageCoords[i].y + windowTopLeft.y;
-        verts[i].color = {0, 149, 0, STAGE_ALPHA};
+        verts[i].color = SDLHelpers::colorToFColor(
+            {0, 149, 0, static_cast<Uint8>(STAGE_ALPHA)});
     }
 
     // Draw the stage's floor bounds.
