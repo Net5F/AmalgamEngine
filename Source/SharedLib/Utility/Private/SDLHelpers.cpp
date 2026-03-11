@@ -82,7 +82,7 @@ void SDLHelpers::renderThickLine(SDL_Renderer* renderer, const SDL_FPoint& min,
     SDL_FPoint diff{(max.x - min.x), (max.y - min.y)};
     float length{std::sqrt((diff.x * diff.x) + (diff.y * diff.y))};
     if (length == 0) {
-        LOG_ERROR("Failed to draw line: length is 0.");
+        // Can't render a 0-length line, return early.
         return;
     }
 
