@@ -55,11 +55,11 @@ bool SDLHelpers::savePng(const std::string& filePath, SDL_Renderer* renderer,
     SDL_Surface* surface{SDL_RenderReadPixels(renderer, nullptr)};
 
     // Save the surface to a file.
-    int result{IMG_SavePNG(surface, filePath.c_str())};
+    bool result{IMG_SavePNG(surface, filePath.c_str())};
     SDL_DestroySurface(surface);
 
     SDL_SetRenderTarget(renderer, oldRenderTarget);
-    return (result == 0);
+    return result;
 }
 
 void SDLHelpers::setWindowFullscreen(SDL_Window* window, Uint32 newMode)
