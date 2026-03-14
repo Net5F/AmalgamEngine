@@ -219,7 +219,8 @@ void EntityLifetimeSystem::finishPlayerEntity()
     registry.emplace<Camera>(
         playerEntity, Camera::CenterOnEntity, position,
         PreviousPosition{position}, BoundingBox{},
-        SDLHelpers::rectToFRect(userConfig.getWindowSize()));
+        SDLHelpers::rectToFRect(userConfig.getWindowSize()),
+        Config::ZOOM_LEVELS[Config::DEFAULT_ZOOM_LEVEL_INDEX]);
 
     registry.emplace<Inventory>(playerEntity);
     registry.emplace<InputHistory>(playerEntity);
