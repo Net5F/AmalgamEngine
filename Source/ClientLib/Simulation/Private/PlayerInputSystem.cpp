@@ -98,6 +98,9 @@ void PlayerInputSystem::addCurrentInputsToHistory()
 
 void PlayerInputSystem::processMouseWheel(SDL_MouseWheelEvent& wheelEvent)
 {
+    // TODO: We don't have many zoom levels, so the mouse wheel zooms through
+    //       them. It'd probably be better to move this to Ctrl+/Ctrl-.
+
     // If zooming is disabled, do nothing.
     if (!Config::ENABLE_MOUSE_ZOOM) {
         return;

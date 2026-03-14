@@ -40,7 +40,12 @@ struct Camera {
         render tick in Renderer::getLerpedCamera(). */
     SDL_FRect screenExtent{0, 0, 0, 0};
 
-    /** The amount that this camera is zoomed in or out. 1.0 is no zoom. */
+    /** The amount that this camera is zoomed in or out. 1.0 is no zoom.
+        Note: We chose this approach instead of using a "distance from target"
+              (even though that would simplify calculations), becaues we're a 
+              sprite-based engine and it's important to be able to render 
+              sprites at evenly-divisble sizes so they look as good as 
+              possible. */
     float zoomFactor{1.0};
 
     /**
