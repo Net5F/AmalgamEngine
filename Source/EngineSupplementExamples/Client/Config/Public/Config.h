@@ -94,8 +94,8 @@ public:
              energy saving mode, causing visual jitter. */
     static constexpr double SLEEP_MINIMUM_TIME_S{.010};
 
-    /** If true, zooming with the mouse scroll wheel will be enabled. */
-    static constexpr bool ENABLE_MOUSE_ZOOM{false};
+    /** If true, zooming with the ctrl+'=' and ctrl+'-' keys will be enabled. */
+    static constexpr bool ENABLE_ZOOM{true};
 
     /** The levels of zoom that the player can select. */
     static constexpr std::array<float, 8> ZOOM_LEVELS{0.25, 0.5, 0.75, 1,

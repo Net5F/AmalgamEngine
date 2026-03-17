@@ -247,12 +247,25 @@ void EntityGraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
 std::size_t EntityGraphicSetEditView::toIndex(EntityGraphicType graphicType,
                                               Rotation::Direction direction)
 {
-    AM_ASSERT(graphicType != EntityGraphicType::NotSet,
-              "Tried to get index of uninitialized entity graphic type.");
+    bool isEngineGraphicType{graphicType > EntityGraphicType::NotSet
+                             && graphicType < EntityGraphicType::PROJECT_START};
+    bool isProjectGraphicType{graphicType > EntityGraphicType::PROJECT_START
+                              && graphicType < EntityGraphicType::PROJECT_END};
+    if (isEngineGraphicType) {
+        // Offset to skip NotSet.
+        return ((static_cast<std::size_t>(graphicType) - 1)
+                * Rotation::Direction::Count)
+               + direction;
+    }
+    else if (isProjectGraphicType) {
+        // Offset to skip NotSet and PROJECT_START.
+        return ((static_cast<std::size_t>(graphicType) - 2)
+                * Rotation::Direction::Count)
+               + direction;
+    }
 
-    return ((static_cast<std::size_t>(graphicType) - 1)
-            * Rotation::Direction::Count)
-           + direction;
+    LOG_ERROR("Invalid entity graphic type: %u, %u", graphicType, direction);
+    return 0;
 }
 
 template<typename Func>

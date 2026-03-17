@@ -181,7 +181,7 @@ bool AVSystem::updateAVEntity(const AVEntityState& avEntityState,
     if (!targetOpt) {
         return false;
     }
-    Position targetPosition{targetOpt.value()};
+    const Position& targetPosition{targetOpt.value()};
 
     // Save the entity's old position.
     previousPosition = position;
@@ -208,10 +208,11 @@ bool AVSystem::updateAVEntity(const AVEntityState& avEntityState,
     graphicState.graphicSetID = phase.graphicSetID;
     const EntityGraphicSet& graphicSet{
         graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
+    bool isMoving{true};
     GraphicHelpers::GraphicReturn newGraphic{
         GraphicHelpers::getGraphicOrFallback(
             graphicSet, desiredGraphicType, desiredGraphicDirection,
-            desiredGraphicType, desiredGraphicDirection)};
+            desiredGraphicType, desiredGraphicDirection, isMoving)};
     if (newGraphic.type != clientGraphicState.graphicType) {
         clientGraphicState.graphicType = newGraphic.type;
         clientGraphicState.setStartTime = true;

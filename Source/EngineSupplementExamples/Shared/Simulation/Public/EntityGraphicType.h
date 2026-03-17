@@ -25,6 +25,7 @@ enum class EntityGraphicType : Uint8 {
     Run = static_cast<Uint8>(EngineEntityGraphicType::Run),
     Crouch = static_cast<Uint8>(EngineEntityGraphicType::Crouch),
     Jump = static_cast<Uint8>(EngineEntityGraphicType::Jump),
+    Fall = static_cast<Uint8>(EngineEntityGraphicType::Fall),
 
     // Project graphic types.
     PROJECT_START = static_cast<Uint8>(EngineEntityGraphicType::PROJECT_START),

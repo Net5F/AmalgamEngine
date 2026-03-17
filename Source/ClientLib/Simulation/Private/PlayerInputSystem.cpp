@@ -26,12 +26,26 @@ PlayerInputSystem::PlayerInputSystem(const SimulationContext& inSimContext)
 void PlayerInputSystem::processMomentaryInput(SDL_Event& event)
 {
     switch (event.type) {
-        case SDL_EVENT_MOUSE_WHEEL:
-            processMouseWheel(event.wheel);
+        case SDL_EVENT_MOUSE_WHEEL: {
             break;
-        default:
+        }
+        case SDL_EVENT_KEY_DOWN: {
+            const bool ctrlHeld{
+                static_cast<bool>(event.key.mod & SDL_KMOD_CTRL)};
+
+            // Handle zoom events.
+            if (ctrlHeld && event.key.key == SDLK_EQUALS) {
+                handleZoomIn();
+            }
+            else if (ctrlHeld && event.key.key == SDLK_MINUS) {
+                handleZoomOut();
+            }
+            break;
+        }
+        default: {
             // No default behavior.
             break;
+        }
     }
 }
 
@@ -96,28 +110,40 @@ void PlayerInputSystem::addCurrentInputsToHistory()
     playerInputHistory.push(playerInputs);
 }
 
-void PlayerInputSystem::processMouseWheel(SDL_MouseWheelEvent& wheelEvent)
+void PlayerInputSystem::handleZoomIn()
 {
-    // TODO: We don't have many zoom levels, so the mouse wheel zooms through
-    //       them. It'd probably be better to move this to Ctrl+/Ctrl-.
-
     // If zooming is disabled, do nothing.
-    if (!Config::ENABLE_MOUSE_ZOOM) {
+    if (!Config::ENABLE_ZOOM) {
+        return;
+    }
+    // If the player doesn't have a camera, do nothing.
+    else if (!(world.registry.all_of<Camera>(world.playerEntity))) {
         return;
     }
 
-    // Only process zoom if the player has a camera.
-    if (world.registry.all_of<Camera>(world.playerEntity)) {
-        // Update the current zoom level based on the mouse wheel movement.
-        // Note: We zoom a set amount per tick regardless of how much they
-        //       scrolled.
-        if ((wheelEvent.y > 0)
-            && (currentZoomLevelIndex < (Config::ZOOM_LEVELS.size()) - 1)) {
-            currentZoomLevelIndex++;
-        }
-        else if ((wheelEvent.y < 0) && (currentZoomLevelIndex > 0)) {
-            currentZoomLevelIndex--;
-        }
+    // Update the camera's current zoom level.
+    if (currentZoomLevelIndex < (Config::ZOOM_LEVELS.size()) - 1) {
+        currentZoomLevelIndex++;
+
+        Camera& camera{world.registry.get<Camera>(world.playerEntity)};
+        camera.zoomFactor = Config::ZOOM_LEVELS.at(currentZoomLevelIndex);
+    }
+}
+
+void PlayerInputSystem::handleZoomOut()
+{
+    // If zooming is disabled, do nothing.
+    if (!Config::ENABLE_ZOOM) {
+        return;
+    }
+    // If the player doesn't have a camera, do nothing.
+    else if (!(world.registry.all_of<Camera>(world.playerEntity))) {
+        return;
+    }
+
+    // Update the camera's current zoom level.
+    if (currentZoomLevelIndex > 0) {
+        currentZoomLevelIndex--;
 
         Camera& camera{world.registry.get<Camera>(world.playerEntity)};
         camera.zoomFactor = Config::ZOOM_LEVELS.at(currentZoomLevelIndex);

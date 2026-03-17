@@ -1,4 +1,5 @@
 #include "Vector3.h"
+#include "AMMath.h"
 #include "Log.h"
 
 namespace AM
@@ -89,6 +90,20 @@ bool Vector3::operator==(const Vector3& other) const
 bool Vector3::operator!=(const Vector3& other) const
 {
     return (x != other.x) || (y != other.y) || (z != other.z);
+}
+
+bool Vector3::isEqualApproxWorld(const Vector3& other) const
+{
+    return Math::isEqualApproxWorld(x, other.x)
+           && Math::isEqualApproxWorld(y, other.y)
+           && Math::isEqualApproxWorld(z, other.z);
+}
+
+bool Vector3::isEqualApproxGeneric(const Vector3& other) const
+{
+    return Math::isEqualApproxGeneric(x, other.x)
+           && Math::isEqualApproxGeneric(y, other.y)
+           && Math::isEqualApproxGeneric(z, other.z);
 }
 
 void Vector3::normalize()

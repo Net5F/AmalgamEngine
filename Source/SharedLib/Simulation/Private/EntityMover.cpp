@@ -11,6 +11,7 @@
 #include "IsClientEntity.h"
 #include "MovementHelpers.h"
 #include "Transforms.h"
+#include "AMMath.h"
 #include "Log.h"
 #include "entt/entity/registry.hpp"
 
@@ -29,16 +30,16 @@ EntityMover::EntityMover(const entt::registry& inRegistry,
 
 void EntityMover::moveEntity(const MoveEntityParams& params)
 {
-    // If no inputs are pressed and they aren't falling, nothing needs to
+    // If no inputs are pressed and they aren't airborne, nothing needs to
     // be done.
-    if (params.inputStates.none() && !(params.movement.isFalling)) {
+    if (params.inputStates.none() && !(params.movement.isAirborne)) {
         params.movement.velocity = {0, 0, 0};
         return;
     }
 
-    // Calculate their updated velocity.
-    params.movement.velocity = MovementHelpers::calcVelocity(
-        params.inputStates, params.movement, params.movementMods);
+    // Update their velocity (and update other movement state).
+    MovementHelpers::updateMovement(
+        params.inputStates, params.movementMods, params.movement);
 
     // Resolve any collisions with the surrounding bounding boxes.
     BoundingBox resolvedBounds{resolveCollisions(
@@ -85,8 +86,8 @@ BoundingBox EntityMover::resolveCollisions(
     //       where two tiles meet, both tiles will be included.
     //       See the note in TileExtent(BoundingBox) for info on why this isn't
     //       the standard behavior.
-    BoundingBox broadPhaseBounds{currentBounds.unionWith(desiredBounds)
-                                     .expandBy(MovementHelpers::WORLD_EPSILON)};
+    BoundingBox broadPhaseBounds{
+        currentBounds.unionWith(desiredBounds).expandBy(Math::WORLD_EPSILON)};
 
     // Clip the extent to the tile map's bounds.
     TileExtent broadPhaseTileExtent(broadPhaseBounds);
@@ -265,14 +266,13 @@ EntityMover::NarrowPhaseResult EntityMover::narrowPhase(
     // Due to float precision loss, the resolved bounds may actually be
     // slightly clipped inside the other bounds. To resolve this, move backwards
     // by an amount equal to our epsilon.
-    static constexpr Vector3 BACKOFF_AMOUNT{MovementHelpers::WORLD_EPSILON,
-                                            MovementHelpers::WORLD_EPSILON,
-                                            MovementHelpers::WORLD_EPSILON};
+    static constexpr Vector3 BACKOFF_AMOUNT{
+        Math::WORLD_EPSILON, Math::WORLD_EPSILON, Math::WORLD_EPSILON};
     resolvedBounds = resolvedBounds.translateBy(BACKOFF_AMOUNT * normalToUse);
 
-    // If they collided with the ground, reset their falling state.
+    // If they collided with the ground, reset their airborne state.
     if (normalToUse.z == 1.f) {
-        movement.isFalling = false;
+        movement.isAirborne = false;
         movement.jumpCount = 0;
     }
 

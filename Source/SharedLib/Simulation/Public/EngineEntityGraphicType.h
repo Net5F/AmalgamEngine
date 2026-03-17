@@ -19,6 +19,7 @@ enum class EngineEntityGraphicType : Uint8 {
     Run,
     Crouch,
     Jump,
+    Fall,
     PROJECT_START
 };
 

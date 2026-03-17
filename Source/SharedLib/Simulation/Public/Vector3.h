@@ -44,6 +44,23 @@ struct Vector3 {
     bool operator!=(const Vector3& other) const;
 
     /**
+     * Returns true if the given values are approximately equal.
+     * 
+     * Uses WORLD_EPSILON as a tolerance threshold, making this useful for 
+     * values that represent positions within the world map.
+     */
+    bool isEqualApproxWorld(const Vector3& other) const;
+
+    /**
+     * Returns true if the given values are approximately equal.
+     * 
+     * Uses GENERIC_EPSILON as a tolerance threshold. If you're doing math on 
+     * values the represent positions within the world map, consider using 
+     * isEqualApproxWorld instead.
+     */
+    bool isEqualApproxGeneric(const Vector3& other) const;
+
+    /**
      * Normalizes this vector.
      */
     void normalize();

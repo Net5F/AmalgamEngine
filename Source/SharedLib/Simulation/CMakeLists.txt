@@ -1,5 +1,6 @@
 target_sources(SharedLib
     PRIVATE
+        Private/AMMath.cpp
         Private/BoundingBox.cpp
         Private/CollisionLocator.cpp
         Private/CollisionLocatorRaycastStrategy.cpp

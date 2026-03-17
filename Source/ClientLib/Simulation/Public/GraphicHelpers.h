@@ -25,8 +25,9 @@ public:
      */
     static GraphicReturn getGraphicOrFallback(
         const EntityGraphicSet& graphicSet, EntityGraphicType currentType,
-        Rotation::Direction currentDirection, EntityGraphicType desiredType,
-        Rotation::Direction desiredDirection);
+        Rotation::Direction currentDirection,
+        EntityGraphicType initialDesiredType,
+        Rotation::Direction desiredDirection, bool isMoving);
 };
 
 } // End namespace Client

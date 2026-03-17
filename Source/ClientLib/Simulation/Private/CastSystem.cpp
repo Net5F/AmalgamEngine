@@ -362,7 +362,7 @@ void CastSystem::playAVEffects(const CastInfo& castInfo)
         if (!casterOpt) {
             continue;
         }
-        Position casterPosition{casterOpt.value()};
+        const Position& casterPosition{casterOpt.value()};
 
         // Determine the target's position.
         std::optional<Position> targetOpt{AVEntityHelpers::getTargetPosition(
@@ -372,7 +372,7 @@ void CastSystem::playAVEffects(const CastInfo& castInfo)
         if (!targetOpt) {
             continue;
         }
-        Position targetPosition{targetOpt.value()};
+        const Position& targetPosition{targetOpt.value()};
 
         // Determine the A/V entity's desired starting state.
         auto startStateOpt{AVEntityHelpers::getStartState(
@@ -381,15 +381,16 @@ void CastSystem::playAVEffects(const CastInfo& castInfo)
         if (!startStateOpt) {
             continue;
         }
-        auto& [startPosition, desiredGraphicType, desiredGraphicDirection]
+        const auto& [startPosition, desiredGraphicType, desiredGraphicDirection]
             = startStateOpt.value();
 
         // Get a valid graphic from the graphic set.
         const EntityGraphicSet& graphicSet{
             graphicData.getEntityGraphicSet(firstPhase.graphicSetID)};
+        bool isMoving{true};
         auto graphicReturn{GraphicHelpers::getGraphicOrFallback(
             graphicSet, desiredGraphicType, desiredGraphicDirection,
-            desiredGraphicType, desiredGraphicDirection)};
+            desiredGraphicType, desiredGraphicDirection, isMoving)};
 
         AVEntityID newAVEntity{world.avRegistry.create()};
         world.avRegistry.emplace<Position>(newAVEntity, startPosition);

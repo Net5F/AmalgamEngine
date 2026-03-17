@@ -3,9 +3,12 @@
 #include "Simulation.h"
 #include "GraphicData.h"
 #include "ISimulationExtension.h"
+#include "Position.h"
+#include "PreviousPosition.h"
 #include "Rotation.h"
 #include "GraphicState.h"
 #include "ClientGraphicState.h"
+#include "Movement.h"
 #include "Input.h"
 #include "ClientCastState.h"
 #include "GraphicHelpers.h"
@@ -29,10 +32,10 @@ void GraphicSystem::updateAnimations()
     // Update all entity sprites to match their current rotation.
     // Note: This iterates static entities, even though most don't change state
     //       very often. If this becomes a performance issue, we can revisit.
-    auto view{
-        world.registry.view<Rotation, GraphicState, ClientGraphicState>()};
-    for (auto [entity, rotation, graphicState, clientGraphicState] :
-         view.each()) {
+    auto view{world.registry.view<Position, PreviousPosition, Rotation,
+                                  GraphicState, ClientGraphicState>()};
+    for (auto [entity, position, previousPosition, rotation, graphicState,
+               clientGraphicState] : view.each()) {
         // Give the project a chance to update the graphic type.
         EntityGraphicType graphicType{extension->getUpdatedGraphicType(entity)};
         if (graphicType != EntityGraphicType::NotSet) {
@@ -48,11 +51,12 @@ void GraphicSystem::updateAnimations()
         // Get the new graphic, accounting for missing graphics in the set.
         const EntityGraphicSet& graphicSet{
             graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
+        bool isMoving{!(position.isEqualApproxWorld(previousPosition))};
         GraphicHelpers::GraphicReturn newGraphic{
             GraphicHelpers::getGraphicOrFallback(
                 graphicSet, clientGraphicState.graphicType,
                 clientGraphicState.graphicDirection, desiredGraphicType,
-                rotation.direction)};
+                rotation.direction, isMoving)};
 
         // If the graphic has changed, update the component.
         if (newGraphic.type != clientGraphicState.graphicType) {
@@ -74,15 +78,24 @@ void GraphicSystem::setExtension(ISimulationExtension* inExtension)
 
 EntityGraphicType GraphicSystem::getDesiredGraphicType(entt::entity entity)
 {
-    // If the entity is moving, use a run graphic.
-    if (const Input* input{world.registry.try_get<Input>(entity)};
-        input && input->inputStates.any()) {
-        return EntityGraphicType::Run;
+    entt::registry& registry{world.registry};
+
+    // If the entity is airborne, use an appropriate graphic.
+    if (const Movement* movement{registry.try_get<Movement>(entity)};
+        movement && movement->isAirborne) {
+        // If the entity is falling, use the Fall graphic.
+        if (movement->velocity.z < 0.f) {
+            return EntityGraphicType::Fall;
+        }
+        else {
+            // Not falling.
+            return EntityGraphicType::Jump;
+        }
     }
+
     // If the entity is casting, use the appropriate graphic from the
     // Castable.
-    else if (const auto* castState{
-                 world.registry.try_get<ClientCastState>(entity)}) {
+    if (const auto* castState{registry.try_get<ClientCastState>(entity)}) {
         if (castState->state == ClientCastState::State::Casting) {
             return castState->castInfo.castable->castingGraphicType;
         }
@@ -90,6 +103,16 @@ EntityGraphicType GraphicSystem::getDesiredGraphicType(entt::entity entity)
             // CastComplete
             return castState->castInfo.castable->castCompleteGraphicType;
         }
+    }
+
+    // If the entity has a held input, use an appropriate graphic.
+    if (const Input* input{registry.try_get<Input>(entity)};
+        input && input->inputStates.any()) {
+        if (input->inputStates[Input::Crouch]) {
+            return EntityGraphicType::Crouch;
+        }
+
+        return EntityGraphicType::Run;
     }
 
     // Default: Use an idle graphic.

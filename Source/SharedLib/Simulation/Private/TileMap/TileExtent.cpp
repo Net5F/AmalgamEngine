@@ -4,7 +4,7 @@
 #include "BoundingBox.h"
 #include "Cylinder.h"
 #include "Vector3.h"
-#include "MovementHelpers.h"
+#include "AMMath.h"
 #include "SharedConfig.h"
 #include "Log.h"
 
@@ -66,22 +66,22 @@ TileExtent::TileExtent(const BoundingBox& boundingBox)
     // To account for float precision issues: add the epsilon to each min value,
     // then round down. If the box is within epsilon range of a tile in the
     // negative direction, it won't be included in this extent.
-    x = static_cast<int>(std::floor(
-        (boundingBox.min.x + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
-    y = static_cast<int>(std::floor(
-        (boundingBox.min.y + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
-    z = static_cast<int>(std::floor(
-        (boundingBox.min.z + MovementHelpers::WORLD_EPSILON) / TILE_HEIGHT));
+    x = static_cast<int>(
+        std::floor((boundingBox.min.x + Math::WORLD_EPSILON) / TILE_WIDTH));
+    y = static_cast<int>(
+        std::floor((boundingBox.min.y + Math::WORLD_EPSILON) / TILE_WIDTH));
+    z = static_cast<int>(
+        std::floor((boundingBox.min.z + Math::WORLD_EPSILON) / TILE_HEIGHT));
 
     // Subtract the epsilon from each max value, then round up. If the
     // boundingBox is within epsilon range of a tile in the positive direction,
     // it won't be included in this extent.
-    float maxTileX{std::ceil(
-        (boundingBox.max.x - MovementHelpers::WORLD_EPSILON) / TILE_WIDTH)};
-    float maxTileY{std::ceil(
-        (boundingBox.max.y - MovementHelpers::WORLD_EPSILON) / TILE_WIDTH)};
-    float maxTileZ{std::ceil(
-        (boundingBox.max.z - MovementHelpers::WORLD_EPSILON) / TILE_HEIGHT)};
+    float maxTileX{
+        std::ceil((boundingBox.max.x - Math::WORLD_EPSILON) / TILE_WIDTH)};
+    float maxTileY{
+        std::ceil((boundingBox.max.y - Math::WORLD_EPSILON) / TILE_WIDTH)};
+    float maxTileZ{
+        std::ceil((boundingBox.max.z - Math::WORLD_EPSILON) / TILE_HEIGHT)};
     xLength = (static_cast<int>(maxTileX) - x);
     yLength = (static_cast<int>(maxTileY) - y);
     zLength = (static_cast<int>(maxTileZ) - z);

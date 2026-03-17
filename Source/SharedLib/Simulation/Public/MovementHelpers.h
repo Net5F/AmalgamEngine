@@ -23,18 +23,17 @@ class MovementHelpers
 {
 public:
     /**
-     * Calculates an updated velocity based on the given data.
+     * Updates the given movement state based on the given data.
 
      * @param inputStates The current input state.
-     * @param[out] movement The current movement state (may update velocity
-     *                      and jumpCount).
      * @param movementMods The current movement mod state.
+     * @param[out] movement The current movement state.
      *
-     * @return The updated velocity.
+     * @post movement is updated.
      */
-    static Vector3 calcVelocity(const Input::StateArr& inputStates,
-                                Movement& movement,
-                                const MovementModifiers& movementMods);
+    static void updateMovement(const Input::StateArr& inputStates,
+                               const MovementModifiers& movementMods,
+                               Movement& movement);
 
     /**
      * Calculates an updated position based on the given data.
@@ -66,18 +65,6 @@ public:
     static Position interpolatePosition(const PreviousPosition& previousPos,
                                         const Position& position, double alpha);
 
-    /** An epsilon that can be used when comparing float world positions to
-        integer values, to account for float precision loss.
-        Calculated by finding the float precision at the furthest position of
-        the largest map that we support.
-        Reference: https://blog.demofox.org/2017/11/21/floating-point-precision/
-        Note: The division by 2 is because we center the map on the origin. */
-    static constexpr float MAX_WORLD_VALUE{SharedConfig::MAX_MAP_WIDTH_TILES
-                                           * SharedConfig::TILE_WORLD_WIDTH
-                                           / 2.f};
-    static constexpr float WORLD_EPSILON{MAX_WORLD_VALUE
-                                         / static_cast<float>(1 << 23)};
-
 private:
     /**
      * Returns the appropriate direction for the given direction int.
@@ -89,18 +76,20 @@ private:
     /**
      * Performs the first step of velocity calculations, assuming the entity
      * can fly.
+     * Note: Won't change movement.velocity. May change other fields.
      */
     static Vector3 calcVelocityCanFly(const Input::StateArr& inputStates,
-                                      Movement& movement,
-                                      const MovementModifiers& movementMods);
+                                      const MovementModifiers& movementMods,
+                                      Movement& movement);
 
     /**
      * Performs the first step of velocity calculations, assuming the entity
      * cannot fly.
+     * Note: Won't change movement.velocity. May change other fields.
      */
     static Vector3 calcVelocityNoFly(const Input::StateArr& inputStates,
-                                     Movement& movement,
-                                     const MovementModifiers& movementMods);
+                                     const MovementModifiers& movementMods,
+                                     Movement& movement);
 };
 
 } // End namespace AM

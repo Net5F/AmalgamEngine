@@ -14,19 +14,20 @@ const float DIAGONAL_NORMALIZATION_CONSTANT{0.70710678118f};
 namespace AM
 {
 
-Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
-                                      Movement& movement,
-                                      const MovementModifiers& movementMods)
+void MovementHelpers::updateMovement(const Input::StateArr& inputStates,
+                                     const MovementModifiers& movementMods,
+                                     Movement& movement)
 {
-    // Update the entity's velocity, depending on whether it can fly or not.
+    // Calc the entity's updated velocity, depending on whether it can fly or
+    // not.
     Vector3 updatedVelocity{};
     if (movementMods.canFly) {
         updatedVelocity
-            = calcVelocityCanFly(inputStates, movement, movementMods);
+            = calcVelocityCanFly(inputStates, movementMods, movement);
     }
     else {
         updatedVelocity
-            = calcVelocityNoFly(inputStates, movement, movementMods);
+            = calcVelocityNoFly(inputStates, movementMods, movement);
     }
 
     // Apply the project's velocity mod.
@@ -40,10 +41,11 @@ Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
     // falling. When they collide with the ground, this will be set to false
     // by the collision logic.
     if (movement.velocity.z != 0) {
-        movement.isFalling = true;
+        movement.isAirborne = true;
     }
 
-    return updatedVelocity;
+    // Set the new velocity.
+    movement.velocity = updatedVelocity;
 }
 
 Position MovementHelpers::calcPosition(const Position& position,
@@ -134,8 +136,8 @@ Rotation::Direction MovementHelpers::directionIntToDirection(int directionInt)
 
 Vector3
     MovementHelpers::calcVelocityCanFly(const Input::StateArr& inputStates,
-                                        Movement& movement,
-                                        const MovementModifiers& movementMods)
+                                        const MovementModifiers& movementMods,
+                                        Movement& movement)
 {
     Vector3 updatedVelocity{movement.velocity};
 
@@ -171,8 +173,8 @@ Vector3
 
 Vector3
     MovementHelpers::calcVelocityNoFly(const Input::StateArr& inputStates,
-                                       Movement& movement,
-                                       const MovementModifiers& movementMods)
+                                       const MovementModifiers& movementMods,
+                                       Movement& movement)
 {
     Vector3 updatedVelocity{movement.velocity};
 
@@ -187,17 +189,17 @@ Vector3
     }
 
     // True if the entity is jumping while already in the air.
-    bool isAirJumping{movement.isFalling && didJump};
+    bool isAirJumping{movement.isAirborne && didJump};
     // True if the entity is moving vertically through the air, e.g. after
     // jumping straight up.
-    bool isVerticalFalling{movement.isFalling && (updatedVelocity.x == 0)
-                           && (updatedVelocity.y == 0)};
+    bool isMovingVerticalOnly{movement.isAirborne && (updatedVelocity.x == 0)
+                              && (updatedVelocity.y == 0)};
 
-    // If they're on the ground, or just air jumped, or are falling vertically,
+    // If they're on the ground, or just air jumped, or are moving vertically,
     // calc their new X/Y velocity.
     // Note: The only other case is that they're falling through the air, in
     //       which case they'll keep traveling with their current X/Y velocity.
-    if (!(movement.isFalling) || isAirJumping || isVerticalFalling) {
+    if (!(movement.isAirborne) || isAirJumping || isMovingVerticalOnly) {
         // Direction values. 0 == no movement, 1 == movement.
         int xUp{static_cast<int>(inputStates[Input::XUp])};
         int xDown{static_cast<int>(inputStates[Input::XDown])};
@@ -216,7 +218,7 @@ Vector3
         }
 
         // Calc the new X/Y velocity.
-        if (isVerticalFalling) {
+        if (isMovingVerticalOnly) {
             updatedVelocity.x
                 = xDirection * SharedConfig::VERTICAL_FALL_MOVE_VELOCITY;
             updatedVelocity.y

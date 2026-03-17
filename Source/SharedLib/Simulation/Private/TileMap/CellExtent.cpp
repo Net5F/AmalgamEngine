@@ -2,7 +2,7 @@
 #include "TileExtent.h"
 #include "BoundingBox.h"
 #include "Cylinder.h"
-#include "MovementHelpers.h"
+#include "AMMath.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include <cmath>
@@ -63,21 +63,18 @@ CellExtent::CellExtent(const BoundingBox& box, float cellWidth,
     // then round down. If the box is within epsilon range of a cell in the
     // negative direction, it won't be included in this extent.
     x = static_cast<int>(
-        std::floor((box.min.x + MovementHelpers::WORLD_EPSILON) / cellWidth));
+        std::floor((box.min.x + Math::WORLD_EPSILON) / cellWidth));
     y = static_cast<int>(
-        std::floor((box.min.y + MovementHelpers::WORLD_EPSILON) / cellWidth));
+        std::floor((box.min.y + Math::WORLD_EPSILON) / cellWidth));
     z = static_cast<int>(
-        std::floor((box.min.z + MovementHelpers::WORLD_EPSILON) / cellHeight));
+        std::floor((box.min.z + Math::WORLD_EPSILON) / cellHeight));
 
     // Subtract the epsilon from each max value, then round up. If the box is
     // within epsilon range of a cell in the positive direction, it won't be
     // included in this extent.
-    float maxTileX{
-        std::ceil((box.max.x - MovementHelpers::WORLD_EPSILON) / cellWidth)};
-    float maxTileY{
-        std::ceil((box.max.y - MovementHelpers::WORLD_EPSILON) / cellWidth)};
-    float maxTileZ{
-        std::ceil((box.max.z - MovementHelpers::WORLD_EPSILON) / cellHeight)};
+    float maxTileX{std::ceil((box.max.x - Math::WORLD_EPSILON) / cellWidth)};
+    float maxTileY{std::ceil((box.max.y - Math::WORLD_EPSILON) / cellWidth)};
+    float maxTileZ{std::ceil((box.max.z - Math::WORLD_EPSILON) / cellHeight)};
     xLength = (static_cast<int>(maxTileX) - x);
     yLength = (static_cast<int>(maxTileY) - y);
     zLength = (static_cast<int>(maxTileZ) - z);

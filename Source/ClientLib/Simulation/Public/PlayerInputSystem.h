@@ -42,9 +42,14 @@ public:
 
 private:
     /**
-     * Processes any mouse wheel movement since the last tick.
+     * If valid, zooms the camera in by one zoom level.
      */
-    void processMouseWheel(SDL_MouseWheelEvent& wheelEvent);
+    void handleZoomIn();
+
+    /**
+     * If valid, zooms the camera out by one zoom level.
+     */
+    void handleZoomOut();
 
     Simulation& simulation;
     World& world;

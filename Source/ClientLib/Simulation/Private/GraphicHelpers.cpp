@@ -7,9 +7,31 @@ namespace Client
 
 GraphicHelpers::GraphicReturn GraphicHelpers::getGraphicOrFallback(
     const EntityGraphicSet& graphicSet, EntityGraphicType currentType,
-    Rotation::Direction currentDirection, EntityGraphicType desiredType,
-    Rotation::Direction desiredDirection)
+    Rotation::Direction currentDirection, EntityGraphicType initialDesiredType,
+    Rotation::Direction desiredDirection, bool isMoving)
 {
+    // If the entity doesn't have any Crouch graphics, fall back to Run or Idle.
+    EntityGraphicType desiredType{initialDesiredType};
+    if (desiredType == EntityGraphicType::Crouch) {
+        bool hasCrouchGraphic{false};
+        for (Uint8 i{0}; i < Rotation::Direction::Count; ++i) {
+            if (graphicSet.contains(EntityGraphicType::Crouch,
+                                    static_cast<Rotation::Direction>(i))) {
+                hasCrouchGraphic = true;
+                break;
+            }
+        }
+
+        if (!hasCrouchGraphic) {
+            if (isMoving) {
+                desiredType = EntityGraphicType::Run;
+            }
+            else {
+                desiredType = EntityGraphicType::Idle;
+            }
+        }
+    }
+
     // If the graphic set contains the desired graphic, use it.
     if (graphicSet.contains(desiredType, desiredDirection)) {
         return {desiredType, desiredDirection};

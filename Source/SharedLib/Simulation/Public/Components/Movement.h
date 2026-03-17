@@ -24,8 +24,8 @@ struct Movement {
     Vector3 velocity{};
 
     /** If false, the entity is currently standing on top of something.
-        If true, the entity is falling through the air. */
-    bool isFalling{false};
+        If true, the entity is moving through the air. */
+    bool isAirborne{false};
 
     /** The number of times the entity has jumped since last touching the
         ground. */
@@ -34,8 +34,8 @@ struct Movement {
     /** If true, the jump input has already been processed and is being held.
         We track this separately from Input.inputStates[Input::Jump] so that we
         can compare the previous tick's state to the current. This lets us
-       ensure the input is released and re-pressed, to prevent accidental air
-       jumps. */
+        ensure the input is released and re-pressed, to prevent accidental air
+        jumps. */
     bool jumpHeld{false};
 };
 
@@ -48,7 +48,7 @@ void serialize(S& serializer, Movement& movement)
     // Note: Packing this field is necessary, otherwise it wouldn't match
     //       MeasureSize (which always has bit packing enabled).
     serializer.enableBitPacking([&movement](typename S::BPEnabledType& sbp) {
-        sbp.boolValue(movement.isFalling);
+        sbp.boolValue(movement.isAirborne);
         sbp.boolValue(movement.jumpHeld);
     });
 
