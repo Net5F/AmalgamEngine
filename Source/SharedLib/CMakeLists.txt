@@ -21,6 +21,7 @@ target_link_libraries(SharedLib
         Bitsery::bitsery
         nlohmann_json::nlohmann_json
         Tracy::TracyClient
+        fmt::fmt
 
         # Only included for PCH.
         readerwriterqueue

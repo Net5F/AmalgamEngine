@@ -138,6 +138,10 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/SQLiteCpp/"
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/libmorton/"
                  "${PROJECT_BINARY_DIR}/Libraries/libmorton/" EXCLUDE_FROM_ALL)
 
+# Configure libfmt.
+add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/fmt/"
+                 "${PROJECT_BINARY_DIR}/Libraries/fmt/" EXCLUDE_FROM_ALL)
+
 # Configure header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/CMake/readerwriterqueue.cmake")
 
