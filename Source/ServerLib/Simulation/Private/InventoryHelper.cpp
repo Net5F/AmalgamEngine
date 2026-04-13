@@ -21,10 +21,9 @@ InventoryHelper::InventoryHelper(World& inWorld, Network& inNetwork,
 {
 }
 
-InventoryHelper::AddResult
-    InventoryHelper::addItemToEntity(ItemID itemID, Uint8 count,
-                                     entt::entity entityToAddTo,
-                                     bool sendFailureMessage)
+InventoryHelper::AddResult InventoryHelper::addItem(entt::entity entityToAddTo,
+                                                    ItemID itemID, Uint8 count,
+                                                    bool sendFailureMessage)
 {
     // Try to add the item.
     auto* item{itemData.getItem(itemID)};
@@ -60,13 +59,13 @@ InventoryHelper::AddResult
     return result;
 }
 
-InventoryHelper::AddResult
-    InventoryHelper::addItemToEntity(std::string_view itemID, Uint8 count,
-                                     entt::entity entityToAddTo,
-                                     bool sendFailureMessage)
+InventoryHelper::AddResult InventoryHelper::addItem(entt::entity entityToAddTo,
+                                                    std::string_view itemID,
+                                                    Uint8 count,
+                                                    bool sendFailureMessage)
 {
     if (const Item* item{itemData.getItem(itemID)}) {
-        return addItemToEntity(item->numericID, count, entityToAddTo);
+        return addItem(entityToAddTo, item->numericID, count);
     }
 
     // Failure. Return an error code (and send a message, if appropriate).
@@ -80,9 +79,9 @@ InventoryHelper::AddResult
 }
 
 InventoryHelper::RemoveResult
-    InventoryHelper::removeItemFromEntity(Uint8 slotIndex, Uint8 count,
-                                          entt::entity entityToRemoveFrom,
-                                          bool sendFailureMessage)
+    InventoryHelper::removeItem(entt::entity entityToRemoveFrom,
+                                Uint8 slotIndex, Uint8 count,
+                                bool sendFailureMessage)
 {
     // Try to remove the item.
     auto* inventory{world.registry.try_get<Inventory>(entityToRemoveFrom)};
@@ -116,9 +115,9 @@ InventoryHelper::RemoveResult
 }
 
 InventoryHelper::RemoveResult
-    InventoryHelper::removeItemFromEntity(std::string_view itemID, Uint8 count,
-                                          entt::entity entityToRemoveFrom,
-                                          bool sendFailureMessage)
+    InventoryHelper::removeItem(entt::entity entityToRemoveFrom,
+                                std::string_view itemID, std::size_t count,
+                                bool sendFailureMessage)
 {
     // If the entity's inventory has enough copies of the item to satisfy the
     // requested count, remove them.
@@ -127,14 +126,14 @@ InventoryHelper::RemoveResult
     auto* client{world.registry.try_get<ClientSimData>(entityToRemoveFrom)};
     if (item && inventory
         && (inventory->getItemCount(item->numericID) >= count)) {
-        Uint8 remainingCount{count};
+        std::size_t remainingCount{count};
         for (Uint8 i{0}; i < inventory->slots.size(); ++i) {
             Inventory::ItemSlot& slot{inventory->slots[i]};
 
             // If this slot contains the item, remove it.
             if (slot.ID == item->numericID) {
-                Uint8 amountToRemove{
-                    std::clamp<Uint8>(remainingCount, 0, slot.count)};
+                Uint8 amountToRemove{std::clamp<Uint8>(
+                    static_cast<Uint8>(remainingCount), 0, slot.count)};
                 inventory->removeItem(i, amountToRemove);
 
                 // If the target is a client entity, send an update.
@@ -175,6 +174,28 @@ InventoryHelper::RemoveResult
         network.serializeAndSend(client->netID, SystemMessage{message});
     }
     return result;
+}
+
+bool InventoryHelper::hasItem(entt::entity entity,
+                              std::string_view itemID) const
+{
+    const Item* item{itemData.getItem(itemID)};
+    auto* inventory{world.registry.try_get<Inventory>(entity)};
+    if (item && inventory && (inventory->getItemCount(item->numericID) >= 1)) {
+        return true;
+    }
+    return false;
+}
+
+std::size_t InventoryHelper::getItemCount(entt::entity entity,
+                                          std::string_view itemID) const
+{
+    const Item* item{itemData.getItem(itemID)};
+    auto* inventory{world.registry.try_get<Inventory>(entity)};
+    if (item && inventory) {
+        return inventory->getItemCount(item->numericID);
+    }
+    return 0;
 }
 
 } // namespace Server

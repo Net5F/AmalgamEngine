@@ -60,9 +60,8 @@ public:
      *                           be sent to entityToAddTo (if its a client
      *                           entity) to communicate the failure.
      */
-    AddResult addItemToEntity(ItemID itemID, Uint8 count,
-                              entt::entity entityToAddTo,
-                              bool sendFailureMessage = true);
+    AddResult addItem(entt::entity entityToAddTo, ItemID itemID, Uint8 count,
+                      bool sendFailureMessage = true);
 
     /**
      * Overload for string IDs.
@@ -71,22 +70,20 @@ public:
      *                           be sent to entityToAddTo (if its a client
      *                           entity) to communicate the failure.
      */
-    AddResult addItemToEntity(std::string_view itemID, Uint8 count,
-                              entt::entity entityToAddTo,
-                              bool sendFailureMessage = true);
+    AddResult addItem(entt::entity entityToAddTo, std::string_view itemID,
+                      Uint8 count, bool sendFailureMessage = true);
 
     /**
      * Removes the item in the given slot in the given entity's inventory.
      *
-     * If entityToAddTo is a client entity, sends an update message.
+     * If entityToRemoveFrom is a client entity, sends an update message.
      *
      * @param sendFailureMessage If true and result != Success, a message will
      *                           be sent to entityToRemoveFrom (if its a client
      *                           entity) to communicate the failure.
      */
-    RemoveResult removeItemFromEntity(Uint8 slotIndex, Uint8 count,
-                                      entt::entity entityToRemoveFrom,
-                                      bool sendFailureMessage = true);
+    RemoveResult removeItem(entt::entity entityToRemoveFrom, Uint8 slotIndex,
+                            Uint8 count, bool sendFailureMessage = true);
 
     /**
      * Removes the given count of items from the entity's inventory.
@@ -95,15 +92,26 @@ public:
      *
      * If the inventory doesn't have enough items, does nothing.
      *
-     * If entityToAddTo is a client entity, sends an update message.
+     * If entityToRemoveFrom is a client entity, sends an update message.
      *
      * @param sendFailureMessage If true and result != Success, a message will
      *                           be sent to entityToRemoveFrom (if its a client
      *                           entity) to communicate the failure.
      */
-    RemoveResult removeItemFromEntity(std::string_view itemID, Uint8 count,
-                                      entt::entity entityToRemoveFrom,
-                                      bool sendFailureMessage = true);
+    RemoveResult removeItem(entt::entity entityToRemoveFrom,
+                            std::string_view itemID, std::size_t count,
+                            bool sendFailureMessage = true);
+
+    /**
+     * Returns true if entity posesses at least 1 of the given item.
+     */
+    bool hasItem(entt::entity entity, std::string_view itemID) const;
+
+    /**
+     * Returns how many of the given item the entity possesses.
+     */
+    std::size_t getItemCount(entt::entity entity,
+                             std::string_view itemID) const;
 
 private:
     World& world;

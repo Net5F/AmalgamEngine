@@ -425,8 +425,8 @@ bool EngineLuaBindings::addItem(entt::entity entityToAddTo,
     }
 
     // Try to add the item, sending update messages appropriately.
-    auto result{world.inventoryHelper.addItemToEntity(itemID, count,
-                                                      entityToAddTo, false)};
+    auto result{
+        world.inventoryHelper.addItem(entityToAddTo, itemID, count, false)};
     if (result == InventoryHelper::AddResult::InventoryFull) {
         throw std::runtime_error{"Failed to add item: Inventory is full."};
     }
@@ -451,8 +451,8 @@ bool EngineLuaBindings::removeItem(entt::entity entityToRemoveFrom,
     // Try to remove the item, sending update messages appropriately.
     // Note: This will walk the whole inventory, looking for enough copies of
     //       the item to satisfy the given count.
-    auto result{world.inventoryHelper.removeItemFromEntity(
-        itemID, count, entityToRemoveFrom, false)};
+    auto result{world.inventoryHelper.removeItem(entityToRemoveFrom, itemID,
+                                                 count, false)};
     if (result == InventoryHelper::RemoveResult::InsufficientItemCount) {
         throw std::runtime_error{
             "Failed to remove item: Insufficient item count."};

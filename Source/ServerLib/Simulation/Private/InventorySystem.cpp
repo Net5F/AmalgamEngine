@@ -88,8 +88,8 @@ void InventorySystem::processOperation(NetworkID clientID,
     // TODO: Check that the client has sufficient permission to create items.
 
     // Try to add the item, sending messages appropriately.
-    world.inventoryHelper.addItemToEntity(
-        inventoryAddItem.itemID, inventoryAddItem.count, entityToAddTo);
+    world.inventoryHelper.addItem(entityToAddTo, inventoryAddItem.itemID,
+                                  inventoryAddItem.count);
 }
 
 void InventorySystem::processOperation(
@@ -99,11 +99,11 @@ void InventorySystem::processOperation(
 
     // Find the client's entity ID.
     entt::entity clientEntity{world.getClientEntity(clientID)};
-    if (clientEntity == entt::null) {
+    if (clientEntity != entt::null) {
         // Try to remove the item, sending messages appropriately.
-        world.inventoryHelper.removeItemFromEntity(
-            inventoryRemoveItem.slotIndex, inventoryRemoveItem.count,
-            clientEntity);
+        world.inventoryHelper.removeItem(clientEntity,
+                                         inventoryRemoveItem.slotIndex,
+                                         inventoryRemoveItem.count);
     }
 }
 
@@ -114,7 +114,7 @@ void InventorySystem::processOperation(
 
     // Find the client's entity ID.
     entt::entity clientEntity{world.getClientEntity(clientID)};
-    if (clientEntity == entt::null) {
+    if (clientEntity != entt::null) {
         // If the move is successful, tell the client.
         Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
         if (inventory.moveItem(inventoryMoveItem.sourceSlotIndex,
