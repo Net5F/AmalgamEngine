@@ -37,7 +37,7 @@ CastHelper::CastHelper(Simulation& inSimulation, const ItemData& inItemData,
 CastFailureType
     CastHelper::castItemInteraction(const CastItemInteractionParams& params)
 {
-    // Check that the item exists and actually has this interaction type.
+    // Check that the item exists and that it supports this interaction type.
     // Note: This implicitly checks that the entity owns the item, since it
     //       uses the slot index.
     // Note: If we ever hit a situation where the item in the requested slot
@@ -85,6 +85,13 @@ CastFailureType
     const Castable* castable{castableData.getCastable(params.interactionType)};
     if (!castable) {
         return CastFailureType::InvalidCastable;
+    }
+
+    // Check that the target entity supports this interaction type.
+    const Interaction* interaction{
+        world.registry.try_get<Interaction>(params.targetEntity)};
+    if (interaction && !(interaction->supports(params.interactionType))) {
+        return CastFailureType::InteractionNotSupported;
     }
 
     // Perform the shared validation checks.
