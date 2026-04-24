@@ -34,7 +34,7 @@ void InventorySystem::sendInventoryInits()
     // If a player Inventory was constructed, send the initial state to that
     // player.
     for (entt::entity entity : playerInventoryObserver) {
-        if (world.registry.all_of<ClientSimData, Inventory>(entity)) {
+        if (!(world.registry.all_of<ClientSimData, Inventory>(entity))) {
             continue;
         }
         auto [client, inventory]
