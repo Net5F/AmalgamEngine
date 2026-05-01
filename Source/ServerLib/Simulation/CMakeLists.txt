@@ -65,8 +65,8 @@ target_sources(ServerLib
         Public/Components/CastState.h
         Public/Components/ClientSimData.h
         Public/Components/Dialogue.h
+        Public/Components/InRangeInitComponentList.h
         Public/Components/ItemHandler.h
-        Public/Components/ReplicatedComponentList.h
         Public/Components/SaveTimestamp.h
         Public/Components/StoredValues.h
         Public/GraphicData/GraphicData.h
@@ -79,7 +79,6 @@ target_sources(ServerLib
         Public/Lua/EntityItemHandlerLua.h
         Public/Lua/ItemInitLua.h
         Public/TileMap/TileMap.h
-        Public/TypeLists/EngineObservedComponentTypes.h
         Public/TypeLists/EnginePersistedComponentTypes.h
 )
 

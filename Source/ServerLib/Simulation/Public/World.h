@@ -205,6 +205,12 @@ public:
      */
     Position getSpawnPoint();
 
+    /**
+     * Loads the saved world state from the database.
+     * Should only be called by Simulation during construction.
+     */
+    void load();
+
 private:
     /**
      * Returns the next spawn point, trying to build groups of 10.
@@ -246,6 +252,9 @@ private:
 
     /** Used to get graphics info. */
     const GraphicData& graphicData;
+
+    /** Used to load items. */
+    ItemData& itemData;
 
     /** Used to run entity init scripts. */
     EntityInitLua& entityInitLua;

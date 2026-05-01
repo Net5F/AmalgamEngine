@@ -10,8 +10,7 @@
 #include "ItemInitLua.h"
 #include "Database.h"
 #include "ClientSimData.h"
-#include "ReplicatedComponentList.h"
-#include "ReplicatedComponent.h"
+#include "InRangeInitComponentList.h"
 #include "PersistedComponent.h"
 #include "Position.h"
 #include "PreviousPosition.h"
@@ -39,33 +38,6 @@ namespace AM
 namespace Server
 {
 
-template<typename T>
-void onComponentConstructed(entt::registry& registry, entt::entity entity)
-{
-    // Find the component's index within the type list.
-    constexpr std::size_t index{
-        boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
-
-    // Add the component to the entity's tracking vector.
-    auto& replicatedComponents{
-        registry.get_or_emplace<ReplicatedComponentList>(entity)};
-    replicatedComponents.typeIndices.push_back(static_cast<Uint8>(index));
-}
-
-template<typename T>
-void onComponentDestroyed(entt::registry& registry, entt::entity entity)
-{
-    // Find the component's index within the type list.
-    constexpr std::size_t index{
-        boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
-
-    // If the component is in the entity's tracking vector, remove it.
-    if (auto replicatedComponents
-        = registry.try_get<ReplicatedComponentList>(entity)) {
-        std::erase(replicatedComponents->typeIndices, index);
-    }
-}
-
 World::World(const SimulationContext& inSimContext)
 : registry{}
 , entityLocator{registry}
@@ -80,6 +52,7 @@ World::World(const SimulationContext& inSimContext)
 , netIDMap{}
 , simulation{inSimContext.simulation}
 , graphicData{inSimContext.graphicData}
+, itemData{inSimContext.itemData}
 , entityInitLua{inSimContext.simulation.getEntityInitLua()}
 , itemInitLua{inSimContext.simulation.getItemInitLua()}
 , nextStoredValueID{NULL_ENTITY_STORED_VALUE_ID + 1}
@@ -111,29 +84,9 @@ World::World(const SimulationContext& inSimContext)
     // Allocate the entity locator grid.
     entityLocator.setGridSize(tileMap.getTileExtent());
 
-    // Add listeners for each client-relevant component. When the component is
-    // constructed or destroyed, the associated entity's ReplicatedComponentList
-    // will be updated.
-    boost::mp11::mp_for_each<ReplicatedComponentTypes>([&](auto I) {
-        using ComponentType = decltype(I);
-        registry.on_construct<ComponentType>()
-            .template connect<&onComponentConstructed<ComponentType>>();
-        registry.on_destroy<ComponentType>()
-            .template connect<&onComponentDestroyed<ComponentType>>();
-    });
-
     // When an entity is destroyed, do any necessary cleanup.
     registry.on_destroy<entt::entity>().connect<&World::onEntityDestroyed>(
         this);
-
-    // Load our saved non-client entities.
-    loadNonClientEntities();
-
-    // Load our saved item definitions.
-    loadItems(inSimContext.itemData);
-
-    // Load our saved stored value data.
-    loadStoredValues();
 }
 
 World::~World() = default;
@@ -187,8 +140,8 @@ entt::entity World::createEntity(const Position& position,
         newEntity = registry.create();
     }
 
-    // Add RelicatedComponentList so it gets updated as we add others.
-    registry.emplace<ReplicatedComponentList>(newEntity);
+    // Add InRangeInitComponentList first so it gets updated as we add others.
+    registry.emplace<InRangeInitComponentList>(newEntity);
 
     // Add Position (all entities have a Position).
     registry.emplace<Position>(newEntity, position);
@@ -395,6 +348,18 @@ Position World::getSpawnPoint()
             return {};
         }
     }
+}
+
+void World::load()
+{
+    // Load our saved non-client entities.
+    loadNonClientEntities();
+
+    // Load our saved item definitions.
+    loadItems(itemData);
+
+    // Load our saved stored value data.
+    loadStoredValues();
 }
 
 Position World::getGroupedSpawnPoint()

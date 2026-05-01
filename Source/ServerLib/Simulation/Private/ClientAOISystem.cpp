@@ -9,7 +9,7 @@
 #include "ReplicatedComponent.h"
 #include "EntityInit.h"
 #include "EntityDelete.h"
-#include "ReplicatedComponentList.h"
+#include "InRangeInitComponentList.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include "tracy/Tracy.hpp"
@@ -25,6 +25,39 @@ namespace Server
 {
 
 /**
+ * Adds the constructed component to ReplicatedComponentList.
+ */
+template<typename T>
+void onComponentConstructed(entt::registry& registry, entt::entity entity)
+{
+    // Find the component's index within the type list.
+    constexpr std::size_t index{
+        boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
+
+    // Add the component to the entity's tracking vector.
+    auto& replicatedComponents{
+        registry.get_or_emplace<InRangeInitComponentList>(entity)};
+    replicatedComponents.typeIndices.push_back(static_cast<Uint8>(index));
+}
+
+/**
+ * Removes the destroyed component from ReplicatedComponentList.
+ */
+template<typename T>
+void onComponentDestroyed(entt::registry& registry, entt::entity entity)
+{
+    // Find the component's index within the type list.
+    constexpr std::size_t index{
+        boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
+
+    // If the component is in the entity's tracking vector, remove it.
+    if (auto replicatedComponents
+        = registry.try_get<InRangeInitComponentList>(entity)) {
+        std::erase(replicatedComponents->typeIndices, index);
+    }
+}
+
+/**
  * Retrieves the types in componentIndices for the given entity and pushes
  * them into componentVec.
  *
@@ -35,8 +68,7 @@ void addComponentsToVector(entt::registry& registry, entt::entity entity,
                            std::vector<ReplicatedComponent>& componentVec)
 {
     for (Uint8 componentIndex : componentIndices) {
-        boost::mp11::mp_with_index<
-            boost::mp11::mp_size<ReplicatedComponentTypes>>(
+        boost::mp11::mp_with_index<boost::mp11::mp_size<ReplicatedComponent>>(
             componentIndex, [&](auto I) {
                 using ComponentType
                     = boost::mp11::mp_at_c<ReplicatedComponentTypes, I>;
@@ -58,6 +90,16 @@ ClientAOISystem::ClientAOISystem(const SimulationContext& inSimContext)
 , entitiesThatLeft{}
 , entitiesThatEntered{}
 {
+    // Add listeners for each client-relevant component. When the component is
+    // constructed or destroyed, the associated entity's 
+    // InRangeInitComponentList will be updated.
+    boost::mp11::mp_for_each<InRangeInitComponentTypes>([&](auto I) {
+        using ComponentType = decltype(I);
+        world.registry.on_construct<ComponentType>()
+            .template connect<&onComponentConstructed<ComponentType>>();
+        world.registry.on_destroy<ComponentType>()
+            .template connect<&onComponentDestroyed<ComponentType>>();
+    });
 }
 
 void ClientAOISystem::updateAOILists()
@@ -127,18 +169,18 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
     // AOI.
     EntityInit entityInit{simulation.getCurrentTick()};
     for (entt::entity entityThatEntered : entitiesThatEntered) {
-        const auto& replicatedComponentList{
-            registry.get<ReplicatedComponentList>(entityThatEntered)};
+        const auto& inRangeInitComponentList{
+            registry.get<InRangeInitComponentList>(entityThatEntered)};
 
         // Add the entity and all of its client-relevant components to the
         // message.
         // Note: We send the entity, even if it has no client-relevant
-        // component,
-        //       because there may be a build mode that cares about it.
+        //       component, because there may be a build mode that cares about 
+        //       it.
         EntityInit::EntityData& entityData{entityInit.entityData.emplace_back(
             entityThatEntered, registry.get<Position>(entityThatEntered))};
         addComponentsToVector(registry, entityThatEntered,
-                              replicatedComponentList.typeIndices,
+                              inRangeInitComponentList.typeIndices,
                               entityData.components);
     }
 

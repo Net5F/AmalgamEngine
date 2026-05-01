@@ -63,6 +63,9 @@ Simulation::Simulation(const SimulationContext& inSimContext)
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);
+
+    // Load the saved world state.
+    world.load();
 }
 
 Simulation::~Simulation() = default;

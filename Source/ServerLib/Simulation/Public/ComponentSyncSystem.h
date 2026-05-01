@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ReplicatedComponent.h"
 #include "ComponentUpdate.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/registry.hpp"
@@ -17,11 +16,11 @@ class Network;
 class GraphicData;
 
 /**
- * Observes component updates based on the ObservedComponentTypes lists in
- * EngineObservedComponentTypes.h and ProjectObservedComponentTypes.h.
+ * This system is the backing logic for the observed component type lists, 
+ * e.g. EngineObserveBroadcastComponentTypes.h.
  *
- * When an observed component is updated, sends an update message to all nearby
- * clients.
+ * When an observed component is updated, sends an update message to the 
+ * appropriate clients.
  */
 class ComponentSyncSystem
 {
@@ -34,6 +33,10 @@ public:
     void sendUpdates();
 
 private:
+    void sendBroadcastUpdates();
+
+    void sendSelfUpdates();
+
     /** Used to get the current tick. */
     Simulation& simulation;
     /** Used for fetching component data. */
@@ -49,7 +52,7 @@ private:
     // Note: To optimize, we could store indices into a vector<ComponentUpdate>.
     //       Then we could re-use the vectors instead of re-allocating.
     /** Maps entityID -> a ComponentUpdate message containing that entity's
-       data. We iterate the observers to detect changes, so this map lets us
+        data. We iterate the observers to detect changes, so this map lets us
         iteratively build the update messages component-by-component. */
     std::unordered_map<entt::entity, ComponentUpdate> componentUpdateMap;
 };
