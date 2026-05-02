@@ -1,8 +1,7 @@
 #pragma once
 
 #include "ComponentUpdate.h"
-#include "entt/fwd.hpp"
-#include "entt/entity/registry.hpp"
+#include "EnttObserver.h"
 #include <unordered_map>
 
 namespace AM
@@ -33,9 +32,23 @@ public:
     void sendUpdates();
 
 private:
-    void sendBroadcastUpdates();
-
     void sendSelfUpdates();
+
+    void sendInRangeUpdates();
+
+    /**
+     * Adds constructed or destroyed components from the given list to 
+     * componentUpdateMap.
+     */
+    template <typename ComponentTypeList>
+    void addConstructDestroyComponents(auto& constructObservers,
+                                       auto& destroyObservers);
+
+    /**
+     * Adds updated components from the given list to * componentUpdateMap.
+     */
+    template <typename ComponentTypeList>
+    void addUpdateComponents(auto& updateObservers);
 
     /** Used to get the current tick. */
     Simulation& simulation;

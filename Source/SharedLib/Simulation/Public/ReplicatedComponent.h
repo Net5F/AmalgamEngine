@@ -9,15 +9,18 @@
 namespace AM
 {
 
+using SelfInitComponentTypes
+    = boost::mp11::mp_append<EngineSelfInitComponentTypes,
+                             ProjectSelfInitComponentTypes>;
+using SelfUpdateComponentTypes
+    = boost::mp11::mp_append<EngineSelfUpdateComponentTypes,
+                             ProjectSelfUpdateComponentTypes>;
 using InRangeInitComponentTypes
     = boost::mp11::mp_append<EngineInRangeInitComponentTypes,
                              ProjectInRangeInitComponentTypes>;
-using ObserveBroadcastComponentTypes
-    = boost::mp11::mp_append<EngineObserveBroadcastComponentTypes,
-                             ProjectObserveBroadcastComponentTypes>;
-using ObserveSelfComponentTypes
-    = boost::mp11::mp_append<EngineObserveSelfComponentTypes,
-                             ProjectObserveSelfComponentTypes>;
+using InRangeUpdateComponentTypes
+    = boost::mp11::mp_append<EngineInRangeUpdateComponentTypes,
+                             ProjectInRangeUpdateComponentTypes>;
 
 /**
  * A unique list of our replicated components types.
@@ -29,9 +32,9 @@ using ObserveSelfComponentTypes
  * care that the client and server have matching lists, and that they don't 
  * change at runtime.
  */
-using ReplicatedComponentTypes = boost::mp11::mp_unique<
-    boost::mp11::mp_append<InRangeInitComponentTypes, ObserveSelfComponentTypes,
-                           ObserveBroadcastComponentTypes>>;
+using ReplicatedComponentTypes = boost::mp11::mp_unique<boost::mp11::mp_append<
+    SelfInitComponentTypes, SelfUpdateComponentTypes, InRangeInitComponentTypes,
+    InRangeUpdateComponentTypes>>;
 // Note: This limit is only to prevent data sizes from getting larger. If we
 //       let there be more than 256 components, every component's index would
 //       start taking 2B instead of 1B.
