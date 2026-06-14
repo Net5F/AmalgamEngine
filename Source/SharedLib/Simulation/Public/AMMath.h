@@ -57,6 +57,30 @@ public:
      * isEqualApproxWorld instead.
      */
     static bool isEqualApproxGeneric(float a, float b);
+
+    /**
+     * Linearly maps x in range [a, b] to an equivalent value in range [0, 1].
+     *
+     * If x is outside [a, b], the returned value will be outside [0, 1].
+     * For example, x < a returns a value less than 0, and x > b returns a value
+     * greater than 1.
+     */
+    static float inverseLerp(float a, float b, float x);
+
+    /**
+     * Smoothly maps x in range [edge0, edge1] to an equivalent value in range
+     * [0, 1].
+     * 
+     * Values outside [edge0, edge1] are clamped to [0, 1].
+     *
+     * Uses a smooth curve with shallow slope near the edges and a steeper 
+     * slope through the middle.
+     *
+     * Note: This normally steps from smaller values to larger values. To step
+     *       from larger values to smaller values, use:
+     *         1.0f - smoothstep(edge0, edge1, x)
+     */
+    static float smoothstep(float edge0, float edge1, float x);
 };
 
 } // namespace AM

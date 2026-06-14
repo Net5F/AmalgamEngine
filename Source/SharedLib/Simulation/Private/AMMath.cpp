@@ -55,4 +55,17 @@ bool Math::isEqualApproxGeneric(float a, float b)
     return std::abs(a - b) < tolerance;
 }
 
+float Math::inverseLerp(float a, float b, float x)
+{
+    return (x - a) / (b - a);
+}
+
+float Math::smoothstep(float edge0, float edge1, float x)
+{
+    // Scale and clamp
+    x = std::clamp((x - edge0) / (edge1 - edge0), 0.f, 1.f);
+
+    return x * x * (3.0f - 2.0f * x);
+}
+
 } // End namespace AM
