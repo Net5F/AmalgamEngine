@@ -434,12 +434,22 @@ void World::loadNonClientEntities()
         projectComponents.clear();
 
         // Deserialize the entity's component data.
-        Deserialize::fromBuffer(serializedEngineComponents.data(),
-                                serializedEngineComponents.size(),
-                                engineComponents);
-        Deserialize::fromBuffer(serializedProjectComponents.data(),
-                                serializedProjectComponents.size(),
-                                projectComponents);
+        if (!Deserialize::fromBuffer(serializedEngineComponents.data(),
+                                     serializedEngineComponents.size(),
+                                     engineComponents)) {
+            LOG_INFO("Failed to load non-client entity: %u", entity);
+            return;
+        }
+        if (!Deserialize::fromBuffer(serializedProjectComponents.data(),
+                                     serializedProjectComponents.size(),
+                                     projectComponents)) {
+            std::size_t nameComponentIndex{
+                boost::mp11::mp_find<EnginePersistedComponent, Name>::value};
+            Name name{std::get<Name>(engineComponents[nameComponentIndex])};
+            LOG_INFO("Failed to load non-client entity: %u, \"%s\"", entity,
+                     name.value.c_str());
+            return;
+        }
 
         // Find the Position component.
         // Note: We do this separately because we know every entity has a
