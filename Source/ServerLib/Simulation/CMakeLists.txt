@@ -57,6 +57,7 @@ target_sources(ServerLib
         Public/MovementSystem.h
         Public/NceLifetimeSystem.h
         Public/PersistedComponentList.h
+        Public/PersistedComponentDefs.h
         Public/SaveSystem.h
         Public/ScriptDataSystem.h
         Public/Simulation.h

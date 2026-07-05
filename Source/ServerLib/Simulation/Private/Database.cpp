@@ -1,13 +1,12 @@
 #include "Database.h"
-#include "EnginePersistedComponentTypes.h"
-#include "ProjectPersistedComponentTypes.h"
+#include "PersistedComponentDefs.h"
 #include "Paths.h"
 #include "AMAssert.h"
 #include "Log.h"
 #include "SQLiteCpp/VariadicBind.h"
 #include "SQLiteCpp/Backup.h"
-
 #include <sqlite3.h>
+#include <array>
 
 #ifdef SQLITECPP_ENABLE_ASSERT_HANDLER
 namespace SQLite
@@ -266,24 +265,16 @@ void Database::initTables()
 
             int versionsKey{0};
             insertVersionQuery.bind(1, versionsKey++);
-            insertVersionQuery.bind(2, "EngineComponents");
-            insertVersionQuery.bind(3, ENGINE_COMPONENTS_VERSION);
-            insertVersionQuery.exec();
-            insertVersionQuery.reset();
-
-            insertVersionQuery.bind(1, versionsKey++);
-            insertVersionQuery.bind(2, "ProjectComponents");
-            insertVersionQuery.bind(3, PROJECT_COMPONENTS_VERSION);
+            insertVersionQuery.bind(2, "PersistedComponents");
+            insertVersionQuery.bind(3, PERSISTED_COMPONENTS_VERSION);
             insertVersionQuery.exec();
             insertVersionQuery.reset();
         }
 
         // Entity components.
         if (!backupDatabase.tableExists("entities")) {
-            // The component lists need to be serialized separately, so we can
-            // migrate them separately. If we tried to serialize them together,
-            // there may be situations where both lists need to be updated at
-            // the same time, which we can't do with a split migration setup.
+            // Engine and project components use separate ID namespaces, so
+            // store their record lists in separate blobs.
             backupDatabase.exec(
                 "CREATE TABLE entities (id INTEGER PRIMARY KEY, "
                 "serializedEngineComponents BLOB, serializedProjectComponents "
@@ -322,7 +313,15 @@ void Database::initTables()
 
 void Database::checkDataVersions()
 {
-    // Iterate through each version row.
+    struct VersionInfo {
+        std::string name{};
+        unsigned int targetVersion{};
+        bool wasFound{false};
+    };
+    std::array<VersionInfo, 1> targetVersions{
+        {"PersistedComponents", PERSISTED_COMPONENTS_VERSION}};
+
+    // Iterate through each version row in the database.
     SQLite::Statement getVersionQuery{database, "SELECT * FROM versions"};
     std::vector<std::string> requiredMigrations{};
     while (getVersionQuery.executeStep()) {
@@ -330,34 +329,33 @@ void Database::checkDataVersions()
         unsigned int versionNumber{
             static_cast<unsigned int>(getVersionQuery.getColumn(2).getInt())};
 
-        // Match the name to one of our expected names and check the version
-        // number. If it's newer than the code, fail immediately. If it's
-        // older, push the required migrations.
-        if (std::strcmp(name, "EngineComponents") == 0) {
-            if (versionNumber > ENGINE_COMPONENTS_VERSION) {
-                LOG_FATAL("Database load error: Data version (v%u) is newer "
-                          "than code (v%u) (EngineComponents).",
-                          versionNumber, ENGINE_COMPONENTS_VERSION);
-            }
-            else if (versionNumber < ENGINE_COMPONENTS_VERSION) {
-                requiredMigrations.push_back(
-                    "EngineComponents v" + std::to_string(versionNumber)
-                    + " -> v" + std::to_string(ENGINE_COMPONENTS_VERSION));
+        // Match this row's version name to one of our expected names and check
+        // the version number. If it's newer than the code, fail immediately.
+        // If it's older, add the required migration to the error string.
+        for (VersionInfo& versionInfo : targetVersions) {
+            if (name == versionInfo.name) {
+                versionInfo.wasFound = true;
+
+                if (versionNumber > versionInfo.targetVersion) {
+                    LOG_FATAL(
+                        "Database load error: Data version (v%u) is newer "
+                        "than code (v%u) (%s).",
+                        versionNumber, versionInfo.targetVersion,
+                        versionInfo.name.c_str());
+                }
+                else if (versionNumber < versionInfo.targetVersion) {
+                    requiredMigrations.push_back(
+                        versionInfo.name + " v" + std::to_string(versionNumber)
+                        + " -> v" + std::to_string(versionInfo.targetVersion));
+                }
             }
         }
-        else if (std::strcmp(name, "ProjectComponents") == 0) {
-            std::string dataVersion{std::to_string(versionNumber)};
-            std::string codeVersion{std::to_string(PROJECT_COMPONENTS_VERSION)};
-            if (versionNumber > PROJECT_COMPONENTS_VERSION) {
-                LOG_FATAL("Database load error: Data version (v%u) is newer "
-                          "than code (v%u) (ProjectComponents).",
-                          versionNumber, PROJECT_COMPONENTS_VERSION);
-            }
-            else if (versionNumber < PROJECT_COMPONENTS_VERSION) {
-                requiredMigrations.push_back(
-                    "ProjectComponents v" + std::to_string(versionNumber)
-                    + " -> v" + std::to_string(PROJECT_COMPONENTS_VERSION));
-            }
+    }
+
+    for (const VersionInfo& versionInfo : targetVersions) {
+        if (!(versionInfo.wasFound)) {
+            LOG_FATAL("Database load error: Missing %s version field.",
+                      versionInfo.name.c_str());
         }
     }
 

@@ -68,10 +68,12 @@ public:
      * Adds or overwrites an entity table entry.
      *
      * @param entity The entity entry to update.
-     * @param serializedEngineComponents A serialized
-     * std::vector<EnginePersistedComponent>.
-     * @param serializedrojectComponents A serialized
-     * std::vector<ProjectPersistedComponent>.
+     * @param serializedEngineComponents Ordered tagged engine component
+     * records.
+     * @param serializedProjectComponents Ordered tagged project component
+     * records.
+     *
+     * See PERSISTED_COMPONENTS_VERSION comment for format info.
      */
     void saveEntityData(entt::entity entity,
                         std::span<const Uint8> serializedEngineComponents,
@@ -89,9 +91,8 @@ public:
      *
      * @param callback A callback of form void(entt::entity,
      *                 std::span<const Uint8>, std::span<const Uint8>) that
-     *                 expects the entity's ID, a serialized
-     *                 std::vector<EnginePersistedComponent>, and a serialized
-     *                 std::vector<ProjectPersistedComponent>.
+     *                 expects the entity's ID, ordered tagged engine component
+     *                 records, and ordered tagged project component records.
      */
     template<typename Func>
     void iterateEntities(Func callback)

@@ -13,6 +13,7 @@
 #include "CollisionBitSets.h"
 #include "CastCooldown.h"
 #include "SaveTimestamp.h"
+#include "PersistedComponentDefs.h"
 #include "Deserialize.h"
 #include "ByteTools.h"
 #include "Log.h"
@@ -30,11 +31,6 @@ namespace AM
 {
 namespace Server
 {
-
-static constexpr std::size_t TYPE_ID_OFFSET{0};
-static constexpr std::size_t VERSION_OFFSET{2};
-static constexpr std::size_t PAYLOAD_SIZE_OFFSET{4};
-static constexpr std::size_t COMPONENT_HEADER_SIZE{8};
 
 LoadHelper::LoadHelper(World& inWorld, Simulation& inSimulation,
                        ItemData& inItemData)
@@ -181,8 +177,7 @@ bool LoadHelper::parseComponents(
         const Uint8* header{serializedComponents.data() + readOffset};
         Uint16 typeID{ByteTools::read16(header + TYPE_ID_OFFSET)};
         Uint16 version{ByteTools::read16(header + VERSION_OFFSET)};
-        Uint32 payloadSize{
-            ByteTools::read32(header + PAYLOAD_SIZE_OFFSET)};
+        Uint32 payloadSize{ByteTools::read32(header + PAYLOAD_SIZE_OFFSET)};
         readOffset += COMPONENT_HEADER_SIZE;
 
         remainingSize = serializedComponents.size() - readOffset;

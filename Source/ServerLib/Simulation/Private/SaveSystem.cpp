@@ -5,12 +5,17 @@
 #include "ItemData.h"
 #include "Config.h"
 #include "Database.h"
-#include "PersistedComponent.h"
+#include "EnginePersistedComponentTypes.h"
+#include "ProjectPersistedComponentTypes.h"
+#include "PersistedComponentDefs.h"
 #include "ClientSimData.h"
 #include "SaveTimestamp.h"
 #include "Serialize.h"
+#include "ByteTools.h"
 #include "Log.h"
 #include "boost/mp11/algorithm.hpp"
+#include "entt/core/type_info.hpp"
+#include <limits>
 #include <type_traits>
 
 namespace AM
@@ -19,28 +24,81 @@ namespace Server
 {
 
 /**
- * Retrieves all persisted component types that the entity possesses from
- * TypeList and pushes them into componentVec.
+ * Appends Component to outputBuffer using the persisted component record
+ * format.
+ *
+ * See PERSISTED_COMPONENTS_VERSION comment for format info.
  *
  * Note: This is a free function to reduce includes in the header.
  */
-template<typename TypeList, typename VariantType>
-void addComponentsToVector(entt::registry& registry, entt::entity entity,
-                           std::vector<VariantType>& componentVec)
+template<typename Entry>
+void serializeComponent(typename Entry::Component& component,
+                        BinaryBuffer& outputBuffer)
 {
-    boost::mp11::mp_for_each<TypeList>([&](auto I) {
-        using ComponentType = decltype(I);
+    using Component = typename Entry::Component;
+    constexpr auto componentName{entt::type_name<Component>::value()};
 
-        if (registry.all_of<ComponentType>(entity)) {
-            if constexpr (std::is_empty_v<ComponentType>) {
+    std::size_t payloadSize{Serialize::measureSize(component)};
+    if (payloadSize > std::numeric_limits<Uint32>::max()) {
+        LOG_ERROR("Can't save component %.*s (ID: %u, version: %u): "
+                  "serialized size exceeds Uint32.",
+                  static_cast<int>(componentName.size()), componentName.data(),
+                  Entry::TYPE_ID, Entry::VERSION);
+        return;
+    }
+
+    const std::size_t recordOffset{outputBuffer.size()};
+    const std::size_t payloadOffset{recordOffset + COMPONENT_HEADER_SIZE};
+    outputBuffer.resize(payloadOffset + payloadSize);
+
+    Uint8* header{outputBuffer.data() + recordOffset};
+    ByteTools::write16(Entry::TYPE_ID, header + TYPE_ID_OFFSET);
+    ByteTools::write16(Entry::VERSION, header + VERSION_OFFSET);
+    ByteTools::write32(static_cast<Uint32>(payloadSize),
+                       header + PAYLOAD_SIZE_OFFSET);
+
+    std::size_t bytesWritten{
+        Serialize::toBuffer(outputBuffer.data(), outputBuffer.size(), component,
+                            payloadOffset)};
+    if (bytesWritten != payloadSize) {
+        outputBuffer.resize(recordOffset);
+        LOG_ERROR("Failed to save component %.*s (ID: %u, version: %u): "
+                  "measured size was %zu bytes, but serialization wrote %zu.",
+                  static_cast<int>(componentName.size()), componentName.data(),
+                  Entry::TYPE_ID, Entry::VERSION, payloadSize, bytesWritten);
+    }
+}
+
+/**
+ * Serializes each component from ComponentList that entity possesses.
+ *
+ * Note: ComponentList requires its entries to be ordered by ascending ID, so 
+ *       the serialized records will also be ordered.
+ */
+template<typename ComponentList>
+void serializeComponents(entt::registry& registry, entt::entity entity,
+                         BinaryBuffer& outputBuffer)
+{
+    outputBuffer.clear();
+    boost::mp11::mp_for_each<typename ComponentList::EntryTypes>(
+        [&](auto entry) {
+            using Entry = decltype(entry);
+            using Component = typename Entry::Component;
+
+            if (!registry.all_of<Component>(entity)) {
+                return;
+            }
+
+            if constexpr (std::is_empty_v<Component>) {
                 // Note: Can't registry.get() empty types.
-                componentVec.push_back(ComponentType{});
+                Component component{};
+                serializeComponent<Entry>(component, outputBuffer);
             }
             else {
-                componentVec.push_back(registry.get<ComponentType>(entity));
+                serializeComponent<Entry>(registry.get<Component>(entity),
+                                          outputBuffer);
             }
-        }
-    });
+        });
 }
 
 SaveSystem::SaveSystem(const SimulationContext& inSimContext)
@@ -50,6 +108,7 @@ SaveSystem::SaveSystem(const SimulationContext& inSimContext)
 , updatedItems{}
 , saveTimer{}
 , workBuffer1{}
+, workBuffer2{}
 {
     // When an item is created or updated, add it to updatedItems.
     itemData.itemCreated.connect<&SaveSystem::itemUpdated>(this);
@@ -97,8 +156,6 @@ void SaveSystem::saveNonClientEntities()
     Uint32 currentTick{simulation.getCurrentTick()};
     auto view{
         world.registry.view<entt::entity>(entt::exclude_t<ClientSimData>{})};
-    std::vector<EnginePersistedComponent> engineComponents{};
-    std::vector<ProjectPersistedComponent> projectComponents{};
     for (entt::entity entity : view) {
         // Update the entity's SaveTimestamp.
         SaveTimestamp& saveTimestamp{
@@ -106,24 +163,10 @@ void SaveSystem::saveNonClientEntities()
         saveTimestamp.lastSavedTick = currentTick;
 
         // Save the entity's data.
-        engineComponents.clear();
-        projectComponents.clear();
-
-        addComponentsToVector<EnginePersistedComponentTypes,
-                              EnginePersistedComponent>(world.registry, entity,
-                                                        engineComponents);
-        addComponentsToVector<ProjectPersistedComponentTypes,
-                              ProjectPersistedComponent>(world.registry, entity,
-                                                         projectComponents);
-
-        workBuffer1.clear();
-        workBuffer2.clear();
-        workBuffer1.resize(Serialize::measureSize(engineComponents));
-        workBuffer2.resize(Serialize::measureSize(projectComponents));
-        Serialize::toBuffer(workBuffer1.data(), workBuffer1.size(),
-                            engineComponents);
-        Serialize::toBuffer(workBuffer2.data(), workBuffer2.size(),
-                            projectComponents);
+        serializeComponents<EnginePersistedComponentTypes>(
+            world.registry, entity, workBuffer1);
+        serializeComponents<ProjectPersistedComponentTypes>(
+            world.registry, entity, workBuffer2);
 
         world.database->saveEntityData(entity, workBuffer1, workBuffer2);
     }

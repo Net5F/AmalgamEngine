@@ -20,15 +20,6 @@ namespace AM
 // Note: Persisted components are server-only.
 namespace Server
 {
-/**
- * The version number of the serialization approach used for persisted
- * components.
- *
- * The persisted component type lists can be modified without changing this.
- * This only needs to be incremented if our serialization approach changes.
- */
-static constexpr unsigned int PERSISTED_COMPONENTS_VERSION{0};
-
 // clang-format off
 /**
  * All of the engine's component types that should be saved to the database
