@@ -11,7 +11,6 @@
 #include "Database.h"
 #include "ClientSimData.h"
 #include "InRangeInitComponentList.h"
-#include "PersistedComponent.h"
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Movement.h"
@@ -19,19 +18,14 @@
 #include "GraphicState.h"
 #include "Collision.h"
 #include "CollisionBitSets.h"
-#include "CastCooldown.h"
 #include "EntityInitScript.h"
-#include "Deserialize.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include "Config.h"
-#include "VariantTools.h"
 #include "StringTools.h"
 #include "Log.h"
 #include "AMAssert.h"
 #include "sol/sol.hpp"
-#include "boost/mp11/algorithm.hpp"
-#include <type_traits>
 
 namespace AM
 {
@@ -48,11 +42,10 @@ World::World(const SimulationContext& inSimContext)
 , inventoryHelper{*this, inSimContext.network, inSimContext.itemData}
 , castHelper{inSimContext.simulation, inSimContext.itemData,
              inSimContext.castableData}
+, loadHelper{*this, inSimContext.simulation, inSimContext.itemData}
 , database{std::make_unique<Database>()}
 , netIDMap{}
-, simulation{inSimContext.simulation}
 , graphicData{inSimContext.graphicData}
-, itemData{inSimContext.itemData}
 , entityInitLua{inSimContext.simulation.getEntityInitLua()}
 , itemInitLua{inSimContext.simulation.getItemInitLua()}
 , nextStoredValueID{NULL_ENTITY_STORED_VALUE_ID + 1}
@@ -353,13 +346,13 @@ Position World::getSpawnPoint()
 void World::load()
 {
     // Load our saved non-client entities.
-    loadNonClientEntities();
+    loadHelper.loadNonClientEntities();
 
     // Load our saved item definitions.
-    loadItems(itemData);
+    loadHelper.loadItems();
 
     // Load our saved stored value data.
-    loadStoredValues();
+    loadHelper.loadStoredValues();
 }
 
 Position World::getGroupedSpawnPoint()
@@ -421,174 +414,6 @@ void World::onEntityDestroyed(entt::entity entity)
     // If the entity is in the database, delete it (does nothing if it isn't).
     // Note: This is to delete non-client entities, since they get persisted.
     database->deleteEntityData(entity);
-}
-
-void World::loadNonClientEntities()
-{
-    std::vector<EnginePersistedComponent> engineComponents{};
-    std::vector<ProjectPersistedComponent> projectComponents{};
-    auto loadEntity = [&](entt::entity entity,
-                          std::span<const Uint8> serializedEngineComponents,
-                          std::span<const Uint8> serializedProjectComponents) {
-        engineComponents.clear();
-        projectComponents.clear();
-
-        // Deserialize the entity's component data.
-        if (!Deserialize::fromBuffer(serializedEngineComponents.data(),
-                                     serializedEngineComponents.size(),
-                                     engineComponents)) {
-            LOG_INFO("Failed to load non-client entity: %u", entity);
-            return;
-        }
-        if (!Deserialize::fromBuffer(serializedProjectComponents.data(),
-                                     serializedProjectComponents.size(),
-                                     projectComponents)) {
-            std::size_t nameComponentIndex{
-                boost::mp11::mp_find<EnginePersistedComponent, Name>::value};
-            Name name{std::get<Name>(engineComponents[nameComponentIndex])};
-            LOG_INFO("Failed to load non-client entity: %u, \"%s\"", entity,
-                     name.value.c_str());
-            return;
-        }
-
-        // Find the Position component.
-        // Note: We do this separately because we know every entity has a
-        //       Position, and we need it for createEntity() (and we want to
-        //       use createEntity() to centralize logic and avoid bugs).
-        const Position* position{nullptr};
-        for (const EnginePersistedComponent& componentVariant :
-             engineComponents) {
-            if (const Position* tempPosition{
-                    std::get_if<Position>(&componentVariant)}) {
-                position = tempPosition;
-                break;
-            }
-        }
-        if (!position) {
-            LOG_INFO("Tried to load entity with no Position. Skipping.");
-            return;
-        }
-
-        // Add the entity to the registry.
-        entt::entity newEntity{createEntity(*position, entity)};
-        if (newEntity != entity) {
-            LOG_FATAL("Created entity ID doesn't match saved entity ID. "
-                      "Created: %u, saved: %u",
-                      newEntity, entity);
-        }
-
-        // Load the entity's persisted components into the registry.
-        // Engine components
-        for (const EnginePersistedComponent& componentVariant :
-             engineComponents) {
-            std::visit(VariantTools::Overload(
-                           [&](const Position&) {
-                               // Do nothing, we already added the position
-                               // above.
-                           },
-                           [&](const Input&) {
-                               // Note: We don't use the persisted Input state,
-                               // but we
-                               //       persist it to flag that the entity is
-                               //       movement- enabled.
-                               addMovementComponents(newEntity);
-                           },
-                           [&](const Rotation& rotation) {
-                               // Note: If movement or graphics components are
-                               // added first,
-                               //       this will be a replace.
-                               registry.emplace_or_replace<Rotation>(newEntity,
-                                                                     rotation);
-                           },
-                           [&](const CollisionBitSets& collisionBitSets) {
-                               // Note: If graphics components are added first,
-                               // this will
-                               //       be a replace.
-                               registry.emplace_or_replace<CollisionBitSets>(
-                                   newEntity, collisionBitSets);
-                           },
-                           [&](const GraphicState& graphicState) {
-                               // Note: We only persist GraphicState, but it
-                               // implies
-                               //       the rest of the graphics components.
-                               addGraphicsComponents(newEntity, graphicState);
-                           },
-                           [&](const auto& component) {
-                               using T = std::decay_t<decltype(component)>;
-                               registry.emplace<T>(newEntity, component);
-                           }),
-                       componentVariant);
-        }
-
-        // Project components
-        for (const ProjectPersistedComponent& componentVariant :
-             projectComponents) {
-            std::visit(VariantTools::Overload([&](const auto& component) {
-                           using T = std::decay_t<decltype(component)>;
-                           registry.emplace<T>(newEntity, component);
-                       }),
-                       componentVariant);
-        }
-
-        // Init any components with lazy-updated timers.
-        initTimerComponents(newEntity);
-    };
-
-    database->iterateEntities(std::move(loadEntity));
-}
-
-void World::initTimerComponents(entt::entity entity)
-{
-    const SaveTimestamp* saveTimestamp{registry.try_get<SaveTimestamp>(entity)};
-    if (!saveTimestamp) {
-        LOG_ERROR("Entity was just loaded but has no SaveTimestamp.");
-        return;
-    }
-
-    // Init CastCooldown, if present.
-    if (CastCooldown * castCooldown{registry.try_get<CastCooldown>(entity)}) {
-        castCooldown->initAfterLoad(saveTimestamp->lastSavedTick,
-                                    simulation.getCurrentTick());
-    }
-}
-
-void World::loadItems(ItemData& itemData)
-{
-    auto loadItem = [&](ItemID itemID, std::span<const Uint8> serializedItem,
-                        ItemVersion version, std::string_view initScript) {
-        // Initialize the item's non-script-provided fields.
-        Item item{.numericID = itemID};
-        Deserialize::fromBuffer(serializedItem.data(), serializedItem.size(),
-                                item);
-
-        // Add the item to ItemData.
-        itemData.loadItem(item, version, initScript);
-    };
-
-    database->iterateItems(std::move(loadItem));
-}
-
-void World::loadStoredValues()
-{
-    // Load the entity stored value IDs.
-    auto loadEntityMap = [&](std::span<const Uint8> serializedMap) {
-        if (serializedMap.size() > 0) {
-            Deserialize::fromBuffer(serializedMap.data(), serializedMap.size(),
-                                    entityStoredValueIDMap);
-        }
-    };
-
-    database->getEntityStoredValueIDMap(std::move(loadEntityMap));
-
-    // Load the global stored values.
-    auto loadGlobalMap = [&](std::span<const Uint8> serializedMap) {
-        if (serializedMap.size() > 0) {
-            Deserialize::fromBuffer(serializedMap.data(), serializedMap.size(),
-                                    globalStoredValueMap);
-        }
-    };
-
-    database->getGlobalStoredValueMap(std::move(loadGlobalMap));
 }
 
 } // namespace Server

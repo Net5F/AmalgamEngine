@@ -9,6 +9,7 @@
 #include "GlobalStoredValueMap.h"
 #include "InventoryHelper.h"
 #include "CastHelper.h"
+#include "LoadHelper.h"
 #include "SpawnStrategy.h"
 #include "entt/entity/registry.hpp"
 #include <unordered_map>
@@ -87,6 +88,9 @@ public:
 
     /** Helper class for casting Castables. */
     CastHelper castHelper;
+
+    /** Helper class for loading persisted world state. */
+    LoadHelper loadHelper;
 
     /** The database for saving and loading world data.
         Kept as a pointer to speed up compilation. */
@@ -222,39 +226,8 @@ private:
      */
     void onEntityDestroyed(entt::entity entity);
 
-    /**
-     * Loads our saved non-client entities and adds them to the registry.
-     */
-    void loadNonClientEntities();
-
-    /**
-     * Initializes any components that have lazy-updated timers.
-     *
-     * Note: We update them on load instead of on save, because we don't want
-     *       to add time to the save operation.
-     * Note: If the project ever needs to do this same sort of thing, we can
-     *       either add a signal or an extension function.
-     */
-    void initTimerComponents(entt::entity entity);
-
-    /**
-     * Loads our saved items and adds them to itemData.
-     */
-    void loadItems(ItemData& itemData);
-
-    /**
-     * Loads our saved entity stored value IDs and global stored values.
-     */
-    void loadStoredValues();
-
-    /** Used to get the current tick. */
-    Simulation& simulation;
-
     /** Used to get graphics info. */
     const GraphicData& graphicData;
-
-    /** Used to load items. */
-    ItemData& itemData;
 
     /** Used to run entity init scripts. */
     EntityInitLua& entityInitLua;

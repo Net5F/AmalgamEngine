@@ -39,7 +39,7 @@ CastSystem::CastSystem(const SimulationContext& inSimContext)
         .on_construct<CastCooldown>();
 
     // Note: When CastCooldown is loaded from the DB, it gets initialized in
-    //       World::initTimerComponents.
+    //       LoadHelper::initTimerComponents.
 }
 
 void CastSystem::sendCastCooldownInits()

@@ -43,7 +43,7 @@ public:
         if (!result.second) {
             std::string errorString{getErrorString(result.first)};
 
-            LOG_ERROR("%s", errorString.c_str());
+            LOG_INFO("%s", errorString.c_str());
             return false;
         }
         else {
@@ -80,7 +80,7 @@ public:
         if (!result.second) {
             std::string errorString{getErrorString(result.first)};
 
-            LOG_ERROR("%s", errorString.c_str());
+            LOG_INFO("%s", errorString.c_str());
             return false;
         }
         else {
@@ -93,6 +93,9 @@ private:
     {
         std::string errorString{"Deserialization failed: "};
         switch (error) {
+            case bitsery::ReaderError::NoError:
+                errorString += "unknown error (bytes remaining?).";
+                break;
             case bitsery::ReaderError::DataOverflow:
                 errorString += "data overflow.";
                 break;

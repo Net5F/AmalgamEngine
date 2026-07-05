@@ -14,6 +14,7 @@ target_sources(ServerLib
         Private/InventoryHelper.cpp
         Private/InventorySystem.cpp
         Private/ItemSystem.cpp
+        Private/LoadHelper.cpp
         Private/MovementSyncSystem.cpp
         Private/MovementSystem.cpp
         Private/NceLifetimeSystem.cpp
@@ -51,10 +52,11 @@ target_sources(ServerLib
         Public/InventorySystem.h
         Public/ISimulationExtension.h
         Public/ItemSystem.h
+        Public/LoadHelper.h
         Public/MovementSyncSystem.h
         Public/MovementSystem.h
         Public/NceLifetimeSystem.h
-        Public/PersistedComponent.h
+        Public/PersistedComponentList.h
         Public/SaveSystem.h
         Public/ScriptDataSystem.h
         Public/Simulation.h
