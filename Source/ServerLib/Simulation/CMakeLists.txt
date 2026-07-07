@@ -37,6 +37,7 @@ target_sources(ServerLib
         Public/ChunkStreamingSystem.h
         Public/ClientAOISystem.h
         Public/ClientConnectionSystem.h
+        Public/ComponentMigration.h
         Public/ComponentChangeSystem.h
         Public/ComponentSyncSystem.h
         Public/Database.h
@@ -45,6 +46,7 @@ target_sources(ServerLib
         Public/EntityStoredValueID.h
         Public/EntityStoredValueIDMap.h
         Public/EnttGroups.h
+        Public/EngineComponentMigrationFunctions.h
         Public/EventSorter.h
         Public/GlobalStoredValueMap.h
         Public/InputSystem.h

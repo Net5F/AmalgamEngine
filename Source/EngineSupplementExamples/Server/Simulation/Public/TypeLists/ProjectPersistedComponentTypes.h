@@ -20,10 +20,10 @@ namespace Server
  * To remove a component, comment it out instead of deleting it. This leaves
  * documentation to "tombstone" the deprecated ID.
  *
- * TODO: Add a designated place for migration functions.
  * If you change a component in any way that causes it to be serialized
  * differently (e.g. adding/removing/changing fields), you must increment the
- * component's VersionNumber and add a migration function in <xyz>.
+ * component's VersionNumber and add a migration step to
+ * ComponentMigrationFunctions.h.
  */
 using ProjectPersistedComponentTypes = PersistedComponentList<
     // PersistedComponentEntry<ProjectComponent, 1, 0>

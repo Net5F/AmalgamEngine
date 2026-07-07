@@ -5,6 +5,9 @@
 #include "ItemData.h"
 #include "EnginePersistedComponentTypes.h"
 #include "ProjectPersistedComponentTypes.h"
+#include "ComponentMigration.h"
+#include "EngineComponentMigrationFunctions.h"
+#include "ComponentMigrationFunctions.h"
 #include "Position.h"
 #include "Input.h"
 #include "Rotation.h"
@@ -316,14 +319,55 @@ bool LoadHelper::deserializeComponent(
     using Component = typename Entry::Component;
     constexpr auto componentName{entt::type_name<Component>::value()};
 
-    // TODO: This is where we'll attempt auto-migration. Be sure to update the 
-    //       header comment also.
-    if (serializedComponent.version != Entry::VERSION) {
+    if (serializedComponent.version > Entry::VERSION) {
         LOG_ERROR("Can't load component %.*s (ID: %u) for entity %u: "
-                  "serialized version is %u, expected %u.",
+                  "serialized version %u is newer than current version %u.",
                   static_cast<int>(componentName.size()), componentName.data(),
                   serializedComponent.typeID, entity,
                   serializedComponent.version, Entry::VERSION);
+        return false;
+    }
+
+    if (serializedComponent.version < Entry::VERSION) {
+        if constexpr (Entry::VERSION > 0) {
+            ComponentMigrationResult result{
+                migrateComponent<Component, Entry::VERSION>(
+                    serializedComponent.version, serializedComponent.payload,
+                    component)};
+            if (result == ComponentMigrationResult::Success) {
+                return true;
+            }
+
+            if (result
+                == ComponentMigrationResult::DeserializationFailed) {
+                LOG_ERROR("Failed to deserialize component %.*s (ID: %u) "
+                          "version %u while migrating it to version %u for "
+                          "entity %u.",
+                          static_cast<int>(componentName.size()),
+                          componentName.data(), serializedComponent.typeID,
+                          serializedComponent.version, Entry::VERSION, entity);
+            }
+            else if (result == ComponentMigrationResult::MigrationFailed) {
+                LOG_ERROR("Migration failed for component %.*s (ID: %u) from "
+                          "version %u to version %u for entity %u.",
+                          static_cast<int>(componentName.size()),
+                          componentName.data(), serializedComponent.typeID,
+                          serializedComponent.version, Entry::VERSION, entity);
+            }
+            else {
+                LOG_ERROR("No migration path for component %.*s (ID: %u) "
+                          "from version %u to version %u for entity %u.",
+                          static_cast<int>(componentName.size()),
+                          componentName.data(), serializedComponent.typeID,
+                          serializedComponent.version, Entry::VERSION, entity);
+            }
+        }
+        else {
+            LOG_ERROR("Can't migrate component %.*s (ID: %u) for entity %u: "
+                      "current component version is 0.",
+                      static_cast<int>(componentName.size()),
+                      componentName.data(), serializedComponent.typeID, entity);
+        }
         return false;
     }
 

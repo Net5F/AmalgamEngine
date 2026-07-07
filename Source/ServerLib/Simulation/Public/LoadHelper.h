@@ -91,8 +91,12 @@ private:
     /**
      * Deserializes serializedComponent as Entry::Component.
      *
-     * If the version is outdated or the data fails to deserialize, errors in
-     * Debug. In Release, returns false so the component can be skipped.
+     * If the serialized version is older than Entry::VERSION, applies each
+     * registered migration step until the current version is reached.
+     *
+     * If the version is newer, a migration is missing or fails, or the data
+     * fails to deserialize, errors in Debug. In Release, returns false so the
+     * component can be skipped.
      */
     template<typename Entry>
     bool deserializeComponent(entt::entity entity,
