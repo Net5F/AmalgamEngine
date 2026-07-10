@@ -133,7 +133,7 @@ void LoadHelper::loadEntity(
         })};
     if ((positionIt == engineComponents.end())
         || (positionIt->typeID != PositionEntry::TYPE_ID)) {
-        LOG_ERROR("Tried to load entity %u with no Position. Skipping.",
+        LOG_ERROR("Tried to load entity %u with no Position.",
                   entity);
         return;
     }

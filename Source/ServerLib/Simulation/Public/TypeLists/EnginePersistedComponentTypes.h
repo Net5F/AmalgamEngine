@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PersistedComponentList.h"
 #include "SaveTimestamp.h"
 #include "Name.h"
 #include "Input.h"
@@ -13,7 +14,6 @@
 #include "EntityInitScript.h"
 #include "StoredValues.h"
 #include "CastCooldown.h"
-#include "PersistedComponentList.h"
 
 namespace AM
 {
