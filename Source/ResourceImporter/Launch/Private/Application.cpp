@@ -78,7 +78,7 @@ void Application::start()
 
         // If we have enough time, dispatch events.
         if (enoughTimeTillNextCall(DISPATCH_MINIMUM_TIME_S)) {
-            dispatchEvents();
+            dispatchOSEvents();
         }
 
         // If we have enough time, sleep.
@@ -102,7 +102,7 @@ bool Application::handleOSEvent(SDL_Event& event)
     return false;
 }
 
-void Application::dispatchEvents()
+void Application::dispatchOSEvents()
 {
     // Dispatch all waiting SDL events.
     SDL_Event event;

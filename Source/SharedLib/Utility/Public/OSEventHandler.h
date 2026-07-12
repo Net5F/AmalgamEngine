@@ -7,7 +7,7 @@ namespace AM
 /**
  * Simple interface to facilitate event handling and propagation.
  *
- * Specifically meant for OS events, provided by SDL2. Intra-app events have
+ * Specifically meant for OS events, provided by SDL3. Intra-app events have
  * other data flow paths.
  */
 class OSEventHandler

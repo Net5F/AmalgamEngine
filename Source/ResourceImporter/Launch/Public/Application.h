@@ -58,9 +58,10 @@ private:
     /**
      * Dispatches waiting events to the eventHandlers.
      * Events are propagated through the vector in order, starting at index 0.
-     * If an event is handled (handleOSEvent() returns true), propagation stops.
+     * If an event is handled (handleOSEvent() returns true), propagation
+     * stops.
      */
-    void dispatchEvents();
+    void dispatchOSEvents();
 
     /**
      * Returns true if all PeriodicCallers have at least minimumTime left until

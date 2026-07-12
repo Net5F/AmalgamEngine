@@ -10,7 +10,7 @@ using namespace AM::ResourceImporter;
 int main(int, char**)
 try {
     // Set up file logging.
-    Log::enableFileLogging("ResourceImporter.log");
+    Log::enableFileLogging("AccountServer.log");
 
     // Start the application (assumes control of the thread).
     Application app;

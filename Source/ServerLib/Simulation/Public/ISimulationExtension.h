@@ -1,6 +1,5 @@
 #pragma once
 
-#include "OSEventHandler.h"
 #include "NetworkID.h"
 
 namespace AM
@@ -26,7 +25,7 @@ namespace Server
  * The project can register the extension class with the engine through
  * Application::registerSimulationExtension().
  */
-class ISimulationExtension : public OSEventHandler
+class ISimulationExtension
 {
 public:
     // Canonical constructor (derived class must implement):
@@ -61,14 +60,6 @@ public:
      * Called after all other systems.
      */
     virtual void afterAll() = 0;
-
-    /**
-     * See OSEventHandler for details.
-     *
-     * Note: Simulation will pass events to this class first. If the event is
-     *       not handled, then Simulation will attempt to handle it.
-     */
-    bool handleOSEvent(SDL_Event& event) override = 0;
 
     //-------------------------------------------------------------------------
     // Simulation System Hooks (Hooks into engine systems)
