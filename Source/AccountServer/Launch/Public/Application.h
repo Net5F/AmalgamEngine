@@ -1,11 +1,9 @@
 #pragma once
 
-#include "OSEventHandler.h"
-#include "PeriodicCaller.h"
-#include "DataModel.h"
-
+#include "ClientManager.h"
+#include "Database.h"
 #include "SDL_Wrappers/SDL.h"
-
+#include "asio/io_context.hpp"
 #include <atomic>
 
 namespace AM
@@ -16,12 +14,10 @@ namespace AccountServer
  * Maintains the lifetime of all app modules and manages the main thread's
  * loop.
  */
-class Application : public OSEventHandler
+class Application
 {
 public:
     Application();
-
-    ~Application();
 
     /**
      * Begins the application. Assumes control of the thread until the
@@ -39,24 +35,20 @@ private:
 
     SDL sdl;
 
-    /** The data model that holds the user's project data. */
-    DataModel dataModel;
+    /** The user account database. */
+    Database database;
 
     //-------------------------------------------------------------------------
     // Data, Modules, Contexts
     //-------------------------------------------------------------------------
-    ClientHandler clientHandler;
+    /** Shared network event queue for all managers. */
+    asio::io_context networkIoContext;
 
-    ServerHandler serverHandler;
+    ClientManager clientManager;
 
-    ChatHandler chatHandler;
+    //ServerManager serverManager;
 
-    //-------------------------------------------------------------------------
-    // PeriodicCallers
-    //-------------------------------------------------------------------------
-    PeriodicCaller clientCaller;
-    PeriodicCaller serverCaller;
-    PeriodicCaller chatCaller;
+    //ChatManager chatManager;
 
     /** True if there has been a request to exit the program, else false. */
     std::atomic<bool> exitRequested;

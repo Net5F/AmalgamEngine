@@ -46,6 +46,8 @@ static constexpr std::size_t ETHERNET_MTU{1460};
 //       is that they have to be a known length so we can receive them first.
 //       It'll let us hide the bit operations in BatchSize.
 
+// Note: AccountServer directly uses MessageHeader.
+
 /**
  * Used for indexing into the parts of a server header.
  *

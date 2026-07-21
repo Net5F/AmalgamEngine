@@ -1,10 +1,12 @@
 target_sources(AccountServer
     PRIVATE
+        Private/Client.cpp
+        Private/ClientManager.cpp
         Private/MessageProcessor.cpp
-        Private/Network.cpp
     PUBLIC
+        Public/Client.h
+        Public/ClientManager.h
         Public/MessageProcessor.h
-        Public/Network.h
 )
 
 target_include_directories(AccountServer

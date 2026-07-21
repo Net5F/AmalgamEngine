@@ -1,8 +1,8 @@
 target_sources(AccountServer
     PRIVATE
-        Private/DataModel.cpp
+        Private/Database.cpp
     PUBLIC
-        Public/DataModel.h
+        Public/Database.h
 )
 
 target_include_directories(AccountServer

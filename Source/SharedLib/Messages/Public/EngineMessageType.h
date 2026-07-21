@@ -6,7 +6,8 @@ namespace AM
 {
 
 /**
- * The types of messages that we send across the network.
+ * The types of messages that we send across the network from Client <->  
+ * Simulation Server.
  *
  * For message descriptions, see their definitions in Shared/Messages/Public.
  */

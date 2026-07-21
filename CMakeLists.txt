@@ -142,6 +142,9 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/libmorton/"
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/fmt/"
                  "${PROJECT_BINARY_DIR}/Libraries/fmt/" EXCLUDE_FROM_ALL)
 
+# Configure header-only Asio.
+include("${PROJECT_SOURCE_DIR}/CMake/asio.cmake")
+
 # Configure header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/CMake/readerwriterqueue.cmake")
 

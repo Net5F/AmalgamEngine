@@ -219,7 +219,7 @@ public:
 
 protected:
     /**
-     * Creates our tables in Database.db3, if they don't already exist.
+     * Creates our tables in World.db, if they don't already exist.
      */
     void initTables();
 
@@ -250,7 +250,7 @@ protected:
 
     /** Calls performBackup(). */
     std::thread backupThreadObj;
-    /** Turn false to signal that the send and receive threads should end. */
+    /** Turn false to signal that the database thread should end. */
     std::atomic<bool> exitRequested;
 
     /** Used for signaling the backup thread. */

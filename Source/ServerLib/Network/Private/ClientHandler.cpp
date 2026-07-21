@@ -144,9 +144,10 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
                       .try_emplace(newID, std::make_shared<Client>(
                                               newID, std::move(newPeer)))
                       .second)) {
-                networkIDPool.freeID(newID);
-                LOG_FATAL(
+                LOG_ERROR(
                     "Ran out of room in client map or key already existed.");
+                networkIDPool.freeID(newID);
+                continue;
             }
         }
 

@@ -26,7 +26,7 @@ namespace Server
 {
 Database::Database()
 : database{":memory:", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE}
-, backupDatabase{(Paths::BASE_PATH + "/Database.db3"),
+, backupDatabase{(Paths::BASE_PATH + "/World.db"),
                  SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE}
 , currentTransaction{}
 , backupThreadObj{}
@@ -45,45 +45,50 @@ Database::Database()
 , insertGlobalStoredValueMapQuery{nullptr}
 , getGlobalStoredValueMapQuery{nullptr}
 {
-    // If any of our tables don't exist in Database.db3, initialize them.
+    // If any of our tables don't exist in World.db, initialize them.
     initTables();
 
-    // Load the data from Database.db3 into our in-memory database.
+    // Load the data from World.db into our in-memory database.
     SQLite::Backup backup(database, backupDatabase);
     backup.executeStep(-1);
 
     // Note: We build these queries after initTables() because they'll
     //       segfault if there's no DB with the expected fields.
-    insertEntityQuery = std::make_unique<SQLite::Statement>(
-        database,
-        "INSERT INTO entities VALUES (?, ?, ?) "
-        "ON CONFLICT(id) DO UPDATE SET "
-        "serializedEngineComponents=excluded.serializedEngineComponents, "
-        "serializedProjectComponents=excluded.serializedProjectComponents");
+    insertEntityQuery = std::make_unique<SQLite::Statement>(database, R"(
+            INSERT INTO entities VALUES (?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                serialized_engine_components=
+                    excluded.serialized_engine_components,
+                serialized_project_components=
+                    excluded.serialized_project_components
+        )");
     deleteEntityQuery = std::make_unique<SQLite::Statement>(
         database, "DELETE FROM entities WHERE id=?");
     iterateEntitiesQuery = std::make_unique<SQLite::Statement>(
         backupDatabase, "SELECT * FROM entities");
 
     insertItemQuery = std::make_unique<SQLite::Statement>(
-        database,
-        "INSERT INTO items VALUES (?, ?, ?, ?) "
-        "ON CONFLICT(id) DO UPDATE SET serializedItem=excluded.serializedItem, "
-        "version=excluded.version, initScript=excluded.initScript");
+        database, R"(
+            INSERT INTO items VALUES (?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                serialized_item=excluded.serialized_item,
+                version=excluded.version,
+                init_script=excluded.init_script
+        )");
     deleteItemQuery = std::make_unique<SQLite::Statement>(
         database, "DELETE FROM items WHERE id=?");
     iterateItemsQuery = std::make_unique<SQLite::Statement>(
         backupDatabase, "SELECT * FROM items");
 
     insertEntityStoredValueIDMapQuery = std::make_unique<SQLite::Statement>(
-        database, "UPDATE entityStoredValueIDMap SET serializedMap=(?)");
+        database, "UPDATE entity_stored_value_id_map SET serialized_map=(?)");
     getEntityStoredValueIDMapQuery = std::make_unique<SQLite::Statement>(
-        backupDatabase, "SELECT * FROM entityStoredValueIDMap");
+        backupDatabase, "SELECT * FROM entity_stored_value_id_map");
 
     insertGlobalStoredValueMapQuery = std::make_unique<SQLite::Statement>(
-        database, "UPDATE globalStoredValueMap SET serializedMap=(?)");
+        database, "UPDATE global_stored_value_map SET serialized_map=(?)");
     getGlobalStoredValueMapQuery = std::make_unique<SQLite::Statement>(
-        backupDatabase, "SELECT * FROM globalStoredValueMap");
+        backupDatabase, "SELECT * FROM global_stored_value_map");
 
     // Check for any out of date data.
     checkDataVersions();
@@ -249,16 +254,21 @@ void Database::saveGlobalStoredValueMap(std::span<const Uint8> serializedMap)
 
 void Database::initTables()
 {
-    // The below commands define the schema for Database.db3.
+    // The below commands define the schema for World.db.
     // Note: We only need to init the file-backed database, since the in-memory
     //       database will copy it.
     try {
         // Version numbers for all data in this database that needs to support
         // migration.
         if (!backupDatabase.tableExists("versions")) {
-            backupDatabase.exec(
-                "CREATE TABLE versions (id INTEGER PRIMARY KEY, "
-                "name TEXT, versionNumber INTEGER)");
+            backupDatabase.exec(R"(
+                CREATE TABLE versions
+                (
+                    id              INTEGER PRIMARY KEY,
+                    name            TEXT,
+                    version_number  INTEGER
+                ) STRICT
+            )");
 
             SQLite::Statement insertVersionQuery{
                 backupDatabase, "INSERT INTO versions VALUES (?, ?, ?)"};
@@ -275,36 +285,55 @@ void Database::initTables()
         if (!backupDatabase.tableExists("entities")) {
             // Engine and project components use separate ID namespaces, so
             // store their record lists in separate blobs.
-            backupDatabase.exec(
-                "CREATE TABLE entities (id INTEGER PRIMARY KEY, "
-                "serializedEngineComponents BLOB, serializedProjectComponents "
-                "BLOB)");
+            backupDatabase.exec(R"(
+                CREATE TABLE entities
+                (
+                    id                             INTEGER PRIMARY KEY,
+                    serialized_engine_components  BLOB,
+                    serialized_project_components BLOB
+                ) STRICT
+            )");
         }
 
         // Items.
         if (!backupDatabase.tableExists("items")) {
-            backupDatabase.exec(
-                "CREATE TABLE items (id INTEGER PRIMARY KEY, "
-                "serializedItem BLOB, version INTEGER, initScript TEXT)");
+            backupDatabase.exec(R"(
+                CREATE TABLE items
+                (
+                    id               INTEGER PRIMARY KEY,
+                    serialized_item  BLOB,
+                    version          INTEGER,
+                    init_script      TEXT
+                ) STRICT
+            )");
         }
 
         // Entity stored values, stored as a single serialized map.
-        if (!backupDatabase.tableExists("entityStoredValueIDMap")) {
-            backupDatabase.exec(
-                "CREATE TABLE entityStoredValueIDMap (serializedMap BLOB)");
+        if (!backupDatabase.tableExists("entity_stored_value_id_map")) {
+            backupDatabase.exec(R"(
+                CREATE TABLE entity_stored_value_id_map
+                (
+                    serialized_map BLOB
+                ) STRICT
+            )");
             // Since we're only storing 1 value in this table, we init the row
             // here so we can use UPDATEs later.
             backupDatabase.exec(
-                "INSERT INTO entityStoredValueIDMap VALUES('')");
+                "INSERT INTO entity_stored_value_id_map VALUES('')");
         }
 
         // Global stored values, stored as a single serialized map.
-        if (!backupDatabase.tableExists("globalStoredValueMap")) {
-            backupDatabase.exec(
-                "CREATE TABLE globalStoredValueMap (serializedMap BLOB)");
+        if (!backupDatabase.tableExists("global_stored_value_map")) {
+            backupDatabase.exec(R"(
+                CREATE TABLE global_stored_value_map
+                (
+                    serialized_map BLOB
+                ) STRICT
+            )");
             // Since we're only storing 1 value in this table, we init the row
             // here so we can use UPDATEs later.
-            backupDatabase.exec("INSERT INTO globalStoredValueMap VALUES('')");
+            backupDatabase.exec(
+                "INSERT INTO global_stored_value_map VALUES('')");
         }
     } catch (std::exception& e) {
         LOG_ERROR("Failed to init table: %s", e.what());

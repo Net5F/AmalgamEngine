@@ -85,9 +85,6 @@ public:
      */
     EventDispatcher& getEventDispatcher();
 
-    /** Initialize the tick timer. */
-    void initTimer();
-
     // Returning non-const refs because they need to be modified. Be careful not
     // to attempt to re-assign the obtained ref (can't re-seat a reference once
     // bound).

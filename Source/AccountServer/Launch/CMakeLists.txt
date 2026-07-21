@@ -1,4 +1,4 @@
-target_sources(ResourceImporter
+target_sources(AccountServer
     PRIVATE
         Private/main.cpp
         Private/Application.cpp
@@ -6,7 +6,7 @@ target_sources(ResourceImporter
         Public/Application.h
 )
 
-target_include_directories(ResourceImporter
+target_include_directories(AccountServer
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
         ${CMAKE_CURRENT_SOURCE_DIR}/Public

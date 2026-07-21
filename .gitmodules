@@ -46,3 +46,6 @@
 [submodule "Libraries/fmt"]
 	path = Libraries/fmt
 	url = git@github.com:fmtlib/fmt.git
+[submodule "Libraries/asio"]
+	path = Libraries/asio
+	url = git@github.com:chriskohlhoff/asio.git

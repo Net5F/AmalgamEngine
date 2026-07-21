@@ -12,6 +12,9 @@ add_subdirectory(ClientLib)
 # Configure Server library.
 add_subdirectory(ServerLib)
 
+# Configure Account Server.
+add_subdirectory(AccountServer)
+
 # Configure Resource Importer.
 if (AM_BUILD_RESOURCE_IMPORTER)
     add_subdirectory(ResourceImporter)
