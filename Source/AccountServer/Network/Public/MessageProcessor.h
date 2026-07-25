@@ -13,6 +13,7 @@ struct AccountRegisterRequest;
 
 namespace AccountServer
 {
+class Database;
 
 /**
  * Processes received messages.
@@ -33,7 +34,7 @@ public:
     using SendCallback = std::function<void(NetworkID, BinaryBufferSharedPtr)>;
 
     MessageProcessor(asio::io_context& inNetworkIoContext,
-                     asio::thread_pool& inDatabasePool,
+                     asio::thread_pool& inDatabasePool, Database& inDatabase,
                      SendCallback sendCallback);
 
     /**
@@ -57,13 +58,15 @@ private:
     // Helpers 
     //-------------------------------------------------------------------------
     template<typename Message>
-    void dispatchMessage(NetworkID netID, std::span<const Uint8> messageBuffer);
+    void handleMessage(NetworkID netID, std::span<const Uint8> messageBuffer);
 
     template<typename Message>
     BinaryBufferSharedPtr serializeMessage(const Message& message);
 
     asio::io_context& networkIoContext;
     asio::thread_pool& databasePool;
+
+    Database& database;
 
     /** Used to send messages through ClientManager.
         Needed since ClientManager owns the NetworkID -> Client map. */

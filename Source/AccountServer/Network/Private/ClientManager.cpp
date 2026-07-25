@@ -1,5 +1,6 @@
 #include "ClientManager.h"
 #include "asio/io_context.hpp"
+#include "Database.h"
 #include "SocketSet.h"
 #include "Config.h"
 #include "MessageProcessor.h"
@@ -10,18 +11,24 @@ namespace AM
 namespace AccountServer
 {
 
-ClientManager::ClientManager(asio::io_context& inNetworkIoContext)
+ClientManager::ClientManager(asio::io_context& inNetworkIoContext,
+                             Database& inDatabase)
 : networkIDPool{IDPool::ReservationStrategy::MarchForward, 8}
 , networkIoContext{inNetworkIoContext}
 , acceptor{inNetworkIoContext,
            asio::ip::tcp::endpoint{asio::ip::tcp::v4(), Config::SERVER_PORT}}
 , databasePool{1}
-, messageProcessor{inNetworkIoContext, databasePool,
+, messageProcessor{inNetworkIoContext, databasePool, inDatabase,
                    std::bind_front(&ClientManager::sendMessage, this)}
 {
     networkIDPool.reserveID();
 
     acceptNewClient();
+}
+
+ClientManager::~ClientManager()
+{
+    databasePool.join();
 }
 
 // TODO: What do we need to do?
@@ -33,12 +40,20 @@ ClientManager::ClientManager(asio::io_context& inNetworkIoContext)
 //       What operations are involved?
 //         New account registration request
 //           -> Username + password
+//              Attempt to register account
 //           <- Recovery key
+//              Or
+//           <- Error
 //         Login request
 //           -> Username + password
+//              Check for DB entry
 //           <- Session token
+//              Or
+//           <- Error
 //         Password reset request
-//         New password request
+//           -> Username + New password + recovery key
+//              Check key against hash
+//           <- Response (success or error), new recovery key
 
 void ClientManager::acceptNewClient()
 {

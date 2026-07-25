@@ -15,7 +15,7 @@ Application::Application()
 : sdl{0}
 , database{}
 , networkIoContext{}
-, clientManager{networkIoContext}
+, clientManager{networkIoContext, database}
 //, serverManager{}
 //, chatManager{}
 , exitRequested{false}

@@ -1,0 +1,1 @@
+// Dummy cpp file so we can buid AccountLib as a static lib.

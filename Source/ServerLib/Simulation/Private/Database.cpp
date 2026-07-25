@@ -28,7 +28,6 @@ Database::Database()
 : database{":memory:", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE}
 , backupDatabase{(Paths::BASE_PATH + "/World.db"),
                  SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE}
-, currentTransaction{}
 , backupThreadObj{}
 , exitRequested{false}
 , backupMutex{}
@@ -109,30 +108,14 @@ Database::~Database()
     backupThreadObj.join();
 }
 
-void Database::startTransaction()
+SQLite::Transaction Database::startTransaction()
 {
-    if (currentTransaction) {
-        LOG_ERROR("Tried to start a transaction while one was ongoing.");
-        return;
-    }
-
-    currentTransaction.emplace(database);
+    return SQLite::Transaction(database);
 }
 
-void Database::commitTransaction()
+SQLite::Transaction Database::startTransaction(SQLite::TransactionBehavior behavior)
 {
-    if (!currentTransaction) {
-        LOG_ERROR("Tried to commit a transaction when no transaction was "
-                  "ongoing.");
-    }
-
-    try {
-        currentTransaction.value().commit();
-    } catch (std::exception& e) {
-        LOG_ERROR("Failed to commit transaction: %s", e.what());
-    }
-
-    currentTransaction.reset();
+    return SQLite::Transaction(database, behavior);
 }
 
 void Database::backupToFile()

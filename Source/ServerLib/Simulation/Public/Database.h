@@ -41,15 +41,18 @@ public:
 
     /**
      * Begins a transaction. While a transaction is ongoing, queries will be
-     * queued until commitTransaction() is called.
+     * executed as normal, but they won't be permanent or visible to other 
+     * connections until object.commit() is called.
+     *
+     * @return An RAII transaction object. If the object is destroyed without 
+     * calling object.commit(), the transaction will be rolled back.
      */
-    void startTransaction();
+    SQLite::Transaction startTransaction();
 
     /**
-     * If a transaction is ongoing, commits it. This will execute all queued
-     * queries.
+     * Overload to use a non-default behavior.
      */
-    void commitTransaction();
+    SQLite::Transaction startTransaction(SQLite::TransactionBehavior behavior);
 
     /**
      * Backs up our in-memory database to the file database.
@@ -244,9 +247,6 @@ protected:
 
     /** File-backed database. Used to persist our data to a file. */
     SQLite::Database backupDatabase;
-
-    /** If valid, this is the current ongoing transaction. */
-    std::optional<SQLite::Transaction> currentTransaction;
 
     /** Calls performBackup(). */
     std::thread backupThreadObj;

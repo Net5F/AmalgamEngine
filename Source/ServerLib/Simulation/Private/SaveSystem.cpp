@@ -124,7 +124,7 @@ void SaveSystem::saveIfNecessary()
         LOG_INFO("Saving entities, items, and map...");
 
         // Save all of our data to the in-memory database.
-        world.database->startTransaction();
+        SQLite::Transaction transaction{world.database->startTransaction()};
 
         saveNonClientEntities();
         saveItems();
@@ -132,7 +132,7 @@ void SaveSystem::saveIfNecessary()
         // TODO: Track changed tiles and save to the database.
         world.tileMap.save("TileMap.bin");
 
-        world.database->commitTransaction();
+        transaction.commit();
 
         // Backup the in-memory database to the file database.
         world.database->backupToFile();

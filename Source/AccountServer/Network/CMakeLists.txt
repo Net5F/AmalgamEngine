@@ -1,9 +1,11 @@
 target_sources(AccountServer
     PRIVATE
+        Private/AccountHelpers.cpp
         Private/Client.cpp
         Private/ClientManager.cpp
         Private/MessageProcessor.cpp
     PUBLIC
+        Public/AccountHelpers.h
         Public/Client.h
         Public/ClientManager.h
         Public/MessageProcessor.h

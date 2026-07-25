@@ -26,57 +26,79 @@ namespace AccountServer
 Database::Database()
 : database{(Paths::BASE_PATH + "/Accounts.db"),
            SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE}
-, currentTransaction{}
-, insertEntityQuery{nullptr}
+, registerAccountQuery{nullptr}
+, insertRecoveryKeyQuery{nullptr}
 {
     // If any of our tables don't exist in Accounts.db, initialize them.
     initTables();
 
     // Note: We build these queries after initTables() because they'll
     //       segfault if there's no DB with the expected fields.
-    insertEntityQuery = std::make_unique<SQLite::Statement>(
-        database, R"(
-            INSERT INTO entities VALUES (?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
-                serializedEngineComponents=excluded.serializedEngineComponents,
-                serializedProjectComponents=excluded.serializedProjectComponents
+    registerAccountQuery = std::make_unique<SQLite::Statement>(database, R"(
+            INSERT INTO accounts
+                (username, normalized_username, password_hash,
+                 created_at, updated_at)
+            VALUES
+                (:username, lower(:username), :password_hash,
+                 unixepoch(), unixepoch())
+            ON CONFLICT(normalized_username) DO NOTHING
+        )");
+
+    insertRecoveryKeyQuery
+        = std::make_unique<SQLite::Statement>(database, R"(
+            INSERT INTO account_recovery_keys
+                (account_id, key_hash, created_at)
+            VALUES
+                (:account_id, :key_hash, unixepoch())
         )");
 }
 
-void Database::startTransaction()
+SQLite::Transaction Database::startTransaction()
 {
-    if (currentTransaction) {
-        LOG_ERROR("Tried to start a transaction while one was ongoing.");
-        return;
-    }
-
-    currentTransaction.emplace(database);
+    return SQLite::Transaction(database);
 }
 
-void Database::startTransaction(SQLite::TransactionBehavior behavior)
+SQLite::Transaction Database::startTransaction(SQLite::TransactionBehavior behavior)
 {
-    if (currentTransaction) {
-        LOG_ERROR("Tried to start a transaction while one was ongoing.");
-        return;
-    }
-
-    currentTransaction.emplace(database, behavior);
+    return SQLite::Transaction(database, behavior);
 }
 
-void Database::commitTransaction()
+Database::RegisterResult
+    Database::registerAccount(const std::string& username,
+                              const std::string& passwordHash,
+                              const std::string& recoveryKeyHash)
 {
-    if (!currentTransaction) {
-        LOG_ERROR("Tried to commit a transaction when no transaction was "
-                  "ongoing.");
-    }
-
     try {
-        currentTransaction.value().commit();
-    } catch (std::exception& e) {
-        LOG_ERROR("Failed to commit transaction: %s", e.what());
-    }
+        SQLite::Transaction transaction{database};
 
-    currentTransaction.reset();
+        // Insert the username/password.
+        registerAccountQuery->bind(":username", username);
+        registerAccountQuery->bind(":password_hash", passwordHash);
+
+        int changedRowCount{registerAccountQuery->exec()};
+
+        registerAccountQuery->reset();
+        if (changedRowCount == 0) {
+            return RegisterResult::UsernameUnavailable;
+        }
+
+        // Insert the recovery key.
+        insertRecoveryKeyQuery->bind(":account_id",
+                                     database.getLastInsertRowid());
+        insertRecoveryKeyQuery->bind(":key_hash", recoveryKeyHash.data(),
+                                     static_cast<int>(recoveryKeyHash.size()));
+        insertRecoveryKeyQuery->exec();
+        insertRecoveryKeyQuery->reset();
+
+        transaction.commit();
+        return RegisterResult::Success;
+    } catch (std::exception& e) {
+        // Ensure the pre-built statement is reusable after a failed insert.
+        registerAccountQuery->tryReset();
+        insertRecoveryKeyQuery->tryReset();
+        LOG_ERROR("Failed to register account: %s", e.what());
+        return RegisterResult::DatabaseError;
+    }
 }
 
 void Database::initTables()
@@ -99,7 +121,7 @@ void Database::initTables()
             database.exec(R"(
                 CREATE TABLE accounts
                 (
-                    account_id           INTEGER PRIMARY KEY,
+                    account_id           INTEGER PRIMARY KEY AUTOINCREMENT,
                     username             TEXT NOT NULL,
                     normalized_username  TEXT NOT NULL,
 

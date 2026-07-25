@@ -18,6 +18,7 @@ namespace AM
 {
 namespace AccountServer 
 {
+class Database;
 
 /**
  * Manages client connections, handles client messaging.
@@ -25,7 +26,9 @@ namespace AccountServer
 class ClientManager
 {
 public:
-    ClientManager(asio::io_context& inNetworkIoContext);
+    ClientManager(asio::io_context& inNetworkIoContext, Database& inDatabase);
+
+    ~ClientManager();
 
     // Note: This class's events are processed by Application running 
     //       networkIoContext.
