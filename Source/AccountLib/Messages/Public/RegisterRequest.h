@@ -9,11 +9,11 @@ namespace AM
 /**
  * Sent by the client to register an account.
  */
-struct AccountRegisterRequest {
-    // The EngineMessageType enum value that this message corresponds to.
+struct RegisterRequest {
+    // The AccountMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr AccountMessageType MESSAGE_TYPE{
-        AccountMessageType::AccountRegisterRequest};
+        AccountMessageType::RegisterRequest};
 
     /** Used as a "we should never hit this" cap on username length. */
     static constexpr std::size_t USERNAME_MAX{100};
@@ -24,19 +24,15 @@ struct AccountRegisterRequest {
     std::string username{};
 
     // TODO: Need SecureString, secure fill
-    /** The desired password in plaintext.
-        Note: We send this over a secure connection to avoid being 
-              compromised. */
+    /** The desired password in plaintext. */
     std::string password{};
 };
 
 template<typename S>
-void serialize(S& serializer, AccountRegisterRequest& accountRegisterRequest)
+void serialize(S& serializer, RegisterRequest& registerRequest)
 {
-    serializer.text1b(accountRegisterRequest.username,
-                      AccountRegisterRequest::USERNAME_MAX);
-    serializer.text1b(accountRegisterRequest.password,
-                      AccountRegisterRequest::PASSWORD_MAX);
+    serializer.text1b(registerRequest.username, RegisterRequest::USERNAME_MAX);
+    serializer.text1b(registerRequest.password, RegisterRequest::PASSWORD_MAX);
 }
 
 } // End namespace AM

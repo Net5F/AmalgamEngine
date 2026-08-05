@@ -275,7 +275,7 @@ void Client::recordTickDiff(Sint64 tickDiff)
     }
 }
 
-NetworkID Client::getNetID()
+NetworkID Client::getNetID() const
 {
     return netID;
 }

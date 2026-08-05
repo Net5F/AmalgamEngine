@@ -45,13 +45,9 @@ target_sources(SharedLib
         Public/TileExtentClearLayers.h
         Public/TileRemoveLayer.h
         Public/UseItemOnEntityRequest.h
-        Public/Account/AccountMessageType.h
-        Public/Account/AccountRegisterRequest.h
-        Public/Account/AccountRegisterResponse.h
 )
 
 target_include_directories(SharedLib
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
-        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Account
 )

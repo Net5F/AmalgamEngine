@@ -3,12 +3,14 @@ target_sources(AccountServer
         Private/AccountHelpers.cpp
         Private/Client.cpp
         Private/ClientManager.cpp
-        Private/MessageProcessor.cpp
+        Private/ClientMessageProcessor.cpp
+        Private/ServiceMessageProcessor.cpp
     PUBLIC
         Public/AccountHelpers.h
         Public/Client.h
         Public/ClientManager.h
-        Public/MessageProcessor.h
+        Public/ClientMessageProcessor.h
+        Public/ServiceMessageProcessor.h
 )
 
 target_include_directories(AccountServer

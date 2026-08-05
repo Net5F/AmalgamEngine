@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 message(STATUS "Configuring Lua")
 
-# Add our static library target
+# Add our static library target.
 add_library(Lua STATIC
       ${PROJECT_SOURCE_DIR}/Libraries/lua/lapi.c
       ${PROJECT_SOURCE_DIR}/Libraries/lua/lcode.c

@@ -1,5 +1,6 @@
 #include "Log.h"
 #include "Application.h"
+#include "sodium.h"
 #include <exception>
 #include <SDL3/SDL_main.h>
 
@@ -11,6 +12,11 @@ int main(int, char**)
 try {
     // Set up file logging.
     Log::enableFileLogging("AccountServer.log");
+
+    // Initialize libsodium.
+    if (sodium_init() < 0) {
+        LOG_FATAL("Failed to initialize libsodium.");
+    }
 
     // Start the application (assumes control of the thread).
     Application app{};

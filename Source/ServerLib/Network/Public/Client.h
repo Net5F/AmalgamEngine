@@ -95,7 +95,7 @@ public:
      */
     void recordTickDiff(Sint64 tickDiff);
 
-    NetworkID getNetID();
+    NetworkID getNetID() const;
 
 private:
     //--------------------------------------------------------------------------

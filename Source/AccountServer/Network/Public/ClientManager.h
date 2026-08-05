@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MessageProcessor.h"
+#include "ClientMessageProcessor.h"
 #include "Client.h"
 #include "IDPool.h"
 #include "asio/ip/tcp.hpp"
@@ -75,7 +75,7 @@ private:
     /** Our pool of database workers. */
     asio::thread_pool databasePool;
 
-    MessageProcessor messageProcessor;
+    ClientMessageProcessor messageProcessor;
 };
 
 } // End namespace AccountServer

@@ -3,7 +3,7 @@
 #include "Database.h"
 #include "SocketSet.h"
 #include "Config.h"
-#include "MessageProcessor.h"
+#include "ClientMessageProcessor.h"
 #include "Log.h"
 
 namespace AM
@@ -32,18 +32,9 @@ ClientManager::~ClientManager()
 }
 
 // TODO: What do we need to do?
-//         Registration
-//         Password recovery
 //         Login
-//       What data is needed for each client?
-//         Done in schema
+//         Password recovery
 //       What operations are involved?
-//         New account registration request
-//           -> Username + password
-//              Attempt to register account
-//           <- Recovery key
-//              Or
-//           <- Error
 //         Login request
 //           -> Username + password
 //              Check for DB entry
@@ -89,7 +80,7 @@ void ClientManager::addClient(asio::ip::tcp::socket socket)
         newID,
         std::make_shared<Client>(
             newID, std::move(socket),
-            std::bind_front(&MessageProcessor::processReceivedMessage,
+            std::bind_front(&ClientMessageProcessor::processReceivedMessage,
                             &messageProcessor),
             std::bind_front(&ClientManager::eraseDisconnectedClient, this)));
     if (!wasSuccessful) {

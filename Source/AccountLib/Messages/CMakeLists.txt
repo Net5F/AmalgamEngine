@@ -1,8 +1,16 @@
 target_sources(AccountLib
     PUBLIC
         Public/AccountMessageType.h
-        Public/AccountRegisterRequest.h
-        Public/AccountRegisterResponse.h
+        Public/ConsumeWorldTicketRequest.h
+        Public/ConsumeWorldTicketResponse.h
+        Public/LoginRequest.h
+        Public/LoginResponse.h
+        Public/LogoutRequest.h
+        Public/LogoutResponse.h
+        Public/RegisterRequest.h
+        Public/RegisterResponse.h
+        Public/RequestWorldTicket.h
+        Public/ServiceTicketIssued.h
 )
 
 target_include_directories(AccountLib

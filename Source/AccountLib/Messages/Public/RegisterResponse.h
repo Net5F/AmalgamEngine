@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AccountDefs.h"
 #include "AccountMessageType.h"
 #include <string>
 
@@ -9,14 +10,11 @@ namespace AM
 /**
  * Sent by the server in response to a registration request.
  */
-struct AccountRegisterResponse {
-    // The EngineMessageType enum value that this message corresponds to.
+struct RegisterResponse {
+    // The AccountMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr AccountMessageType MESSAGE_TYPE{
-        AccountMessageType::AccountRegisterResponse};
-
-    /** Used as a "we should never hit this" cap on recovery key length. */
-    static constexpr std::size_t RECOVERY_KEY_MAX{100};
+        AccountMessageType::RegisterResponse};
 
     enum Result : Uint8 {
         Success,
@@ -35,11 +33,10 @@ struct AccountRegisterResponse {
 };
 
 template<typename S>
-void serialize(S& serializer, AccountRegisterResponse& accountRegisterResponse)
+void serialize(S& serializer, RegisterResponse& registerResponse)
 {
-    serializer.value1b(accountRegisterResponse.result);
-    serializer.text1b(accountRegisterResponse.recoveryKey,
-                      AccountRegisterResponse::RECOVERY_KEY_MAX);
+    serializer.value1b(registerResponse.result);
+    serializer.text1b(registerResponse.recoveryKey, RECOVERY_KEY_CHARACTERS);
 }
 
 } // End namespace AM

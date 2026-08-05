@@ -6,8 +6,7 @@ namespace AM
 {
 
 /**
- * The types of messages that we send across the network from Client <-> Account
- * Server.
+ * The types of messages exchanged across Account Server connections.
  *
  * For message descriptions, see their definitions in Shared/Messages/Public.
  */
@@ -16,12 +15,22 @@ enum class AccountMessageType : Uint8 {
     NotSet,
 
     // Client -> Server Messages
-    AccountRegisterRequest,
+    RegisterRequest,
+    LoginRequest,
+    LogoutRequest,
+    RequestWorldTicket,
+
+    // Trusted World Server -> Account Server Messages
+    ConsumeWorldTicketRequest,
 
     // Server -> Client Messages
-    AccountRegisterResponse,
+    RegisterResponse,
+    LoginResponse,
+    LogoutResponse,
+    ServiceTicketIssued,
 
-    // Bidirectional Messages
+    // Account Server -> Trusted World Server Messages
+    ConsumeWorldTicketResponse,
 };
 
 } // End namespace AM

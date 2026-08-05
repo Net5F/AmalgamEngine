@@ -49,3 +49,6 @@
 [submodule "Libraries/asio"]
 	path = Libraries/asio
 	url = git@github.com:chriskohlhoff/asio.git
+[submodule "Libraries/libsodium"]
+	path = Libraries/libsodium
+	url = git@github.com:jedisct1/libsodium.git

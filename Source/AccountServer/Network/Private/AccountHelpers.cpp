@@ -23,6 +23,8 @@ AccountHelpers::ValidateResult
     return ValidateResult::Success;
 }
 
+// TODO: This error reporting will probably have to change, so we can show all 
+//       the issues at once
 AccountHelpers::ValidateResult
     AccountHelpers::validatePassword(std::string_view password)
 {

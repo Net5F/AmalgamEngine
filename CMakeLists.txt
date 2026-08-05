@@ -145,6 +145,9 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/fmt/"
 # Configure header-only Asio.
 include("${PROJECT_SOURCE_DIR}/CMake/asio.cmake")
 
+# Configure libsodium.
+include("${PROJECT_SOURCE_DIR}/CMake/libsodium.cmake")
+
 # Configure header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/CMake/readerwriterqueue.cmake")
 

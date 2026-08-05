@@ -23,6 +23,7 @@ target_link_libraries(AccountServer
         asio
         SQLiteCpp
         sqlite3
+        libsodium
 )
 
 # Compile with C++23.
