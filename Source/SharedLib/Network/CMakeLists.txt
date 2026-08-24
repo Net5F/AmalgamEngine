@@ -4,16 +4,23 @@ target_sources(SharedLib
         Private/Peer.cpp
         Private/SocketSet.cpp
         Private/TcpSocket.cpp
+        Private/TlsTransport.cpp
         Private/NetworkStats.cpp
     PUBLIC
         Public/Acceptor.h
+        Public/Acceptor2.h
         Public/BufferPool.h
+        Public/Connection.h
+        Public/ConnectionHandle.h
+        Public/ConnectionRegistry.h
         Public/DispatchMessage.h
         Public/NetworkDefs.h
         Public/NetworkID.h
         Public/Peer.h
+        Public/SimpleConnection.h
         Public/SocketSet.h
         Public/TcpSocket.h
+        Public/TlsTransport.h
         Public/NetworkStats.h
 )
 

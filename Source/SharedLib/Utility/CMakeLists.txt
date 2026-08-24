@@ -53,5 +53,8 @@ target_include_directories(SharedLib
 # CMake causes issues when using precompiled headers with GCC on macOS,
 # so precompiled headers are disabled for that target.
 if ((NOT APPLE) OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang"))
-    target_precompile_headers(SharedLib PRIVATE Private/pch.h)
+	# Only generate for C++ translation units, since pch.h contains C++ headers.
+    target_precompile_headers(SharedLib PRIVATE
+        "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/Private/pch.h>"
+    )
 endif()

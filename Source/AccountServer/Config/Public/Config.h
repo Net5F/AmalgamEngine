@@ -18,13 +18,31 @@ public:
     /** The port that the server listens for incoming client connections on. */
     static constexpr unsigned int SERVER_PORT{41498};
 
-    /** The maximum number of clients that we will allow. */
+    /** The maximum number of clients that we will allow at once. */
     static constexpr unsigned int MAX_CLIENTS{1000};
 
-    /** How long we should wait before considering the client to be timed out.
-        Arbitrarily chosen. If too high, we set ourselves up to take a huge
-        spike of data for a very late client. */
-    static constexpr double CLIENT_TIMEOUT_S{4};
+    /** How long a connecting (or handshaking) client can be idle before timing
+        out. */
+    static constexpr double CONNECTING_TIMEOUT_S{5};
+
+    /** How long we'll wait after receiving the first byte of a message before 
+        timing out. Prevents slowloris-style attacks. */
+    static constexpr double PARTIAL_RECEIVE_TIMEOUT_S{10};
+
+    /** How long a connected client can be idle before timing out. */
+    static constexpr double IDLE_TIMEOUT_S{10};
+
+    /** How long a connected client can not consume our written data before 
+        timing out. */
+    static constexpr double WRITE_TIMEOUT_S{10};
+
+    /** The maximum amount of outgoing bytes we'll allow at once before 
+        considering the client to be hostile and closing the connection. */
+    static constexpr double MAX_QUEUED_WRITE_BYTES{10};
+
+    /** The maximum number of outgoing writes we'll allow at once before 
+        considering the client to be hostile and closing the connection. */
+    static constexpr double MAX_QUEUED_WRITES{10};
 
     //-------------------------------------------------------------------------
     // Account sessions

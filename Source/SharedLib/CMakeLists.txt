@@ -22,11 +22,20 @@ target_link_libraries(SharedLib
         nlohmann_json::nlohmann_json
         Tracy::TracyClient
         fmt::fmt
+        asio
+        OpenSSL::SSL
+        OpenSSL::Crypto
 
         # Only included for PCH.
         readerwriterqueue
         QueuedEvents
 )
+
+# MSVC requires OpenSSL's applink target. This is a no-op on other platforms, 
+# we just guard it to make the dependency clear.
+if (MSVC)
+    target_link_libraries(SharedLib PRIVATE OpenSSL::applink)
+endif()
 
 # Compile with C++23.
 target_compile_features(SharedLib PRIVATE cxx_std_23)
