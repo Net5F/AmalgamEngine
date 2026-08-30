@@ -3,8 +3,6 @@ target_sources(AccountServer
         Private/AccountClientEndpoint.cpp
         Private/AccountHelpers.cpp
         Private/AccountServiceEndpoint.cpp
-        Private/Client.cpp
-        Private/ClientManager.cpp
         Private/ClientMessageProcessor.cpp
         Private/Network.cpp
         Private/ServiceMessageProcessor.cpp
@@ -12,8 +10,6 @@ target_sources(AccountServer
         Public/AccountClientEndpoint.h
         Public/AccountHelpers.h
         Public/AccountServiceEndpoint.h
-        Public/Client.h
-        Public/ClientManager.h
         Public/ClientMessageProcessor.h
         Public/Network.h
         Public/ServiceMessageProcessor.h

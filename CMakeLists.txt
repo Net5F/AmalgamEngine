@@ -145,9 +145,9 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/fmt/"
 # Configure header-only Asio.
 include("${PROJECT_SOURCE_DIR}/CMake/asio.cmake")
 
-# Asio's TLS support is backed by OpenSSL. We require the current LTS line so
-# every endpoint gets the same supported TLS implementation.
-find_package(OpenSSL 3.5 REQUIRED COMPONENTS SSL Crypto)
+# Asio's TLS support is backed by OpenSSL. Restrict it to our tested LTS
+# release line.
+find_package(OpenSSL 3.5...<3.6 REQUIRED COMPONENTS SSL Crypto)
 
 # Configure libsodium.
 include("${PROJECT_SOURCE_DIR}/CMake/libsodium.cmake")

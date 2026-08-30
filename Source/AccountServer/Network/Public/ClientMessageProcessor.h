@@ -1,11 +1,13 @@
 #pragma once
 
 #include "AccountDefs.h"
-#include "NetworkID.h"
+#include "AccountClientMessageType.h"
+#include "ConnectionHandle.h"
 #include "RegisterResponse.h"
 #include "LoginResponse.h"
 #include "LogoutResponse.h"
 #include "ServiceTicketIssued.h"
+#include "asio/error_code.hpp"
 #include "asio/thread_pool.hpp"
 #include "asio/io_context.hpp"
 #include <SDL3/SDL_stdinc.h>
@@ -28,7 +30,7 @@ namespace AccountServer
 class Database;
 
 /**
- * Processes received messages.
+ * Processes AccountClientMessageType messages.
  *
  * Unlike Client/Server, which pass messages down to the sim layer,
  * AccountServer handles messages directly in the network thread. As such,
@@ -37,27 +39,31 @@ class Database;
  * To add a message:
  *   1. Add #include "MyNewMessage.h" to ClientMessageProcessor.cpp.
  *   2. Add a case to the switch statement in processReceivedMessage().
- *   3. Add a forward declaration and handleMessage(NetworkID, MyNewMessage)
- *      function.
+ *   3. Add a forward declaration and a matching handleMessage() function.
  */
 class ClientMessageProcessor
 {
 public:
-    using SendCallback = std::function<void(NetworkID, BinaryBufferSharedPtr)>;
+    using SendCallback
+        = std::function<void(ConnectionHandle, BinaryBufferSharedPtr)>;
+    using DisconnectCallback = std::function<void(
+        ConnectionHandle, const asio::error_code&)>;
 
     ClientMessageProcessor(asio::io_context& inNetworkIoContext,
                            asio::thread_pool& inDatabasePool,
-                           Database& inDatabase, SendCallback sendCallback);
+                           Database& inDatabase, SendCallback sendCallback,
+                           DisconnectCallback disconnectCallback);
 
     /**
      * Deserializes and handles received messages.
      *
-     * @param netID The network ID of the client that the message came from.
+     * @param handle The connection that the message came from.
      * @param messageType The type of the received message.
      * @param messageBuffer A buffer containing a serialized message, starting
      * at index 0.
      */
-    void processReceivedMessage(NetworkID netID, Uint8 messageType,
+    void processReceivedMessage(ConnectionHandle handle,
+                                AccountClientMessageType messageType,
                                 std::span<const Uint8> messageBuffer);
 
 private:
@@ -83,13 +89,14 @@ private:
     //-------------------------------------------------------------------------
     // Handlers
     //-------------------------------------------------------------------------
-    void handleMessage(NetworkID netID, const RegisterRequest& message);
+    void handleMessage(ConnectionHandle handle, const RegisterRequest& message);
 
-    void handleMessage(NetworkID netID, const LoginRequest& message);
+    void handleMessage(ConnectionHandle handle, const LoginRequest& message);
 
-    void handleMessage(NetworkID netID, const LogoutRequest& message);
+    void handleMessage(ConnectionHandle handle, const LogoutRequest& message);
 
-    void handleMessage(NetworkID netID, const RequestWorldTicket& message);
+    void handleMessage(ConnectionHandle handle,
+                       const RequestWorldTicket& message);
 
     //-------------------------------------------------------------------------
     // Helpers
@@ -185,7 +192,8 @@ private:
         const std::array<Uint8, SESSION_TOKEN_BYTES>& sessionToken);
 
     template<typename Message>
-    void handleMessage(NetworkID netID, std::span<const Uint8> messageBuffer);
+    void handleMessage(ConnectionHandle handle,
+                       std::span<const Uint8> messageBuffer);
 
     template<typename Message>
     BinaryBufferSharedPtr serializeMessage(const Message& message);
@@ -195,9 +203,11 @@ private:
 
     Database& database;
 
-    /** Used to send messages through ClientManager.
-        Needed since ClientManager owns the NetworkID -> Client map. */
+    /** Used to send messages through the owning endpoint. */
     SendCallback sendCallback;
+
+    /** Used to disconnect clients that send invalid messages. */
+    DisconnectCallback disconnectCallback;
 
     /** A valid hash that we can verify against when a login references an
         unknown account. This keeps that path close to the cost of verifying a

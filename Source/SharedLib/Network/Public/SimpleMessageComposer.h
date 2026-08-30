@@ -93,7 +93,7 @@ public:
 
             // This was a 0-byte message, return it and reset.
             if (pendingPayloadSize == 0) {
-                DecodeResult result{};
+                ComposeResult result{};
                 result.frameComplete = true;
                 result.message = {pendingType, {}};
                 reset();

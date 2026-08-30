@@ -1,6 +1,7 @@
 target_sources(AccountLib
     PUBLIC
-        Public/AccountMessageType.h
+        Public/AccountClientMessageType.h
+        Public/AccountServiceMessageType.h
         Public/ConsumeWorldTicketRequest.h
         Public/ConsumeWorldTicketResponse.h
         Public/LoginRequest.h

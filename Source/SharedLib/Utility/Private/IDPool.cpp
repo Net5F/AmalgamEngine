@@ -20,7 +20,17 @@ IDPool::IDPool(ReservationStrategy inStrategy, std::size_t initialPoolSize)
 
 unsigned int IDPool::reserveID()
 {
+    // If we're out of IDs, double our capacity.
+    if (reservedIDCount == IDs.size()) {
+        IDs.resize(IDs.size() * 2);
+    }
+
     if (strategy == ReservationStrategy::MarchForward) {
+        // If the pool was previously full, find a newly allocated or freed ID.
+        if (IDs[nextMarchID]) {
+            setNextMarchID();
+        }
+
         // Reserve nextMarchID.
         unsigned int returnID{nextMarchID};
         IDs[nextMarchID] = true;
@@ -32,6 +42,11 @@ unsigned int IDPool::reserveID()
         return returnID;
     }
     else if (strategy == ReservationStrategy::ReuseLowest) {
+        // If the pool was previously full, find a newly allocated or freed ID.
+        if (IDs[nextLowestID]) {
+            setNextLowestID();
+        }
+
         // Reserve nextLowestID.
         unsigned int returnID{nextLowestID};
         IDs[nextLowestID] = true;
@@ -72,8 +87,9 @@ void IDPool::markIDAsReserved(unsigned int ID)
 
 void IDPool::freeID(unsigned int ID)
 {
-    if (ID > IDs.size()) {
+    if (ID >= IDs.size()) {
         LOG_FATAL("ID out of bounds: %u", ID);
+        return;
     }
 
     // If the ID is reserved, free it.
@@ -95,13 +111,16 @@ void IDPool::freeID(unsigned int ID)
 void IDPool::freeAllIDs()
 {
     std::fill(IDs.begin(), IDs.end(), false);
+    reservedIDCount = 0;
+    nextMarchID = 0;
+    nextLowestID = 0;
 }
 
 void IDPool::setNextMarchID()
 {
-    // If we're out of IDs, double our capacity.
+    // Growth is deferred until another ID is actually requested.
     if (reservedIDCount == IDs.size()) {
-        IDs.resize(IDs.size() * 2);
+        return;
     }
 
     // March to the next ID, wrapping and searching if necessary.
@@ -117,9 +136,9 @@ void IDPool::setNextMarchID()
 
 void IDPool::setNextLowestID()
 {
-    // If we're out of IDs, double our capacity.
+    // Growth is deferred until another ID is actually requested.
     if (reservedIDCount == IDs.size()) {
-        IDs.resize(IDs.size() * 2);
+        return;
     }
 
     // Find the next available ID.

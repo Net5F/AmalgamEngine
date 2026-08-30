@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AccountMessageType.h"
+#include "AccountServiceMessageType.h"
 #include <string>
 
 namespace AM
@@ -11,8 +11,8 @@ namespace AM
  * connection ticket.
  */
 struct ConsumeWorldTicketResponse {
-    static constexpr AccountMessageType MESSAGE_TYPE{
-        AccountMessageType::ConsumeWorldTicketResponse};
+    static constexpr AccountServiceMessageType MESSAGE_TYPE{
+        AccountServiceMessageType::ConsumeWorldTicketResponse};
 
     /** Maximum serialized account-status length. */
     static constexpr std::size_t ACCOUNT_STATUS_MAX{32};

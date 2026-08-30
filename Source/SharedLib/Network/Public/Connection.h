@@ -22,7 +22,7 @@ private:
     enum class State { NotStarted, Handshaking, Ready, Closed };
 
 public:
-    using ReadyCallback = std::function<bool(Connection&)>;
+    using ReadyCallback = std::function<void(Connection&)>;
     using DisconnectCallback = std::function<void(const asio::error_code&)>;
 
     Connection(asio::ip::tcp::socket socket, asio::ssl::context& sslContext,
@@ -51,10 +51,10 @@ public:
      *       instead.
      */
     void startServer(ReadyCallback inReadyCallback,
-                     DisconnectCallback inDisconnectCallback, double timeoutS)
+                     DisconnectCallback inDisconnectCallback)
     {
         start(TlsTransport::HandshakeType::server, std::move(inReadyCallback),
-              std::move(inDisconnectCallback), timeoutS);
+              std::move(inDisconnectCallback));
     }
 
     /**
@@ -66,10 +66,10 @@ public:
      *       instead.
      */
     void startClient(ReadyCallback inReadyCallback,
-                     DisconnectCallback inDisconnectCallback, double timeoutS)
+                     DisconnectCallback inDisconnectCallback)
     {
         start(TlsTransport::HandshakeType::client, std::move(inReadyCallback),
-              std::move(inDisconnectCallback), timeoutS);
+              std::move(inDisconnectCallback));
     }
 
     /**
@@ -131,7 +131,7 @@ protected:
 private:
     void start(TlsTransport::HandshakeType handshakeType,
                ReadyCallback inReadyCallback,
-               DisconnectCallback inDisconnectCallback, double timeoutS)
+               DisconnectCallback inDisconnectCallback)
     {
         if (state != State::NotStarted) {
             LOG_INFO("Connection cannot be started from its current state.");
@@ -151,7 +151,7 @@ private:
                 }
             });
 
-        if (!tlsTransport->handshake(handshakeType, timeoutS, [weakSelf]() {
+        if (!tlsTransport->handshake(handshakeType, [weakSelf]() {
                 if (std::shared_ptr<Connection> lockedSelf{weakSelf.lock()}) {
                     lockedSelf->handleHandshakeComplete();
                 }
@@ -173,12 +173,9 @@ private:
         ReadyCallback callback{std::move(readyCallback)};
         readyCallback = {};
 
-        // Call the ready callback, giving our parent the opportunity to reject
-        // this connection if desired.
-        if (callback && !callback(*this)) {
-            disconnect(
-                asio::error::make_error_code(asio::error::access_denied));
-            return;
+        // Call the ready callback.
+        if (callback) {
+            callback(*this);
         }
 
         // The callback may have closed or disconnected this connection.

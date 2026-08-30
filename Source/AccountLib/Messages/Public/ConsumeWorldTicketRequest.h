@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AccountDefs.h"
-#include "AccountMessageType.h"
+#include "AccountServiceMessageType.h"
 #include <array>
 
 namespace AM
@@ -11,8 +11,8 @@ namespace AM
  * Sent by a trusted World Server to validate and consume a connection ticket.
  */
 struct ConsumeWorldTicketRequest {
-    static constexpr AccountMessageType MESSAGE_TYPE{
-        AccountMessageType::ConsumeWorldTicketRequest};
+    static constexpr AccountServiceMessageType MESSAGE_TYPE{
+        AccountServiceMessageType::ConsumeWorldTicketRequest};
 
     /** The single-use ticket presented by the client. */
     std::array<Uint8, SERVICE_TICKET_BYTES> ticket{};

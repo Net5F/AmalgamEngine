@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AccountDefs.h"
-#include "AccountMessageType.h"
+#include "AccountClientMessageType.h"
 #include <array>
 
 namespace AM
@@ -11,10 +11,10 @@ namespace AM
  * Sent by the client to request a ticket for connecting to a World Server.
  */
 struct RequestWorldTicket {
-    // The AccountMessageType enum value that this message corresponds to.
+    // The message enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr AccountMessageType MESSAGE_TYPE{
-        AccountMessageType::RequestWorldTicket};
+    static constexpr AccountClientMessageType MESSAGE_TYPE{
+        AccountClientMessageType::RequestWorldTicket};
 
     /** The client's current account session token. */
     std::array<Uint8, SESSION_TOKEN_BYTES> accountSessionToken{};

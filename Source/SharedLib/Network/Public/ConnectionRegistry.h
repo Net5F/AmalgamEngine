@@ -2,12 +2,11 @@
 
 #include "ConnectionHandle.h"
 #include "IDPool.h"
+#include "Log.h"
 #include <cstddef>
 #include <limits>
 #include <memory>
 #include <optional>
-#include <stdexcept>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -24,15 +23,13 @@ class ConnectionRegistry
 {
 public:
     explicit ConnectionRegistry(std::size_t inCapacity)
-    : capacity{inCapacity}
-    , networkIDPool{IDPool::ReservationStrategy::MarchForward,
-                    getPoolSize(inCapacity)}
-    , entries{}
-    , nextGeneration{1}
+    : capacity{getCapacity(inCapacity)}
+    , connectionIDPool{IDPool::ReservationStrategy::MarchForward, capacity + 1}
+    , entries(capacity + 1)
+    , connectionCount{0}
     {
-        networkIDPool.markIDAsReserved(NULL_NETWORK_ID);
-
-        entries.reserve(capacity);
+        // ID 0 is reserved so a default-constructed handle is always null.
+        connectionIDPool.markIDAsReserved(0);
     }
 
     ~ConnectionRegistry() { closeAll(); }
@@ -52,18 +49,19 @@ public:
             return std::nullopt;
         }
 
-        NetworkID networkID{static_cast<NetworkID>(networkIDPool.reserveID())};
-        ConnectionHandle handle{networkID, reserveGeneration()};
-        bool inserted{entries
-                          .try_emplace(networkID, Entry{handle.generation,
-                                                        std::move(connection)})
-                          .second};
-        if (!inserted) {
-            networkIDPool.freeID(networkID);
+        ConnectionHandle::ID id{static_cast<ConnectionHandle::ID>(
+            connectionIDPool.reserveID())};
+        Entry& entry{entries[id]};
+        if (entry.connection) {
+            LOG_ERROR("Reserved connection ID is already in use: %u",
+                      static_cast<unsigned int>(id));
+            connectionIDPool.freeID(id);
             return std::nullopt;
         }
 
-        return handle;
+        entry.connection = std::move(connection);
+        ++connectionCount;
+        return ConnectionHandle{id, entry.generation};
     }
 
     /**
@@ -72,12 +70,16 @@ public:
      */
     std::shared_ptr<ConnectionType> find(ConnectionHandle handle) const
     {
-        auto iterator{entries.find(handle.networkID)};
-        if ((iterator == entries.end())
-            || (iterator->second.generation != handle.generation)) {
+        if (!handle || (handle.id() >= entries.size())) {
             return {};
         }
-        return iterator->second.connection;
+
+        const Entry& entry{entries[handle.id()]};
+        if (!entry.connection
+            || (entry.generation != handle.generation())) {
+            return {};
+        }
+        return entry.connection;
     }
 
     /**
@@ -86,16 +88,22 @@ public:
      */
     bool erase(ConnectionHandle handle)
     {
-        auto iterator{entries.find(handle.networkID)};
-        if ((iterator == entries.end())
-            || (iterator->second.generation != handle.generation)) {
+        if (!handle || (handle.id() >= entries.size())) {
+            return false;
+        }
+
+        Entry& entry{entries[handle.id()]};
+        if (!entry.connection
+            || (entry.generation != handle.generation())) {
             return false;
         }
 
         std::shared_ptr<ConnectionType> connection{
-            std::move(iterator->second.connection)};
-        entries.erase(iterator);
-        networkIDPool.freeID(handle.networkID);
+            std::move(entry.connection)};
+        entry.generation = nextGeneration(entry.generation);
+        connectionIDPool.freeID(handle.id());
+        --connectionCount;
+
         connection->close();
         return true;
     }
@@ -106,12 +114,19 @@ public:
     void closeAll()
     {
         std::vector<std::shared_ptr<ConnectionType>> connections{};
-        connections.reserve(entries.size());
-        for (auto& [networkID, entry] : entries) {
-            networkIDPool.freeID(networkID);
+        connections.reserve(connectionCount);
+
+        for (std::size_t id{1}; id < entries.size(); ++id) {
+            Entry& entry{entries[id]};
+            if (!entry.connection) {
+                continue;
+            }
+
             connections.push_back(std::move(entry.connection));
+            entry.generation = nextGeneration(entry.generation);
+            connectionIDPool.freeID(static_cast<unsigned int>(id));
         }
-        entries.clear();
+        connectionCount = 0;
 
         for (const std::shared_ptr<ConnectionType>& connection : connections) {
             connection->close();
@@ -121,18 +136,18 @@ public:
     /**
      * Returns the number of connections in this registry.
      */
-    std::size_t size() const { return entries.size(); }
+    std::size_t size() const { return connectionCount; }
 
     /**
      * Returns true if this registry is empty, else false.
      */
-    bool empty() const { return entries.empty(); }
+    bool empty() const { return connectionCount == 0; }
 
     /**
      * Returns true if this registry can't accept any more connections, else
      * false.
      */
-    bool full() const { return entries.size() >= capacity; }
+    bool full() const { return connectionCount >= capacity; }
 
     /**
      * Returns the maximum number of connections that this registry can hold.
@@ -140,42 +155,47 @@ public:
     std::size_t maxSize() const { return capacity; }
 
 private:
+    static constexpr std::size_t DEFAULT_CAPACITY{100};
+
     /**
-     * Returns an appropriate size of IDPool for the given requested capacity.
+     * Returns a valid registry capacity for the given requested capacity.
      */
-    static std::size_t getPoolSize(std::size_t requestedCapacity)
+    static std::size_t getCapacity(std::size_t requestedCapacity)
     {
         if ((requestedCapacity == 0)
-            || (requestedCapacity > std::numeric_limits<NetworkID>::max())) {
+            || (requestedCapacity
+                > std::numeric_limits<ConnectionHandle::ID>::max())) {
             LOG_INFO(
-                "Invalid connection registry capacity: %zu. Defaulting to 100.",
-                requestedCapacity.);
-            return 100 + 1;
+                "Invalid connection registry capacity: %zu. Defaulting to "
+                "%zu.",
+                requestedCapacity, DEFAULT_CAPACITY);
+            return DEFAULT_CAPACITY;
         }
-        return requestedCapacity + 1;
+        return requestedCapacity;
     }
 
     struct Entry {
-        Uint64 generation;
-        std::shared_ptr<ConnectionType> connection;
+        ConnectionHandle::Generation generation{1};
+        std::shared_ptr<ConnectionType> connection{};
     };
 
     /**
-     * Returns the next generation to use for a connection handle.
+     * Returns the generation following the given generation, skipping 0.
      */
-    Uint64 reserveGeneration()
+    static ConnectionHandle::Generation
+        nextGeneration(ConnectionHandle::Generation generation)
     {
-        Uint64 generation{nextGeneration++};
-        if (nextGeneration == 0) {
-            nextGeneration = 1;
+        if (generation
+            == std::numeric_limits<ConnectionHandle::Generation>::max()) {
+            return 1;
         }
-        return generation;
+        return static_cast<ConnectionHandle::Generation>(generation + 1);
     }
 
     std::size_t capacity;
-    IDPool networkIDPool;
-    std::unordered_map<NetworkID, Entry> entries;
-    Uint64 nextGeneration;
+    IDPool connectionIDPool;
+    std::vector<Entry> entries;
+    std::size_t connectionCount;
 };
 
 } // namespace AM

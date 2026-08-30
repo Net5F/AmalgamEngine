@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AccountMessageType.h"
+#include "AccountClientMessageType.h"
 
 namespace AM
 {
@@ -9,10 +9,10 @@ namespace AM
  * Sent by the server in response to a logout request.
  */
 struct LogoutResponse {
-    // The AccountMessageType enum value that this message corresponds to.
+    // The message enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr AccountMessageType MESSAGE_TYPE{
-        AccountMessageType::LogoutResponse};
+    static constexpr AccountClientMessageType MESSAGE_TYPE{
+        AccountClientMessageType::LogoutResponse};
 
     enum Result : Uint8 {
         Success,

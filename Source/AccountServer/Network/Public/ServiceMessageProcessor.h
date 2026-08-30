@@ -1,8 +1,10 @@
 #pragma once
 
 #include "AccountDefs.h"
+#include "AccountServiceMessageType.h"
+#include "ConnectionHandle.h"
 #include "ConsumeWorldTicketResponse.h"
-#include "NetworkID.h"
+#include "asio/error_code.hpp"
 #include "asio/io_context.hpp"
 #include "asio/thread_pool.hpp"
 #include <SDL3/SDL_stdinc.h>
@@ -28,21 +30,26 @@ class Database;
 class ServiceMessageProcessor
 {
 public:
-    using SendCallback = std::function<void(NetworkID, BinaryBufferSharedPtr)>;
+    using SendCallback
+        = std::function<void(ConnectionHandle, BinaryBufferSharedPtr)>;
+    using DisconnectCallback = std::function<void(
+        ConnectionHandle, const asio::error_code&)>;
 
     ServiceMessageProcessor(asio::io_context& inNetworkIoContext,
                             asio::thread_pool& inDatabasePool,
-                            Database& inDatabase, SendCallback sendCallback);
+                            Database& inDatabase, SendCallback sendCallback,
+                            DisconnectCallback disconnectCallback);
 
     /** Deserializes and handles a message received from a trusted service. */
-    void processReceivedMessage(NetworkID netID, Uint8 messageType,
+    void processReceivedMessage(ConnectionHandle handle,
+                                AccountServiceMessageType messageType,
                                 std::span<const Uint8> messageBuffer);
 
 private:
     /** Must match token_hash in the service_tickets table. */
     static constexpr std::size_t SERVICE_TICKET_HASH_BYTES{32};
 
-    void handleMessage(NetworkID netID,
+    void handleMessage(ConnectionHandle handle,
                        const ConsumeWorldTicketRequest& message);
 
     ConsumeWorldTicketResponse consumeWorldTicket(
@@ -50,7 +57,8 @@ private:
         Sint64 targetServerID);
 
     template<typename Message>
-    void handleMessage(NetworkID netID, std::span<const Uint8> messageBuffer);
+    void handleMessage(ConnectionHandle handle,
+                       std::span<const Uint8> messageBuffer);
 
     template<typename Message>
     BinaryBufferSharedPtr serializeMessage(const Message& message);
@@ -59,6 +67,7 @@ private:
     asio::thread_pool& databasePool;
     Database& database;
     SendCallback sendCallback;
+    DisconnectCallback disconnectCallback;
 };
 
 } // End namespace AccountServer

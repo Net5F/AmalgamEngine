@@ -15,6 +15,7 @@ TlsTransport::TlsTransport(asio::ip::tcp::socket socket,
                            const ClassConfig& config)
 try
 : stream{std::move(socket), sslContext}
+, handshakeTimeoutS{config.handshakeTimeoutS}
 , maxQueuedWriteBytes{config.maxQueuedWriteBytes}
 , maxQueuedMessages{config.maxQueuedMessages}
 , handshakeTimer{stream.get_executor()}
@@ -50,7 +51,7 @@ void TlsTransport::setFailureCallback(FailureCallback inFailureCallback)
     failureCallback = std::move(inFailureCallback);
 }
 
-bool TlsTransport::handshake(HandshakeType type, double timeoutS,
+bool TlsTransport::handshake(HandshakeType type,
                              SuccessCallback successCallback)
 {
     if (closed) {
@@ -60,7 +61,7 @@ bool TlsTransport::handshake(HandshakeType type, double timeoutS,
     try {
         handshakeTimer.expires_after(
             std::chrono::duration_cast<asio::steady_timer::duration>(
-                std::chrono::duration<double>(timeoutS)));
+                std::chrono::duration<double>(handshakeTimeoutS)));
         handshakeTimer.async_wait([self](const asio::error_code& error) {
             if (!error) {
                 self->reportFailure(

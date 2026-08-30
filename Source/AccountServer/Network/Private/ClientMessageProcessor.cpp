@@ -4,19 +4,21 @@
 #include "Deserialize.h"
 #include "Serialize.h"
 #include "ByteTools.h"
-#include "AccountMessageType.h"
+#include "AccountClientMessageType.h"
 #include "RegisterRequest.h"
 #include "LoginRequest.h"
 #include "LogoutRequest.h"
 #include "RequestWorldTicket.h"
 #include "AccountHelpers.h"
 #include "Log.h"
+#include "asio/error.hpp"
 #include "asio/post.hpp"
 #include "sodium.h"
 #include <algorithm>
 #include <array>
 #include <chrono>
 #include <span>
+#include <utility>
 
 namespace AM
 {
@@ -25,11 +27,13 @@ namespace AccountServer
 
 ClientMessageProcessor::ClientMessageProcessor(
     asio::io_context& inNetworkIoContext, asio::thread_pool& inDatabasePool,
-    Database& inDatabase, SendCallback inSendCallback)
+    Database& inDatabase, SendCallback inSendCallback,
+    DisconnectCallback inDisconnectCallback)
 : networkIoContext{inNetworkIoContext}
 , databasePool{inDatabasePool}
 , database{inDatabase}
-, sendCallback{inSendCallback}
+, sendCallback{std::move(inSendCallback)}
+, disconnectCallback{std::move(inDisconnectCallback)}
 , dummyPasswordHash{}
 {
     // Generate the dummy hash.
@@ -43,43 +47,48 @@ ClientMessageProcessor::ClientMessageProcessor(
 }
 
 void ClientMessageProcessor::processReceivedMessage(
-    NetworkID netID, Uint8 messageType, std::span<const Uint8> messageBuffer)
+    ConnectionHandle handle, AccountClientMessageType messageType,
+    std::span<const Uint8> messageBuffer)
 {
     // Match the enum values to their message types.
-    AccountMessageType accountMessageType{
-        static_cast<AccountMessageType>(messageType)};
-    switch (accountMessageType) {
-        case AccountMessageType::RegisterRequest: {
-            handleMessage<RegisterRequest>(netID, messageBuffer);
+    switch (messageType) {
+        case AccountClientMessageType::RegisterRequest: {
+            handleMessage<RegisterRequest>(handle, messageBuffer);
             break;
         }
-        case AccountMessageType::LoginRequest: {
-            handleMessage<LoginRequest>(netID, messageBuffer);
+        case AccountClientMessageType::LoginRequest: {
+            handleMessage<LoginRequest>(handle, messageBuffer);
             break;
         }
-        case AccountMessageType::LogoutRequest: {
-            handleMessage<LogoutRequest>(netID, messageBuffer);
+        case AccountClientMessageType::LogoutRequest: {
+            handleMessage<LogoutRequest>(handle, messageBuffer);
             break;
         }
-        case AccountMessageType::RequestWorldTicket: {
-            handleMessage<RequestWorldTicket>(netID, messageBuffer);
+        case AccountClientMessageType::RequestWorldTicket: {
+            handleMessage<RequestWorldTicket>(handle, messageBuffer);
             break;
         }
         default: {
-            LOG_FATAL("Received unexpected message type: %u", messageType);
+            LOG_INFO("Received unexpected client message type: %u",
+                     static_cast<unsigned int>(messageType));
+            if (disconnectCallback) {
+                disconnectCallback(
+                    handle, asio::error::make_error_code(
+                                asio::error::invalid_argument));
+            }
             break;
         }
     }
 }
 
-void ClientMessageProcessor::handleMessage(NetworkID netID,
+void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
                                            const RegisterRequest& message)
 {
     // Validate the username.
     AccountHelpers::ValidateResult usernameIsValid{
         AccountHelpers::validateUsername(message.username)};
     if (usernameIsValid != AccountHelpers::ValidateResult::Success) {
-        sendCallback(netID, serializeMessage(RegisterResponse{
+        sendCallback(handle, serializeMessage(RegisterResponse{
                                 .result{RegisterResponse::InvalidUsername}}));
         return;
     }
@@ -88,29 +97,29 @@ void ClientMessageProcessor::handleMessage(NetworkID netID,
     AccountHelpers::ValidateResult passwordIsValid{
         AccountHelpers::validatePassword(message.password)};
     if (passwordIsValid != AccountHelpers::ValidateResult::Success) {
-        sendCallback(netID, serializeMessage(RegisterResponse{
+        sendCallback(handle, serializeMessage(RegisterResponse{
                                 .result{RegisterResponse::InvalidPassword}}));
         return;
     }
 
     // Note: We use a DB worker so we don't hold up the message thread.
-    asio::post(databasePool, [this, netID, username = message.username,
+    asio::post(databasePool, [this, handle, username = message.username,
                               password = message.password]() {
         // Attempt to register the account.
         RegisterResponse response{registerAccount(username, password)};
 
         // Send the response (must be done on the network thread).
         asio::post(networkIoContext,
-                   [this, netID, response = std::move(response)]() {
-                       sendCallback(netID, serializeMessage(response));
+                   [this, handle, response = std::move(response)]() {
+                       sendCallback(handle, serializeMessage(response));
                    });
     });
 }
 
-void ClientMessageProcessor::handleMessage(NetworkID netID,
+void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
                                            const LoginRequest& message)
 {
-    asio::post(databasePool, [this, netID, username = message.username,
+    asio::post(databasePool, [this, handle, username = message.username,
                               password = message.password]() {
         // Attempt to create a login session for the account.
         LoginResponse response{
@@ -118,41 +127,41 @@ void ClientMessageProcessor::handleMessage(NetworkID netID,
 
         // Send the response (must be done on the network thread).
         asio::post(networkIoContext,
-                   [this, netID, response = std::move(response)]() {
-                       sendCallback(netID, serializeMessage(response));
+                   [this, handle, response = std::move(response)]() {
+                       sendCallback(handle, serializeMessage(response));
                    });
     });
 }
 
-void ClientMessageProcessor::handleMessage(NetworkID netID,
+void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
                                            const LogoutRequest& message)
 {
     asio::post(databasePool,
-               [this, netID, sessionToken = message.sessionToken]() {
+               [this, handle, sessionToken = message.sessionToken]() {
         LogoutResponse response{logoutSession(sessionToken)};
 
         // Send the response (must be done on the network thread).
         asio::post(networkIoContext,
-                   [this, netID, response = std::move(response)]() {
-                       sendCallback(netID, serializeMessage(response));
+                   [this, handle, response = std::move(response)]() {
+                       sendCallback(handle, serializeMessage(response));
                    });
     });
 }
 
 void ClientMessageProcessor::handleMessage(
-    NetworkID netID, const RequestWorldTicket& message)
+    ConnectionHandle handle, const RequestWorldTicket& message)
 {
     asio::post(
         databasePool,
-        [this, netID, accountSessionToken = message.accountSessionToken,
+        [this, handle, accountSessionToken = message.accountSessionToken,
          targetServerID = message.targetServerID]() {
             ServiceTicketIssued response{
                 issueWorldTicket(accountSessionToken, targetServerID)};
 
             // Send the response (must be done on the network thread).
             asio::post(networkIoContext,
-                       [this, netID, response = std::move(response)]() {
-                           sendCallback(netID, serializeMessage(response));
+                       [this, handle, response = std::move(response)]() {
+                           sendCallback(handle, serializeMessage(response));
                        });
         });
 }
@@ -512,15 +521,22 @@ ClientMessageProcessor::SessionValidation
 
 template<typename Message>
 void ClientMessageProcessor::handleMessage(
-    NetworkID netID, std::span<const Uint8> messageBuffer)
+    ConnectionHandle handle, std::span<const Uint8> messageBuffer)
 {
     // Deserialize the message.
     Message message{};
-    Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
-                            message);
+    if (!Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
+                                 message)) {
+        if (disconnectCallback) {
+            disconnectCallback(
+                handle, asio::error::make_error_code(
+                            asio::error::invalid_argument));
+        }
+        return;
+    }
 
     // Pass it to the appropriate handler.
-    handleMessage(netID, message);
+    handleMessage(handle, message);
 }
 
 template<typename Message>

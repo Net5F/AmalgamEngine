@@ -9,7 +9,6 @@ namespace AM
 namespace AccountServer
 {
 
-// TODO: We can start filling this out
 /**
  */
 class AccountServiceEndpoint
@@ -17,8 +16,8 @@ class AccountServiceEndpoint
 public:
 
 private:
-    using Connection = SimpleConnection<AccountServiceMessageType>;
-    ConnectionRegistry<Connection> connectionRegistry;
+    //using Connection = SimpleConnection<AccountServiceMessageType>;
+    //ConnectionRegistry<Connection> connectionRegistry;
 };
 
 } // End namespace AccountServer

@@ -33,6 +33,8 @@ public:
         = asio::ssl::stream<asio::ip::tcp::socket>::native_handle_type;
 
     struct ClassConfig {
+        /** How long to wait for a handshake to be completed. */
+        double handshakeTimeoutS{5};
         /** How many bytes we allow to be queued for writing at once. */
         std::size_t maxQueuedWriteBytes{4000};
         /** How many messages we allow to be queued for writing at once. */
@@ -61,10 +63,9 @@ public:
     void setFailureCallback(FailureCallback inFailureCallback);
 
     /**
-     * Performs a TLS handshake, bounded by the given timeout.
+     * Performs a TLS handshake, bounded by config.handshakeTimeoutS.
      */
-    bool handshake(HandshakeType type, double timeoutS,
-                   SuccessCallback successCallback);
+    bool handshake(HandshakeType type, SuccessCallback successCallback);
 
     /**
      * Reads exactly buffer.size() bytes.
@@ -103,6 +104,7 @@ private:
     asio::ssl::stream<asio::ip::tcp::socket> stream;
 
     // See comments in Config above.
+    double handshakeTimeoutS{};
     std::size_t maxQueuedWriteBytes{};
     std::size_t maxQueuedMessages{};
 

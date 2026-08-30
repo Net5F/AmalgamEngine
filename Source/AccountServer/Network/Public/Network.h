@@ -2,6 +2,8 @@
 
 #include "AccountClientEndpoint.h"
 #include "AccountServiceEndpoint.h"
+#include "asio/ssl/context.hpp"
+#include "asio/thread_pool.hpp"
 
 namespace asio
 {
@@ -23,6 +25,8 @@ class Network
 public:
     Network(asio::io_context& inIoContext, Database& inDatabase);
 
+    ~Network();
+
     /**
      * Starts our network endpoint management.
      */
@@ -31,6 +35,10 @@ public:
 private:
     /** Shared network event queue for all endpoints. */
     asio::io_context& ioContext;
+
+    asio::ssl::context sslContext;
+
+    asio::thread_pool databasePool;
 
     AccountClientEndpoint accountClientEndpoint;
 

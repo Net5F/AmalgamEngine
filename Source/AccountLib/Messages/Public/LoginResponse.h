@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AccountDefs.h"
-#include "AccountMessageType.h"
+#include "AccountClientMessageType.h"
 #include <array>
 
 namespace AM
@@ -11,10 +11,10 @@ namespace AM
  * Sent by the server in response to a login request.
  */
 struct LoginResponse {
-    // The AccountMessageType enum value that this message corresponds to.
+    // The message enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr AccountMessageType MESSAGE_TYPE{
-        AccountMessageType::LoginResponse};
+    static constexpr AccountClientMessageType MESSAGE_TYPE{
+        AccountClientMessageType::LoginResponse};
 
     enum Result : Uint8 {
         Success,

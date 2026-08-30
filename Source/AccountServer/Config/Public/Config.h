@@ -16,7 +16,10 @@ public:
     // Network
     //-------------------------------------------------------------------------
     /** The port that the server listens for incoming client connections on. */
-    static constexpr unsigned int SERVER_PORT{41498};
+    static constexpr unsigned int SERVER_CLIENT_PORT{41498};
+
+    /** The port that the server listens for incoming service connections on. */
+    static constexpr unsigned int SERVER_SERVICE_PORT{41497};
 
     /** The maximum number of clients that we will allow at once. */
     static constexpr unsigned int MAX_CLIENTS{1000};
@@ -38,11 +41,19 @@ public:
 
     /** The maximum amount of outgoing bytes we'll allow at once before 
         considering the client to be hostile and closing the connection. */
-    static constexpr double MAX_QUEUED_WRITE_BYTES{10};
+    static constexpr std::size_t MAX_QUEUED_WRITE_BYTES{4000};
 
     /** The maximum number of outgoing writes we'll allow at once before 
         considering the client to be hostile and closing the connection. */
-    static constexpr double MAX_QUEUED_WRITES{10};
+    static constexpr std::size_t MAX_QUEUED_WRITES{10};
+
+    /** The max size, in bytes, for an incoming message payload.
+        Kept to a reasonable size to minimize data usage per connection. */
+    static constexpr std::size_t MAX_READ_PAYLOAD_SIZE{500};
+
+    /** The max size, in bytes, for an outgoing message payload.
+        Kept to a reasonable size to minimize data usage per connection. */
+    static constexpr std::size_t MAX_WRITE_PAYLOAD_SIZE{500};
 
     //-------------------------------------------------------------------------
     // Account sessions

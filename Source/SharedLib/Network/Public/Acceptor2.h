@@ -76,7 +76,7 @@ private:
      * We use a separate class so it can be owned as a shared_ptr by the async
      * context, making it safe to call, even during shutdown.
      */
-    struct AcceptLoop : public std::enable_shared_from_this<State> {
+    struct AcceptLoop : public std::enable_shared_from_this<AcceptLoop> {
         AcceptLoop(asio::io_context& ioContext,
                    asio::ip::tcp::endpoint inEndpoint,
                    ConnectionFactory inConnectionFactory,
@@ -154,7 +154,7 @@ private:
                 return;
             }
 
-            std::shared_ptr<State> self{this->shared_from_this()};
+            std::shared_ptr<AcceptLoop> self{this->shared_from_this()};
             acceptor.async_accept([self](const asio::error_code& error,
                                          asio::ip::tcp::socket socket) {
                 if (!self->running) {

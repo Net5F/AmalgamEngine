@@ -33,7 +33,7 @@ class SimpleConnection : public Connection
 {
 public:
     using MessageCallback
-        = std::function<bool(MessageType, std::span<const Uint8>)>;
+        = std::function<void(MessageType, std::span<const Uint8>)>;
 
     struct ClassConfig {
         TlsTransport::ClassConfig tlsTransportConfig{};
@@ -93,6 +93,19 @@ public:
         }
 
         return tlsTransport->asyncWrite(messageFramer.frameMessage(message));
+    }
+
+    /**
+     * Sends a message that has already been framed for this connection's
+     * protocol.
+     */
+    bool sendFramed(BinaryBufferSharedPtr message)
+    {
+        if (!isReady()) {
+            return false;
+        }
+
+        return tlsTransport->asyncWrite(std::move(message));
     }
 
 private:
@@ -215,12 +228,12 @@ private:
 
         // A message was completed. Pass it to the registered callback.
         const auto& message{composeResult.message};
-        if (!messageCallback
-            || !messageCallback(message.type, message.payload)) {
+        if (!messageCallback) {
             disconnect(asio::error::make_error_code(
                 asio::error::invalid_argument));
             return;
         }
+        messageCallback(message.type, message.payload);
         if (!isReady()) {
             return;
         }

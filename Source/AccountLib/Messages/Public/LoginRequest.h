@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AccountMessageType.h"
+#include "AccountClientMessageType.h"
 #include <string>
 
 namespace AM
@@ -10,10 +10,10 @@ namespace AM
  * Sent by the client to log into an account.
  */
 struct LoginRequest {
-    // The AccountMessageType enum value that this message corresponds to.
+    // The message enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr AccountMessageType MESSAGE_TYPE{
-        AccountMessageType::LoginRequest};
+    static constexpr AccountClientMessageType MESSAGE_TYPE{
+        AccountClientMessageType::LoginRequest};
 
     /** Used as a "we should never hit this" cap on username length. */
     static constexpr std::size_t USERNAME_MAX{100};

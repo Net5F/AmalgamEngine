@@ -23,8 +23,9 @@ Repose is our first template project. If you'd like to make a world, you can for
 ## Building
 Note: You rarely need to build the engine by itself, this section just provides canonical instructions. Instead, see the Template Projects section.
 
-Amalgam Engine requires the OpenSSL 3.5 development libraries. If they are
-installed outside your platform's standard search paths, pass
+Amalgam Engine requires the OpenSSL 3.5.x LTS development libraries. Other
+OpenSSL release lines are not currently supported. If OpenSSL is installed
+outside your platform's standard search paths, pass
 `-DOPENSSL_ROOT_DIR=/path/to/openssl` when configuring CMake.
 
 ### Windows

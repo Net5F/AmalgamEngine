@@ -1,11 +1,12 @@
 #include "ServiceMessageProcessor.h"
-#include "AccountMessageType.h"
+#include "AccountServiceMessageType.h"
 #include "ByteTools.h"
 #include "ConsumeWorldTicketRequest.h"
 #include "Database.h"
 #include "Deserialize.h"
 #include "Log.h"
 #include "Serialize.h"
+#include "asio/error.hpp"
 #include "asio/post.hpp"
 #include "sodium.h"
 #include <memory>
@@ -19,45 +20,51 @@ namespace AccountServer
 
 ServiceMessageProcessor::ServiceMessageProcessor(
     asio::io_context& inNetworkIoContext, asio::thread_pool& inDatabasePool,
-    Database& inDatabase, SendCallback inSendCallback)
+    Database& inDatabase, SendCallback inSendCallback,
+    DisconnectCallback inDisconnectCallback)
 : networkIoContext{inNetworkIoContext}
 , databasePool{inDatabasePool}
 , database{inDatabase}
 , sendCallback{std::move(inSendCallback)}
+, disconnectCallback{std::move(inDisconnectCallback)}
 {
 }
 
 void ServiceMessageProcessor::processReceivedMessage(
-    NetworkID netID, Uint8 messageType, std::span<const Uint8> messageBuffer)
+    ConnectionHandle handle, AccountServiceMessageType messageType,
+    std::span<const Uint8> messageBuffer)
 {
-    AccountMessageType accountMessageType{
-        static_cast<AccountMessageType>(messageType)};
-    switch (accountMessageType) {
-        case AccountMessageType::ConsumeWorldTicketRequest: {
-            handleMessage<ConsumeWorldTicketRequest>(netID, messageBuffer);
+    switch (messageType) {
+        case AccountServiceMessageType::ConsumeWorldTicketRequest: {
+            handleMessage<ConsumeWorldTicketRequest>(handle, messageBuffer);
             break;
         }
         default: {
-            LOG_FATAL("Received unexpected service message type: %u",
-                      messageType);
+            LOG_INFO("Received unexpected service message type: %u",
+                     static_cast<unsigned int>(messageType));
+            if (disconnectCallback) {
+                disconnectCallback(
+                    handle, asio::error::make_error_code(
+                                asio::error::invalid_argument));
+            }
             break;
         }
     }
 }
 
 void ServiceMessageProcessor::handleMessage(
-    NetworkID netID, const ConsumeWorldTicketRequest& message)
+    ConnectionHandle handle, const ConsumeWorldTicketRequest& message)
 {
     asio::post(
         databasePool,
-        [this, netID, ticket = message.ticket,
+        [this, handle, ticket = message.ticket,
          targetServerID = message.targetServerID]() {
             ConsumeWorldTicketResponse response{
                 consumeWorldTicket(ticket, targetServerID)};
 
             asio::post(networkIoContext,
-                       [this, netID, response = std::move(response)]() {
-                           sendCallback(netID, serializeMessage(response));
+                       [this, handle, response = std::move(response)]() {
+                           sendCallback(handle, serializeMessage(response));
                        });
         });
 }
@@ -104,12 +111,19 @@ ConsumeWorldTicketResponse ServiceMessageProcessor::consumeWorldTicket(
 
 template<typename Message>
 void ServiceMessageProcessor::handleMessage(
-    NetworkID netID, std::span<const Uint8> messageBuffer)
+    ConnectionHandle handle, std::span<const Uint8> messageBuffer)
 {
     Message message{};
-    Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
-                            message);
-    handleMessage(netID, message);
+    if (!Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
+                                 message)) {
+        if (disconnectCallback) {
+            disconnectCallback(
+                handle, asio::error::make_error_code(
+                            asio::error::invalid_argument));
+        }
+        return;
+    }
+    handleMessage(handle, message);
 }
 
 template<typename Message>
