@@ -302,7 +302,7 @@ void Database::initTables()
             // Since we're only storing 1 value in this table, we init the row
             // here so we can use UPDATEs later.
             backupDatabase.exec(
-                "INSERT INTO entity_stored_value_id_map VALUES('')");
+                "INSERT INTO entity_stored_value_id_map VALUES(X'')");
         }
 
         // Global stored values, stored as a single serialized map.
@@ -316,7 +316,7 @@ void Database::initTables()
             // Since we're only storing 1 value in this table, we init the row
             // here so we can use UPDATEs later.
             backupDatabase.exec(
-                "INSERT INTO global_stored_value_map VALUES('')");
+                "INSERT INTO global_stored_value_map VALUES(X'')");
         }
     } catch (std::exception& e) {
         LOG_ERROR("Failed to init table: %s", e.what());

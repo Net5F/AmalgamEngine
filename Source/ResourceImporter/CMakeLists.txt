@@ -42,11 +42,12 @@ endif()
 file(COPY ${PROJECT_SOURCE_DIR}/Resources/ResourceImporter/Common/Assets/
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Assets/)
 
-# On Windows, copy the SDL3 DLLs into the build folder so we can run our executable.
+# On Windows, copy runtime DLLs into the build folder so we can run our executable.
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_custom_command(TARGET ResourceImporter POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			$<TARGET_RUNTIME_DLLS:ResourceImporter>
+			${AM_OPENSSL_RUNTIME_DLLS}
 			$<TARGET_FILE_DIR:ResourceImporter>
 		COMMAND_EXPAND_LISTS
 	)

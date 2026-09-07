@@ -76,7 +76,8 @@ void ItemSystem::processItemUpdates()
         if (!(itemData.getItem(resultItemID))
             || (itemData.getItemVersion(resultItemID)
                 < combineItems.resultItemVersion)) {
-            network.serializeAndSend(ItemDataRequest{resultItemID});
+            network.worldClientEndpoint.serializeAndSend(
+                ItemDataRequest{resultItemID});
         }
     }
 }

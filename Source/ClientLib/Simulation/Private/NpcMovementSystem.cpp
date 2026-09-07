@@ -43,7 +43,7 @@ void NpcMovementSystem::updateNpcs()
 
     // While we haven't reached the desired tick and have more data to process.
     Uint32 desiredTick{simulation.getReplicationTick()};
-    Uint32 lastReceivedTick{network.getLastReceivedTick()};
+    Uint32 lastReceivedTick{network.worldClientEndpoint.getLastReceivedTick()};
     while ((lastProcessedTick < desiredTick)
            && (lastProcessedTick < lastReceivedTick)) {
         // Move all NPCs as if their inputs didn't change.

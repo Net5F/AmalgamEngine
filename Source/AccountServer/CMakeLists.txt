@@ -37,11 +37,12 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(AccountServer PUBLIC /W3 /permissive-)
 endif()
 
-# On Windows, copy the SDL3 DLLs into the build folder so we can run our executable.
+# On Windows, copy runtime DLLs into the build folder so we can run our executable.
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_custom_command(TARGET AccountServer POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			$<TARGET_RUNTIME_DLLS:AccountServer>
+			${AM_OPENSSL_RUNTIME_DLLS}
 			$<TARGET_FILE_DIR:AccountServer>
 		COMMAND_EXPAND_LISTS
 	)

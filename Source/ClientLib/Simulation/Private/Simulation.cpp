@@ -42,7 +42,7 @@ Simulation::Simulation(const SimulationContext& inSimContext)
 {
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
-    network.registerCurrentTickPtr(&currentTick);
+    network.worldClientEndpoint.registerCurrentTickPtr(&currentTick);
 
     // Initialize our systems to prepare them to run.
     initializeSystems();
@@ -105,7 +105,7 @@ void Simulation::tick()
     // If we're online, apply any adjustments that we receive from the
     // server.
     if (!Config::RUN_OFFLINE) {
-        int adjustment{network.transferTickAdjustment()};
+        int adjustment{network.worldClientEndpoint.transferTickAdjustment()};
         if (adjustment != 0) {
             targetTick += adjustment;
 

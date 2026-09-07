@@ -20,8 +20,12 @@
   // The application framerate.
   "framesPerSecond": 60,
 
-  // The IP address and port of the simulation server.
+  // The IP address and port of the WorldServer.
   "serverIP": "104.237.139.17",
   // "serverIP": "127.0.0.1",
-  "serverPort": 41499
+  "serverPort": 41499,
+
+  // The IP address and port of the AccountServer.
+  "accountServerIP": "127.0.0.1",
+  "accountServerPort": 41498
 }

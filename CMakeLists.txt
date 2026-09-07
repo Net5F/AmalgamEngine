@@ -149,6 +149,30 @@ include("${PROJECT_SOURCE_DIR}/CMake/asio.cmake")
 # release line.
 find_package(OpenSSL 3.5...<3.6 REQUIRED COMPONENTS SSL Crypto)
 
+# FindOpenSSL exposes its Windows import libraries, but not the corresponding
+# DLLs, so TARGET_RUNTIME_DLLS can't discover them for our post-build copies.
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT OPENSSL_USE_STATIC_LIBS)
+    get_filename_component(AM_OPENSSL_ROOT "${OPENSSL_INCLUDE_DIR}" DIRECTORY)
+    find_file(AM_OPENSSL_CRYPTO_RUNTIME
+        NAMES libcrypto-3-x64.dll libcrypto-3.dll
+        PATHS "${AM_OPENSSL_ROOT}" "${AM_OPENSSL_ROOT}/bin"
+        NO_DEFAULT_PATH)
+    find_file(AM_OPENSSL_SSL_RUNTIME
+        NAMES libssl-3-x64.dll libssl-3.dll
+        PATHS "${AM_OPENSSL_ROOT}" "${AM_OPENSSL_ROOT}/bin"
+        NO_DEFAULT_PATH)
+
+    if (NOT AM_OPENSSL_CRYPTO_RUNTIME OR NOT AM_OPENSSL_SSL_RUNTIME)
+        message(FATAL_ERROR
+            "Could not find the OpenSSL runtime DLLs under ${AM_OPENSSL_ROOT}")
+    endif()
+
+    set(AM_OPENSSL_RUNTIME_DLLS
+        "${AM_OPENSSL_CRYPTO_RUNTIME}"
+        "${AM_OPENSSL_SSL_RUNTIME}"
+        CACHE INTERNAL "OpenSSL runtime DLLs")
+endif()
+
 # Configure libsodium.
 include("${PROJECT_SOURCE_DIR}/CMake/libsodium.cmake")
 

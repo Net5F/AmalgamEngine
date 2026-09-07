@@ -19,6 +19,8 @@ UserConfig::UserConfig()
 , frameTimestepS{}
 , serverIP{}
 , serverPort{}
+, accountServerIP{}
+, accountServerPort{}
 {
     // Open the file.
     std::string fullPath{Paths::BASE_PATH};
@@ -111,6 +113,17 @@ void UserConfig::setServerAddress(const ServerAddress& inServerAddress)
     serverPort = inServerAddress.port;
 }
 
+ServerAddress UserConfig::getAccountServerAddress()
+{
+    return {accountServerIP, accountServerPort};
+}
+
+void UserConfig::setAccountServerAddress(const ServerAddress& inServerAddress)
+{
+    accountServerIP = inServerAddress.IP;
+    accountServerPort = inServerAddress.port;
+}
+
 void UserConfig::init(nlohmann::json& json)
 {
     // Fullscreen mode.
@@ -122,6 +135,10 @@ void UserConfig::init(nlohmann::json& json)
 
     // Server address.
     setServerAddress({json.at("serverIP"), json.at("serverPort")});
+
+    // AccountServer address.
+    setAccountServerAddress(
+        {json.at("accountServerIP"), json.at("accountServerPort")});
 
     // Framerate.
     setFramesPerSecond(json.at("framesPerSecond"));

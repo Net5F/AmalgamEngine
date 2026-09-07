@@ -1,14 +1,21 @@
 target_sources(ClientLib
 	PRIVATE
+		Private/AccountClientEndpoint.cpp
+		Private/AccountMessageProcessor.cpp
 		Private/Network.cpp
 		Private/MessageProcessor.cpp
+		Private/WorldClientEndpoint.cpp
 	PUBLIC
+		Public/AccountClientEndpoint.h
+		Public/AccountConnectionEvent.h
+		Public/AccountMessageProcessor.h
 		Public/ConnectionError.h
 		Public/IMessageProcessorExtension.h
 		Public/MessageProcessor.h
 		Public/MessageProcessorContext.h
 		Public/Network.h
 		Public/PlayerMovementUpdate.h
+		Public/WorldClientEndpoint.h
 )
 
 target_include_directories(ClientLib

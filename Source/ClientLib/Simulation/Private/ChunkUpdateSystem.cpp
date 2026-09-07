@@ -91,7 +91,7 @@ void ChunkUpdateSystem::requestAllInRangeChunks(
     }
 
     // Send the request.
-    network.serializeAndSend(chunkDataRequest);
+    network.worldClientEndpoint.serializeAndSend(chunkDataRequest);
 }
 
 void ChunkUpdateSystem::requestNewInRangeChunks(
@@ -132,7 +132,7 @@ void ChunkUpdateSystem::requestNewInRangeChunks(
     }
 
     // Send the request.
-    network.serializeAndSend(chunkDataRequest);
+    network.worldClientEndpoint.serializeAndSend(chunkDataRequest);
 }
 
 void ChunkUpdateSystem::receiveAndApplyUpdates()

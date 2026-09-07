@@ -54,7 +54,8 @@ Application::Application()
 , rendererContext{sdlRenderer.get(), simulation.getWorld(), userInterface,
                   [&]() { return simCaller.getProgress(); }, graphicData}
 , renderer{rendererContext}
-, networkCaller{std::bind_front(&Network::tick, &network),
+, networkCaller{std::bind_front(&WorldClientEndpoint::tick,
+                                &network.worldClientEndpoint),
                 SharedConfig::CLIENT_NETWORK_TICK_TIMESTEP_S, "Network", true}
 , uiCaller{std::bind_front(&UserInterface::tick, &userInterface),
            Config::UI_TICK_TIMESTEP_S, "UserInterface", true}
@@ -80,9 +81,9 @@ Application::Application()
             break;
         }
         case 1: {
-			SDLHelpers::setWindowFullscreen(sdlWindow.get(),
-											SDL_WINDOW_FULLSCREEN);
-			break;
+            SDLHelpers::setWindowFullscreen(sdlWindow.get(),
+                                            SDL_WINDOW_FULLSCREEN);
+            break;
         }
         // Note: We removed real fullscreen because it was behaving weirdly and
         //       causing network timeouts, and having just windowed and
@@ -107,6 +108,9 @@ void Application::start()
         || !userInterfaceExtension) {
         LOG_FATAL("All extensions must be registered before calling start()");
     }
+
+    // Start the network thread.
+    network.start();
 
     // Prime the timers so they don't start at 0.
     simCaller.initTimer();

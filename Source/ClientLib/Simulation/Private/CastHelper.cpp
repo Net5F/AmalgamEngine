@@ -93,7 +93,7 @@ CastFailureType
                         .endTick{0}});
 
     // Send a cast request.
-    network.serializeAndSend(CastRequest{
+    network.worldClientEndpoint.serializeAndSend(CastRequest{
         simulation.getCurrentTick(), castable->castableID, params.slotIndex,
         params.targetEntity, params.targetPosition});
 
@@ -132,7 +132,7 @@ CastFailureType
                         .endTick{0}});
 
     // Send a cast request.
-    network.serializeAndSend(
+    network.worldClientEndpoint.serializeAndSend(
         CastRequest{simulation.getCurrentTick(), castable->castableID, 0,
                     params.targetEntity, params.targetPosition});
 
@@ -170,7 +170,7 @@ CastFailureType CastHelper::castSpell(const CastSpellParams& params)
                         .endTick{0}});
 
     // Send a cast request.
-    network.serializeAndSend(
+    network.worldClientEndpoint.serializeAndSend(
         CastRequest{simulation.getCurrentTick(), castable->castableID, 0,
                     params.targetEntity, params.targetPosition});
 
