@@ -5,8 +5,14 @@ Binaries/
 /Output/
 *.log
 *.swp
+*.crt
+*.key
 .vs/
 SystemPATHBackup.txt
+
+# Engine-local credentials are intentionally shared for development builds.
+!TlsCredentials/Local/*.crt
+!TlsCredentials/Local/*.key
 
 # MacOS junk files
 .DS_Store

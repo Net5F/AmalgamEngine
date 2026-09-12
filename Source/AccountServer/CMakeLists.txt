@@ -37,6 +37,14 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(AccountServer PUBLIC /W3 /permissive-)
 endif()
 
+# Copy local TLS credentials to the build directory.
+file(COPY
+    "${AmalgamEngine_SOURCE_DIR}/TlsCredentials/Local/account-server.crt"
+    "${AmalgamEngine_SOURCE_DIR}/TlsCredentials/Local/account-server.key"
+    "${AmalgamEngine_SOURCE_DIR}/TlsCredentials/Local/chat-server.pin"
+    "${AmalgamEngine_SOURCE_DIR}/TlsCredentials/Local/world-server.pin"
+    DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+
 # On Windows, copy runtime DLLs into the build folder so we can run our executable.
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_custom_command(TARGET AccountServer POST_BUILD
@@ -58,8 +66,15 @@ add_subdirectory(Network)
 # Install Step (Packaging the application)
 ###############################################################################
 # Define an install step that copies the executable and all resources.
+set(ACCOUNT_SERVER_REMOTE_TLS_PINS
+    "${CMAKE_SOURCE_DIR}/TlsCredentials/Remote/chat-server.pin"
+    "${CMAKE_SOURCE_DIR}/TlsCredentials/Remote/world-server.pin")
+include("${AmalgamEngine_SOURCE_DIR}/CMake/am_check_tls_pins_exist.cmake")
+am_check_tls_pins_exist(${ACCOUNT_SERVER_REMOTE_TLS_PINS})
+install(FILES ${ACCOUNT_SERVER_REMOTE_TLS_PINS}
+        DESTINATION ${CMAKE_PROJECT_NAME}/AccountServer)
+
 install(TARGETS AccountServer
-        RUNTIME_DEPENDENCY_SET account_server_deps
         RUNTIME DESTINATION ${CMAKE_PROJECT_NAME}/AccountServer)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/AccountServer/Common/
         DESTINATION ${CMAKE_PROJECT_NAME}/AccountServer)
@@ -69,9 +84,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/AccountServer/Windows/
             DESTINATION ${CMAKE_PROJECT_NAME}/AccountServer)
 
-    # On Windows, we provide the SDL3 DLLs.
-    install(RUNTIME_DEPENDENCY_SET account_server_deps
-		    DESTINATION ${CMAKE_PROJECT_NAME}/AccountServer)
+    # On Windows, provide the SDL3 DLLs.
+    install(FILES
+            ${AM_SDL3_RUNTIME_DLL}
+            ${AM_SDL3_IMAGE_RUNTIME_DLL}
+            DESTINATION ${CMAKE_PROJECT_NAME}/AccountServer)
+
+    # FindOpenSSL doesn't expose its runtime DLLs as imported targets.
+    install(FILES ${AM_OPENSSL_RUNTIME_DLLS}
+            DESTINATION ${CMAKE_PROJECT_NAME}/AccountServer)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/AccountServer/Linux/
             DESTINATION ${CMAKE_PROJECT_NAME}/AccountServer)

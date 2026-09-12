@@ -21,7 +21,7 @@ Repose is our first template project. If you'd like to make a world, you can for
 [Check out the project and download the latest playable release here.](https://github.com/Net5F/Repose)
 
 ## Building
-Note: You rarely need to build the engine by itself, this section just provides canonical instructions. Instead, see the Template Projects section.
+Note: You rarely need to build the engine by itself. This section provides instructions for building a project.
 
 Amalgam Engine requires the OpenSSL 3.5.x LTS development libraries. Other
 OpenSSL release lines are not currently supported. If OpenSSL is installed
@@ -65,8 +65,8 @@ Note: AmalgamEngine requires GCC to build on macOS. Clang / Apple Clang does not
    1. ~~You can optionally add `-DAM_BUILD_RESOURCE_IMPORTER` to build the Resource Importer.~~ Resource Importer doesn't currently build on macOS due to GCC not being able to build with Apple SDK headers which use certain Objective C extensions.
 1. `ninja all`
 
-## Packaging
-Note: You rarely need to package the engine by itself, this section just provides canonical instructions. Instead, see the Template Projects section.
+## Packaging, Deploying
+Note: You rarely need to package the engine by itself. This section provides instructions for packaging a project.
 
 To package the applications in a way that can be shared, first run the desired build. Then, run:
 ```
@@ -76,6 +76,49 @@ cmake --install Build/Windows/Release --prefix Packages/Windows
 where 'Build/Windows/Release' is your desired build to package, and 'Packages/Windows' is your desired output directory.
 
 On Windows, you can use Visual Studio's developer terminal (`Tools` -> `Command Line` -> `Developer Command Prompt`) for easy access to CMake.
+
+Once packaged, you can compress and copy the package to wherever you want to "deploy" your build. This can be somewhere on your machine (if you have a way to let others connect to your machine, e.g. port forwarding), or onto a remote server like a VPS.
+
+## TLS Credentials
+We use TLS to encrypt data and secure connections. Skip to the appropriate section below for your situation, to learn how to set up your TLS credentials.
+
+### Joining an existing project
+During development, you'll likely want to run the client and servers directly from the `Build` directory. This uses local credentials, which are provided by the engine (`AmalgamEngine/TlsCredentials/Local`) and require no extra work on your part. During the CMake configure step, they're automatically copied into your project's Build directory.
+
+Be sure to never copy these local credentials anywhere. They're automatically placed where they need to be.
+
+### Starting a new project
+When you first start a new project, you'll use local credentials (see `Joining an existing project` above).
+
+After you've deployed your first build (see the `Packaging, Deploying` section above), you'll need to generate a set of credentials for it to use:
+
+First, clear out any existing files in your project's `TlsCredentials/Remote` directory (this will allow new files to be generated).
+
+Then, run:
+
+```
+// Note: Also pass `-DOPENSSL_EXECUTABLE=/path/to/openssl` if OpenSSL 3.5.x is not in `PATH`.
+cmake -DPROJECT_DIR=/path/to/your/project -P /path/to/AmalgamEngine/Scripts/GenerateTlsCredentials.cmake
+```
+
+This will generate `.key` and `.crt` files in `TlsCredentials/Remote`. These are the private keys and TLS certs for your Account, Chat, and World servers.
+
+**NOTE: The .key files are private. Do not commit them to your repo or share them. They should only live next to the deployed server executables, and in secure storage.**
+
+When you deploy your servers, copy the following credentials so they're placed in the same directory as the associated executable:
+* account-server.exe
+  * account-server.crt
+  * account-server.key
+* chat-server.exe
+  * chat-server.crt
+  * chat-server.key
+* world-server.exe
+  * world-server.crt
+  * world-server.key
+
+When you run the script, a set of `.pin` files will also be generated. These are public hashes of the `.key` files and should be committed to your repo. During packaging, they'll automatically be copied to the appropriate place, so you don't need to move them manually.
+
+**NOTE: Since the pins are packaged with the client, and each pin is associated with a particular key, losing a .key file means you need to generate a new key/pin and distribute the new pin to your players (or package a new build). It's best to be careful and not lose or delete your .key files.**
 
 ## Contributing
 Contributions are very welcome! Feel free to work on features or bugfixes and submit PRs, they'll all be promptly reviewed. If you're looking for ways to contribute, check the [Task Board](https://trello.com/b/8Z8VoAiX/amalgam-engine-tasks).

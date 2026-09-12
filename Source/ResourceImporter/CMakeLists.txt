@@ -66,7 +66,6 @@ add_subdirectory(Utility)
 ###############################################################################
 # Define an install step that copies the executable and all resources.
 install(TARGETS ResourceImporter
-        RUNTIME_DEPENDENCY_SET resource_importer_deps
         RUNTIME DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/ResourceImporter/Common/
         DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)
@@ -76,9 +75,17 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/ResourceImporter/Windows/
             DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)
 
-    # On Windows, we provide the SDL3 DLLs.
-    install(RUNTIME_DEPENDENCY_SET resource_importer_deps
-		    DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)
+    # On Windows, provide the SDL3 DLLs.
+    install(FILES
+            ${AM_SDL3_RUNTIME_DLL}
+            ${AM_SDL3_IMAGE_RUNTIME_DLL}
+            ${AM_SDL3_MIXER_RUNTIME_DLL}
+            ${AM_SDL3_TTF_RUNTIME_DLL}
+            DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)
+
+    # FindOpenSSL doesn't expose its runtime DLLs as imported targets.
+    install(FILES ${AM_OPENSSL_RUNTIME_DLLS}
+            DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/ResourceImporter/Linux/
             DESTINATION ${CMAKE_PROJECT_NAME}/ResourceImporter)

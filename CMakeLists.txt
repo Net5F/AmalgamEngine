@@ -66,6 +66,33 @@ find_package(SDL3 REQUIRED CONFIG)
 find_package(SDL3_image REQUIRED CONFIG)
 find_package(SDL3_mixer REQUIRED CONFIG)
 find_package(SDL3_ttf REQUIRED CONFIG)
+
+# Record the SDL runtime DLLs so parent projects can package them without
+# recursively scanning the Windows system dependency graph.
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    get_target_property(AM_SDL3_RUNTIME_DLL
+                        SDL3::SDL3-shared IMPORTED_LOCATION)
+    get_target_property(AM_SDL3_IMAGE_RUNTIME_DLL
+                        SDL3_image::SDL3_image-shared IMPORTED_LOCATION)
+    get_target_property(AM_SDL3_MIXER_RUNTIME_DLL
+                        SDL3_mixer::SDL3_mixer-shared IMPORTED_LOCATION)
+    get_target_property(AM_SDL3_TTF_RUNTIME_DLL
+                        SDL3_ttf::SDL3_ttf-shared IMPORTED_LOCATION)
+
+    foreach(SDL_RUNTIME_DLL
+            AM_SDL3_RUNTIME_DLL
+            AM_SDL3_IMAGE_RUNTIME_DLL
+            AM_SDL3_MIXER_RUNTIME_DLL
+            AM_SDL3_TTF_RUNTIME_DLL)
+        if (NOT EXISTS "${${SDL_RUNTIME_DLL}}")
+            message(FATAL_ERROR
+                "Could not find the runtime DLL for ${SDL_RUNTIME_DLL}")
+        endif()
+        set(${SDL_RUNTIME_DLL} "${${SDL_RUNTIME_DLL}}"
+            CACHE INTERNAL "SDL runtime DLL")
+    endforeach()
+endif()
+
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/SDL_net/"
                  "${PROJECT_BINARY_DIR}/Libraries/SDL_net/")
 
