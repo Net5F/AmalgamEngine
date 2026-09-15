@@ -38,6 +38,12 @@ public:
 private:
     void stop();
 
+    /**
+     * Attempts to load the given certificate pin and set it for use.
+     */
+    void loadCertificatePin(const std::string& fileName,
+                            const std::string& serverName);
+
     std::optional<WorkGuard> workGuard;
     std::jthread ioThread;
     bool started;

@@ -1,5 +1,6 @@
 #include "StringTools.h"
 #include <algorithm>
+#include <cctype>
 
 namespace AM
 {
@@ -52,6 +53,31 @@ bool StringTools::pathStartsWith(std::string_view pathA, std::string_view pathB)
         }
 
         if (charA != charB) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool StringTools::isAscii(std::string_view stringToCheck)
+{
+    for (char character : stringToCheck) {
+        unsigned char castChar{static_cast<unsigned char>(character)};
+        if (castChar > 0x7F || castChar < 0x20) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool StringTools::isBase64(std::string_view stringToCheck)
+{
+    for (char character : stringToCheck) {
+        unsigned char castChar{static_cast<unsigned char>(character)};
+        if ((std::isalnum(castChar) == 0) && (character != '+')
+            && (character != '/')) {
             return false;
         }
     }

@@ -14,6 +14,7 @@ target_sources(SharedLib
         Private/SDLWindow.cpp
         Private/StringTools.cpp
         Private/Timer.cpp
+        Private/TlsHelpers.cpp
         Private/Transforms.cpp
     PUBLIC
         Public/AMAssert.h
@@ -34,6 +35,7 @@ target_sources(SharedLib
         Public/SerializeBuffer.h
         Public/StringTools.h
         Public/Timer.h
+        Public/TlsHelpers.h
         Public/Transforms.h
         Public/VariantTools.h
         Public/SDL_Wrappers/SDL.h

@@ -12,6 +12,7 @@ add_library(AmalgamEngine::AccountLib ALIAS AccountLib)
 target_link_libraries(AccountLib
     PUBLIC
         SDL3::SDL3
+        SharedLib
 )
 
 # Compile with C++23.

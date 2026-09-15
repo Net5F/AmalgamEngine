@@ -1,8 +1,9 @@
 target_sources(AccountLib
     PRIVATE
-        Private/Dummy.cpp
+        Private/AccountHelpers.cpp
     PUBLIC
         Public/AccountDefs.h
+        Public/AccountHelpers.h
 )
 
 target_include_directories(AccountLib

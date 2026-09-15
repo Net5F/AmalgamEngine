@@ -1,5 +1,6 @@
 #include "AccountHelpers.h"
 #include "AccountDefs.h"
+#include "StringTools.h"
 
 namespace AM
 {
@@ -16,7 +17,7 @@ AccountHelpers::ValidateResult
         return ValidateResult::TooLong;
     }
 
-    if (!isAscii(username)) {
+    if (!StringTools::isAscii(username)) {
         return ValidateResult::InvalidCharacter;
     }
 
@@ -35,23 +36,11 @@ AccountHelpers::ValidateResult
         return ValidateResult::TooLong;
     }
 
-    if (!isAscii(password)) {
+    if (!StringTools::isAscii(password)) {
         return ValidateResult::InvalidCharacter;
     }
 
     return ValidateResult::Success;
-}
-
-bool AccountHelpers::isAscii(std::string_view stringToCheck)
-{
-    for (char character : stringToCheck) {
-        unsigned char castChar{static_cast<unsigned char>(character)};
-        if (castChar > 0x7F || castChar < 0x20) {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 } // End namespace AccountServer

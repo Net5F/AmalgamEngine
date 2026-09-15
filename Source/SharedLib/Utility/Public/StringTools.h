@@ -36,6 +36,18 @@ public:
      * differences in slash type used ('/' vs '\').
      */
     static bool pathStartsWith(std::string_view pathA, std::string_view pathB);
+
+    /**
+     * Returns true if every character in the given string is within the 
+     * printable ASCII character set.
+     */
+    static bool isAscii(std::string_view string);
+
+    /**
+     * Returns true if every character in the given string is within the 
+     * base 64 character set.
+     */
+    static bool isBase64(std::string_view string);
 };
 
 } // End namespace AM

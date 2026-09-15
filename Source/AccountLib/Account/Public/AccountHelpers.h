@@ -28,11 +28,6 @@ public:
      * @return Success if the given password is valid.
      */
     static ValidateResult validatePassword(std::string_view password);
-
-private:
-    /** Returns true if every character in the given string is within the 
-        printable ASCII character set. */
-    static bool isAscii(std::string_view string);
 };
 
 } // End namespace AccountServer
