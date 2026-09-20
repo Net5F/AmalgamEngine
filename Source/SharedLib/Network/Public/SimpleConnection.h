@@ -96,6 +96,15 @@ public:
     }
 
     /**
+     * Returns the given message, framed for this connection's protocol.
+     */
+    template<typename Message>
+    BinaryBufferSharedPtr frame(const Message& message)
+    {
+        return messageFramer.frameMessage(message);
+    }
+
+    /**
      * Sends a message that has already been framed for this connection's
      * protocol.
      */

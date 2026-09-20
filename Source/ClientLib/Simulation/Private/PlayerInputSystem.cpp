@@ -94,7 +94,7 @@ void PlayerInputSystem::processHeldInputs()
 
     // If our input state has changed, ask the server to apply the new state.
     if (inputHasChanged && !Config::RUN_OFFLINE) {
-        network.worldClientEndpoint.serializeAndSend<InputChangeRequest>(
+        network.worldEndpoint.send<InputChangeRequest>(
             {simulation.getCurrentTick(), playerInput});
     }
 }

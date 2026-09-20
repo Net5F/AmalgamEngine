@@ -13,8 +13,8 @@ namespace Client
 Network::Network(const MessageProcessorContext& inMessageProcessorContext)
 : ioContext{}
 , sslContext{asio::ssl::context::tls_client}
-, worldClientEndpoint{inMessageProcessorContext}
-, accountClientEndpoint{ioContext, sslContext, inMessageProcessorContext}
+, worldEndpoint{inMessageProcessorContext}
+, accountEndpoint{ioContext, sslContext, inMessageProcessorContext}
 , workGuard{}
 , ioThread{}
 , started{false}

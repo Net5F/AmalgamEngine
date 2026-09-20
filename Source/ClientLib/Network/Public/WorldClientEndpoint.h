@@ -23,13 +23,17 @@ namespace Client
 {
 struct MessageProcessorContext;
 class IMessageProcessorExtension;
+
 /**
  * Provides a convenient interface for connecting to the server, sending
  * and receiving messages, and other network-related functionality.
  *
+ * TODO: Add comment about how this connection behaves (see 
+ *       AccountClientEndpoint.h).
+ *
  * Note: ServerConnectionSystem is responsible for calling connect() and
- * disconnect(). If a connection error is detected, this class will push a
- * ConnectionError event and ServerConnectionSystem will handle it.
+ *       disconnect(). If a connection error is detected, this class will push a
+ *       ConnectionError event and ServerConnectionSystem will handle it.
  */
 class WorldClientEndpoint
 {
@@ -67,14 +71,14 @@ public:
     void tick();
 
     /**
-     * Sends bytes over the network.
+     * Sends a message over the network.
      * Errors if the server is disconnected.
      *
-     * @param messageStruct A structure that defines MESSAGE_TYPE and has an
-     *                      associated serialize() function.
+     * @param message A structure that defines MESSAGE_TYPE and has an
+     * associated serialize() function.
      */
-    template<typename T>
-    void serializeAndSend(const T& messageStruct);
+    template<typename Message>
+    void send(const Message& message);
 
     /**
      * Returns the latest tick that we've received an update message for.
@@ -120,7 +124,7 @@ private:
      * Sends bytes over the network.
      * Errors if the server is disconnected.
      */
-    void send(const BinaryBufferSharedPtr& message);
+    void sendBytes(const BinaryBufferSharedPtr& message);
 
     /**
      * If we haven't sent any messages since the last network tick, sends a
@@ -212,14 +216,14 @@ private:
     unsigned int ticksSinceNetstatsLog;
 };
 
-template<typename T>
-void WorldClientEndpoint::serializeAndSend(const T& messageStruct)
+template<typename Message>
+void WorldClientEndpoint::send(const Message& message)
 {
     // Check that the message isn't too big.
     // Note: We don't compress messages on this side, so we know the final
     //       message size at this point.
     std::size_t totalMessageSize{CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE
-                                 + Serialize::measureSize(messageStruct)};
+                                 + Serialize::measureSize(message)};
     if (totalMessageSize > CLIENT_MAX_MESSAGE_SIZE) {
         LOG_INFO("Tried to send a too-large message. Size: %u, max: %u",
                  totalMessageSize, CLIENT_MAX_MESSAGE_SIZE);
@@ -231,7 +235,7 @@ void WorldClientEndpoint::serializeAndSend(const T& messageStruct)
     BinaryBufferSharedPtr messageBuffer{
         std::make_shared<BinaryBuffer>(totalMessageSize)};
     std::size_t messageSize{Serialize::toBuffer(
-        messageBuffer->data(), messageBuffer->size(), messageStruct,
+        messageBuffer->data(), messageBuffer->size(), message,
         (CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE))};
 
     // Copy the adjustment iteration into the client header.
@@ -239,9 +243,10 @@ void WorldClientEndpoint::serializeAndSend(const T& messageStruct)
         = adjustmentIteration;
 
     // Copy the message type into the message header.
-    // TODO: Add a nice compile-time message if T doesn't define MESSAGE_TYPE.
+    // TODO: Add a nice compile-time message if Message doesn't define
+    //       MESSAGE_TYPE.
     messageBuffer->at(CLIENT_HEADER_SIZE + MessageHeaderIndex::MessageType)
-        = static_cast<Uint8>(T::MESSAGE_TYPE);
+        = static_cast<Uint8>(Message::MESSAGE_TYPE);
 
     // Copy the message size into the message header.
     ByteTools::write16(static_cast<Uint16>(messageSize),
@@ -249,7 +254,7 @@ void WorldClientEndpoint::serializeAndSend(const T& messageStruct)
                         + MessageHeaderIndex::Size));
 
     // Send the message.
-    send(messageBuffer);
+    sendBytes(messageBuffer);
 }
 
 } // namespace Client

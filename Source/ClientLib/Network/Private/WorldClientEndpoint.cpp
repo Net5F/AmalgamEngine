@@ -146,7 +146,7 @@ void WorldClientEndpoint::setMessageProcessorExtension(
     messageProcessor.setExtension(extension);
 }
 
-void WorldClientEndpoint::send(const BinaryBufferSharedPtr& message)
+void WorldClientEndpoint::sendBytes(const BinaryBufferSharedPtr& message)
 {
     if ((server == nullptr) || !(server->isConnected())) {
         // Note: Receive thread is responsible for emitting ConnectionError.
@@ -175,7 +175,7 @@ void WorldClientEndpoint::sendHeartbeatIfNecessary()
     // If we haven't sent any relevant messages since the last tick.
     if (messagesSentSinceTick == 0) {
         // Send the heartbeat message.
-        serializeAndSend<Heartbeat>({*currentTickPtr});
+        send<Heartbeat>({*currentTickPtr});
     }
 
     messagesSentSinceTick = 0;

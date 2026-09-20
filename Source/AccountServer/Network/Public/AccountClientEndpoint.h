@@ -19,6 +19,10 @@ class Database;
 
 /**
  * Manages communication with clients (ran by users).
+ *
+ * This connection behaves like a webpage talking to a web server: clients 
+ * connect lazily when user input triggers a message, connection stays open as
+ * long as messages are flowing, disconnect on timeout, repeat as needed.
  */
 class AccountClientEndpoint
 {

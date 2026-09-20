@@ -32,8 +32,8 @@ public:
     /** Starts the asynchronous endpoint thread. */
     void start();
 
-    WorldClientEndpoint worldClientEndpoint;
-    AccountClientEndpoint accountClientEndpoint;
+    WorldClientEndpoint worldEndpoint;
+    AccountClientEndpoint accountEndpoint;
 
 private:
     void stop();

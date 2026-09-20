@@ -16,8 +16,8 @@ Network::Network(asio::io_context& inIoContext, Database& inDatabase)
 : ioContext{inIoContext}
 , sslContext{asio::ssl::context::tls_server}
 , databasePool{1}
-, accountClientEndpoint{inIoContext, sslContext, databasePool, inDatabase}
-, accountServiceEndpoint{}
+, clientEndpoint{inIoContext, sslContext, databasePool, inDatabase}
+, serviceEndpoint{}
 {
     const std::string certificatePath{Paths::BASE_PATH + "account-server.crt"};
     const std::string privateKeyPath{Paths::BASE_PATH + "account-server.key"};
@@ -51,9 +51,9 @@ Network::~Network()
 
 void Network::start()
 {
-    accountClientEndpoint.start();
+    clientEndpoint.start();
 
-    // accountClientEndpoint and accountServiceEndpoint both use this context
+    // clientEndpoint and serviceEndpoint both use this context
     // for their events. By running it, we run them all.
     ioContext.run();
 }

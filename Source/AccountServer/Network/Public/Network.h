@@ -40,9 +40,9 @@ private:
 
     asio::thread_pool databasePool;
 
-    AccountClientEndpoint accountClientEndpoint;
+    AccountClientEndpoint clientEndpoint;
 
-    AccountServiceEndpoint accountServiceEndpoint;
+    AccountServiceEndpoint serviceEndpoint;
 };
 
 } // namespace AccountServer

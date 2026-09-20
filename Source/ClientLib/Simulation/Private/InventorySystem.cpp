@@ -71,8 +71,7 @@ void InventorySystem::initInventory(const InventoryInit& inventoryInit)
 
             // Request definitions for any out-of-date items.
             for (ItemID itemID : itemsToRequest) {
-                network.worldClientEndpoint.serializeAndSend(
-                    ItemDataRequest{itemID});
+                network.worldEndpoint.send(ItemDataRequest{itemID});
             }
         });
 }
@@ -90,8 +89,7 @@ void InventorySystem::processOperation(const InventoryAddItem& inventoryAddItem)
                 ItemVersion itemVersion{inventoryAddItem.version};
                 if (!(itemData.getItem(itemID))
                     || (itemData.getItemVersion(itemID) < itemVersion)) {
-                    network.worldClientEndpoint.serializeAndSend(
-                        ItemDataRequest{itemID});
+                    network.worldEndpoint.send(ItemDataRequest{itemID});
                 }
             }
         });

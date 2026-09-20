@@ -231,7 +231,7 @@ template<typename T>
 void Application::registerMessageProcessorExtension()
 {
     messageProcessorExtension = std::make_unique<T>(messageProcessorContext);
-    network.worldClientEndpoint.setMessageProcessorExtension(
+    network.worldEndpoint.setMessageProcessorExtension(
         messageProcessorExtension.get());
 }
 

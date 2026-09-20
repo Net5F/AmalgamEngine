@@ -77,7 +77,7 @@ bool StringTools::isBase64(std::string_view stringToCheck)
     for (char character : stringToCheck) {
         unsigned char castChar{static_cast<unsigned char>(character)};
         if ((std::isalnum(castChar) == 0) && (character != '+')
-            && (character != '/')) {
+            && (character != '/') && (character != '=')) {
             return false;
         }
     }

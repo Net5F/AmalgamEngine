@@ -65,7 +65,7 @@ void ServerConnectionSystem::processConnectionEvents()
                 // Kick off a connection attempt with the server.
                 // Note: Eventually we'll instead send a ConnectionRequest to
                 //       the login server here with our login info.
-                network.worldClientEndpoint.connect();
+                network.worldEndpoint.connect();
                 connectionState = ConnectionState::AwaitingResponse;
                 connectionAttemptTimer.reset();
             }
@@ -92,7 +92,7 @@ void ServerConnectionSystem::processConnectionEvents()
     ConnectionError connectionError;
     if (connectionErrorQueue.pop(connectionError)) {
         simEventDispatcher.trigger(connectionError);
-        network.worldClientEndpoint.disconnect();
+        network.worldEndpoint.disconnect();
         clearSimState();
         connectionState = ConnectionState::Disconnected;
     }

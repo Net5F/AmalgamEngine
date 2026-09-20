@@ -55,7 +55,7 @@ Application::Application()
                   [&]() { return simCaller.getProgress(); }, graphicData}
 , renderer{rendererContext}
 , networkCaller{std::bind_front(&WorldClientEndpoint::tick,
-                                &network.worldClientEndpoint),
+                                &network.worldEndpoint),
                 SharedConfig::CLIENT_NETWORK_TICK_TIMESTEP_S, "Network", true}
 , uiCaller{std::bind_front(&UserInterface::tick, &userInterface),
            Config::UI_TICK_TIMESTEP_S, "UserInterface", true}

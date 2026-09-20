@@ -49,9 +49,9 @@ public:
      *
      * @param networkID The client to send the message to.
      * @param messageStruct A structure that defines MESSAGE_TYPE and has an
-     *                      associated serialize() function.
+     * associated serialize() function.
      * @param messageTick Optional, used in certain cases to update the
-     *                    Client's latestSentSimTick.
+     * Client's latestSentSimTick.
      */
     template<typename T>
     void serializeAndSend(NetworkID networkID, const T& messageStruct,
@@ -74,7 +74,7 @@ public:
      * @param networkID The client to send the message to.
      * @param message The message to send.
      * @param messageTick Optional, used when sending entity movement updates
-     *                    to update the Client's latestSentSimTick.
+     * to update the Client's latestSentSimTick.
      */
     void send(NetworkID networkID, const BinaryBufferSharedPtr& message,
               Uint32 messageTick = 0);

@@ -47,7 +47,7 @@ public:
 
         std::size_t payloadSize{Serialize::measureSize(message)};
         if (payloadSize > maxPayloadSize) {
-            LOG_INFO("Encoded message exceeds codec limit.");
+            LOG_INFO("Encoded message exceeds payload limit.");
             return {};
         }
 
