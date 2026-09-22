@@ -1,7 +1,7 @@
 #include "Application.h"
 #include "Timer.h"
-#include "Log.h"
-#include <SDL3/SDL.h>
+#include "asio/signal_set.hpp"
+#include <csignal>
 
 namespace AM
 {
@@ -19,21 +19,16 @@ Application::Application()
 
 void Application::start()
 {
-    network.start();
-}
-
-void Application::handleOSEvents()
-{
-    // Process all waiting SDL events.
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            case SDL_EVENT_QUIT: {
-                // TODO: Stop the IO context
-                return;
+    // Stop the event loop when the process receives a termination signal.
+    asio::signal_set terminationSignals{ioContext, SIGINT, SIGTERM};
+    terminationSignals.async_wait(
+        [this](const asio::error_code& error, int) {
+            if (!error) {
+                ioContext.stop();
             }
-        }
-    }
+        });
+
+    network.start();
 }
 
 } // End namespace AccountServer

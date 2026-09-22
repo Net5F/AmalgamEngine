@@ -5,7 +5,7 @@ message(STATUS "Configuring Amalgam Engine AccountServer")
 ###############################################################################
 # Configure Step
 ###############################################################################
-add_executable(AccountServer WIN32 "")
+add_executable(AccountServer "")
 
 # Inherit Shared's precompiled header.
 # CMake causes issues when using precompiled headers with GCC on macOS,

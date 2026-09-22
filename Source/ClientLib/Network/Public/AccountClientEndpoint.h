@@ -4,6 +4,7 @@
 #include "AccountConnectionEvent.h"
 #include "AccountMessageProcessor.h"
 #include "SimpleConnection.h"
+#include "SimpleMessageFramer.h"
 #include "Log.h"
 #include "asio/io_context.hpp"
 #include "asio/ip/tcp.hpp"
@@ -12,6 +13,7 @@
 #include "asio/steady_timer.hpp"
 #include <atomic>
 #include <cstddef>
+#include <deque>
 #include <memory>
 #include <span>
 #include <string>
@@ -45,19 +47,8 @@ public:
     ~AccountClientEndpoint();
 
     /**
-     * Starts an asynchronous connection to the configured AccountServer.
-     */
-    void connect();
-
-    /**
-     * Disconnects from the AccountServer, or cancels an active attempt.
-     */
-    void disconnect();
-
-    ConnectionState getConnectionState() const;
-
-    /**
-     * Queues a typed message to be sent on the network thread.
+     * Queues a typed message to be sent on the network thread. If necessary,
+     * a connection to the AccountServer is established first.
      */
     template<typename Message>
     void send(const Message& message);
@@ -75,7 +66,18 @@ private:
     static constexpr Uint16 MAX_READ_PAYLOAD_SIZE{500};
     static constexpr Uint16 MAX_WRITE_PAYLOAD_SIZE{500};
 
+    /** Connection logic */
+    void connectOnIOThread();
     void beginConnect(std::string serverIP, unsigned int serverPort);
+    void handleConnectionFailure(std::size_t connectionAttempt,
+                                 const asio::error_code& error);
+    void disconnectWithError(const asio::error_code& error);
+    void cancelConnectionTimer();
+
+    void sendPendingMessages();
+    void clearPendingMessages();
+
+    /** Event handlers. */
     void onSocketConnected(std::shared_ptr<asio::ip::tcp::socket> socket,
                            std::size_t connectionAttempt,
                            const asio::error_code& error);
@@ -84,11 +86,7 @@ private:
                                   const asio::error_code& error);
     void onMessageReceived(AccountClientMessageType messageType,
                            std::span<const Uint8> messageBuffer);
-    void disconnectWithError(const asio::error_code& error);
-    void handleConnectionFailure(std::size_t connectionAttempt,
-                                 const asio::error_code& error);
-    void cancelConnectionTimer();
-    void disconnectOnIOThread();
+
     void emitConnectionEvent(AccountConnectionEvent::Type type);
 
     template<typename Message>
@@ -101,6 +99,12 @@ private:
     asio::steady_timer connectionTimer;
     std::shared_ptr<asio::ip::tcp::socket> connectingSocket;
     std::shared_ptr<Connection> connection;
+
+    /** Used to queue messages while we're waiting for a connection to be
+        established. */
+    SimpleMessageFramer<AccountClientMessageType> messageFramer;
+    std::deque<BinaryBufferSharedPtr> pendingMessages;
+    std::size_t pendingMessageBytes;
 
     AccountMessageProcessor messageProcessor;
 
@@ -126,13 +130,31 @@ void AccountClientEndpoint::send(const Message& message)
 template<typename Message>
 void AccountClientEndpoint::sendOnIOThread(Message message)
 {
-    if ((connectionState != ConnectionState::Connected) || !connection) {
-        LOG_INFO("Tried to send while the AccountServer is disconnected.");
+    BinaryBufferSharedPtr framedMessage{messageFramer.frameMessage(message)};
+    if (!framedMessage) {
         return;
     }
 
-    if (!connection->send(message)) {
+    if (connectionState == ConnectionState::Connected) {
+        if (!connection || !connection->sendFramed(std::move(framedMessage))) {
+            LOG_INFO("Failed to queue an AccountServer message.");
+        }
+        return;
+    }
+
+    const std::size_t messageSize{framedMessage->size()};
+    if ((pendingMessages.size() >= MAX_QUEUED_WRITES)
+        || (messageSize > MAX_QUEUED_WRITE_BYTES)
+        || (pendingMessageBytes > (MAX_QUEUED_WRITE_BYTES - messageSize))) {
         LOG_INFO("Failed to queue an AccountServer message.");
+        return;
+    }
+
+    pendingMessageBytes += messageSize;
+    pendingMessages.push_back(std::move(framedMessage));
+
+    if (connectionState == ConnectionState::Disconnected) {
+        connectOnIOThread();
     }
 }
 

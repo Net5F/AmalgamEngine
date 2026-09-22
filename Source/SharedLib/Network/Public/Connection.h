@@ -173,17 +173,18 @@ private:
         ReadyCallback callback{std::move(readyCallback)};
         readyCallback = {};
 
+        state = State::Ready;
+
         // Call the ready callback.
         if (callback) {
             callback(*this);
         }
 
         // The callback may have closed or disconnected this connection.
-        if (state != State::Handshaking) {
+        if (state != State::Ready) {
             return;
         }
 
-        state = State::Ready;
         startReadLoop();
     }
 

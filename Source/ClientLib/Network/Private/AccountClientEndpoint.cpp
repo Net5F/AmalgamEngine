@@ -25,6 +25,9 @@ AccountClientEndpoint::AccountClientEndpoint(
 , connectionTimer{inIoContext}
 , connectingSocket{}
 , connection{}
+, messageFramer{MAX_WRITE_PAYLOAD_SIZE}
+, pendingMessages{}
+, pendingMessageBytes{0}
 , messageProcessor{inMessageProcessorContext,
                    std::bind_front(&AccountClientEndpoint::disconnectWithError,
                                    this)}
@@ -46,42 +49,15 @@ AccountClientEndpoint::~AccountClientEndpoint()
     }
 }
 
-void AccountClientEndpoint::connect()
+void AccountClientEndpoint::connectOnIOThread()
 {
-    ConnectionState expectedState{ConnectionState::Disconnected};
-    if (!connectionState.compare_exchange_strong(expectedState,
-                                                 ConnectionState::Connecting)) {
-        LOG_INFO("Attempted to connect to the AccountServer while not "
-                 "disconnected.");
+    if (connectionState != ConnectionState::Disconnected) {
         return;
     }
 
-    // Tell the network thread to begin connecting.
+    connectionState = ConnectionState::Connecting;
     ServerAddress serverAddress{UserConfig::get().getAccountServerAddress()};
-    asio::post(ioContext, [this, serverIP = std::move(serverAddress.IP),
-                           serverPort = serverAddress.port]() mutable {
-        beginConnect(std::move(serverIP), serverPort);
-    });
-}
-
-void AccountClientEndpoint::disconnect()
-{
-    ConnectionState previousState{
-        connectionState.exchange(ConnectionState::Disconnected)};
-    if (previousState == ConnectionState::Disconnected) {
-        LOG_INFO("Attempted to disconnect from the AccountServer while "
-                 "disconnected.");
-        return;
-    }
-
-    // Tell the network thread to disconnect.
-    asio::post(ioContext, [this]() { disconnectOnIOThread(); });
-}
-
-AccountClientEndpoint::ConnectionState
-    AccountClientEndpoint::getConnectionState() const
-{
-    return connectionState;
+    beginConnect(std::move(serverAddress.IP), serverAddress.port);
 }
 
 void AccountClientEndpoint::beginConnect(std::string serverIP,
@@ -135,6 +111,68 @@ void AccountClientEndpoint::beginConnect(std::string serverIP,
     } catch (const asio::system_error& e) {
         handleConnectionFailure(currentAttempt, e.code());
     }
+}
+
+void AccountClientEndpoint::handleConnectionFailure(
+    std::size_t currentAttempt, const asio::error_code& error)
+{
+    if ((currentAttempt != connectionAttempt)
+        || (connectionState != ConnectionState::Connecting)) {
+        return;
+    }
+
+    // Tear down the connection.
+    connectionState = ConnectionState::Disconnected;
+    ++connectionAttempt;
+    cancelConnectionTimer();
+    asio::error_code ignoredError{};
+    if (connectingSocket) {
+        connectingSocket->cancel(ignoredError);
+        connectingSocket->close(ignoredError);
+    }
+    connectingSocket.reset();
+    connection.reset();
+    clearPendingMessages();
+
+    LOG_INFO("AccountServer connection failed: %s", error.message().c_str());
+    emitConnectionEvent(AccountConnectionEvent::Type::ConnectionFailed);
+}
+
+void AccountClientEndpoint::disconnectWithError(const asio::error_code& error)
+{
+    if (connection) {
+        connection->disconnect(error);
+    }
+}
+
+void AccountClientEndpoint::cancelConnectionTimer()
+{
+    try {
+        connectionTimer.cancel();
+    } catch (const asio::system_error& e) {
+        LOG_INFO("Failed to cancel AccountServer connection timer: %s",
+                 e.code().message().c_str());
+    }
+}
+
+void AccountClientEndpoint::sendPendingMessages()
+{
+    while (!pendingMessages.empty()) {
+        BinaryBufferSharedPtr message{pendingMessages.front()};
+        if (!connection || !connection->sendFramed(std::move(message))) {
+            LOG_INFO("Failed to queue an AccountServer message.");
+            return;
+        }
+
+        pendingMessageBytes -= pendingMessages.front()->size();
+        pendingMessages.pop_front();
+    }
+}
+
+void AccountClientEndpoint::clearPendingMessages()
+{
+    pendingMessages.clear();
+    pendingMessageBytes = 0;
 }
 
 void AccountClientEndpoint::onSocketConnected(
@@ -191,6 +229,7 @@ void AccountClientEndpoint::onConnectionReady(std::size_t currentAttempt)
 
     connectionState = ConnectionState::Connected;
     emitConnectionEvent(AccountConnectionEvent::Type::Connected);
+    sendPendingMessages();
 }
 
 void AccountClientEndpoint::onConnectionDisconnected(
@@ -205,6 +244,7 @@ void AccountClientEndpoint::onConnectionDisconnected(
     ++connectionAttempt;
     connection.reset();
     connectingSocket.reset();
+    clearPendingMessages();
 
     LOG_INFO("AccountServer disconnected: %s", error.message().c_str());
     if (previousState == ConnectionState::Connecting) {
@@ -219,66 +259,6 @@ void AccountClientEndpoint::onMessageReceived(
     AccountClientMessageType messageType, std::span<const Uint8> messageBuffer)
 {
     messageProcessor.processReceivedMessage(messageType, messageBuffer);
-}
-
-void AccountClientEndpoint::disconnectWithError(const asio::error_code& error)
-{
-    if (connection) {
-        connection->disconnect(error);
-    }
-}
-
-void AccountClientEndpoint::handleConnectionFailure(
-    std::size_t currentAttempt, const asio::error_code& error)
-{
-    if ((currentAttempt != connectionAttempt)
-        || (connectionState != ConnectionState::Connecting)) {
-        return;
-    }
-
-    // Tear down the connection.
-    connectionState = ConnectionState::Disconnected;
-    ++connectionAttempt;
-    cancelConnectionTimer();
-    asio::error_code ignoredError{};
-    if (connectingSocket) {
-        connectingSocket->cancel(ignoredError);
-        connectingSocket->close(ignoredError);
-    }
-    connectingSocket.reset();
-    connection.reset();
-
-    LOG_INFO("AccountServer connection failed: %s", error.message().c_str());
-    emitConnectionEvent(AccountConnectionEvent::Type::ConnectionFailed);
-}
-
-void AccountClientEndpoint::cancelConnectionTimer()
-{
-    try {
-        connectionTimer.cancel();
-    } catch (const asio::system_error& e) {
-        LOG_INFO("Failed to cancel AccountServer connection timer: %s",
-                 e.code().message().c_str());
-    }
-}
-
-void AccountClientEndpoint::disconnectOnIOThread()
-{
-    // Tear down the connection.
-    ++connectionAttempt;
-    cancelConnectionTimer();
-    asio::error_code ignoredError{};
-    if (connectingSocket) {
-        connectingSocket->cancel(ignoredError);
-        connectingSocket->close(ignoredError);
-        connectingSocket.reset();
-    }
-    if (connection) {
-        connection->close();
-        connection.reset();
-    }
-
-    emitConnectionEvent(AccountConnectionEvent::Type::Disconnected);
 }
 
 void AccountClientEndpoint::emitConnectionEvent(

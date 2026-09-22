@@ -96,17 +96,12 @@ public:
     }
 
     /**
-     * Returns the given message, framed for this connection's protocol.
-     */
-    template<typename Message>
-    BinaryBufferSharedPtr frame(const Message& message)
-    {
-        return messageFramer.frameMessage(message);
-    }
-
-    /**
      * Sends a message that has already been framed for this connection's
      * protocol.
+     *
+     * To frame a message for use in this function, construct a framer:
+     * SimpleMessageFramer<MyMessageType> messageFramer{MAX_SIZE};
+     * BinaryBufferSharedPtr framedMessage{messageFramer.frameMessage(message)};
      */
     bool sendFramed(BinaryBufferSharedPtr message)
     {

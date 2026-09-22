@@ -55,6 +55,7 @@ void Network::start()
 
     // clientEndpoint and serviceEndpoint both use this context
     // for their events. By running it, we run them all.
+    LOG_INFO("Starting network IO context.");
     ioContext.run();
 }
 

@@ -25,8 +25,6 @@ public:
     void start();
 
 private:
-    void handleOSEvents();
-
     SDL sdl;
 
     /** The user account database. */
