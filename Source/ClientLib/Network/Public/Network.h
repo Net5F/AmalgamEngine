@@ -14,13 +14,12 @@ namespace Client
 {
 struct MessageProcessorContext;
 
-/** Owns and runs the Client's network endpoints. */
+/**
+ * Owns and runs the Client's network endpoints.
+ */
 class Network
 {
 private:
-    using WorkGuard
-        = asio::executor_work_guard<asio::io_context::executor_type>;
-
     asio::io_context ioContext;
     asio::ssl::context sslContext;
 
@@ -36,6 +35,9 @@ public:
     AccountClientEndpoint accountEndpoint;
 
 private:
+    using WorkGuard
+        = asio::executor_work_guard<asio::io_context::executor_type>;
+
     void stop();
 
     /**

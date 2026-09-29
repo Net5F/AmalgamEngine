@@ -13,6 +13,7 @@ namespace Client
 class Simulation;
 class WorldObjectLocator;
 class Network;
+class AccountSession;
 class GraphicData;
 class ItemData;
 class IconData;
@@ -30,6 +31,9 @@ public:
 
     /** Server messaging. */
     Network& network;
+
+    /** Account authentication and session state. */
+    AccountSession& accountSession;
 
     /** UI -> Sim events. */
     entt::dispatcher& uiEventDispatcher;

@@ -98,11 +98,27 @@ bool TlsHelpers::verifyPinnedCertificate(
         return false;
     }
 
+    X509_PUBKEY* subjectPublicKeyInfo{X509_get_X509_PUBKEY(certificate)};
+    if (subjectPublicKeyInfo == nullptr) {
+        return false;
+    }
+
+    unsigned char* encodedSubjectPublicKeyInfo{};
+    int encodedLength{
+        i2d_X509_PUBKEY(subjectPublicKeyInfo, &encodedSubjectPublicKeyInfo)};
+    if ((encodedLength <= 0) || (encodedSubjectPublicKeyInfo == nullptr)) {
+        OPENSSL_free(encodedSubjectPublicKeyInfo);
+        return false;
+    }
+
     std::array<unsigned char, EVP_MAX_MD_SIZE> publicKeyDigest{};
     unsigned int digestLength{};
-    if ((X509_pubkey_digest(certificate, EVP_sha256(), publicKeyDigest.data(),
-                            &digestLength)
-         != 1)
+    int digestResult{EVP_Digest(
+        encodedSubjectPublicKeyInfo, static_cast<std::size_t>(encodedLength),
+        publicKeyDigest.data(), &digestLength, EVP_sha256(), nullptr)};
+    OPENSSL_free(encodedSubjectPublicKeyInfo);
+
+    if ((digestResult != 1)
         || (digestLength != expectedPin.size())
         || (CRYPTO_memcmp(publicKeyDigest.data(), expectedPin.data(),
                           expectedPin.size())

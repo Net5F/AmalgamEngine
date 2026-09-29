@@ -44,6 +44,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 # Build all of the subdirectories.
+add_subdirectory(Account)
 add_subdirectory(Config)
 add_subdirectory(Launch)
 add_subdirectory(Network)

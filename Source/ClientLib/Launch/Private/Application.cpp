@@ -30,6 +30,7 @@ Application::Application()
 , castableData{graphicData}
 , messageProcessorContext{networkEventDispatcher}
 , network{messageProcessorContext}
+, accountSession{network, networkEventDispatcher}
 , simulationContext{simulation,
                     network,
                     simEventDispatcher,
@@ -43,6 +44,7 @@ Application::Application()
 , uiContext{simulation,
             userInterface.getWorldObjectLocator(),
             network,
+            accountSession,
             uiEventDispatcher,
             simEventDispatcher,
             networkEventDispatcher,
@@ -120,6 +122,9 @@ void Application::start()
     while (!exitRequested) {
         // Let the simulation process an iteration if it needs to.
         simCaller.update();
+
+        // Process account responses before the UI observes session state.
+        accountSession.tick();
 
         // Let the UI widgets tick if they need to.
         uiCaller.update();
