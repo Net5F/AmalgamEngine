@@ -45,7 +45,7 @@ void DialogueSystem::processTalkInteraction(const CastInfo& castInfo)
     if (!dialogue) {
         // Note: This can happen if the init script has an addTalkInteraction()
         //       but doesn't have any topic() declarations.
-        network.serializeAndSend(
+        network.clientEndpoint.send(
             castInfo.clientID,
             SystemMessage{"Error: Tried to Talk to entity that has no "
                           "Dialogue component."});
@@ -79,7 +79,7 @@ void DialogueSystem::processTalkInteraction(const CastInfo& castInfo)
                          dialogueResponse);
 
     // Send the dialogue to the client.
-    network.serializeAndSend(castInfo.clientID, dialogueResponse);
+    network.clientEndpoint.send(castInfo.clientID, dialogueResponse);
 }
 
 void DialogueSystem::processDialogueChoice(
@@ -140,7 +140,7 @@ void DialogueSystem::processDialogueChoice(
     }
 
     // Send the dialogue to the client.
-    network.serializeAndSend(choiceRequest.netID, dialogueResponse);
+    network.clientEndpoint.send(choiceRequest.netID, dialogueResponse);
 }
 
 DialogueSystem::TopicPair DialogueSystem::runChoice(
@@ -162,7 +162,7 @@ DialogueSystem::TopicPair DialogueSystem::runChoice(
         workString.append(std::to_string(choiceIndex));
         workString.append(", error: ");
         workString.append(err.what());
-        network.serializeAndSend(clientID, SystemMessage{workString});
+        network.clientEndpoint.send(clientID, SystemMessage{workString});
         return {nullptr};
     }
 
@@ -180,7 +180,7 @@ DialogueSystem::TopicPair DialogueSystem::runChoice(
             workString.append("Invalid setNextTopic(). Topic name: \"");
             workString.append(dialogueLua.nextTopicName);
             workString.append("\".");
-            network.serializeAndSend(clientID, SystemMessage{workString});
+            network.clientEndpoint.send(clientID, SystemMessage{workString});
         }
     }
 
@@ -203,7 +203,7 @@ DialogueSystem::TopicPair DialogueSystem::runTopic(const Dialogue& dialogue,
         workString.append(topic.name);
         workString.append("\", error: ");
         workString.append(err.what());
-        network.serializeAndSend(clientID, SystemMessage{workString});
+        network.clientEndpoint.send(clientID, SystemMessage{workString});
         return {nullptr};
     }
 
@@ -221,7 +221,7 @@ DialogueSystem::TopicPair DialogueSystem::runTopic(const Dialogue& dialogue,
             workString.append("Invalid setNextTopic(). Topic name: \"");
             workString.append(dialogueLua.nextTopicName);
             workString.append("\".");
-            network.serializeAndSend(clientID, SystemMessage{workString});
+            network.clientEndpoint.send(clientID, SystemMessage{workString});
         }
     }
 
@@ -239,7 +239,7 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
     if (!dialogue) {
         // This can happen if the init script has an addTalkInteraction()
         // but doesn't have any topic() declarations.
-        network.serializeAndSend(
+        network.clientEndpoint.send(
             choiceRequest.netID,
             SystemMessage{"Error: Tried to Talk to entity that has no "
                           "Dialogue component."});
@@ -251,7 +251,7 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
                         .choices.size())) {
         // This can happen if the entity is re-initialized while a client is
         // talking to it, and some topics or choices are removed.
-        network.serializeAndSend(choiceRequest.netID,
+        network.clientEndpoint.send(choiceRequest.netID,
                                  SystemMessage{"Invalid dialogue request."});
         return nullptr;
     }
@@ -290,7 +290,7 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
         workString.clear();
         workString.append("Choice condition script error: ");
         workString.append(err.what());
-        network.serializeAndSend(clientID, SystemMessage{workString});
+        network.clientEndpoint.send(clientID, SystemMessage{workString});
         return false;
     }
 
@@ -298,7 +298,7 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
     const auto& conditionResult{dialogueChoiceConditionLua.luaState["r"]};
     if (!(conditionResult.is<bool>())) {
         // We always send this error, since it's a malformed script.
-        network.serializeAndSend(
+        network.clientEndpoint.send(
             clientID, SystemMessage{"Error: Choice condition script did not "
                                     "evaluate to bool type."});
         return false;
@@ -307,7 +307,7 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
         // We only send this error when appropriate (when the player somehow
         // selects a choice that shouldn't have been sent to them).
         if (sendAccessErrorMessage) {
-            network.serializeAndSend(
+            network.clientEndpoint.send(
                 clientID, SystemMessage{"Error: Player entity does not have "
                                         "access to selected choice."});
         }

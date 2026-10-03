@@ -19,7 +19,7 @@ class EventDispatcher;
 
 namespace WorldServer
 {
-class Network;
+class WorldClientEndpoint;
 class MessageProcessor;
 
 /**
@@ -28,12 +28,12 @@ class MessageProcessor;
  * Accepts new client connections, erases clients that have been detected as
  * disconnected, and receives available messages.
  *
- * Acts directly on the Network's client map.
+ * Acts directly on the WorldClientEndpoint's client map.
  */
 class ClientHandler
 {
 public:
-    ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher,
+    ClientHandler(WorldClientEndpoint& inEndpoint, EventDispatcher& inDispatcher,
                   MessageProcessor& inMessageProcessor);
 
     ~ClientHandler();
@@ -63,7 +63,7 @@ private:
      * Accepts new client connections, erases clients that have been detected as
      * disconnected, and receives available messages.
      *
-     * Acts directly on the Network's client map.
+     * Acts directly on the WorldClientEndpoint's client map.
      */
     void serviceClients();
 
@@ -80,12 +80,12 @@ private:
     void sendClientUpdates();
 
     /**
-     * Accepts any new clients, pushing them into the Network's client map.
+     * Accepts any new clients, pushing them into the endpoint's client map.
      */
     void acceptNewClients(ClientMap& clientMap);
 
     /**
-     * Erase any disconnected clients from the Network's clientMap.
+     * Erase any disconnected clients from the endpoint's client map.
      */
     void eraseDisconnectedClients(ClientMap& clientMap);
 
@@ -111,7 +111,7 @@ private:
                                 std::span<Uint8> messageBuffer);
 
     /** Used to get the client map and current tick. */
-    Network& network;
+    WorldClientEndpoint& endpoint;
 
     /** Used to push network events like connections/disconnections. */
     EventDispatcher& dispatcher;

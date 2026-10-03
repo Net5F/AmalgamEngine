@@ -51,7 +51,7 @@ void InventorySystem::sendInventoryInits()
         }
 
         if (inventoryInit.slots.size() > 0) {
-            network.serializeAndSend(client.netID, inventoryInit);
+            network.clientEndpoint.send(client.netID, inventoryInit);
         }
     }
 
@@ -119,7 +119,7 @@ void InventorySystem::processOperation(
         Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
         if (inventory.moveItem(inventoryMoveItem.sourceSlotIndex,
                                inventoryMoveItem.destSlotIndex)) {
-            network.serializeAndSend(clientID,
+            network.clientEndpoint.send(clientID,
                                      InventoryOperation{inventoryMoveItem});
         }
     }

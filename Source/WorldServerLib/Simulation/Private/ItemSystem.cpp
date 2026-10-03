@@ -95,7 +95,7 @@ void ItemSystem::processItemUpdates()
                                   itemSlot.ID)};
                 if (it != updatedItems.end()) {
                     const Item& item{*(itemData.getItem(itemSlot.ID))};
-                    network.serializeAndSend(
+                    network.clientEndpoint.send(
                         client.netID,
                         ItemUpdate{item.displayName, item.stringID,
                                    item.numericID, item.iconID,
@@ -133,7 +133,7 @@ void ItemSystem::examineItem(const CastInfo& castInfo)
     //       with the initial ItemUpdate. To save data, we send it when
     //       requested instead (we assume that people are rarely going to
     //       examine items, compared to how often we send ItemUpdates).
-    network.serializeAndSend(castInfo.clientID,
+    network.clientEndpoint.send(castInfo.clientID,
                              SystemMessage{castInfo.item->description});
 }
 
@@ -152,16 +152,16 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
             const Item* item{itemData.getItem(resultItemID)};
             ItemVersion resultItemVersion{
                 itemData.getItemVersion(resultItemID)};
-            network.serializeAndSend(
+            network.clientEndpoint.send(
                 clientID,
                 CombineItems{sourceSlotIndex, targetSlotIndex, resultItemID,
                              item->maxStackSize, resultItemVersion});
-            network.serializeAndSend(clientID,
+            network.clientEndpoint.send(clientID,
                                      SystemMessage{combination->description});
         }
         else {
             // No combination for the item. Give the user feedback.
-            network.serializeAndSend(clientID,
+            network.clientEndpoint.send(clientID,
                                      SystemMessage{"Nothing happens."});
         }
     }
@@ -192,7 +192,7 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
         }
         else {
             // No handler for the item. Give the user feedback.
-            network.serializeAndSend(clientID,
+            network.clientEndpoint.send(clientID,
                                      SystemMessage{"Nothing happens."});
         }
     }
@@ -216,7 +216,7 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 
     // If we found an error, send it to the requesting client.
     if (errorType != ItemError::NotSet) {
-        network.serializeAndSend(itemInitRequest.netID,
+        network.clientEndpoint.send(itemInitRequest.netID,
                                  ItemError{itemInitRequest.displayName,
                                            itemInitRequest.stringID,
                                            NULL_ITEM_ID, errorType});
@@ -241,7 +241,7 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
     AM_ASSERT(newItem != nullptr, "Failed to create item.");
 
     // Send the requester the new item's definition.
-    network.serializeAndSend(
+    network.clientEndpoint.send(
         itemInitRequest.netID,
         ItemUpdate{newItem->displayName, newItem->stringID, newItem->numericID,
                    newItem->iconID, newItem->maxStackSize,
@@ -272,7 +272,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
 
     // If we found an error, send it to the requesting client.
     if (errorType != ItemError::NotSet) {
-        network.serializeAndSend(
+        network.clientEndpoint.send(
             itemChangeRequest.netID,
             ItemError{itemChangeRequest.displayName, itemChangeRequest.stringID,
                       itemChangeRequest.itemID, errorType});
@@ -300,7 +300,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     // Send the requester the new item's definition.
     // Note: If the requester owns the item, we'll end up double-sending
     //       them this update, which isn't a big deal.
-    network.serializeAndSend(
+    network.clientEndpoint.send(
         itemChangeRequest.netID,
         ItemUpdate{updatedItem->displayName, updatedItem->stringID,
                    updatedItem->numericID, updatedItem->iconID,
@@ -317,7 +317,7 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
         [&](auto& itemID) {
             if (const Item* item{itemData.getItem(itemID)}) {
                 itemWasFound = true;
-                network.serializeAndSend(
+                network.clientEndpoint.send(
                     itemDataRequest.netID,
                     ItemUpdate{item->displayName, item->stringID,
                                item->numericID, item->iconID,
@@ -342,7 +342,7 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
                 }
             },
             itemDataRequest.itemID);
-        network.serializeAndSend(
+        network.clientEndpoint.send(
             itemDataRequest.netID,
             ItemError{"", stringID, numericID, ItemError::StringIDNotFound});
     }
@@ -357,10 +357,10 @@ bool ItemSystem::runItemInitScript(NetworkID clientID,
     // If there was an error while running the script, tell the user and return
     // false.
     if (!(resultString.empty())) {
-        network.serializeAndSend(clientID,
+        network.clientEndpoint.send(clientID,
                                  ItemError{item.displayName, "", item.numericID,
                                            ItemError::InitScriptFailure});
-        network.serializeAndSend(clientID, SystemMessage{resultString});
+        network.clientEndpoint.send(clientID, SystemMessage{resultString});
         return false;
     }
 
@@ -384,7 +384,7 @@ void ItemSystem::runEntityItemHandlerScript(
     // user.
     if (!(result.valid())) {
         sol::error err = result;
-        network.serializeAndSend(clientID, SystemMessage{err.what()});
+        network.clientEndpoint.send(clientID, SystemMessage{err.what()});
     }
 }
 

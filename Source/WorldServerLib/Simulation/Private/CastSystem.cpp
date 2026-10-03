@@ -56,7 +56,7 @@ void CastSystem::sendCastCooldownInits()
         auto [client, castCooldown]
             = world.registry.get<ClientSimData, CastCooldown>(entity);
 
-        network.serializeAndSend(client.netID, CastCooldownInit{castCooldown});
+        network.clientEndpoint.send(client.netID, CastCooldownInit{castCooldown});
     }
 
     playerCastCooldownObserver.clear();
@@ -151,7 +151,7 @@ void CastSystem::processCastRequest(const CastRequest& castRequest)
 
     // If the cast failed, send the failure to the caster.
     if (result != CastFailureType::None) {
-        network.serializeAndSend<CastFailed>(
+        network.clientEndpoint.send<CastFailed>(
             castRequest.netID, {clientEntity, castRequest.castableID, result});
     }
 }
@@ -280,7 +280,7 @@ void CastSystem::sendCastStarted(CastState& castState)
                             .castableID{castInfo.castable->castableID},
                             .targetEntity{castInfo.targetEntity},
                             .targetPosition{castInfo.targetPosition}};
-    BinaryBufferSharedPtr message{network.serialize(castStarted)};
+    BinaryBufferSharedPtr message{network.clientEndpoint.serialize(castStarted)};
 
     // Get the list of entities that are in range of the caster entity.
     const std::vector<entt::entity>* entitiesInRange{nullptr};
@@ -304,7 +304,7 @@ void CastSystem::sendCastStarted(CastState& castState)
     for (entt::entity entity : *entitiesInRange) {
         if ((entity != castInfo.casterEntity) && view.contains(entity)) {
             const auto& client{view.get<ClientSimData>(entity)};
-            network.send(client.netID, message);
+            network.clientEndpoint.sendBytes(client.netID, message);
         }
     }
 }
@@ -317,7 +317,7 @@ void CastSystem::sendCastFailed(CastState& castState,
     CastFailed castFailed{.casterEntity{castInfo.casterEntity},
                           .castableID{castInfo.castable->castableID},
                           .castFailureType{failureType}};
-    BinaryBufferSharedPtr message{network.serialize(castFailed)};
+    BinaryBufferSharedPtr message{network.clientEndpoint.serialize(castFailed)};
 
     // Get the list of entities that are in range of the caster entity.
     const std::vector<entt::entity>* entitiesInRange{nullptr};
@@ -341,7 +341,7 @@ void CastSystem::sendCastFailed(CastState& castState,
     for (entt::entity entity : *entitiesInRange) {
         if ((entity != castInfo.casterEntity) && view.contains(entity)) {
             const auto& client{view.get<ClientSimData>(entity)};
-            network.send(client.netID, message);
+            network.clientEndpoint.sendBytes(client.netID, message);
         }
     }
 }

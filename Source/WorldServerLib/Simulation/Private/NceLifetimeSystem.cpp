@@ -111,7 +111,7 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
     entt::entity newEntity{world.createEntity(entityInitRequest.position,
                                               entityInitRequest.entity)};
     if (newEntity == entt::null) {
-        network.serializeAndSend(
+        network.clientEndpoint.send(
             entityInitRequest.netID,
             SystemMessage{"Failed to create entity: Invalid position"});
         return;
@@ -120,7 +120,7 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
     // Try to add the graphic components.
     if (!(world.addGraphicsComponents(newEntity,
                                       entityInitRequest.graphicState))) {
-        network.serializeAndSend(
+        network.clientEndpoint.send(
             entityInitRequest.netID,
             SystemMessage{"Failed to create entity: Invalid position"});
         return;
@@ -136,7 +136,7 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
     std::string resultString{
         world.runEntityInitScript(newEntity, entityInitRequest.initScript)};
     if (!(resultString.empty())) {
-        network.serializeAndSend(entityInitRequest.netID,
+        network.clientEndpoint.send(entityInitRequest.netID,
                                  SystemMessage{resultString});
     }
 }

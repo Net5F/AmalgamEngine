@@ -29,7 +29,7 @@ ClientConnectionSystem::ClientConnectionSystem(
 , world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
 , graphicData{inSimContext.graphicData}
-, clientConnectionEventQueue{network.getEventDispatcher()}
+, clientConnectionEventQueue{network.clientEndpoint.getEventDispatcher()}
 {
 }
 
@@ -139,7 +139,7 @@ void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
     connectionResponse.mapZLengthChunks = mapChunkExtent.zLength;
 
     // Send the connection response message.
-    network.serializeAndSend(networkID, connectionResponse, currentTick);
+    network.clientEndpoint.send(networkID, connectionResponse, currentTick);
 }
 
 } // namespace WorldServer

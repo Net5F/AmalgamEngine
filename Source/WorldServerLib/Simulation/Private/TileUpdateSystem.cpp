@@ -56,7 +56,7 @@ struct UpdateSender {
     template<typename T>
     void operator()(const T& tileUpdate)
     {
-        network.serializeAndSend<T>(netID, tileUpdate);
+        network.clientEndpoint.send<T>(netID, tileUpdate);
     }
 };
 
@@ -64,10 +64,10 @@ TileUpdateSystem::TileUpdateSystem(const SimulationContext& inSimContext)
 : world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
 , extension{nullptr}
-, addLayerRequestQueue{network.getEventDispatcher()}
-, removeLayerRequestQueue{network.getEventDispatcher()}
-, clearLayersRequestQueue{network.getEventDispatcher()}
-, extentClearLayersRequestQueue{network.getEventDispatcher()}
+, addLayerRequestQueue{network.clientEndpoint.getEventDispatcher()}
+, removeLayerRequestQueue{network.clientEndpoint.getEventDispatcher()}
+, clearLayersRequestQueue{network.clientEndpoint.getEventDispatcher()}
+, extentClearLayersRequestQueue{network.clientEndpoint.getEventDispatcher()}
 {
 }
 

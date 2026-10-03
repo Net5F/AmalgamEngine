@@ -4,6 +4,7 @@ target_sources(WorldServerLib
         Private/ClientHandler.cpp
         Private/MessageProcessor.cpp
         Private/Network.cpp
+        Private/WorldClientEndpoint.cpp
     PUBLIC
         Public/Client.h
         Public/ClientMap.h
@@ -13,6 +14,7 @@ target_sources(WorldServerLib
         Public/MessageProcessor.h
         Public/MessageProcessorContext.h
         Public/Network.h
+        Public/WorldClientEndpoint.h
 )
 
 target_include_directories(WorldServerLib

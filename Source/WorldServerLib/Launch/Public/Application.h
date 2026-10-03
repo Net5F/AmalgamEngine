@@ -108,7 +108,7 @@ private:
     //-------------------------------------------------------------------------
     // PeriodicCallers
     //-------------------------------------------------------------------------
-    /** Calls network.tick() at the network tick rate. */
+    /** Calls clientEndpoint.tick() at the network tick rate. */
     PeriodicCaller networkCaller;
 
     /** Calls simulation.tick() at the sim tick rate. */
@@ -137,7 +137,7 @@ template<typename T>
 void Application::registerMessageProcessorExtension()
 {
     messageProcessorExtension = std::make_unique<T>(messageProcessorContext);
-    network.setMessageProcessorExtension(messageProcessorExtension.get());
+    network.clientEndpoint.setMessageProcessorExtension(messageProcessorExtension.get());
 }
 
 template<typename T>

@@ -693,7 +693,7 @@ Uint32 EngineLuaBindings::getCurrentTime()
 void EngineLuaBindings::sendSystemMessage(std::string_view message,
                                           NetworkID clientID)
 {
-    network.serializeAndSend(clientID, SystemMessage{std::string{message}});
+    network.clientEndpoint.send(clientID, SystemMessage{std::string{message}});
 }
 
 } // namespace WorldServer

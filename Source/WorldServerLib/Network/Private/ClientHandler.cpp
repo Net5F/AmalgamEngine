@@ -1,5 +1,5 @@
 #include "ClientHandler.h"
-#include "Network.h"
+#include "WorldClientEndpoint.h"
 #include "NetworkDefs.h"
 #include "SocketSet.h"
 #include "ClientConnectionEvent.h"
@@ -14,9 +14,9 @@ namespace AM
 namespace WorldServer
 {
 
-ClientHandler::ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher,
+ClientHandler::ClientHandler(WorldClientEndpoint& inEndpoint, EventDispatcher& inDispatcher,
                              MessageProcessor& inMessageProcessor)
-: network{inNetwork}
+: endpoint{inEndpoint}
 , dispatcher{inDispatcher}
 , messageProcessor{inMessageProcessor}
 , networkIDPool{IDPool::ReservationStrategy::MarchForward, 8}
@@ -62,7 +62,7 @@ void ClientHandler::serviceClients()
 {
     tracy::SetThreadName("ServerReceive");
 
-    ClientMap& clientMap{network.getClientMap()};
+    ClientMap& clientMap{endpoint.getClientMap()};
 
     while (!exitRequested) {
         // Check if there are any new clients to connect.
@@ -92,8 +92,8 @@ void ClientHandler::sendClientUpdates()
     tracy::SetThreadName("ServerSend");
 
     SharedLockableBase(std::shared_mutex)
-        & clientMapMutex{network.getClientMapMutex()};
-    ClientMap& clientMap{network.getClientMap()};
+        & clientMapMutex{endpoint.getClientMapMutex()};
+    ClientMap& clientMap{endpoint.getClientMap()};
 
     while (!exitRequested) {
         // Wait until this thread is signaled by beginSendClientUpdates().
@@ -107,7 +107,7 @@ void ClientHandler::sendClientUpdates()
             std::shared_lock readLock{clientMapMutex};
 
             // Run through the clients, sending their waiting messages.
-            Uint32 currentTick{network.getCurrentTick()};
+            Uint32 currentTick{endpoint.getCurrentTick()};
             for (auto& pair : clientMap) {
                 pair.second->sendWaitingMessages(currentTick);
             }
@@ -138,8 +138,8 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
         LOG_INFO("New client connected. Assigning netID: %u", newID);
 
         {
-            // Add the peer to the Network's clientMap.
-            std::unique_lock writeLock{network.getClientMapMutex()};
+            // Add the peer to the endpoint's client map.
+            std::unique_lock writeLock{endpoint.getClientMapMutex()};
             if (!(clientMap
                       .try_emplace(newID, std::make_shared<Client>(
                                               newID, std::move(newPeer)))
@@ -174,7 +174,7 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
 
             {
                 // Need to modify the map, acquire a write lock.
-                std::unique_lock writeLock{network.getClientMapMutex()};
+                std::unique_lock writeLock{endpoint.getClientMapMutex()};
 
                 // Erase the disconnected client.
                 networkIDPool.freeID(it->first);
@@ -241,7 +241,7 @@ void ClientHandler::processReceivedMessage(Client& client, Uint8 messageType,
     if (messageTick != -1) {
         // Calc the difference between the current tick and the message's tick.
         Sint64 tickDiff{messageTick
-                        - static_cast<Sint64>(network.getCurrentTick())};
+                        - static_cast<Sint64>(endpoint.getCurrentTick())};
 
         // Record the diff.
         client.recordTickDiff(tickDiff);

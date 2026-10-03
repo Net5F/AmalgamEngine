@@ -155,7 +155,7 @@ void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
 {
     // Send the client an EntityDelete for each entity that left its AOI.
     for (entt::entity entityThatLeft : entitiesThatLeft) {
-        network.serializeAndSend(
+        network.clientEndpoint.send(
             client.netID,
             EntityDelete{simulation.getCurrentTick(), entityThatLeft});
     }
@@ -185,7 +185,7 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
     }
 
     // Send the message.
-    network.serializeAndSend(client.netID, entityInit);
+    network.clientEndpoint.send(client.netID, entityInit);
 }
 
 } // namespace WorldServer

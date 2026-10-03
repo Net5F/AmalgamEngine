@@ -161,10 +161,10 @@ void ComponentSyncSystem::sendSelfUpdates()
         // Serialize the message.
         componentUpdate.entity = updatedEntity;
         componentUpdate.tickNum = simulation.getCurrentTick();
-        BinaryBufferSharedPtr message{network.serialize(componentUpdate)};
+        BinaryBufferSharedPtr message{network.clientEndpoint.serialize(componentUpdate)};
 
         // Send the message.
-        network.send(client.netID, message, componentUpdate.tickNum);
+        network.clientEndpoint.sendBytes(client.netID, message, componentUpdate.tickNum);
     }
 
     componentUpdateMap.clear();
@@ -194,7 +194,7 @@ void ComponentSyncSystem::sendInRangeUpdates()
         // Serialize the message.
         componentUpdate.entity = updatedEntity;
         componentUpdate.tickNum = simulation.getCurrentTick();
-        BinaryBufferSharedPtr message{network.serialize(componentUpdate)};
+        BinaryBufferSharedPtr message{network.clientEndpoint.serialize(componentUpdate)};
 
         // Get the list of entities that are in range of the updated entity.
         const std::vector<entt::entity>* entitiesInRange{nullptr};
@@ -215,7 +215,7 @@ void ComponentSyncSystem::sendInRangeUpdates()
         for (entt::entity entity : *entitiesInRange) {
             if (view.contains(entity)) {
                 const auto& client{view.get<ClientSimData>(entity)};
-                network.send(client.netID, message, componentUpdate.tickNum);
+                network.clientEndpoint.sendBytes(client.netID, message, componentUpdate.tickNum);
             }
         }
     }

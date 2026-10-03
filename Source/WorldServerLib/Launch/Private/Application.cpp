@@ -27,7 +27,8 @@ Application::Application()
                     graphicData, iconData, itemData,
                     castableData}
 , simulation{simulationContext}
-, networkCaller{std::bind_front(&Network::tick, &network),
+, networkCaller{std::bind_front(&WorldClientEndpoint::tick,
+                                &network.clientEndpoint),
                 SharedConfig::SERVER_NETWORK_TICK_TIMESTEP_S, "Network", true}
 , simCaller{std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
