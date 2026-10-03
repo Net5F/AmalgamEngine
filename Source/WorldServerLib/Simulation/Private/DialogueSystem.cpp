@@ -252,7 +252,7 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
         // This can happen if the entity is re-initialized while a client is
         // talking to it, and some topics or choices are removed.
         network.clientEndpoint.send(choiceRequest.netID,
-                                 SystemMessage{"Invalid dialogue request."});
+                                    SystemMessage{"Invalid dialogue request."});
         return nullptr;
     }
 

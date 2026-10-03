@@ -92,7 +92,7 @@ void MovementSyncSystem::sendEntityUpdate(ClientSimData& client)
 
     // Send the message.
     network.clientEndpoint.send(client.netID, movementUpdate,
-                             movementUpdate.tickNum);
+                                movementUpdate.tickNum);
 }
 
 } // namespace WorldServer

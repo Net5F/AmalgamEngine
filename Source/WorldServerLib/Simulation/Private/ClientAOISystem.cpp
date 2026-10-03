@@ -91,7 +91,7 @@ ClientAOISystem::ClientAOISystem(const SimulationContext& inSimContext)
 , entitiesThatEntered{}
 {
     // Add listeners for each client-relevant component. When the component is
-    // constructed or destroyed, the associated entity's 
+    // constructed or destroyed, the associated entity's
     // InRangeInitComponentList will be updated.
     boost::mp11::mp_for_each<InRangeInitComponentTypes>([&](auto I) {
         using ComponentType = decltype(I);
@@ -175,7 +175,7 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
         // Add the entity and all of its client-relevant components to the
         // message.
         // Note: We send the entity, even if it has no client-relevant
-        //       component, because there may be a build mode that cares about 
+        //       component, because there may be a build mode that cares about
         //       it.
         EntityInit::EntityData& entityData{entityInit.entityData.emplace_back(
             entityThatEntered, registry.get<Position>(entityThatEntered))};

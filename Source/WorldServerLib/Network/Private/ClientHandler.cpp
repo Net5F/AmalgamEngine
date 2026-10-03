@@ -14,7 +14,8 @@ namespace AM
 namespace WorldServer
 {
 
-ClientHandler::ClientHandler(WorldClientEndpoint& inEndpoint, EventDispatcher& inDispatcher,
+ClientHandler::ClientHandler(WorldClientEndpoint& inEndpoint,
+                             EventDispatcher& inDispatcher,
                              MessageProcessor& inMessageProcessor)
 : endpoint{inEndpoint}
 , dispatcher{inDispatcher}

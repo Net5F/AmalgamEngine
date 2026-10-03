@@ -134,7 +134,7 @@ void ItemSystem::examineItem(const CastInfo& castInfo)
     //       requested instead (we assume that people are rarely going to
     //       examine items, compared to how often we send ItemUpdates).
     network.clientEndpoint.send(castInfo.clientID,
-                             SystemMessage{castInfo.item->description});
+                                SystemMessage{castInfo.item->description});
 }
 
 void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
@@ -156,13 +156,13 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
                 clientID,
                 CombineItems{sourceSlotIndex, targetSlotIndex, resultItemID,
                              item->maxStackSize, resultItemVersion});
-            network.clientEndpoint.send(clientID,
-                                     SystemMessage{combination->description});
+            network.clientEndpoint.send(
+                clientID, SystemMessage{combination->description});
         }
         else {
             // No combination for the item. Give the user feedback.
             network.clientEndpoint.send(clientID,
-                                     SystemMessage{"Nothing happens."});
+                                        SystemMessage{"Nothing happens."});
         }
     }
 }
@@ -193,7 +193,7 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
         else {
             // No handler for the item. Give the user feedback.
             network.clientEndpoint.send(clientID,
-                                     SystemMessage{"Nothing happens."});
+                                        SystemMessage{"Nothing happens."});
         }
     }
 }
@@ -217,9 +217,9 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
     // If we found an error, send it to the requesting client.
     if (errorType != ItemError::NotSet) {
         network.clientEndpoint.send(itemInitRequest.netID,
-                                 ItemError{itemInitRequest.displayName,
-                                           itemInitRequest.stringID,
-                                           NULL_ITEM_ID, errorType});
+                                    ItemError{itemInitRequest.displayName,
+                                              itemInitRequest.stringID,
+                                              NULL_ITEM_ID, errorType});
         return;
     }
 
@@ -357,9 +357,9 @@ bool ItemSystem::runItemInitScript(NetworkID clientID,
     // If there was an error while running the script, tell the user and return
     // false.
     if (!(resultString.empty())) {
-        network.clientEndpoint.send(clientID,
-                                 ItemError{item.displayName, "", item.numericID,
-                                           ItemError::InitScriptFailure});
+        network.clientEndpoint.send(
+            clientID, ItemError{item.displayName, "", item.numericID,
+                                ItemError::InitScriptFailure});
         network.clientEndpoint.send(clientID, SystemMessage{resultString});
         return false;
     }

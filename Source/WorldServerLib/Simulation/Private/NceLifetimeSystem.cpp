@@ -137,7 +137,7 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
         world.runEntityInitScript(newEntity, entityInitRequest.initScript)};
     if (!(resultString.empty())) {
         network.clientEndpoint.send(entityInitRequest.netID,
-                                 SystemMessage{resultString});
+                                    SystemMessage{resultString});
     }
 }
 

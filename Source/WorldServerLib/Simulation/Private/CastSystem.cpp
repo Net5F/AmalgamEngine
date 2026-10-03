@@ -56,7 +56,8 @@ void CastSystem::sendCastCooldownInits()
         auto [client, castCooldown]
             = world.registry.get<ClientSimData, CastCooldown>(entity);
 
-        network.clientEndpoint.send(client.netID, CastCooldownInit{castCooldown});
+        network.clientEndpoint.send(client.netID,
+                                    CastCooldownInit{castCooldown});
     }
 
     playerCastCooldownObserver.clear();
@@ -280,7 +281,8 @@ void CastSystem::sendCastStarted(CastState& castState)
                             .castableID{castInfo.castable->castableID},
                             .targetEntity{castInfo.targetEntity},
                             .targetPosition{castInfo.targetPosition}};
-    BinaryBufferSharedPtr message{network.clientEndpoint.serialize(castStarted)};
+    BinaryBufferSharedPtr message{
+        network.clientEndpoint.serialize(castStarted)};
 
     // Get the list of entities that are in range of the caster entity.
     const std::vector<entt::entity>* entitiesInRange{nullptr};

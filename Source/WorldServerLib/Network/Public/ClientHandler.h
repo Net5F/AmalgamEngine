@@ -33,7 +33,8 @@ class MessageProcessor;
 class ClientHandler
 {
 public:
-    ClientHandler(WorldClientEndpoint& inEndpoint, EventDispatcher& inDispatcher,
+    ClientHandler(WorldClientEndpoint& inEndpoint,
+                  EventDispatcher& inDispatcher,
                   MessageProcessor& inMessageProcessor);
 
     ~ClientHandler();

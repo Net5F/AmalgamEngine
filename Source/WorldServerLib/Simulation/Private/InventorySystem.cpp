@@ -120,7 +120,7 @@ void InventorySystem::processOperation(
         if (inventory.moveItem(inventoryMoveItem.sourceSlotIndex,
                                inventoryMoveItem.destSlotIndex)) {
             network.clientEndpoint.send(clientID,
-                                     InventoryOperation{inventoryMoveItem});
+                                        InventoryOperation{inventoryMoveItem});
         }
     }
 }

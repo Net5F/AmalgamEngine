@@ -45,8 +45,9 @@ void ScriptDataSystem::sendEntityInitScript(
     if (const auto* initScript{
             world.registry.try_get<EntityInitScript>(entity)}) {
         LOG_INFO("Sending script: %s", initScript->script.c_str());
-        network.clientEndpoint.send(initScriptRequest.netID,
-                                 EntityInitScriptResponse{entity, *initScript});
+        network.clientEndpoint.send(
+            initScriptRequest.netID,
+            EntityInitScriptResponse{entity, *initScript});
     }
 }
 
