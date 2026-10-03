@@ -29,7 +29,6 @@ target_link_libraries(ClientLib
         EnTT::EnTT
         QueuedEvents
         SharedLib
-        AccountLib
 )
 
 # Compile with C++23.

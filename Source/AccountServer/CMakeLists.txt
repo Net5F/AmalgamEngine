@@ -19,7 +19,6 @@ target_link_libraries(AccountServer
         SDL3::SDL3
         nlohmann_json::nlohmann_json
         SharedLib
-        AccountLib
         asio
         SQLiteCpp
         sqlite3

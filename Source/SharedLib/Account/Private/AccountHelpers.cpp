@@ -4,8 +4,6 @@
 
 namespace AM
 {
-namespace AccountServer
-{
 
 AccountHelpers::ValidateResult
     AccountHelpers::validateUsername(std::string_view username)
@@ -40,5 +38,4 @@ AccountHelpers::ValidateResult
     return result;
 }
 
-} // End namespace AccountServer
 } // End namespace AM

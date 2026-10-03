@@ -1,4 +1,4 @@
-target_sources(AccountLib
+target_sources(SharedLib
     PRIVATE
         Private/AccountHelpers.cpp
     PUBLIC
@@ -6,7 +6,7 @@ target_sources(AccountLib
         Public/AccountHelpers.h
 )
 
-target_include_directories(AccountLib
+target_include_directories(SharedLib
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC

@@ -9,7 +9,7 @@ namespace AM
  * The types of messages that we send across the network from Client <->  
  * Simulation Server.
  *
- * For message descriptions, see their definitions in Shared/Messages/Public.
+ * For message descriptions, see their definitions in SharedLib/Messages/Public/World.
  */
 enum class EngineMessageType : Uint8 {
     /** Indicates the value hasn't been set. Used for initialization. */

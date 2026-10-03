@@ -5,8 +5,6 @@ cmake_minimum_required(VERSION 3.13)
 ###############################################################################
 add_subdirectory(SharedLib)
 
-add_subdirectory(AccountLib)
-
 add_subdirectory(ClientLib)
 
 add_subdirectory(ServerLib)

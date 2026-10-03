@@ -6,8 +6,6 @@
 
 namespace AM
 {
-namespace AccountServer
-{
 
 /**
  * Helper functions for account operations.
@@ -38,5 +36,4 @@ public:
     static ValidateResult validatePassword(std::string_view password);
 };
 
-} // End namespace AccountServer
 } // End namespace AM
