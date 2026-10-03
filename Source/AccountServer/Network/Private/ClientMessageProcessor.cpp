@@ -85,18 +85,18 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
                                            const RegisterRequest& message)
 {
     // Validate the username.
-    AccountHelpers::ValidateResult usernameIsValid{
+    AccountHelpers::ValidateResult usernameResult{
         AccountHelpers::validateUsername(message.username)};
-    if (usernameIsValid != AccountHelpers::ValidateResult::Success) {
+    if (!(usernameResult.success())) {
         sendCallback(handle, serializeMessage(RegisterResponse{
                                 .result{RegisterResponse::InvalidUsername}}));
         return;
     }
 
     // Validate the password.
-    AccountHelpers::ValidateResult passwordIsValid{
+    AccountHelpers::ValidateResult passwordResult{
         AccountHelpers::validatePassword(message.password)};
-    if (passwordIsValid != AccountHelpers::ValidateResult::Success) {
+    if (!(passwordResult.success())) {
         sendCallback(handle, serializeMessage(RegisterResponse{
                                 .result{RegisterResponse::InvalidPassword}}));
         return;

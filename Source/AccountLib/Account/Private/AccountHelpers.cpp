@@ -10,37 +10,34 @@ namespace AccountServer
 AccountHelpers::ValidateResult
     AccountHelpers::validateUsername(std::string_view username)
 {
+    ValidateResult result{};
     if (username.length() < static_cast<std::size_t>(USERNAME_MIN_LENGTH)) {
-        return ValidateResult::TooShort;
-    }
-    if (username.length() > static_cast<std::size_t>(USERNAME_MAX_LENGTH)) {
-        return ValidateResult::TooLong;
+        result.tooShort = true;
     }
 
     if (!StringTools::isAscii(username)) {
-        return ValidateResult::InvalidCharacter;
+        result.invalidCharacter = true;
     }
 
-    return ValidateResult::Success;
+    return result;
 }
 
-// TODO: This error reporting will probably have to change, so we can show all 
-//       the issues at once
 AccountHelpers::ValidateResult
     AccountHelpers::validatePassword(std::string_view password)
 {
+    ValidateResult result{};
     if (password.length() < static_cast<std::size_t>(PASSWORD_MIN_LENGTH)) {
-        return ValidateResult::TooShort;
+        result.tooShort = true;
     }
     if (password.length() > static_cast<std::size_t>(PASSWORD_MAX_LENGTH)) {
-        return ValidateResult::TooLong;
+        result.tooLong = true;
     }
 
     if (!StringTools::isAscii(password)) {
-        return ValidateResult::InvalidCharacter;
+        result.invalidCharacter = true;
     }
 
-    return ValidateResult::Success;
+    return result;
 }
 
 } // End namespace AccountServer
