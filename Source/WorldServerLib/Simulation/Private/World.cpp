@@ -1,0 +1,420 @@
+#include "World.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
+#include "Network.h"
+#include "GraphicData.h"
+#include "ItemData.h"
+#include "CastableData.h"
+#include "EnttGroups.h"
+#include "EntityInitLua.h"
+#include "ItemInitLua.h"
+#include "Database.h"
+#include "ClientSimData.h"
+#include "InRangeInitComponentList.h"
+#include "Position.h"
+#include "PreviousPosition.h"
+#include "Movement.h"
+#include "MovementModifiers.h"
+#include "GraphicState.h"
+#include "Collision.h"
+#include "CollisionBitSets.h"
+#include "EntityInitScript.h"
+#include "Transforms.h"
+#include "SharedConfig.h"
+#include "Config.h"
+#include "StringTools.h"
+#include "Log.h"
+#include "AMAssert.h"
+#include "sol/sol.hpp"
+
+namespace AM
+{
+namespace WorldServer
+{
+
+World::World(const SimulationContext& inSimContext)
+: registry{}
+, entityLocator{registry}
+, collisionLocator{}
+, tileMap{inSimContext.graphicData, collisionLocator}
+, entityStoredValueIDMap{}
+, globalStoredValueMap{}
+, inventoryHelper{*this, inSimContext.network, inSimContext.itemData}
+, castHelper{inSimContext.simulation, inSimContext.itemData,
+             inSimContext.castableData}
+, loadHelper{*this, inSimContext.simulation, inSimContext.itemData}
+, database{std::make_unique<Database>()}
+, netIDMap{}
+, graphicData{inSimContext.graphicData}
+, entityInitLua{inSimContext.simulation.getEntityInitLua()}
+, itemInitLua{inSimContext.simulation.getItemInitLua()}
+, nextStoredValueID{NULL_ENTITY_STORED_VALUE_ID + 1}
+, workStringID{}
+, randomDevice{}
+, generator{randomDevice()}
+, xDistribution{Config::SPAWN_POINT_RANDOM_MIN_X,
+                Config::SPAWN_POINT_RANDOM_MAX_X}
+, yDistribution{Config::SPAWN_POINT_RANDOM_MIN_Y,
+                Config::SPAWN_POINT_RANDOM_MAX_Y}
+, groupX{}
+, groupY{}
+, columnIndex{0}
+, rowIndex{0}
+{
+    // Initialize our entt groups.
+    EnttGroups::init(registry);
+
+    // Calc our group spawn point starting position. We add padding to make
+    // sure they don't clip the North or West edges of the map.
+    TileExtent tileMapExtent{tileMap.getTileExtent()};
+    groupX
+        = tileMapExtent.x * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
+          + Config::SPAWN_POINT_GROUP_PADDING_X;
+    groupY
+        = tileMapExtent.y * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
+          + Config::SPAWN_POINT_GROUP_PADDING_Y;
+
+    // Allocate the entity locator grid.
+    entityLocator.setGridSize(tileMap.getTileExtent());
+
+    // When an entity is destroyed, do any necessary cleanup.
+    registry.on_destroy<entt::entity>().connect<&World::onEntityDestroyed>(
+        this);
+}
+
+World::~World() = default;
+
+entt::entity World::getClientEntity(NetworkID netID)
+{
+    // Find the entity ID associated with the given network ID.
+    auto it{netIDMap.find(netID)};
+    if (it == netIDMap.end()) {
+        // Client doesn't exist (may have disconnected).
+        return entt::null;
+    }
+
+    return it->second;
+}
+
+bool World::teleportEntity(entt::entity entity, const Vector3& newPosition)
+{
+    auto movementGroup{EnttGroups::getMovementGroup(registry)};
+
+    auto [position, collision] = movementGroup.get<Position, Collision>(entity);
+    position = newPosition;
+    collision.worldBounds
+        = Transforms::modelToWorldEntity(collision.modelBounds, position);
+
+    // If the entity is movement-enabled, update its previous position.
+    // This will make it teleport straight to the new position instead of
+    // lerping there.
+    if (PreviousPosition
+        * prevPosition{registry.try_get<PreviousPosition>(entity)}) {
+        *prevPosition = position;
+    }
+
+    // Flag that the entity's movement state needs to be synced.
+    // (movement state is auto-synced when Input is dirtied).
+    registry.patch<Input>(entity, [](auto&) {});
+
+    // TODO: Check if valid and return false if not.
+    return true;
+}
+
+entt::entity World::createEntity(const Position& position,
+                                 entt::entity entityHint)
+{
+    // Create the new entity.
+    entt::entity newEntity{entt::null};
+    if (entityHint != entt::null) {
+        newEntity = registry.create(entityHint);
+    }
+    else {
+        newEntity = registry.create();
+    }
+
+    // Add InRangeInitComponentList first so it gets updated as we add others.
+    registry.emplace<InRangeInitComponentList>(newEntity);
+
+    // Add Position (all entities have a Position).
+    registry.emplace<Position>(newEntity, position);
+
+    // Try to add the entity to the locator. If it fails, destroy the entity
+    // and return null.
+    if (!(entityLocator.updateEntity(newEntity, position))) {
+        registry.destroy(newEntity);
+        return entt::null;
+    }
+
+    return newEntity;
+}
+
+bool World::addGraphicsComponents(entt::entity entity,
+                                  const GraphicState& graphicState)
+{
+    // Note: We only add entities to the locator (and replicate them to clients)
+    //       if they have a GraphicState. If we ever need to replicate
+    //       entities that don't have GraphicState, revisit this.
+    //       Similarly, if we ever need to add GraphicState without Collision,
+    //       we'll need to revisit this.
+
+    // Use the current graphic as the entity's collision bounds.
+    const EntityGraphicSet& graphicSet{
+        graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
+    const BoundingBox& modelBounds{graphicSet.getCollisionModelBounds()};
+    const Position& position{registry.get<Position>(entity)};
+
+    const Collision& collision{registry.emplace<Collision>(
+        entity, modelBounds,
+        Transforms::modelToWorldEntity(modelBounds, position))};
+    const CollisionBitSets& collisionBitSets{
+        registry.emplace<CollisionBitSets>(entity, entity, registry)};
+
+    bool rotationAdded{false};
+    if (!(registry.all_of<Rotation>(entity))) {
+        registry.emplace<Rotation>(entity);
+        rotationAdded = true;
+    }
+
+    // Try to add the Collision to the locator. If it fails, revert the
+    // changes and return false.
+    if (!(collisionLocator.updateEntity(
+            entity, collision.worldBounds,
+            collisionBitSets.getCollisionLayers()))) {
+        registry.erase<Collision, CollisionBitSets>(entity);
+        if (rotationAdded) {
+            registry.erase<Rotation>(entity);
+        }
+        return false;
+    }
+
+    // Add the GraphicState.
+    registry.emplace<GraphicState>(entity, graphicState);
+
+    return true;
+}
+
+void World::addMovementComponents(entt::entity entity)
+{
+    if (!(registry.all_of<Input>(entity))) {
+        registry.emplace<Input>(entity);
+    }
+
+    if (!(registry.all_of<PreviousPosition>(entity))) {
+        // Note: All entities have a Position component.
+        registry.emplace<PreviousPosition>(entity,
+                                           registry.get<Position>(entity));
+    }
+
+    if (!(registry.all_of<Movement>(entity))) {
+        registry.emplace<Movement>(entity);
+    }
+
+    if (!(registry.all_of<MovementModifiers>(entity))) {
+        registry.emplace<MovementModifiers>(entity);
+    }
+
+    // Note: We add Rotation as part of movement (instead of just graphics),
+    //       because it may be useful at some point to have a non-graphical
+    //       entity that is movement-enabled and can face a direction.
+    if (!(registry.all_of<Rotation>(entity))) {
+        registry.emplace<Rotation>(entity);
+    }
+}
+
+std::string World::runEntityInitScript(entt::entity entity,
+                                       const EntityInitScript& initScript)
+{
+    // Run the given script on the given entity.
+    entityInitLua.selfEntity = entity;
+    auto result{entityInitLua.luaState.script(initScript.script,
+                                              &sol::script_pass_on_error)};
+
+    // If the init script ran successfully, save it.
+    std::string returnString{""};
+    if (result.valid()) {
+        registry.emplace<EntityInitScript>(entity, initScript);
+    }
+    else {
+        // Error while running the init script. Keep the entity alive (so the
+        // user can try again) and return the error.
+        sol::error err = result;
+        returnString = err.what();
+    }
+
+    return returnString;
+}
+
+std::string World::runItemInitScript(Item& item, std::string_view initScript)
+{
+    // Run the given script on the given item.
+    itemInitLua.selfItem = &item;
+    auto result{
+        itemInitLua.luaState.script(initScript, &sol::script_pass_on_error)};
+
+    // If the init script failed, return the error.
+    std::string returnString{""};
+    if (!(result.valid())) {
+        // Error while running the init script. Return the error.
+        sol::error err = result;
+        returnString = err.what();
+    }
+
+    return returnString;
+}
+
+EntityStoredValueID World::getEntityStoredValueID(std::string_view stringID)
+{
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stringID, workStringID);
+
+    // If the value already exists, return its numeric ID.
+    auto storedValueIDIt{entityStoredValueIDMap.find(workStringID)};
+    if (storedValueIDIt != entityStoredValueIDMap.end()) {
+        return storedValueIDIt->second;
+    }
+    else {
+        // Check if we've ran out of IDs.
+        if (nextStoredValueID == SDL_MAX_UINT16) {
+            return NULL_ENTITY_STORED_VALUE_ID;
+        }
+
+        // Flag doesn't exist, add it to the map.
+        EntityStoredValueID newFlagID{static_cast<Uint16>(nextStoredValueID)};
+        entityStoredValueIDMap.emplace(workStringID, newFlagID);
+        nextStoredValueID++;
+
+        return newFlagID;
+    }
+}
+
+void World::storeGlobalValue(std::string_view stringID, Uint32 newValue)
+{
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stringID, workStringID);
+
+    // If we're setting the value to 0, don't add it to the map (default values
+    // don't need to be stored).
+    if (newValue == 0) {
+        // If the value already exists, erase it.
+        auto valueIt{globalStoredValueMap.find(workStringID)};
+        if (valueIt != globalStoredValueMap.end()) {
+            globalStoredValueMap.erase(valueIt);
+        }
+
+        return;
+    }
+
+    globalStoredValueMap[workStringID] = newValue;
+}
+
+Uint32 World::getStoredValue(std::string_view stringID)
+{
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stringID, workStringID);
+
+    // If the value exists, return it.
+    auto valueIt{globalStoredValueMap.find(workStringID)};
+    if (valueIt != globalStoredValueMap.end()) {
+        return valueIt->second;
+    }
+
+    // Value doesn't exist. Return the default.
+    return 0;
+}
+
+Position World::getSpawnPoint()
+{
+    switch (Config::SPAWN_STRATEGY) {
+        case SpawnStrategy::Fixed: {
+            return {Config::SPAWN_POINT_FIXED_X, Config::SPAWN_POINT_FIXED_Y,
+                    0.1f};
+        }
+        case SpawnStrategy::Random: {
+            return {xDistribution(generator), yDistribution(generator), 0.1f};
+        }
+        case SpawnStrategy::Grouped: {
+            return getGroupedSpawnPoint();
+        }
+        default: {
+            LOG_FATAL("Invalid spawn strategy.");
+            return {};
+        }
+    }
+}
+
+void World::load()
+{
+    // Load our saved non-client entities.
+    loadHelper.loadNonClientEntities();
+
+    // Load our saved item definitions.
+    loadHelper.loadItems();
+
+    // Load our saved stored value data.
+    loadHelper.loadStoredValues();
+}
+
+Position World::getGroupedSpawnPoint()
+{
+    static constexpr float TILE_WIDTH{SharedConfig::TILE_WORLD_WIDTH};
+
+    // Calculate the next spawn point.
+    Position spawnPoint{groupX, groupY, 0.1f};
+    spawnPoint.x += (columnIndex * Config::SPAWN_POINT_GROUP_PADDING_X);
+    spawnPoint.y += (rowIndex * Config::SPAWN_POINT_GROUP_PADDING_Y);
+
+    // Increment our column. If it wrapped, increment our row.
+    columnIndex = ((columnIndex + 1) % Config::SPAWN_POINT_GROUP_COLUMNS);
+    unsigned int previousRow{rowIndex};
+    if (columnIndex == 0) {
+        rowIndex = ((rowIndex + 1) % Config::SPAWN_POINT_GROUP_ROWS);
+    }
+
+    // If the row wrapped, increment our group position.
+    if (previousRow > rowIndex) {
+        // The width of a full group of entities. We add one extra padding to
+        // make sure they don't clip the Eastern edge of the map.
+        const float GROUP_WIDTH{Config::SPAWN_POINT_GROUP_PADDING_X
+                                    * Config::SPAWN_POINT_GROUP_COLUMNS
+                                + Config::SPAWN_POINT_GROUP_PADDING_X};
+
+        // Increment the group X offset.
+        groupX += Config::SPAWN_POINT_GROUP_OFFSET_X;
+
+        // If the new group would go off the East edge of the map, reset the
+        // X offset and increment the Y offset.
+        TileExtent tileMapExtent{tileMap.getTileExtent()};
+        float tileMapMaxX{tileMapExtent.xMax() * TILE_WIDTH};
+        if ((groupX + GROUP_WIDTH) > tileMapMaxX) {
+            groupX = tileMapExtent.x * TILE_WIDTH
+                     + Config::SPAWN_POINT_GROUP_PADDING_X;
+            groupY += Config::SPAWN_POINT_GROUP_OFFSET_Y;
+        }
+
+        columnIndex = 0;
+        rowIndex = 0;
+    }
+
+    return spawnPoint;
+}
+
+void World::onEntityDestroyed(entt::entity entity)
+{
+    // Note: Only ClientConnectionSystem should be destroying client entities,
+    //       so we don't handle netIDMap cleanup here.
+
+    // Remove it from the locators.
+    // Note: Client entities could easily be removed where we delete them, but
+    //       NCEs may be deleted at any point by project code, so we handle it
+    //       here to avoid bugs.
+    entityLocator.removeEntity(entity);
+    collisionLocator.removeEntity(entity);
+
+    // If the entity is in the database, delete it (does nothing if it isn't).
+    // Note: This is to delete non-client entities, since they get persisted.
+    database->deleteEntityData(entity);
+}
+
+} // namespace WorldServer
+} // namespace AM

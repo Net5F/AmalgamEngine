@@ -14,7 +14,7 @@ namespace AM
 {
 
 /**
- * Base class for Client::ItemData and Server::ItemData.
+ * Base class for Client::ItemData and WorldServer::ItemData.
  * Holds item data.
  *
  * You can think of the items in this class as "templates". To actually place

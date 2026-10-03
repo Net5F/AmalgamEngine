@@ -12,7 +12,7 @@ namespace Client
 /**
  * Tracks whether an entity is currently casting a Castable.
  *
- * To match the behavior of Server::CastState, this component will only be
+ * To match the behavior of WorldServer::CastState, this component will only be
  * present on an entity if a cast is currently ongoing. It gets removed when
  * the cast ends.
  */

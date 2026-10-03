@@ -31,7 +31,7 @@ target_include_directories(UnitTests
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC
-        ${PROJECT_SOURCE_DIR}/Source/ServerLib/Network/Public
+        ${PROJECT_SOURCE_DIR}/Source/WorldServerLib/Network/Public
 )
 
 # Link our dependencies.

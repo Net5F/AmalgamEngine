@@ -1,0 +1,23 @@
+target_sources(WorldServerLib
+    PRIVATE
+        Private/Client.cpp
+        Private/ClientHandler.cpp
+        Private/MessageProcessor.cpp
+        Private/Network.cpp
+    PUBLIC
+        Public/Client.h
+        Public/ClientMap.h
+        Public/ClientConnectionEvent.h
+        Public/ClientHandler.h
+        Public/IMessageProcessorExtension.h
+        Public/MessageProcessor.h
+        Public/MessageProcessorContext.h
+        Public/Network.h
+)
+
+target_include_directories(WorldServerLib
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public
+)

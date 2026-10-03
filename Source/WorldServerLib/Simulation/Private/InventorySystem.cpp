@@ -1,0 +1,129 @@
+#include "InventorySystem.h"
+#include "SimulationContext.h"
+#include "Simulation.h"
+#include "Network.h"
+#include "ItemData.h"
+#include "ISimulationExtension.h"
+#include "ClientSimData.h"
+#include "Inventory.h"
+#include "InventoryInit.h"
+#include "SystemMessage.h"
+#include "Log.h"
+#include <algorithm>
+
+namespace AM
+{
+namespace WorldServer
+{
+InventorySystem::InventorySystem(const SimulationContext& inSimContext)
+: world{inSimContext.simulation.getWorld()}
+, network{inSimContext.network}
+, itemData{inSimContext.itemData}
+, extension{nullptr}
+, playerInventoryObserver{}
+, inventoryOperationQueue{inSimContext.networkEventDispatcher}
+{
+    // Observe player Inventory construction events.
+    playerInventoryObserver.bind(world.registry);
+    playerInventoryObserver.on_construct<ClientSimData>()
+        .on_construct<Inventory>();
+}
+
+void InventorySystem::sendInventoryInits()
+{
+    // If a player Inventory was constructed, send the initial state to that
+    // player.
+    for (entt::entity entity : playerInventoryObserver) {
+        if (!(world.registry.all_of<ClientSimData, Inventory>(entity))) {
+            continue;
+        }
+        auto [client, inventory]
+            = world.registry.get<ClientSimData, Inventory>(entity);
+
+        InventoryInit inventoryInit{inventory.size};
+        for (const Inventory::ItemSlot& itemSlot : inventory.slots) {
+            ItemVersion version{0};
+            if (itemSlot.ID) {
+                version = itemData.getItemVersion(itemSlot.ID);
+            }
+            inventoryInit.slots.emplace_back(itemSlot.ID, itemSlot.count,
+                                             version);
+        }
+
+        if (inventoryInit.slots.size() > 0) {
+            network.serializeAndSend(client.netID, inventoryInit);
+        }
+    }
+
+    playerInventoryObserver.clear();
+}
+
+void InventorySystem::processInventoryUpdates()
+{
+    // Process any waiting inventory operations.
+    InventoryOperation inventoryOperation{};
+    while (inventoryOperationQueue.pop(inventoryOperation)) {
+        std::visit(
+            [&](const auto& operation) {
+                processOperation(inventoryOperation.netID, operation);
+            },
+            inventoryOperation.operation);
+    }
+}
+
+void InventorySystem::setExtension(ISimulationExtension* inExtension)
+{
+    extension = inExtension;
+}
+
+void InventorySystem::processOperation(NetworkID clientID,
+                                       const InventoryAddItem& inventoryAddItem)
+{
+    // If the entity isn't valid, skip it.
+    entt::entity entityToAddTo{inventoryAddItem.entity};
+    if (!(world.registry.valid(entityToAddTo))) {
+        return;
+    }
+
+    // TODO: Check that the client has sufficient permission to create items.
+
+    // Try to add the item, sending messages appropriately.
+    world.inventoryHelper.addItem(entityToAddTo, inventoryAddItem.itemID,
+                                  inventoryAddItem.count);
+}
+
+void InventorySystem::processOperation(
+    NetworkID clientID, const InventoryRemoveItem& inventoryRemoveItem)
+{
+    // Note: "Remove item" always applies to the client's own inventory.
+
+    // Find the client's entity ID.
+    entt::entity clientEntity{world.getClientEntity(clientID)};
+    if (clientEntity != entt::null) {
+        // Try to remove the item, sending messages appropriately.
+        world.inventoryHelper.removeItem(clientEntity,
+                                         inventoryRemoveItem.slotIndex,
+                                         inventoryRemoveItem.count);
+    }
+}
+
+void InventorySystem::processOperation(
+    NetworkID clientID, const InventoryMoveItem& inventoryMoveItem)
+{
+    // Note: "Move item" always applies to the client's own inventory.
+
+    // Find the client's entity ID.
+    entt::entity clientEntity{world.getClientEntity(clientID)};
+    if (clientEntity != entt::null) {
+        // If the move is successful, tell the client.
+        Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
+        if (inventory.moveItem(inventoryMoveItem.sourceSlotIndex,
+                               inventoryMoveItem.destSlotIndex)) {
+            network.serializeAndSend(clientID,
+                                     InventoryOperation{inventoryMoveItem});
+        }
+    }
+}
+
+} // namespace WorldServer
+} // namespace AM

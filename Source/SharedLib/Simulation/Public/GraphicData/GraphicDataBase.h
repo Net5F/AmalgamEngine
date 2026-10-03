@@ -15,7 +15,7 @@ namespace AM
 {
 
 /**
- * Base class for Client::GraphicData and Server::GraphicData.
+ * Base class for Client::GraphicData and WorldServer::GraphicData.
  * Loads the shared graphics data from ResourceData.json into memory and
  * provides an interface for accessing it.
  *

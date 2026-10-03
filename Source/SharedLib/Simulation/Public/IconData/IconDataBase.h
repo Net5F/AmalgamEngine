@@ -11,7 +11,7 @@ namespace AM
 {
 
 /**
- * Base class for Client::IconData and Server::IconData.
+ * Base class for Client::IconData and WorldServer::IconData.
  * Loads the shared icon data from ResourceData.json into memory and provides
  * an interface for accessing it.
  *

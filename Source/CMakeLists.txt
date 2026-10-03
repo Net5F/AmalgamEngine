@@ -7,7 +7,7 @@ add_subdirectory(SharedLib)
 
 add_subdirectory(ClientLib)
 
-add_subdirectory(ServerLib)
+add_subdirectory(WorldServerLib)
 
 add_subdirectory(AccountServer)
 
