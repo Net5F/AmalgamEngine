@@ -4,6 +4,8 @@
 #include "CryptoHelpers.h"
 #include "Deserialize.h"
 #include "ConsumeWorldTicketRequest.h"
+#include "ServiceHeartbeat.h"
+#include "ServiceHeartbeatResponse.h"
 #include "Log.h"
 #include "asio/error.hpp"
 #include "asio/post.hpp"
@@ -39,6 +41,10 @@ void ServiceMessageProcessor::processReceivedMessage(
             handleMessage<ConsumeWorldTicketRequest>(handle, messageBuffer);
             break;
         }
+        case AccountServiceMessageType::ServiceHeartbeat: {
+            handleMessage<ServiceHeartbeat>(handle, messageBuffer);
+            break;
+        }
         default: {
             LOG_INFO("Received unexpected service message type: %u",
                      static_cast<unsigned int>(messageType));
@@ -53,8 +59,10 @@ void ServiceMessageProcessor::handleMessage(
     ConnectionHandle handle, const ConsumeWorldTicketRequest& message)
 {
     // Note: We use a DB worker so we don't hold up the network thread.
-    asio::post(databasePool, [this, handle, ticket = message.ticket]() {
+    asio::post(databasePool, [this, handle, requestID = message.requestID,
+                              ticket = message.ticket]() {
         ConsumeWorldTicketResponse response{consumeWorldTicket(ticket)};
+        response.requestID = requestID;
 
         // Send the response (must be done on the network thread).
         asio::post(
@@ -62,6 +70,13 @@ void ServiceMessageProcessor::handleMessage(
                 sendCallback(handle, messageFramer.frameMessage(response));
             });
     });
+}
+
+void ServiceMessageProcessor::handleMessage(ConnectionHandle handle,
+                                            const ServiceHeartbeat&)
+{
+    // Respond so the service knows we're still here.
+    sendCallback(handle, messageFramer.frameMessage(ServiceHeartbeatResponse{}));
 }
 
 ConsumeWorldTicketResponse ServiceMessageProcessor::consumeWorldTicket(

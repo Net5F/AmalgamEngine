@@ -60,7 +60,8 @@ public:
     static constexpr unsigned int MAX_SERVICE_CONNECTIONS{4};
 
     /** How long a connected service can be idle before timing out.
-        Services are expected to reconnect as needed. */
+        Services send periodic heartbeats, so this only triggers if the
+        service has gone away. Services are expected to reconnect. */
     static constexpr double SERVICE_IDLE_TIMEOUT_S{60};
 
     /** The maximum amount of outgoing bytes we'll allow at once on a service

@@ -1,11 +1,13 @@
 #pragma once
 
 #include "nlohmann/json_fwd.hpp"
+#include <string>
 
 namespace AM
 {
 namespace WorldServer
 {
+
 /**
  * A singleton instance that loads the user-defined configuration from
  * UserConfig.json into memory and provides an interface for accessing and
@@ -38,6 +40,12 @@ public:
     //-------------------------------------------------------------------------
     // Configuration Interface
     //-------------------------------------------------------------------------
+    struct ServerAddress {
+        std::string IP{};
+        unsigned int port{};
+    };
+    ServerAddress getAccountServerAddress();
+    void setAccountServerAddress(const ServerAddress& inServerAddress);
 
 private:
     /**
@@ -45,6 +53,9 @@ private:
      * @throw nlohmann::json::exception if an expected field is not found.
      */
     void init(nlohmann::json& json);
+
+    std::string accountServerIP;
+    unsigned int accountServerPort;
 };
 
 } // End namespace WorldServer

@@ -32,8 +32,10 @@ class Database;
  * completes its handshake while another is active, the old one is assumed to
  * be stale and is disconnected.
  *
- * This connection stays open as long as messages are flowing, and disconnects
- * on timeout. The world server is expected to reconnect as needed.
+ * The world server holds this connection open, sending periodic heartbeats
+ * (which we respond to). If we stop receiving messages, we assume the world
+ * server is gone and disconnect on timeout. The world server is expected to
+ * reconnect.
  */
 class AccountServiceEndpoint
 {

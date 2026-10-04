@@ -16,6 +16,7 @@
 namespace AM
 {
 struct ConsumeWorldTicketRequest;
+struct ServiceHeartbeat;
 
 namespace AccountServer
 {
@@ -61,6 +62,8 @@ private:
     //-------------------------------------------------------------------------
     void handleMessage(ConnectionHandle handle,
                        const ConsumeWorldTicketRequest& message);
+    void handleMessage(ConnectionHandle handle,
+                       const ServiceHeartbeat& message);
 
     //-------------------------------------------------------------------------
     // Helpers

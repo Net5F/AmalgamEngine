@@ -56,7 +56,8 @@ void AccountClientEndpoint::connectOnIOThread()
     }
 
     connectionState = ConnectionState::Connecting;
-    ServerAddress serverAddress{UserConfig::get().getAccountServerAddress()};
+    UserConfig::ServerAddress serverAddress{
+        UserConfig::get().getAccountServerAddress()};
     beginConnect(std::move(serverAddress.IP), serverAddress.port);
 }
 

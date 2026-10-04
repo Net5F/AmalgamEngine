@@ -56,6 +56,8 @@ target_sources(SharedLib
         Public/Account/RegisterRequest.h
         Public/Account/RegisterResponse.h
         Public/Account/RequestWorldTicket.h
+        Public/Account/ServiceHeartbeat.h
+        Public/Account/ServiceHeartbeatResponse.h
         Public/Account/ServiceTicketIssued.h
 )
 

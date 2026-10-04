@@ -184,7 +184,8 @@ void WorldClientEndpoint::sendHeartbeatIfNecessary()
 void WorldClientEndpoint::connectAndReceive()
 {
     // Try to connect.
-    ServerAddress serverAddress{UserConfig::get().getServerAddress()};
+    UserConfig::ServerAddress serverAddress{
+        UserConfig::get().getServerAddress()};
     server = Peer::initiate(serverAddress.IP, serverAddress.port);
     if (server != nullptr) {
         // Note: The server sends us a ConnectionResponse when we connect the

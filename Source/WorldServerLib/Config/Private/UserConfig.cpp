@@ -11,6 +11,8 @@ namespace WorldServer
 {
 
 UserConfig::UserConfig()
+: accountServerIP{}
+, accountServerPort{0}
 {
     // Open the file.
     std::string fullPath{Paths::BASE_PATH};
@@ -42,7 +44,23 @@ UserConfig& UserConfig::get()
     return userConfig;
 }
 
-void UserConfig::init([[maybe_unused]] nlohmann::json& json) {}
+UserConfig::ServerAddress UserConfig::getAccountServerAddress()
+{
+    return {accountServerIP, accountServerPort};
+}
+
+void UserConfig::setAccountServerAddress(const ServerAddress& inServerAddress)
+{
+    accountServerIP = inServerAddress.IP;
+    accountServerPort = inServerAddress.port;
+}
+
+void UserConfig::init(nlohmann::json& json)
+{
+    // AccountServer address.
+    setAccountServerAddress(
+        {json.at("accountServerIP"), json.at("accountServerPort")});
+}
 
 } // End namespace WorldServer
 } // End namespace AM

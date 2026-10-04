@@ -35,7 +35,7 @@ void NetworkSimulation::connect()
     }
 
     // Try to connect.
-    Client::ServerAddress serverAddress{
+    Client::UserConfig::ServerAddress serverAddress{
         Client::UserConfig::get().getServerAddress()};
     server = Peer::initiate(serverAddress.IP, serverAddress.port);
     if (server != nullptr) {

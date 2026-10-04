@@ -17,6 +17,10 @@ struct ConsumeWorldTicketResponse {
     /** Maximum serialized account-status length. */
     static constexpr std::size_t ACCOUNT_STATUS_MAX{32};
 
+    /** The requestID of the ConsumeWorldTicketRequest that this responds
+        to. */
+    Uint32 requestID{0};
+
     enum Result : Uint8 {
         Success,
         InvalidTicket,
@@ -38,6 +42,7 @@ template<typename S>
 void serialize(S& serializer,
                ConsumeWorldTicketResponse& consumeWorldTicketResponse)
 {
+    serializer.value4b(consumeWorldTicketResponse.requestID);
     serializer.value1b(consumeWorldTicketResponse.result);
     serializer.value8b(consumeWorldTicketResponse.accountID);
     serializer.value8b(consumeWorldTicketResponse.accountSessionID);

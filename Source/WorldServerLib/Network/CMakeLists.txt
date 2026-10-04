@@ -1,11 +1,13 @@
 target_sources(WorldServerLib
     PRIVATE
+        Private/AccountServiceEndpoint.cpp
         Private/Client.cpp
         Private/ClientHandler.cpp
         Private/MessageProcessor.cpp
         Private/Network.cpp
         Private/WorldClientEndpoint.cpp
     PUBLIC
+        Public/AccountServiceEndpoint.h
         Public/Client.h
         Public/ClientMap.h
         Public/ClientConnectionEvent.h

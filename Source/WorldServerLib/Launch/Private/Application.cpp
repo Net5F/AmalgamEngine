@@ -50,6 +50,9 @@ void Application::start()
         LOG_FATAL("All extensions must be registered before calling start()");
     }
 
+    // Start the asynchronous network thread.
+    network.start();
+
     LOG_INFO("Starting main loop.");
 
     // Prime the timers so they don't start at 0.

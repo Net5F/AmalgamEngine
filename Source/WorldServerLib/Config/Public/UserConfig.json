@@ -1,0 +1,11 @@
+/**
+ * This is an example UserConfig.json file, these values are not actually used. 
+ * Projects can reference this file to understand what fields they must 
+ * provide in their UserConfig.json.
+ */
+
+{
+  // The IP address and service port of the AccountServer.
+  "accountServerIP": "127.0.0.1",
+  "accountServerPort": 41497
+}

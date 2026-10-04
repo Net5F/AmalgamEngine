@@ -5,7 +5,6 @@ target_sources(ClientLib
     PUBLIC
         Public/UserConfig.h
         Public/UserConfigInitializer.h
-        Public/UserConfigStructs.h
 )
 
 target_include_directories(ClientLib

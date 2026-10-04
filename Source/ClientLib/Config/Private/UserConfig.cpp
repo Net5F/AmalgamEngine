@@ -102,7 +102,7 @@ void UserConfig::setFramesPerSecond(unsigned int inFramesPerSecond)
     frameTimestepS = (1.0 / static_cast<double>(framesPerSecond));
 }
 
-ServerAddress UserConfig::getServerAddress()
+UserConfig::ServerAddress UserConfig::getServerAddress()
 {
     return {serverIP, serverPort};
 }
@@ -113,7 +113,7 @@ void UserConfig::setServerAddress(const ServerAddress& inServerAddress)
     serverPort = inServerAddress.port;
 }
 
-ServerAddress UserConfig::getAccountServerAddress()
+UserConfig::ServerAddress UserConfig::getAccountServerAddress()
 {
     return {accountServerIP, accountServerPort};
 }

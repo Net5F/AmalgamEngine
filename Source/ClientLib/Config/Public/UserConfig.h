@@ -1,13 +1,14 @@
 #pragma once
 
-#include "UserConfigStructs.h"
 #include "nlohmann/json_fwd.hpp"
 #include <SDL3/SDL_rect.h>
+#include <string>
 
 namespace AM
 {
 namespace Client
 {
+
 /**
  * A singleton instance that loads the user-defined configuration from
  * UserConfig.json into memory and provides an interface for accessing and
@@ -50,6 +51,10 @@ public:
     double getFrameTimestepS();
     void setFramesPerSecond(unsigned int inFramesPerSecond);
 
+    struct ServerAddress {
+        std::string IP{};
+        unsigned int port{};
+    };
     ServerAddress getServerAddress();
     void setServerAddress(const ServerAddress& inServerAddress);
 

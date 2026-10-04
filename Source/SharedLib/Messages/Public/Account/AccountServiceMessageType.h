@@ -15,9 +15,11 @@ enum class AccountServiceMessageType : Uint8 {
 
     // Service -> Account Server
     ConsumeWorldTicketRequest,
+    ServiceHeartbeat,
 
     // Account Server -> Service
     ConsumeWorldTicketResponse,
+    ServiceHeartbeatResponse,
 };
 
 } // End namespace AM
