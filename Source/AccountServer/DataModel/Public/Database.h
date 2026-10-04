@@ -12,45 +12,26 @@ namespace AccountServer
 {
 
 /**
- * Interface for interacting with the database.
+ * Interface for interacting with the account database (Accounts.db).
  *
- * We use the database to persist item definitions, non-client entity data,
- * and tile map data as blobs.
+ * We use the database to persist accounts, account sessions, and service
+ * tickets.
  *
- * To avoid blocking the main loop, we first copy all of our data into an
- * in-memory database. Then, we use a separate thread to backup the in-memory
- * database to a file. See SaveSystem.h for more info.
+ * Secrets (recovery keys, session tokens, service tickets) are never stored
+ * directly. Instead, we store their hashes (see CryptoHelpers::hashSecret()).
  *
- * Note: Client entity data is persisted in the account database, not here.
+ * Note: This class isn't thread-safe. It must only be accessed from 1 thread
+ *       at a time (currently, the single database worker).
  */
 class Database
 {
 public:
     Database();
 
-    /**
-     * Begins a transaction. While a transaction is ongoing, queries will be
-     * executed as normal, but they won't be permanent or visible to other 
-     * connections until object.commit() is called.
-     *
-     * @return An RAII transaction object. If the object is destroyed without 
-     * calling object.commit(), the transaction will be rolled back.
-     */
-    SQLite::Transaction startTransaction();
-
-    /**
-     * Overload to use a non-default behavior.
-     */
-    SQLite::Transaction startTransaction(SQLite::TransactionBehavior behavior);
-
     //-------------------------------------------------------------------------
     // Accounts
     //-------------------------------------------------------------------------
-    enum class RegisterResult {
-        Success,
-        UsernameUnavailable,
-        DatabaseError
-    };
+    enum class RegisterResult { Success, UsernameUnavailable, DatabaseError };
     /**
      * Registers an account using an already-hashed password and recovery key.
      *
@@ -63,11 +44,7 @@ public:
                                    const std::string& recoveryKeyHash);
 
     struct AccountLoginInfo {
-        enum class Result {
-            Success,
-            AccountNotFound,
-            DatabaseError
-        };
+        enum class Result { Success, AccountNotFound, DatabaseError };
 
         Result result{Result::DatabaseError};
         Sint64 accountID{0};
@@ -108,11 +85,7 @@ public:
                                       Sint64 absoluteExpiresAt);
 
     struct AccountSessionInfo {
-        enum class Result {
-            Success,
-            SessionNotFound,
-            DatabaseError
-        };
+        enum class Result { Success, SessionNotFound, DatabaseError };
 
         Result result{Result::DatabaseError};
         Sint64 sessionID{0};
@@ -133,20 +106,13 @@ public:
     AccountSessionInfo validateSession(const std::string& tokenHash,
                                        Sint64 idleTimeoutS);
 
-    enum class RevokeSessionResult {
-        Success,
-        SessionNotFound,
-        DatabaseError
-    };
+    enum class RevokeSessionResult { Success, SessionNotFound, DatabaseError };
     /**
      * Revokes the session with the given 32-byte token hash.
      */
     RevokeSessionResult revokeSession(const std::string& tokenHash);
 
-    enum class RevokeAllSessionsResult {
-        Success,
-        DatabaseError
-    };
+    enum class RevokeAllSessionsResult { Success, DatabaseError };
     /**
      * Revokes every non-revoked session belonging to an account.
      */
@@ -168,16 +134,13 @@ public:
      * @param audience The service that may consume the ticket.
      * @param expiresAt The Unix timestamp at which the ticket expires.
      */
-    CreateServiceTicketResult createServiceTicket(
-        Sint64 accountSessionID, const std::string& tokenHash,
-        ServiceTicketAudience audience, Sint64 expiresAt);
+    CreateServiceTicketResult
+        createServiceTicket(Sint64 accountSessionID,
+                            const std::string& tokenHash,
+                            ServiceTicketAudience audience, Sint64 expiresAt);
 
     struct ConsumedServiceTicketInfo {
-        enum class Result {
-            Success,
-            TicketNotFound,
-            DatabaseError
-        };
+        enum class Result { Success, TicketNotFound, DatabaseError };
 
         Result result{Result::DatabaseError};
         Sint64 accountSessionID{0};
@@ -191,8 +154,9 @@ public:
      * The ticket must be unconsumed, unrevoked, unexpired, and bound to the
      * given audience. Its account session and account must also remain valid.
      */
-    ConsumedServiceTicketInfo consumeServiceTicket(
-        const std::string& tokenHash, ServiceTicketAudience audience);
+    ConsumedServiceTicketInfo
+        consumeServiceTicket(const std::string& tokenHash,
+                             ServiceTicketAudience audience);
 
 protected:
     /**
@@ -215,5 +179,5 @@ protected:
     std::unique_ptr<SQLite::Statement> consumeServiceTicketQuery;
 };
 
-} // namespace AccountServer
-} // namespace AM
+} // End namespace AccountServer
+} // End namespace AM

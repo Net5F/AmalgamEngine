@@ -1,15 +1,13 @@
 #include "ServiceMessageProcessor.h"
-#include "AccountServiceMessageType.h"
-#include "ByteTools.h"
-#include "ConsumeWorldTicketRequest.h"
+#include "Config.h"
 #include "Database.h"
+#include "CryptoHelpers.h"
 #include "Deserialize.h"
+#include "ConsumeWorldTicketRequest.h"
 #include "Log.h"
-#include "Serialize.h"
 #include "asio/error.hpp"
 #include "asio/post.hpp"
-#include "sodium.h"
-#include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -27,6 +25,7 @@ ServiceMessageProcessor::ServiceMessageProcessor(
 , database{inDatabase}
 , sendCallback{std::move(inSendCallback)}
 , disconnectCallback{std::move(inDisconnectCallback)}
+, messageFramer{Config::MAX_WRITE_PAYLOAD_SIZE}
 {
 }
 
@@ -34,6 +33,7 @@ void ServiceMessageProcessor::processReceivedMessage(
     ConnectionHandle handle, AccountServiceMessageType messageType,
     std::span<const Uint8> messageBuffer)
 {
+    // Match the enum values to their message types.
     switch (messageType) {
         case AccountServiceMessageType::ConsumeWorldTicketRequest: {
             handleMessage<ConsumeWorldTicketRequest>(handle, messageBuffer);
@@ -42,11 +42,8 @@ void ServiceMessageProcessor::processReceivedMessage(
         default: {
             LOG_INFO("Received unexpected service message type: %u",
                      static_cast<unsigned int>(messageType));
-            if (disconnectCallback) {
-                disconnectCallback(
-                    handle, asio::error::make_error_code(
-                                asio::error::invalid_argument));
-            }
+            disconnectCallback(handle, asio::error::make_error_code(
+                                           asio::error::invalid_argument));
             break;
         }
     }
@@ -55,13 +52,15 @@ void ServiceMessageProcessor::processReceivedMessage(
 void ServiceMessageProcessor::handleMessage(
     ConnectionHandle handle, const ConsumeWorldTicketRequest& message)
 {
+    // Note: We use a DB worker so we don't hold up the network thread.
     asio::post(databasePool, [this, handle, ticket = message.ticket]() {
         ConsumeWorldTicketResponse response{consumeWorldTicket(ticket)};
 
-        asio::post(networkIoContext,
-                   [this, handle, response = std::move(response)]() {
-                       sendCallback(handle, serializeMessage(response));
-                   });
+        // Send the response (must be done on the network thread).
+        asio::post(
+            networkIoContext, [this, handle, response = std::move(response)]() {
+                sendCallback(handle, messageFramer.frameMessage(response));
+            });
     });
 }
 
@@ -70,20 +69,15 @@ ConsumeWorldTicketResponse ServiceMessageProcessor::consumeWorldTicket(
 {
     ConsumeWorldTicketResponse response{};
 
-    std::array<unsigned char, SERVICE_TICKET_HASH_BYTES> ticketHash{};
-    int hashResult{crypto_generichash(
-        ticketHash.data(), ticketHash.size(), ticket.data(),
-        static_cast<unsigned long long>(ticket.size()), nullptr, 0)};
-    if (hashResult != 0) {
+    std::optional<std::string> ticketHash{CryptoHelpers::hashSecret(ticket)};
+    if (!ticketHash) {
         LOG_ERROR("Failed to hash service ticket.");
         response.result = ConsumeWorldTicketResponse::InternalError;
         return response;
     }
 
-    std::string ticketHashString{
-        reinterpret_cast<const char*>(ticketHash.data()), ticketHash.size()};
     Database::ConsumedServiceTicketInfo ticketInfo{
-        database.consumeServiceTicket(ticketHashString,
+        database.consumeServiceTicket(*ticketHash,
                                       ServiceTicketAudience::WorldServer)};
     if (ticketInfo.result
         == Database::ConsumedServiceTicketInfo::Result::DatabaseError) {
@@ -107,38 +101,17 @@ template<typename Message>
 void ServiceMessageProcessor::handleMessage(
     ConnectionHandle handle, std::span<const Uint8> messageBuffer)
 {
+    // Deserialize the message.
     Message message{};
     if (!Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
                                  message)) {
-        if (disconnectCallback) {
-            disconnectCallback(
-                handle, asio::error::make_error_code(
-                            asio::error::invalid_argument));
-        }
+        disconnectCallback(handle, asio::error::make_error_code(
+                                       asio::error::invalid_argument));
         return;
     }
+
+    // Pass it to the appropriate handler.
     handleMessage(handle, message);
-}
-
-template<typename Message>
-BinaryBufferSharedPtr
-    ServiceMessageProcessor::serializeMessage(const Message& message)
-{
-    std::size_t totalMessageSize{MESSAGE_HEADER_SIZE
-                                 + Serialize::measureSize(message)};
-    BinaryBufferSharedPtr messageBuffer{
-        std::make_shared<BinaryBuffer>(totalMessageSize)};
-
-    std::size_t messageSize{Serialize::toBuffer(
-        messageBuffer->data(), messageBuffer->size(), message,
-        MESSAGE_HEADER_SIZE)};
-
-    messageBuffer->at(MessageHeaderIndex::MessageType)
-        = static_cast<Uint8>(Message::MESSAGE_TYPE);
-    ByteTools::write16(static_cast<Uint16>(messageSize),
-                       messageBuffer->data() + MessageHeaderIndex::Size);
-
-    return messageBuffer;
 }
 
 } // End namespace AccountServer

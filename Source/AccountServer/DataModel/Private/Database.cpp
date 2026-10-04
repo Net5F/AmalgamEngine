@@ -1,11 +1,6 @@
 #include "Database.h"
 #include "Paths.h"
-#include "AMAssert.h"
 #include "Log.h"
-#include "SQLiteCpp/VariadicBind.h"
-#include "SQLiteCpp/Backup.h"
-#include <sqlite3.h>
-#include <array>
 
 #ifdef SQLITECPP_ENABLE_ASSERT_HANDLER
 namespace SQLite
@@ -24,7 +19,7 @@ namespace AM
 namespace AccountServer
 {
 Database::Database()
-: database{(Paths::BASE_PATH + "/Accounts.db"),
+: database{(Paths::BASE_PATH + "Accounts.db"),
            SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE}
 , registerAccountQuery{nullptr}
 , insertRecoveryKeyQuery{nullptr}
@@ -51,16 +46,14 @@ Database::Database()
             ON CONFLICT(normalized_username) DO NOTHING
         )");
 
-    insertRecoveryKeyQuery
-        = std::make_unique<SQLite::Statement>(database, R"(
+    insertRecoveryKeyQuery = std::make_unique<SQLite::Statement>(database, R"(
             INSERT INTO account_recovery_keys
                 (account_id, key_hash, created_at)
             VALUES
                 (:account_id, :key_hash, unixepoch())
         )");
 
-    getAccountLoginInfoQuery
-        = std::make_unique<SQLite::Statement>(database, R"(
+    getAccountLoginInfoQuery = std::make_unique<SQLite::Statement>(database, R"(
             SELECT account_id, password_hash, status
             FROM accounts
             WHERE normalized_username = lower(:username)
@@ -79,8 +72,7 @@ Database::Database()
               AND status = 'active'
         )");
 
-    validateSessionQuery
-        = std::make_unique<SQLite::Statement>(database, R"(
+    validateSessionQuery = std::make_unique<SQLite::Statement>(database, R"(
             UPDATE account_sessions
             SET last_used_at = unixepoch(),
                 idle_expires_at = min(
@@ -108,16 +100,14 @@ Database::Database()
               AND revoked_at IS NULL
         )");
 
-    revokeAllSessionsQuery
-        = std::make_unique<SQLite::Statement>(database, R"(
+    revokeAllSessionsQuery = std::make_unique<SQLite::Statement>(database, R"(
             UPDATE account_sessions
             SET revoked_at = unixepoch()
             WHERE account_id = :account_id
               AND revoked_at IS NULL
         )");
 
-    createServiceTicketQuery
-        = std::make_unique<SQLite::Statement>(database, R"(
+    createServiceTicketQuery = std::make_unique<SQLite::Statement>(database, R"(
             INSERT INTO service_tickets
                 (token_hash, account_session_id, audience, created_at,
                  expires_at)
@@ -176,16 +166,6 @@ Database::Database()
         )");
 }
 
-SQLite::Transaction Database::startTransaction()
-{
-    return SQLite::Transaction(database);
-}
-
-SQLite::Transaction Database::startTransaction(SQLite::TransactionBehavior behavior)
-{
-    return SQLite::Transaction(database, behavior);
-}
-
 Database::RegisterResult
     Database::registerAccount(const std::string& username,
                               const std::string& passwordHash,
@@ -238,8 +218,7 @@ Database::AccountLoginInfo
             return loginInfo;
         }
 
-        loginInfo.accountID
-            = getAccountLoginInfoQuery->getColumn(0).getInt64();
+        loginInfo.accountID = getAccountLoginInfoQuery->getColumn(0).getInt64();
         loginInfo.passwordHash
             = getAccountLoginInfoQuery->getColumn(1).getString();
         loginInfo.status = getAccountLoginInfoQuery->getColumn(2).getString();
@@ -256,10 +235,8 @@ Database::AccountLoginInfo
 }
 
 Database::CreateSessionResult
-    Database::createSession(Sint64 accountID,
-                            const std::string& tokenHash,
-                            Sint64 idleExpiresAt,
-                            Sint64 absoluteExpiresAt)
+    Database::createSession(Sint64 accountID, const std::string& tokenHash,
+                            Sint64 idleExpiresAt, Sint64 absoluteExpiresAt)
 {
     try {
         createSessionQuery->bind(":account_id", accountID);
@@ -284,8 +261,7 @@ Database::CreateSessionResult
 }
 
 Database::AccountSessionInfo
-    Database::validateSession(const std::string& tokenHash,
-                              Sint64 idleTimeoutS)
+    Database::validateSession(const std::string& tokenHash, Sint64 idleTimeoutS)
 {
     AccountSessionInfo sessionInfo{};
 
@@ -296,19 +272,14 @@ Database::AccountSessionInfo
 
         if (!(validateSessionQuery->executeStep())) {
             validateSessionQuery->reset();
-            sessionInfo.result
-                = AccountSessionInfo::Result::SessionNotFound;
+            sessionInfo.result = AccountSessionInfo::Result::SessionNotFound;
             return sessionInfo;
         }
 
-        sessionInfo.sessionID
-            = validateSessionQuery->getColumn(0).getInt64();
-        sessionInfo.accountID
-            = validateSessionQuery->getColumn(1).getInt64();
-        sessionInfo.createdAt
-            = validateSessionQuery->getColumn(2).getInt64();
-        sessionInfo.lastUsedAt
-            = validateSessionQuery->getColumn(3).getInt64();
+        sessionInfo.sessionID = validateSessionQuery->getColumn(0).getInt64();
+        sessionInfo.accountID = validateSessionQuery->getColumn(1).getInt64();
+        sessionInfo.createdAt = validateSessionQuery->getColumn(2).getInt64();
+        sessionInfo.lastUsedAt = validateSessionQuery->getColumn(3).getInt64();
         sessionInfo.idleExpiresAt
             = validateSessionQuery->getColumn(4).getInt64();
         sessionInfo.absoluteExpiresAt
@@ -347,8 +318,7 @@ Database::RevokeSessionResult
     }
 }
 
-Database::RevokeAllSessionsResult
-    Database::revokeAllSessions(Sint64 accountID)
+Database::RevokeAllSessionsResult Database::revokeAllSessions(Sint64 accountID)
 {
     try {
         revokeAllSessionsQuery->bind(":account_id", accountID);
@@ -367,12 +337,10 @@ Database::CreateServiceTicketResult Database::createServiceTicket(
     ServiceTicketAudience audience, Sint64 expiresAt)
 {
     try {
-        createServiceTicketQuery->bind(":account_session_id",
-                                       accountSessionID);
+        createServiceTicketQuery->bind(":account_session_id", accountSessionID);
         createServiceTicketQuery->bind(":token_hash", tokenHash.data(),
                                        static_cast<int>(tokenHash.size()));
-        createServiceTicketQuery->bind(":audience",
-                                       static_cast<int>(audience));
+        createServiceTicketQuery->bind(":audience", static_cast<int>(audience));
         createServiceTicketQuery->bind(":expires_at", expiresAt);
 
         int changedRowCount{createServiceTicketQuery->exec()};
@@ -390,8 +358,9 @@ Database::CreateServiceTicketResult Database::createServiceTicket(
     }
 }
 
-Database::ConsumedServiceTicketInfo Database::consumeServiceTicket(
-    const std::string& tokenHash, ServiceTicketAudience audience)
+Database::ConsumedServiceTicketInfo
+    Database::consumeServiceTicket(const std::string& tokenHash,
+                                   ServiceTicketAudience audience)
 {
     ConsumedServiceTicketInfo ticketInfo{};
 
@@ -587,5 +556,5 @@ void Database::initTables()
     }
 }
 
-} // namespace AccountServer
-} // namespace AM
+} // End namespace AccountServer
+} // End namespace AM

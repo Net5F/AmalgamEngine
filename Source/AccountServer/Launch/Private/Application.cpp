@@ -21,12 +21,11 @@ void Application::start()
 {
     // Stop the event loop when the process receives a termination signal.
     asio::signal_set terminationSignals{ioContext, SIGINT, SIGTERM};
-    terminationSignals.async_wait(
-        [this](const asio::error_code& error, int) {
-            if (!error) {
-                ioContext.stop();
-            }
-        });
+    terminationSignals.async_wait([this](const asio::error_code& error, int) {
+        if (!error) {
+            ioContext.stop();
+        }
+    });
 
     network.start();
 }

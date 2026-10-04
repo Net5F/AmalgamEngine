@@ -9,9 +9,10 @@ namespace AM
 namespace AccountServer
 {
 
-AccountClientEndpoint::AccountClientEndpoint(
-    asio::io_context& inIoContext, asio::ssl::context& inSSLContext,
-    asio::thread_pool& inDatabasePool, Database& inDatabase)
+AccountClientEndpoint::AccountClientEndpoint(asio::io_context& inIoContext,
+                                             asio::ssl::context& inSSLContext,
+                                             asio::thread_pool& inDatabasePool,
+                                             Database& inDatabase)
 : ioContext{inIoContext}
 , sslContext{inSSLContext}
 , connectionRegistry(Config::MAX_CLIENTS)
@@ -21,10 +22,9 @@ AccountClientEndpoint::AccountClientEndpoint(
       std::bind_front(&AccountClientEndpoint::connectionFactory, this),
       std::bind_front(&AccountClientEndpoint::onConnectionAccepted, this),
       std::bind_front(&AccountClientEndpoint::onAcceptorError, this))
-, messageProcessor{
-      inIoContext, inDatabasePool, inDatabase,
-      std::bind_front(&AccountClientEndpoint::sendMessage, this),
-      std::bind_front(&AccountClientEndpoint::disconnect, this)}
+, messageProcessor{inIoContext, inDatabasePool, inDatabase,
+                   std::bind_front(&AccountClientEndpoint::sendMessage, this),
+                   std::bind_front(&AccountClientEndpoint::disconnect, this)}
 {
 }
 
@@ -116,5 +116,5 @@ void AccountClientEndpoint::disconnect(ConnectionHandle handle,
     }
 }
 
-} // end namespace AccountServer
-} // end namespace AM
+} // End namespace AccountServer
+} // End namespace AM

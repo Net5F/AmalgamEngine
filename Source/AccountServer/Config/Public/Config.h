@@ -13,7 +13,7 @@ class Config
 {
 public:
     //-------------------------------------------------------------------------
-    // Network
+    // Client network
     //-------------------------------------------------------------------------
     /** The port that the server listens for incoming client connections on. */
     static constexpr unsigned int SERVER_CLIENT_PORT{41498};
@@ -28,22 +28,18 @@ public:
         out. */
     static constexpr double CONNECTING_TIMEOUT_S{5};
 
-    /** How long we'll wait after receiving the first byte of a message before 
+    /** How long we'll wait after receiving the first byte of a message before
         timing out. Prevents slowloris-style attacks. */
     static constexpr double PARTIAL_RECEIVE_TIMEOUT_S{10};
 
     /** How long a connected client can be idle before timing out. */
     static constexpr double IDLE_TIMEOUT_S{10};
 
-    /** How long a connected client can not consume our written data before 
-        timing out. */
-    static constexpr double WRITE_TIMEOUT_S{10};
-
-    /** The maximum amount of outgoing bytes we'll allow at once before 
+    /** The maximum amount of outgoing bytes we'll allow at once before
         considering the client to be hostile and closing the connection. */
     static constexpr std::size_t MAX_QUEUED_WRITE_BYTES{4000};
 
-    /** The maximum number of outgoing writes we'll allow at once before 
+    /** The maximum number of outgoing writes we'll allow at once before
         considering the client to be hostile and closing the connection. */
     static constexpr std::size_t MAX_QUEUED_WRITES{10};
 

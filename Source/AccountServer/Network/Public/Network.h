@@ -18,7 +18,7 @@ namespace AccountServer
 class Database;
 
 /**
- * Manages the network connection endpoints. 
+ * Manages the network connection endpoints.
  */
 class Network
 {
@@ -61,5 +61,5 @@ private:
     AccountServiceEndpoint serviceEndpoint;
 };
 
-} // namespace AccountServer
-} // namespace AM
+} // End namespace AccountServer
+} // End namespace AM

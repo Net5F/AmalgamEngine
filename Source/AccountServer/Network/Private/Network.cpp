@@ -94,5 +94,5 @@ void Network::configureServicePeerVerification()
     }
 }
 
-} // namespace AccountServer
-} // namespace AM
+} // End namespace AccountServer
+} // End namespace AM

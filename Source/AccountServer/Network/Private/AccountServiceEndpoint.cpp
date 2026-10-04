@@ -18,15 +18,13 @@ AccountServiceEndpoint::AccountServiceEndpoint(
 , connectionRegistry(Config::MAX_SERVICE_CONNECTIONS)
 , acceptor(
       inIoContext,
-      asio::ip::tcp::endpoint{asio::ip::tcp::v4(),
-                              Config::SERVER_SERVICE_PORT},
+      asio::ip::tcp::endpoint{asio::ip::tcp::v4(), Config::SERVER_SERVICE_PORT},
       std::bind_front(&AccountServiceEndpoint::connectionFactory, this),
       std::bind_front(&AccountServiceEndpoint::onConnectionAccepted, this),
       std::bind_front(&AccountServiceEndpoint::onAcceptorError, this))
-, messageProcessor{
-      inIoContext, inDatabasePool, inDatabase,
-      std::bind_front(&AccountServiceEndpoint::sendMessage, this),
-      std::bind_front(&AccountServiceEndpoint::disconnect, this)}
+, messageProcessor{inIoContext, inDatabasePool, inDatabase,
+                   std::bind_front(&AccountServiceEndpoint::sendMessage, this),
+                   std::bind_front(&AccountServiceEndpoint::disconnect, this)}
 , worldServerHandle{NULL_CONNECTION_HANDLE}
 {
 }
@@ -147,5 +145,5 @@ void AccountServiceEndpoint::disconnect(ConnectionHandle handle,
     }
 }
 
-} // end namespace AccountServer
-} // end namespace AM
+} // End namespace AccountServer
+} // End namespace AM

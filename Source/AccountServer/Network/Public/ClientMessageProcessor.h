@@ -3,6 +3,7 @@
 #include "AccountDefs.h"
 #include "AccountClientMessageType.h"
 #include "ConnectionHandle.h"
+#include "SimpleMessageFramer.h"
 #include "RegisterResponse.h"
 #include "LoginResponse.h"
 #include "LogoutResponse.h"
@@ -14,9 +15,7 @@
 #include <array>
 #include <functional>
 #include <span>
-#include <optional>
 #include <string>
-#include <string_view>
 
 namespace AM
 {
@@ -32,7 +31,7 @@ class Database;
 /**
  * Processes AccountClientMessageType messages.
  *
- * Unlike Client/Server, which pass messages down to the sim layer,
+ * Unlike Client/WorldServer, which pass messages down to the sim layer,
  * AccountServer handles messages directly in the network thread. As such,
  * these functions are actual message handlers, instead of just dispatchers.
  *
@@ -46,13 +45,13 @@ class ClientMessageProcessor
 public:
     using SendCallback
         = std::function<void(ConnectionHandle, BinaryBufferSharedPtr)>;
-    using DisconnectCallback = std::function<void(
-        ConnectionHandle, const asio::error_code&)>;
+    using DisconnectCallback
+        = std::function<void(ConnectionHandle, const asio::error_code&)>;
 
     ClientMessageProcessor(asio::io_context& inNetworkIoContext,
                            asio::thread_pool& inDatabasePool,
-                           Database& inDatabase, SendCallback sendCallback,
-                           DisconnectCallback disconnectCallback);
+                           Database& inDatabase, SendCallback inSendCallback,
+                           DisconnectCallback inDisconnectCallback);
 
     /**
      * Deserializes and handles received messages.
@@ -67,25 +66,6 @@ public:
                                 std::span<const Uint8> messageBuffer);
 
 private:
-    /** Encoding 18 random bytes as unpadded Base64URL produces a 24-
-        character recovery key with 144 bits of entropy. */
-    static constexpr std::size_t RECOVERY_KEY_RANDOM_BYTES{18};
-    /** The recovery key, plus 1 for null terminator. */
-    static constexpr std::size_t RECOVERY_KEY_BUFFER_BYTES{
-        RECOVERY_KEY_CHARACTERS + 1};
-
-    /** How long the hash of the recovery key should be.
-        Must match key_hash in the account_recovery_keys table. */
-    static constexpr std::size_t RECOVERY_KEY_HASH_BYTES{32};
-
-    /** How long the hash of an account session token should be.
-        Must match token_hash in the account_sessions table. */
-    static constexpr std::size_t SESSION_TOKEN_HASH_BYTES{32};
-
-    /** How long the hash of a service ticket should be.
-        Must match token_hash in the service_tickets table. */
-    static constexpr std::size_t SERVICE_TICKET_HASH_BYTES{32};
-
     //-------------------------------------------------------------------------
     // Handlers
     //-------------------------------------------------------------------------
@@ -129,73 +109,18 @@ private:
         const std::array<Uint8, SESSION_TOKEN_BYTES>& accountSessionToken);
 
     /**
-     * Generates an account recovery key.
-     */
-    std::string generateRecoveryKey() const;
-
-    /**
-     * Hashes the given password using argon2id.
-     */
-    std::optional<std::string> hashPassword(std::string_view password) const;
-
-    /**
-     * Hashes a recovery key into exactly 32 binary bytes.
-     */
-    std::optional<std::string>
-        hashRecoveryKey(std::string_view recoveryKey) const;
-
-    /**
-     * Generates a cryptographically random account session token.
-     */
-    std::array<Uint8, SESSION_TOKEN_BYTES> generateSessionToken() const;
-
-    /**
-     * Hashes an account session token into exactly 32 binary bytes.
-     */
-    std::optional<std::string> hashSessionToken(
-        const std::array<Uint8, SESSION_TOKEN_BYTES>& sessionToken) const;
-
-    /**
-     * Generates a cryptographically random service ticket.
-     */
-    std::array<Uint8, SERVICE_TICKET_BYTES> generateServiceTicket() const;
-
-    /**
-     * Hashes a service ticket into exactly 32 binary bytes.
-     */
-    std::optional<std::string> hashServiceTicket(
-        const std::array<Uint8, SERVICE_TICKET_BYTES>& serviceTicket) const;
-
-    struct SessionValidation {
-        enum class Result {
-            Success,
-            InvalidSession,
-            InternalError
-        };
-
-        Result result{Result::InternalError};
-        Sint64 sessionID{0};
-        Sint64 accountID{0};
-        Sint64 createdAt{0};
-        Sint64 lastUsedAt{0};
-        Sint64 idleExpiresAt{0};
-        Sint64 absoluteExpiresAt{0};
-    };
-    /**
-     * Hashes and validates an account session token.
+     * Runs createResponse on a database worker, then sends the returned
+     * response message to the given connection.
      *
-     * Valid sessions have their last-used time and idle expiration refreshed
-     * by the database.
+     * Note: We use a database worker so we don't hold up the network thread.
      */
-    SessionValidation validateSessionToken(
-        const std::array<Uint8, SESSION_TOKEN_BYTES>& sessionToken);
+    template<typename CreateResponse>
+    void respondFromDatabasePool(ConnectionHandle handle,
+                                 CreateResponse createResponse);
 
     template<typename Message>
     void handleMessage(ConnectionHandle handle,
                        std::span<const Uint8> messageBuffer);
-
-    template<typename Message>
-    BinaryBufferSharedPtr serializeMessage(const Message& message);
 
     asio::io_context& networkIoContext;
     asio::thread_pool& databasePool;
@@ -207,6 +132,9 @@ private:
 
     /** Used to disconnect clients that send invalid messages. */
     DisconnectCallback disconnectCallback;
+
+    /** Used to serialize and frame our outgoing messages. */
+    SimpleMessageFramer<AccountClientMessageType> messageFramer;
 
     /** A valid hash that we can verify against when a login references an
         unknown account. This keeps that path close to the cost of verifying a

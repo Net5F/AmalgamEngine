@@ -3,12 +3,14 @@ target_sources(AccountServer
         Private/AccountClientEndpoint.cpp
         Private/AccountServiceEndpoint.cpp
         Private/ClientMessageProcessor.cpp
+        Private/CryptoHelpers.cpp
         Private/Network.cpp
         Private/ServiceMessageProcessor.cpp
     PUBLIC
         Public/AccountClientEndpoint.h
         Public/AccountServiceEndpoint.h
         Public/ClientMessageProcessor.h
+        Public/CryptoHelpers.h
         Public/Network.h
         Public/ServiceMessageProcessor.h
 )
