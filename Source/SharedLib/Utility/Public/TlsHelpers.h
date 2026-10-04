@@ -26,6 +26,14 @@ public:
     static constexpr std::size_t SHA256_BASE64_LENGTH{44};
 
     using CertificatePin = std::array<unsigned char, SHA256_BYTES>;
+
+    /** The role that a pinned peer is expected to play in the connection. */
+    enum class PeerRole {
+        /** The peer is a server that we connected to. */
+        Server,
+        /** The peer is a client that connected to us (mutual TLS). */
+        Client
+    };
     /**
      * Loads and returns the TLS pin at the given path.
      * @return A valid pin, or null if the pin was not found or invalid. If 
@@ -36,11 +44,15 @@ public:
 
     /**
      * Verifies that the given pin is valid within the given context.
+     *
+     * @param peerRole The role that the peer is expected to play. Used to
+     *                 check that the certificate is authorized for that use.
      * @return true if the pin is valid, else false.
      */
     static bool verifyPinnedCertificate(
         const CertificatePin& expectedPin,
-        asio::ssl::verify_context& verifyContext) noexcept;
+        asio::ssl::verify_context& verifyContext,
+        PeerRole peerRole = PeerRole::Server) noexcept;
 };
 
 } // End namespace AM

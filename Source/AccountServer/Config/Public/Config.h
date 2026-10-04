@@ -56,6 +56,27 @@ public:
     static constexpr std::size_t MAX_WRITE_PAYLOAD_SIZE{500};
 
     //-------------------------------------------------------------------------
+    // Service network
+    //-------------------------------------------------------------------------
+    /** The maximum number of service connections that we will allow at once.
+        Only 1 world server is supported, but a few extra slots let it
+        reconnect while a stale connection is still being cleaned up. */
+    static constexpr unsigned int MAX_SERVICE_CONNECTIONS{4};
+
+    /** How long a connected service can be idle before timing out.
+        Services are expected to reconnect as needed. */
+    static constexpr double SERVICE_IDLE_TIMEOUT_S{60};
+
+    /** The maximum amount of outgoing bytes we'll allow at once on a service
+        connection. Larger than the client limit, since a service may send
+        bursts of requests on behalf of many users. */
+    static constexpr std::size_t SERVICE_MAX_QUEUED_WRITE_BYTES{64000};
+
+    /** The maximum number of outgoing writes we'll allow at once on a service
+        connection. */
+    static constexpr std::size_t SERVICE_MAX_QUEUED_WRITES{1000};
+
+    //-------------------------------------------------------------------------
     // Account sessions
     //-------------------------------------------------------------------------
     /** How long an account session can remain idle before expiring. */

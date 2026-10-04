@@ -30,9 +30,6 @@ struct ServiceTicketIssued {
     /** If result == success, this identifies the authorized service. */
     ServiceTicketAudience audience{ServiceTicketAudience::WorldServer};
 
-    /** If result == success, this identifies the authorized server instance. */
-    Sint64 targetServerID{0};
-
     /** If result == success, this is the ticket's Unix expiration timestamp. */
     Sint64 expiresAt{0};
 };
@@ -43,7 +40,6 @@ void serialize(S& serializer, ServiceTicketIssued& serviceTicketIssued)
     serializer.value1b(serviceTicketIssued.result);
     serializer.container1b(serviceTicketIssued.ticket);
     serializer.value1b(serviceTicketIssued.audience);
-    serializer.value8b(serviceTicketIssued.targetServerID);
     serializer.value8b(serviceTicketIssued.expiresAt);
 }
 

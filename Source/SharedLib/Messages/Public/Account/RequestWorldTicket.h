@@ -18,16 +18,12 @@ struct RequestWorldTicket {
 
     /** The client's current account session token. */
     std::array<Uint8, SESSION_TOKEN_BYTES> accountSessionToken{};
-
-    /** The World Server instance that the client wants to connect to. */
-    Sint64 targetServerID{0};
 };
 
 template<typename S>
 void serialize(S& serializer, RequestWorldTicket& requestWorldTicket)
 {
     serializer.container1b(requestWorldTicket.accountSessionToken);
-    serializer.value8b(requestWorldTicket.targetServerID);
 }
 
 } // End namespace AM

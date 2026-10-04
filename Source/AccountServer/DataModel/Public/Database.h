@@ -166,13 +166,11 @@ public:
      * @param accountSessionID The session that owns the ticket.
      * @param tokenHash The 32-byte hash of the service ticket.
      * @param audience The service that may consume the ticket.
-     * @param targetServerID The specific server instance that may consume it.
      * @param expiresAt The Unix timestamp at which the ticket expires.
      */
     CreateServiceTicketResult createServiceTicket(
         Sint64 accountSessionID, const std::string& tokenHash,
-        ServiceTicketAudience audience, Sint64 targetServerID,
-        Sint64 expiresAt);
+        ServiceTicketAudience audience, Sint64 expiresAt);
 
     struct ConsumedServiceTicketInfo {
         enum class Result {
@@ -191,12 +189,10 @@ public:
      * Atomically validates and consumes a service ticket.
      *
      * The ticket must be unconsumed, unrevoked, unexpired, and bound to the
-     * given audience and target server. Its account session and account must
-     * also remain valid.
+     * given audience. Its account session and account must also remain valid.
      */
     ConsumedServiceTicketInfo consumeServiceTicket(
-        const std::string& tokenHash, ServiceTicketAudience audience,
-        Sint64 targetServerID);
+        const std::string& tokenHash, ServiceTicketAudience audience);
 
 protected:
     /**

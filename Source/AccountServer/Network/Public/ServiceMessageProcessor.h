@@ -53,8 +53,7 @@ private:
                        const ConsumeWorldTicketRequest& message);
 
     ConsumeWorldTicketResponse consumeWorldTicket(
-        const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket,
-        Sint64 targetServerID);
+        const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket);
 
     template<typename Message>
     void handleMessage(ConnectionHandle handle,

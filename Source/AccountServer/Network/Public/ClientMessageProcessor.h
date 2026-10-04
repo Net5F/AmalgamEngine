@@ -123,11 +123,10 @@ private:
         const std::array<Uint8, SESSION_TOKEN_BYTES>& sessionToken);
 
     /**
-     * Attempts to issue a single-use ticket for the requested World Server.
+     * Attempts to issue a single-use ticket for the World Server.
      */
     ServiceTicketIssued issueWorldTicket(
-        const std::array<Uint8, SESSION_TOKEN_BYTES>& accountSessionToken,
-        Sint64 targetServerID);
+        const std::array<Uint8, SESSION_TOKEN_BYTES>& accountSessionToken);
 
     /**
      * Generates an account recovery key.

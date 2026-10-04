@@ -153,10 +153,9 @@ void ClientMessageProcessor::handleMessage(
 {
     asio::post(
         databasePool,
-        [this, handle, accountSessionToken = message.accountSessionToken,
-         targetServerID = message.targetServerID]() {
+        [this, handle, accountSessionToken = message.accountSessionToken]() {
             ServiceTicketIssued response{
-                issueWorldTicket(accountSessionToken, targetServerID)};
+                issueWorldTicket(accountSessionToken)};
 
             // Send the response (must be done on the network thread).
             asio::post(networkIoContext,
@@ -316,8 +315,7 @@ LogoutResponse ClientMessageProcessor::logoutSession(
 }
 
 ServiceTicketIssued ClientMessageProcessor::issueWorldTicket(
-    const std::array<Uint8, SESSION_TOKEN_BYTES>& accountSessionToken,
-    Sint64 targetServerID)
+    const std::array<Uint8, SESSION_TOKEN_BYTES>& accountSessionToken)
 {
     ServiceTicketIssued response{};
 
@@ -359,7 +357,7 @@ ServiceTicketIssued ClientMessageProcessor::issueWorldTicket(
     Database::CreateServiceTicketResult createResult{
         database.createServiceTicket(
             sessionValidation.sessionID, *serviceTicketHash, audience,
-            targetServerID, expiresAt)};
+            expiresAt)};
     if (createResult
         == Database::CreateServiceTicketResult::SessionUnavailable) {
         response.result = ServiceTicketIssued::InvalidSession;
@@ -372,7 +370,6 @@ ServiceTicketIssued ClientMessageProcessor::issueWorldTicket(
 
     response.ticket = std::move(serviceTicket);
     response.audience = audience;
-    response.targetServerID = targetServerID;
     response.expiresAt = expiresAt;
     response.result = ServiceTicketIssued::Success;
     return response;

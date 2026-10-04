@@ -119,11 +119,11 @@ Database::Database()
     createServiceTicketQuery
         = std::make_unique<SQLite::Statement>(database, R"(
             INSERT INTO service_tickets
-                (token_hash, account_session_id, audience, target_server_id,
-                 created_at, expires_at)
+                (token_hash, account_session_id, audience, created_at,
+                 expires_at)
             SELECT
-                :token_hash, sessions.session_id, :audience,
-                :target_server_id, unixepoch(), :expires_at
+                :token_hash, sessions.session_id, :audience, unixepoch(),
+                :expires_at
             FROM account_sessions AS sessions
             JOIN accounts
               ON accounts.account_id = sessions.account_id
@@ -141,7 +141,6 @@ Database::Database()
             SET consumed_at = unixepoch()
             WHERE token_hash = :token_hash
               AND audience = :audience
-              AND target_server_id = :target_server_id
               AND consumed_at IS NULL
               AND revoked_at IS NULL
               AND expires_at > unixepoch()
@@ -365,8 +364,7 @@ Database::RevokeAllSessionsResult
 
 Database::CreateServiceTicketResult Database::createServiceTicket(
     Sint64 accountSessionID, const std::string& tokenHash,
-    ServiceTicketAudience audience, Sint64 targetServerID,
-    Sint64 expiresAt)
+    ServiceTicketAudience audience, Sint64 expiresAt)
 {
     try {
         createServiceTicketQuery->bind(":account_session_id",
@@ -375,7 +373,6 @@ Database::CreateServiceTicketResult Database::createServiceTicket(
                                        static_cast<int>(tokenHash.size()));
         createServiceTicketQuery->bind(":audience",
                                        static_cast<int>(audience));
-        createServiceTicketQuery->bind(":target_server_id", targetServerID);
         createServiceTicketQuery->bind(":expires_at", expiresAt);
 
         int changedRowCount{createServiceTicketQuery->exec()};
@@ -394,8 +391,7 @@ Database::CreateServiceTicketResult Database::createServiceTicket(
 }
 
 Database::ConsumedServiceTicketInfo Database::consumeServiceTicket(
-    const std::string& tokenHash, ServiceTicketAudience audience,
-    Sint64 targetServerID)
+    const std::string& tokenHash, ServiceTicketAudience audience)
 {
     ConsumedServiceTicketInfo ticketInfo{};
 
@@ -404,7 +400,6 @@ Database::ConsumedServiceTicketInfo Database::consumeServiceTicket(
                                         static_cast<int>(tokenHash.size()));
         consumeServiceTicketQuery->bind(":audience",
                                         static_cast<int>(audience));
-        consumeServiceTicketQuery->bind(":target_server_id", targetServerID);
 
         if (!(consumeServiceTicketQuery->executeStep())) {
             consumeServiceTicketQuery->reset();
@@ -563,8 +558,6 @@ void Database::initTables()
 
                     audience           INTEGER NOT NULL
                         CHECK (audience IN (0, 1)),
-
-                    target_server_id   INTEGER NOT NULL,
 
                     created_at         INTEGER NOT NULL,
                     expires_at         INTEGER NOT NULL,

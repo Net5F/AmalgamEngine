@@ -108,15 +108,14 @@ bool AccountSession::logout()
     return true;
 }
 
-bool AccountSession::requestWorldTicket(Sint64 targetServerID)
+bool AccountSession::requestWorldTicket()
 {
     if ((loginState != LoginState::LoggedIn) || worldTicketRequestPending) {
         return false;
     }
 
     worldTicketRequestPending = true;
-    network.accountEndpoint.send(
-        RequestWorldTicket{sessionToken, targetServerID});
+    network.accountEndpoint.send(RequestWorldTicket{sessionToken});
     return true;
 }
 

@@ -84,7 +84,7 @@ std::optional<TlsHelpers::CertificatePin>
 
 bool TlsHelpers::verifyPinnedCertificate(
     const CertificatePin& expectedPin,
-    asio::ssl::verify_context& verifyContext) noexcept
+    asio::ssl::verify_context& verifyContext, PeerRole peerRole) noexcept
 {
     X509_STORE_CTX* storeContext{verifyContext.native_handle()};
     if (storeContext == nullptr) {
@@ -133,7 +133,9 @@ bool TlsHelpers::verifyPinnedCertificate(
         return false;
     }
 
-    if (X509_check_purpose(certificate, X509_PURPOSE_SSL_SERVER, 0) != 1) {
+    int purpose{(peerRole == PeerRole::Server) ? X509_PURPOSE_SSL_SERVER
+                                               : X509_PURPOSE_SSL_CLIENT};
+    if (X509_check_purpose(certificate, purpose, 0) != 1) {
         return false;
     }
 

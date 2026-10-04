@@ -51,8 +51,8 @@ public:
     /** Revokes the current account session. */
     bool logout();
 
-    /** Requests a one-use ticket for a WorldServer instance. */
-    bool requestWorldTicket(Sint64 targetServerID);
+    /** Requests a one-use ticket for the WorldServer. */
+    bool requestWorldTicket();
 
     LoginState getLoginState() const noexcept;
     bool isAuthenticated() const noexcept;

@@ -55,23 +55,18 @@ void ServiceMessageProcessor::processReceivedMessage(
 void ServiceMessageProcessor::handleMessage(
     ConnectionHandle handle, const ConsumeWorldTicketRequest& message)
 {
-    asio::post(
-        databasePool,
-        [this, handle, ticket = message.ticket,
-         targetServerID = message.targetServerID]() {
-            ConsumeWorldTicketResponse response{
-                consumeWorldTicket(ticket, targetServerID)};
+    asio::post(databasePool, [this, handle, ticket = message.ticket]() {
+        ConsumeWorldTicketResponse response{consumeWorldTicket(ticket)};
 
-            asio::post(networkIoContext,
-                       [this, handle, response = std::move(response)]() {
-                           sendCallback(handle, serializeMessage(response));
-                       });
-        });
+        asio::post(networkIoContext,
+                   [this, handle, response = std::move(response)]() {
+                       sendCallback(handle, serializeMessage(response));
+                   });
+    });
 }
 
 ConsumeWorldTicketResponse ServiceMessageProcessor::consumeWorldTicket(
-    const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket,
-    Sint64 targetServerID)
+    const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket)
 {
     ConsumeWorldTicketResponse response{};
 
@@ -88,9 +83,8 @@ ConsumeWorldTicketResponse ServiceMessageProcessor::consumeWorldTicket(
     std::string ticketHashString{
         reinterpret_cast<const char*>(ticketHash.data()), ticketHash.size()};
     Database::ConsumedServiceTicketInfo ticketInfo{
-        database.consumeServiceTicket(
-            ticketHashString, ServiceTicketAudience::WorldServer,
-            targetServerID)};
+        database.consumeServiceTicket(ticketHashString,
+                                      ServiceTicketAudience::WorldServer)};
     if (ticketInfo.result
         == Database::ConsumedServiceTicketInfo::Result::DatabaseError) {
         response.result = ConsumeWorldTicketResponse::InternalError;
