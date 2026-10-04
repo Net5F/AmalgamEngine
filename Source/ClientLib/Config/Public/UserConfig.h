@@ -55,8 +55,8 @@ public:
         std::string IP{};
         unsigned int port{};
     };
-    ServerAddress getServerAddress();
-    void setServerAddress(const ServerAddress& inServerAddress);
+    ServerAddress getWorldServerAddress();
+    void setWorldServerAddress(const ServerAddress& inServerAddress);
 
     ServerAddress getAccountServerAddress();
     void setAccountServerAddress(const ServerAddress& inServerAddress);
@@ -76,8 +76,8 @@ private:
     unsigned int framesPerSecond;
     double frameTimestepS;
 
-    std::string serverIP;
-    unsigned int serverPort;
+    std::string worldServerIP;
+    unsigned int worldServerPort;
 
     std::string accountServerIP;
     unsigned int accountServerPort;

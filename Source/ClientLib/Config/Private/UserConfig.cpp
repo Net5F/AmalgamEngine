@@ -17,8 +17,8 @@ UserConfig::UserConfig()
 , windowSizeHeight{}
 , framesPerSecond{}
 , frameTimestepS{}
-, serverIP{}
-, serverPort{}
+, worldServerIP{}
+, worldServerPort{}
 , accountServerIP{}
 , accountServerPort{}
 {
@@ -102,15 +102,15 @@ void UserConfig::setFramesPerSecond(unsigned int inFramesPerSecond)
     frameTimestepS = (1.0 / static_cast<double>(framesPerSecond));
 }
 
-UserConfig::ServerAddress UserConfig::getServerAddress()
+UserConfig::ServerAddress UserConfig::getWorldServerAddress()
 {
-    return {serverIP, serverPort};
+    return {worldServerIP, worldServerPort};
 }
 
-void UserConfig::setServerAddress(const ServerAddress& inServerAddress)
+void UserConfig::setWorldServerAddress(const ServerAddress& inServerAddress)
 {
-    serverIP = inServerAddress.IP;
-    serverPort = inServerAddress.port;
+    worldServerIP = inServerAddress.IP;
+    worldServerPort = inServerAddress.port;
 }
 
 UserConfig::ServerAddress UserConfig::getAccountServerAddress()
@@ -133,8 +133,9 @@ void UserConfig::init(nlohmann::json& json)
     setWindowSize(
         {0, 0, json.at("windowSizeWidth"), json.at("windowSizeHeight")});
 
-    // Server address.
-    setServerAddress({json.at("serverIP"), json.at("serverPort")});
+    // WorldServer address.
+    setWorldServerAddress(
+        {json.at("worldServerIP"), json.at("worldServerPort")});
 
     // AccountServer address.
     setAccountServerAddress(
