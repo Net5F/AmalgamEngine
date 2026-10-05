@@ -95,8 +95,10 @@ void ClientConnectionSystem::processConnectEvent(
     // Add the new client entity to the network ID map.
     world.netIDMap[clientConnected.clientID] = newEntity;
 
-    LOG_INFO("Constructed client entity with netID: %u, entityID: %u",
-             clientConnected.clientID, newEntity);
+    LOG_INFO("Constructed client entity with netID: %u, accountID: %lld, "
+             "entityID: %u",
+             clientConnected.clientID,
+             static_cast<long long>(clientConnected.accountID), newEntity);
 
     // Build and send the response.
     sendConnectionResponse(clientConnected.clientID, newEntity);
@@ -129,6 +131,7 @@ void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
     // Fill in the current tick and their entity's ID.
     ConnectionResponse connectionResponse{};
     Uint32 currentTick{simulation.getCurrentTick()};
+    connectionResponse.result = ConnectionResponse::Success;
     connectionResponse.entity = newEntity;
     connectionResponse.tickNum = currentTick;
 

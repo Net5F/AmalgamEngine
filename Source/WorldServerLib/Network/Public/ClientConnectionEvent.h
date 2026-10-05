@@ -8,15 +8,20 @@ namespace AM
 namespace WorldServer
 {
 /**
- * Used to tell the simulation that a client was connected.
+ * Used to tell the simulation that a client was connected and authenticated.
  */
 struct ClientConnected {
     /** The ID of the client that connected. */
     NetworkID clientID{0};
+
+    /** The ID of the account that the client authenticated as. */
+    Sint64 accountID{0};
 };
 
 /**
  * Used to tell the simulation that a client was disconnected.
+ *
+ * Note: This is only sent for clients that a ClientConnected was sent for.
  */
 struct ClientDisconnected {
     /** The ID of the client that disconnected. */

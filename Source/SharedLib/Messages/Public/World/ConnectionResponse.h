@@ -15,6 +15,19 @@ struct ConnectionResponse {
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::ConnectionResponse};
 
+    enum Result : Uint8 {
+        /** The client was authenticated and added to the sim. */
+        Success,
+        /** The client's ticket was invalid, expired, or already used. */
+        InvalidTicket,
+        /** The server failed to validate the client's ticket (e.g. it
+            couldn't reach the AccountServer). */
+        InternalError
+    };
+    Result result{Result::InternalError};
+
+    // Note: The following fields are only valid if result == Success.
+
     /** The tick that the server is telling the client to assume. */
     Uint32 tickNum{0};
 
@@ -35,6 +48,7 @@ struct ConnectionResponse {
 template<typename S>
 void serialize(S& serializer, ConnectionResponse& connectionResponse)
 {
+    serializer.value1b(connectionResponse.result);
     serializer.value4b(connectionResponse.tickNum);
     serializer.value4b(connectionResponse.entity);
     serializer.value2b(connectionResponse.mapXLengthChunks);

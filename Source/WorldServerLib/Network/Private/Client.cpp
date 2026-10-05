@@ -23,6 +23,8 @@ Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 : netID{inNetID}
 , peer{std::move(inPeer)}
 , receiveTimer{}
+, authState{AuthState::AwaitingRequest}
+, authTimer{}
 , latestSentSimTick{0}
 , tickDiffHistory{Config::TICKDIFF_TARGET}
 , numFreshDiffs{0}
@@ -39,6 +41,16 @@ bool Client::isConnected()
         LOG_INFO("Dropped connection, peer timed out. Time since last "
                  "message: %.6f seconds. Timeout: %.6f, NetID: %u",
                  delta, Config::CLIENT_TIMEOUT_S, netID);
+        return false;
+    }
+
+    // If we didn't authenticate in time, drop the connection.
+    if ((authState != AuthState::Authenticated)
+        && (authTimer.getTime() > AUTH_TIMEOUT_S)) {
+        peer = nullptr;
+        LOG_INFO("Dropped connection, peer failed to authenticate in time. "
+                 "NetID: %u",
+                 netID);
         return false;
     }
 
@@ -278,6 +290,16 @@ void Client::recordTickDiff(Sint64 tickDiff)
 NetworkID Client::getNetID() const
 {
     return netID;
+}
+
+Client::AuthState Client::getAuthState() const
+{
+    return authState;
+}
+
+void Client::setAuthState(AuthState inAuthState)
+{
+    authState = inAuthState;
 }
 
 void Client::addExplicitConfirmation(std::size_t& currentIndex,

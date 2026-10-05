@@ -1,8 +1,11 @@
 #include "ClientHandler.h"
 #include "WorldClientEndpoint.h"
+#include "AccountServiceEndpoint.h"
 #include "NetworkDefs.h"
 #include "SocketSet.h"
 #include "ClientConnectionEvent.h"
+#include "ConnectionRequest.h"
+#include "Deserialize.h"
 #include "Config.h"
 #include "Log.h"
 #include <shared_mutex>
@@ -16,10 +19,13 @@ namespace WorldServer
 
 ClientHandler::ClientHandler(WorldClientEndpoint& inEndpoint,
                              EventDispatcher& inDispatcher,
-                             MessageProcessor& inMessageProcessor)
+                             MessageProcessor& inMessageProcessor,
+                             AccountServiceEndpoint& inAccountEndpoint)
 : endpoint{inEndpoint}
 , dispatcher{inDispatcher}
 , messageProcessor{inMessageProcessor}
+, accountEndpoint{inAccountEndpoint}
+, ticketResultQueue{}
 , networkIDPool{IDPool::ReservationStrategy::MarchForward, 8}
 , clientCount{0}
 , clientSet{std::make_shared<SocketSet>(Config::MAX_CLIENTS)}
@@ -68,6 +74,9 @@ void ClientHandler::serviceClients()
     while (!exitRequested) {
         // Check if there are any new clients to connect.
         acceptNewClients(clientMap);
+
+        // Authenticate or reject any clients whose tickets were validated.
+        processTicketResults(clientMap);
 
         // Erase any clients who were detected to be disconnected.
         eraseDisconnectedClients(clientMap);
@@ -154,10 +163,63 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
 
         clientCount++;
 
-        // Notify the sim that a client was connected.
-        dispatcher.emplace<ClientConnectionEvent>(ClientConnected{newID});
+        // Note: We don't notify the sim about this client until it
+        //       authenticates (see processTicketResults()).
 
         newPeer = acceptor.accept();
+    }
+}
+
+void ClientHandler::processTicketResults(ClientMap& clientMap)
+{
+    ZoneScoped;
+
+    TicketResult ticketResult{};
+    while (ticketResultQueue.try_dequeue(ticketResult)) {
+        // If the client disconnected while we were waiting, there's nothing
+        // to do.
+        // Note: We compare the pointers in case the netID was reused.
+        std::shared_ptr<Client> client{ticketResult.client.lock()};
+        auto clientIt{clientMap.find(ticketResult.netID)};
+        if (!client || (clientIt == clientMap.end())
+            || (clientIt->second != client)) {
+            continue;
+        }
+
+        if (client->getAuthState() != Client::AuthState::Validating) {
+            LOG_ERROR("Received ticket result for client that isn't "
+                      "validating. NetID: %u",
+                      ticketResult.netID);
+            continue;
+        }
+
+        const ConsumeWorldTicketResponse& response{ticketResult.response};
+        switch (response.result) {
+            case ConsumeWorldTicketResponse::Success: {
+                client->setAuthState(Client::AuthState::Authenticated);
+                LOG_INFO("Client authenticated. NetID: %u, AccountID: %lld",
+                         ticketResult.netID,
+                         static_cast<long long>(response.accountID));
+
+                // Notify the sim that a client was connected.
+                dispatcher.emplace<ClientConnectionEvent>(
+                    ClientConnected{ticketResult.netID, response.accountID});
+                break;
+            }
+            case ConsumeWorldTicketResponse::InvalidTicket: {
+                LOG_INFO("Rejected client: Invalid ticket. NetID: %u",
+                         ticketResult.netID);
+                rejectClient(*client, ConnectionResponse::InvalidTicket);
+                break;
+            }
+            default: {
+                LOG_INFO("Rejected client: Failed to validate ticket. "
+                         "NetID: %u",
+                         ticketResult.netID);
+                rejectClient(*client, ConnectionResponse::InternalError);
+                break;
+            }
+        }
     }
 }
 
@@ -170,8 +232,11 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
         std::shared_ptr<Client>& client{it->second};
 
         if (!(client->isConnected())) {
-            // Save the ID since we're going to erase this client.
+            // Save the ID and auth state since we're going to erase this
+            // client.
             NetworkID clientID{it->first};
+            bool wasAuthenticated{client->getAuthState()
+                                  == Client::AuthState::Authenticated};
 
             {
                 // Need to modify the map, acquire a write lock.
@@ -184,10 +249,13 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
 
             clientCount--;
 
-            // Notify the sim that a client was disconnected.
+            // If the sim knows about this client, notify it that the client
+            // was disconnected.
             LOG_INFO("Erased disconnected client with netID: %u.", clientID);
-            dispatcher.emplace<ClientConnectionEvent>(
-                ClientDisconnected{clientID});
+            if (wasAuthenticated) {
+                dispatcher.emplace<ClientConnectionEvent>(
+                    ClientDisconnected{clientID});
+            }
         }
         else {
             ++it;
@@ -219,8 +287,18 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
                 numReceived++;
 
                 // Process the message.
-                processReceivedMessage(*clientPtr, result.messageType,
-                                       result.messageBuffer);
+                // Note: Until a client authenticates, the only message we
+                //       accept from it is its ConnectionRequest.
+                if (result.messageType
+                    == static_cast<Uint8>(
+                        EngineMessageType::ConnectionRequest)) {
+                    processConnectionRequest(clientPtr, result.messageBuffer);
+                }
+                else if (clientPtr->getAuthState()
+                         == Client::AuthState::Authenticated) {
+                    processReceivedMessage(*clientPtr, result.messageType,
+                                           result.messageBuffer);
+                }
             }
         }
     }
@@ -247,6 +325,46 @@ void ClientHandler::processReceivedMessage(Client& client, Uint8 messageType,
         // Record the diff.
         client.recordTickDiff(tickDiff);
     }
+}
+
+void ClientHandler::processConnectionRequest(
+    const std::shared_ptr<Client>& client, std::span<Uint8> messageBuffer)
+{
+    NetworkID netID{client->getNetID()};
+    if (client->getAuthState() != Client::AuthState::AwaitingRequest) {
+        LOG_INFO("Ignoring unexpected ConnectionRequest. NetID: %u", netID);
+        return;
+    }
+
+    ConnectionRequest connectionRequest{};
+    if (!Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
+                                 connectionRequest)) {
+        LOG_INFO("Rejected client: Failed to deserialize ConnectionRequest. "
+                 "NetID: %u",
+                 netID);
+        rejectClient(*client, ConnectionResponse::InvalidTicket);
+        return;
+    }
+
+    // Ask the AccountServer to validate the ticket.
+    // Note: The callback is called on the network IO thread, so we pass the
+    //       result to processTicketResults() through a queue.
+    client->setAuthState(Client::AuthState::Validating);
+    std::weak_ptr<Client> weakClient{client};
+    accountEndpoint.consumeWorldTicket(
+        connectionRequest.ticket,
+        [this, netID, weakClient](const ConsumeWorldTicketResponse& response) {
+            ticketResultQueue.enqueue(
+                TicketResult{netID, weakClient, response});
+        });
+}
+
+void ClientHandler::rejectClient(Client& client,
+                                 ConnectionResponse::Result result)
+{
+    client.setAuthState(Client::AuthState::Rejected);
+    client.queueMessage(endpoint.serialize(ConnectionResponse{.result{result}}),
+                        0);
 }
 
 } // End namespace WorldServer

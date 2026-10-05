@@ -4,6 +4,9 @@
 #include "Client.h"
 #include "Acceptor.h"
 #include "IDPool.h"
+#include "ConnectionResponse.h"
+#include "ConsumeWorldTicketResponse.h"
+#include "readerwriterqueue.h"
 #include "tracy/Tracy.hpp"
 #include <thread>
 #include <queue>
@@ -21,12 +24,18 @@ namespace WorldServer
 {
 class WorldClientEndpoint;
 class MessageProcessor;
+class AccountServiceEndpoint;
 
 /**
  * Handles all asynchronous activity that the Clients require.
  *
- * Accepts new client connections, erases clients that have been detected as
- * disconnected, and receives available messages.
+ * Accepts new client connections, authenticates them, erases clients that have
+ * been detected as disconnected, and receives available messages.
+ *
+ * Newly accepted clients must send a ConnectionRequest containing a World
+ * Server ticket. We validate the ticket with the AccountServer, and only tell
+ * the sim about the client once it succeeds. Until then, any other messages
+ * from the client are dropped.
  *
  * Acts directly on the WorldClientEndpoint's client map.
  */
@@ -35,7 +44,8 @@ class ClientHandler
 public:
     ClientHandler(WorldClientEndpoint& inEndpoint,
                   EventDispatcher& inDispatcher,
-                  MessageProcessor& inMessageProcessor);
+                  MessageProcessor& inMessageProcessor,
+                  AccountServiceEndpoint& inAccountEndpoint);
 
     ~ClientHandler();
 
@@ -86,6 +96,12 @@ private:
     void acceptNewClients(ClientMap& clientMap);
 
     /**
+     * Processes any ticket validation results that the AccountServer has sent
+     * us, authenticating or rejecting the associated clients.
+     */
+    void processTicketResults(ClientMap& clientMap);
+
+    /**
      * Erase any disconnected clients from the endpoint's client map.
      */
     void eraseDisconnectedClients(ClientMap& clientMap);
@@ -111,6 +127,23 @@ private:
     void processReceivedMessage(Client& client, Uint8 messageType,
                                 std::span<Uint8> messageBuffer);
 
+    /**
+     * If the given client is awaiting authentication, sends the request's
+     * ticket to the AccountServer for validation.
+     */
+    void processConnectionRequest(const std::shared_ptr<Client>& client,
+                                  std::span<Uint8> messageBuffer);
+
+    /**
+     * Sends the given client a failed ConnectionResponse and marks it as
+     * rejected.
+     *
+     * Note: We leave the connection open so the response can be sent. If the
+     *       client doesn't disconnect, it'll be dropped when its auth timeout
+     *       expires.
+     */
+    void rejectClient(Client& client, ConnectionResponse::Result result);
+
     /** Used to get the client map and current tick. */
     WorldClientEndpoint& endpoint;
 
@@ -119,6 +152,22 @@ private:
 
     /** Used to process received messages. */
     MessageProcessor& messageProcessor;
+
+    /** Used to validate the tickets that clients send us. */
+    AccountServiceEndpoint& accountEndpoint;
+
+    /** A ticket validation result, received from the AccountServer. */
+    struct TicketResult {
+        /** The client that sent the ticket. */
+        NetworkID netID{0};
+        /** Used to make sure the client didn't disconnect (and have its netID
+            reused) while we were waiting. */
+        std::weak_ptr<Client> client{};
+        ConsumeWorldTicketResponse response{};
+    };
+    /** Holds ticket results until the receive thread can process them.
+        Written to by the network IO thread, read by the receive thread. */
+    moodycamel::ReaderWriterQueue<TicketResult> ticketResultQueue;
 
     /** Used for generating network IDs. */
     IDPool networkIDPool;

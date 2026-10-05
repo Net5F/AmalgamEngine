@@ -16,8 +16,8 @@ namespace WorldServer
 Network::Network(const MessageProcessorContext& inMessageProcessorContext)
 : ioContext{}
 , accountSSLContext{asio::ssl::context::tls_client}
-, clientEndpoint{inMessageProcessorContext}
 , accountEndpoint{ioContext, accountSSLContext}
+, clientEndpoint{inMessageProcessorContext, accountEndpoint}
 , workGuard{}
 , ioThread{}
 , started{false}

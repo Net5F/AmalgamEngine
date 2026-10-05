@@ -15,9 +15,10 @@ namespace WorldServer
 {
 
 WorldClientEndpoint::WorldClientEndpoint(
-    const MessageProcessorContext& inMessageProcessorContext)
+    const MessageProcessorContext& inMessageProcessorContext,
+    AccountServiceEndpoint& inAccountEndpoint)
 : messageProcessor{inMessageProcessorContext}
-, clientHandler{*this, eventDispatcher, messageProcessor}
+, clientHandler{*this, eventDispatcher, messageProcessor, inAccountEndpoint}
 , ticksSinceNetstatsLog{0}
 , currentTickPtr{nullptr}
 {

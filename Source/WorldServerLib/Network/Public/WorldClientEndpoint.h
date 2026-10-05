@@ -23,6 +23,7 @@ namespace WorldServer
 {
 struct MessageProcessorContext;
 class IMessageProcessorExtension;
+class AccountServiceEndpoint;
 
 /**
  * Manages communication with clients (ran by users).
@@ -40,7 +41,8 @@ class WorldClientEndpoint
 {
 public:
     WorldClientEndpoint(
-        const MessageProcessorContext& inMessageProcessorContext);
+        const MessageProcessorContext& inMessageProcessorContext,
+        AccountServiceEndpoint& inAccountEndpoint);
 
     /**
      * Sends all queued messages over the network.

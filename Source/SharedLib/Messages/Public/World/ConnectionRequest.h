@@ -1,12 +1,17 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include <string>
+#include "AccountDefs.h"
+#include <array>
 
 namespace AM
 {
 /**
- * Contains a connection response, sent from the server to the client.
+ * Sent by the client after connecting, to request entry into the world.
+ *
+ * The server validates the given ticket with the AccountServer. If it's
+ * valid, the client is added to the sim. Either way, the server responds with
+ * a ConnectionResponse.
  */
 struct ConnectionRequest {
     // The EngineMessageType enum value that this message corresponds to.
@@ -14,21 +19,15 @@ struct ConnectionRequest {
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::ConnectionRequest};
 
-    /** Used as a "we should never hit this" cap on the size of each name
-        string. */
-    static constexpr std::size_t MAX_NAME_LENGTH{50};
-
-    // Note: This will eventually change to login credentials and will be sent
-    //       to the login server instead of the simulation server.
-    /** The name of this player. */
-    std::string playerName{""};
+    /** The single-use World Server ticket that the client received from the
+        AccountServer. */
+    std::array<Uint8, SERVICE_TICKET_BYTES> ticket{};
 };
 
 template<typename S>
-void serialize(S& serializer, ConnectionRequest& connectionResponse)
+void serialize(S& serializer, ConnectionRequest& connectionRequest)
 {
-    serializer.text1b(connectionResponse.playerName,
-                      ConnectionRequest::MAX_NAME_LENGTH);
+    serializer.container1b(connectionRequest.ticket);
 }
 
 } // End namespace AM

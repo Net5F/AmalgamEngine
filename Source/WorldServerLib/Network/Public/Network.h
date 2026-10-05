@@ -37,8 +37,10 @@ public:
     /** Starts the asynchronous endpoint thread. */
     void start();
 
-    WorldClientEndpoint clientEndpoint;
+    // Note: accountEndpoint must be constructed before clientEndpoint, since
+    //       clientEndpoint starts threads that use it.
     AccountServiceEndpoint accountEndpoint;
+    WorldClientEndpoint clientEndpoint;
 
 private:
     using WorkGuard

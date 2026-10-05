@@ -26,10 +26,30 @@ namespace WorldServer
 class Client
 {
 public:
+    /** How long a client has to authenticate after connecting, before we
+        drop it.
+        Note: If a project ever cares to configure this, it can be moved into
+              Config.h. */
+    static constexpr double AUTH_TIMEOUT_S{10};
+
+    enum class AuthState {
+        /** We're waiting for the client to send a ConnectionRequest. */
+        AwaitingRequest,
+        /** We're waiting for the AccountServer to validate the client's
+            ticket. */
+        Validating,
+        /** The client's ticket was rejected. If the client doesn't
+            disconnect, it'll be dropped when AUTH_TIMEOUT_S expires. */
+        Rejected,
+        /** The client's ticket was accepted and it was added to the sim. */
+        Authenticated
+    };
+
     Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer);
 
     /**
-     * Checks if this client has timed out, then returns its connection state.
+     * Checks if this client has timed out (or failed to authenticate in
+     * time), then returns its connection state.
      * @return true if the client is connected, else false.
      *
      * Note: There's 2 places where a disconnect can occur:
@@ -96,6 +116,12 @@ public:
     void recordTickDiff(Sint64 tickDiff);
 
     NetworkID getNetID() const;
+
+    /**
+     * Note: The auth state should only be accessed from the receive thread.
+     */
+    AuthState getAuthState() const;
+    void setAuthState(AuthState inAuthState);
 
 private:
     //--------------------------------------------------------------------------
@@ -199,6 +225,16 @@ private:
     /** Tracks how long it's been since we've received a message from this
         client. */
     Timer receiveTimer;
+
+    //--------------------------------------------------------------------------
+    // Authentication
+    //--------------------------------------------------------------------------
+    /** This client's current authentication state. */
+    AuthState authState;
+
+    /** Tracks how long it's been since this client connected. Used to drop
+        clients that don't authenticate within AUTH_TIMEOUT_S. */
+    Timer authTimer;
 
     //--------------------------------------------------------------------------
     // Synchronization Functions
