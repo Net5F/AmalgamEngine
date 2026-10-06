@@ -7,8 +7,10 @@
 #include "Peer.h"
 #include "Deserialize.h"
 #include "ByteTools.h"
+#include "AccountDefs.h"
 #include "Log.h"
 #include <SDL3/SDL_stdinc.h>
+#include <array>
 #include <string>
 #include <memory>
 #include <atomic>
@@ -47,12 +49,13 @@ public:
     //       thread will stall for a long time while waiting for
     //       SDLNet_TCP_Open() to return. If we move off SDL_Net, improve this.
     /**
-     * Spins up the connectAndReceive thread.
+     * Spins up the connectAndReceive thread. Once connected, sends a
+     * ConnectionRequest with the given ticket.
      *
      * Note: ServerConnectionSystem is responsible for calling this. See class
      *       comment.
      */
-    void connect();
+    void connect(const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket);
 
     /**
      * Cleans up our server connection and spins down the receive thread.
@@ -162,6 +165,10 @@ private:
     void logNetworkStatistics();
 
     std::shared_ptr<Peer> server;
+
+    /** The ticket to present to the server after connecting. Set by
+        connect(), cleared after it's sent. */
+    std::array<Uint8, SERVICE_TICKET_BYTES> pendingWorldTicket;
 
     /** Used to dispatch events from the network to the simulation. */
     EventDispatcher& networkEventDispatcher;

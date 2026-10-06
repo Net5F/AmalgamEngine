@@ -25,6 +25,7 @@
 #include "Config.h"
 #include "Log.h"
 #include "entt/signal/dispatcher.hpp"
+#include <openssl/crypto.h>
 
 namespace AM
 {
@@ -53,21 +54,23 @@ void ServerConnectionSystem::processConnectionEvents()
     if (connectionState == ConnectionState::Disconnected) {
         // Check for a connection request from the UI.
         if (!(connectionRequestQueue.empty())) {
-            ConnectionRequest connectionRequest{connectionRequestQueue.front()};
+            ConnectionRequest& connectionRequest{
+                connectionRequestQueue.front()};
+            if (!Config::RUN_OFFLINE) {
+                // Kick off a connection attempt with the server.
+                network.worldEndpoint.connect(connectionRequest.ticket);
+                connectionState = ConnectionState::AwaitingResponse;
+                connectionAttemptTimer.reset();
+            }
+            OPENSSL_cleanse(connectionRequest.ticket.data(),
+                            connectionRequest.ticket.size());
             connectionRequestQueue.pop();
+
             if (Config::RUN_OFFLINE) {
                 // No need to connect if we're running offline. Just mock up
                 // the player data.
                 initMockSimState();
                 return;
-            }
-            else {
-                // Kick off a connection attempt with the server.
-                // Note: Eventually we'll instead send a ConnectionRequest to
-                //       the login server here with our login info.
-                network.worldEndpoint.connect();
-                connectionState = ConnectionState::AwaitingResponse;
-                connectionAttemptTimer.reset();
             }
         }
     }
@@ -75,16 +78,28 @@ void ServerConnectionSystem::processConnectionEvents()
         // Wait for a connection response from the server.
         ConnectionResponse connectionResponse;
         if (connectionResponseQueue.pop(connectionResponse)) {
-            initSimState(connectionResponse);
-            connectionState = ConnectionState::Connected;
-            simEventDispatcher.trigger<SimulationStarted>();
+            if (connectionResponse.result == ConnectionResponse::Success) {
+                initSimState(connectionResponse);
+                connectionState = ConnectionState::Connected;
+                simEventDispatcher.trigger<SimulationStarted>();
+            }
+            else {
+                LOG_INFO("Server rejected connection. Result: %u",
+                         static_cast<unsigned int>(connectionResponse.result));
+                ConnectionError::Type errorType{
+                    (connectionResponse.result
+                     == ConnectionResponse::InvalidTicket)
+                        ? ConnectionError::Type::InvalidTicket
+                        : ConnectionError::Type::Rejected};
+                abortConnectionAttempt(errorType);
+                return;
+            }
         }
-
         // If we've timed out, send a failure signal.
-        if (connectionAttemptTimer.getTime() >= CONNECTION_RESPONSE_WAIT_S) {
-            simEventDispatcher.trigger<ConnectionError>(
-                {ConnectionError::Type::Failed});
-            connectionState = ConnectionState::Disconnected;
+        else if (connectionAttemptTimer.getTime()
+                 >= CONNECTION_RESPONSE_WAIT_S) {
+            abortConnectionAttempt(ConnectionError::Type::Failed);
+            return;
         }
     }
 
@@ -102,6 +117,23 @@ ServerConnectionSystem::ConnectionState
     ServerConnectionSystem::getConnectionState()
 {
     return connectionState;
+}
+
+void ServerConnectionSystem::abortConnectionAttempt(
+    ConnectionError::Type errorType)
+{
+    // Spin down the endpoint so we can try again later.
+    network.worldEndpoint.disconnect();
+
+    // The server may have closed the socket after responding, which would
+    // have queued a redundant error. We report our own error instead.
+    // Note: disconnect() joined the receive thread, so nothing else will be
+    //       pushed.
+    while (connectionErrorQueue.pop()) {
+    }
+
+    connectionState = ConnectionState::Disconnected;
+    simEventDispatcher.trigger<ConnectionError>({errorType});
 }
 
 void ServerConnectionSystem::onUIConnectionRequest(

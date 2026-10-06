@@ -87,7 +87,14 @@ void AccountClientEndpoint::onAcceptorError(const asio::error_code& error)
 void AccountClientEndpoint::onConnectionDisconnected(
     ConnectionHandle handle, const asio::error_code& error)
 {
-    LOG_INFO("Account client disconnected: %s", error.message().c_str());
+    // Note: Timeouts are common (idle clients), and the OS's message for them
+    //       is long, so we print a short message instead.
+    if (error == asio::error::timed_out) {
+        LOG_INFO("Account client disconnected: Timeout.");
+    }
+    else {
+        LOG_INFO("Account client disconnected: %s", error.message().c_str());
+    }
     connectionRegistry.erase(handle);
 }
 

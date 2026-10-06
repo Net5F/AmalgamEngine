@@ -51,6 +51,12 @@ private:
     void onUIConnectionRequest(ConnectionRequest& connectionRequest);
 
     /**
+     * Disconnects the endpoint, returns to the Disconnected state, and sends
+     * a ConnectionError with the given type to the UI.
+     */
+    void abortConnectionAttempt(ConnectionError::Type errorType);
+
+    /**
      * Requests to connect to the game server, waits for an assigned EntityID,
      * and constructs the player.
      */

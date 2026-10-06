@@ -2,6 +2,7 @@
 #include "MessageProcessorContext.h"
 #include "QueuedEvents.h"
 #include "Heartbeat.h"
+#include "ConnectionRequest.h"
 #include "ConnectionError.h"
 #include "Config.h"
 #include "UserConfig.h"
@@ -9,6 +10,7 @@
 #include "IMessageProcessorExtension.h"
 #include "AMAssert.h"
 #include "SDL_net.h"
+#include <openssl/crypto.h>
 
 namespace AM
 {
@@ -17,6 +19,7 @@ namespace Client
 WorldClientEndpoint::WorldClientEndpoint(
     const MessageProcessorContext& inMessageProcessorContext)
 : server{nullptr}
+, pendingWorldTicket{}
 , networkEventDispatcher{inMessageProcessorContext.networkEventDispatcher}
 , messageProcessor{inMessageProcessorContext}
 , tickAdjustment{0}
@@ -49,12 +52,16 @@ WorldClientEndpoint::~WorldClientEndpoint()
     }
 }
 
-void WorldClientEndpoint::connect()
+void WorldClientEndpoint::connect(
+    const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket)
 {
     if (server != nullptr) {
         LOG_INFO("Attempted to connect while connected.");
         return;
     }
+
+    // Save the ticket so the receive thread can send it once connected.
+    pendingWorldTicket = worldTicket;
 
     // Spin up the receive thread (will start the connection attempt).
     exitRequested = false;
@@ -70,6 +77,7 @@ void WorldClientEndpoint::disconnect()
         receiveThreadObj.join();
     }
     server = nullptr;
+    OPENSSL_cleanse(pendingWorldTicket.data(), pendingWorldTicket.size());
     adjustmentIteration = 0;
     isApplyingTickAdjustment = false;
     messagesSentSinceTick = 0;
@@ -188,11 +196,13 @@ void WorldClientEndpoint::connectAndReceive()
         UserConfig::get().getWorldServerAddress()};
     server = Peer::initiate(serverAddress.IP, serverAddress.port);
     if (server != nullptr) {
-        // Note: The server sends us a ConnectionResponse when we connect the
-        //       socket. Eventually, we'll instead send a ConnectionRequest to
-        //       the login server here.
+        // Present our ticket. The server will validate it and send us a
+        // ConnectionResponse.
+        send(ConnectionRequest{pendingWorldTicket});
+        OPENSSL_cleanse(pendingWorldTicket.data(), pendingWorldTicket.size());
     }
     else {
+        OPENSSL_cleanse(pendingWorldTicket.data(), pendingWorldTicket.size());
         networkEventDispatcher.emplace<ConnectionError>(
             ConnectionError::Type::Failed);
         return;
