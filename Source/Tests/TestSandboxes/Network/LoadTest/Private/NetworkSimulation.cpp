@@ -1,6 +1,7 @@
 #include "NetworkSimulation.h"
 #include "MessageProcessorContext.h"
 #include "Heartbeat.h"
+#include "ConnectionRequest.h"
 #include "ConnectionError.h"
 #include "Config.h"
 #include "UserConfig.h"
@@ -27,7 +28,8 @@ NetworkSimulation::NetworkSimulation()
 {
 }
 
-void NetworkSimulation::connect()
+void NetworkSimulation::connect(
+    const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket)
 {
     if (server != nullptr) {
         LOG_INFO("Attempted to connect while connected.");
@@ -39,9 +41,9 @@ void NetworkSimulation::connect()
         Client::UserConfig::get().getWorldServerAddress()};
     server = Peer::initiate(serverAddress.IP, serverAddress.port);
     if (server != nullptr) {
-        // Note: The server sends us a ConnectionResponse when we connect the
-        //       socket. Eventually, we'll instead send a ConnectionRequest to
-        //       the login server here.
+        // Present our ticket. The server will validate it and send us a
+        // ConnectionResponse.
+        serializeAndSend(ConnectionRequest{worldTicket});
 
         serverConnected = true;
     }

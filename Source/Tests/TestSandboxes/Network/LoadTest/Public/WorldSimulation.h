@@ -4,8 +4,10 @@
 #include "QueuedEvents.h"
 #include "ConnectionResponse.h"
 #include "ConnectionError.h"
+#include "AccountDefs.h"
 #include "entt/entity/registry.hpp"
 #include <SDL3/SDL_stdinc.h>
+#include <array>
 #include <atomic>
 
 namespace AM
@@ -28,9 +30,10 @@ public:
     WorldSimulation(NetworkSimulation& network, unsigned int inInputsPerSecond);
 
     /**
-     * Requests to connect to the game server, waits for a ConnectionResponse.
+     * Connects to the game server using the given ticket, waits for a
+     * ConnectionResponse.
      */
-    void connect();
+    void connect(const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket);
 
     /**
      * Processes one tick of the "sim", checking if we need to send inputs or
@@ -46,8 +49,10 @@ private:
     void sendNextInput();
 
     /** How long the sim should wait for the server to send a connection
-        response, in microseconds. */
-    static constexpr int CONNECTION_RESPONSE_WAIT_US{1 * 1000 * 1000};
+        response, in microseconds.
+        Note: The server has to validate our ticket with the AccountServer
+              before responding. */
+    static constexpr int CONNECTION_RESPONSE_WAIT_US{5 * 1000 * 1000};
 
     NetworkSimulation& network;
 

@@ -7,8 +7,10 @@
 #include "Peer.h"
 #include "Deserialize.h"
 #include "ByteTools.h"
+#include "AccountDefs.h"
 #include "Log.h"
 #include <SDL3/SDL_stdinc.h>
+#include <array>
 #include <atomic>
 
 namespace AM
@@ -27,9 +29,10 @@ public:
     NetworkSimulation();
 
     /**
-     * Attempts to connect to the server.
+     * Attempts to connect to the server. If successful, sends a
+     * ConnectionRequest with the given ticket.
      */
-    void connect();
+    void connect(const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket);
 
     /**
      * Cleans up our server connection.

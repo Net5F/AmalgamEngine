@@ -19,8 +19,12 @@ namespace AM
 namespace AccountServer
 {
 Database::Database()
-: database{(Paths::BASE_PATH + "Accounts.db"),
-           SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE}
+: Database(Paths::BASE_PATH + "Accounts.db")
+{
+}
+
+Database::Database(const std::string& databasePath)
+: database{databasePath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE}
 , registerAccountQuery{nullptr}
 , insertRecoveryKeyQuery{nullptr}
 , getAccountLoginInfoQuery{nullptr}

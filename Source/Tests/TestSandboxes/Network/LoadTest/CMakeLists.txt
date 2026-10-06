@@ -11,6 +11,7 @@ add_executable(LoadTestClient
     Public/SimulatedClient.h
     Private/WorldSimulation.cpp
     Public/WorldSimulation.h
+    Public/LoadTestAccounts.h
     
     # Client objects
     ${PROJECT_SOURCE_DIR}/Source/EngineSupplementExamples/Client/Config/Public/Config.h
@@ -20,6 +21,11 @@ add_executable(LoadTestClient
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/MessageProcessor.cpp
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/MessageProcessor.h
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/IMessageProcessorExtension.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/AccountClientEndpoint.cpp
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/AccountClientEndpoint.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/AccountConnectionEvent.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/AccountMessageProcessor.cpp
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/AccountMessageProcessor.h
 )
 
 target_include_directories(LoadTestClient
@@ -65,6 +71,11 @@ endif()
 file(COPY ${CMAKE_SOURCE_DIR}/Resources/Client/Common/UserConfig.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
+# Copy the AccountServer's local TLS pin to the build directory.
+file(COPY
+    "${AmalgamEngine_SOURCE_DIR}/TlsCredentials/Local/account-server.pin"
+    DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+
 # On Windows, copy runtime DLLs into the build folder so we can run our executable.
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_custom_command(TARGET LoadTestClient POST_BUILD
@@ -72,6 +83,63 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 			$<TARGET_RUNTIME_DLLS:LoadTestClient>
 			${AM_OPENSSL_RUNTIME_DLLS}
 			$<TARGET_FILE_DIR:LoadTestClient>
+		COMMAND_EXPAND_LISTS
+	)
+endif()
+
+# Load test account seeder
+add_executable(SeedLoadTestAccounts
+    Private/SeedLoadTestAccountsMain.cpp
+    Public/LoadTestAccounts.h
+
+    # AccountServer objects
+    ${PROJECT_SOURCE_DIR}/Source/AccountServer/DataModel/Private/Database.cpp
+    ${PROJECT_SOURCE_DIR}/Source/AccountServer/DataModel/Public/Database.h
+    ${PROJECT_SOURCE_DIR}/Source/AccountServer/Network/Private/CryptoHelpers.cpp
+    ${PROJECT_SOURCE_DIR}/Source/AccountServer/Network/Public/CryptoHelpers.h
+)
+
+target_include_directories(SeedLoadTestAccounts
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public
+
+        # AccountServer objects
+        ${PROJECT_SOURCE_DIR}/Source/AccountServer/DataModel/Public
+        ${PROJECT_SOURCE_DIR}/Source/AccountServer/Network/Public
+)
+
+# Inherit Shared's precompiled header.
+# CMake causes issues when using precompiled headers with GCC on macOS,
+# so precompiled headers are disabled for that target.
+if ((NOT APPLE) OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang"))
+    target_precompile_headers(SeedLoadTestAccounts REUSE_FROM SharedLib)
+endif()
+
+target_link_libraries(SeedLoadTestAccounts
+    PRIVATE
+        SharedLib
+        SQLiteCpp
+        sqlite3
+        libsodium
+)
+
+# Compile with C++23.
+target_compile_features(SeedLoadTestAccounts PRIVATE cxx_std_23)
+set_target_properties(SeedLoadTestAccounts PROPERTIES CXX_EXTENSIONS OFF)
+
+# Enable compile warnings.
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(SeedLoadTestAccounts PUBLIC -Wall -Wextra)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(SeedLoadTestAccounts PUBLIC /W3 /permissive-)
+endif()
+
+# On Windows, copy runtime DLLs into the build folder so we can run our executable.
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    add_custom_command(TARGET SeedLoadTestAccounts POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			$<TARGET_RUNTIME_DLLS:SeedLoadTestAccounts>
+			$<TARGET_FILE_DIR:SeedLoadTestAccounts>
 		COMMAND_EXPAND_LISTS
 	)
 endif()

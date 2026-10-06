@@ -4,10 +4,17 @@
 #include "SDL_Wrappers/SDL.h"
 
 #include "Timer.h"
+#include "TlsHelpers.h"
+#include "Paths.h"
 #include "Log.h"
 
 #include "SimulatedClient.h"
 #include "UserConfig.h"
+
+#include "asio/executor_work_guard.hpp"
+#include "asio/io_context.hpp"
+#include "asio/ssl/context.hpp"
+#include "asio/system_error.hpp"
 
 #include <exception>
 #include <atomic>
@@ -28,7 +35,36 @@ void printUsage()
         "  InputsPerSecond: How many times each client should change movement "
         "direction per second.\n"
         "  ConnectionWaitTime: How long, in milliseconds, to wait between"
-        " client connections.\n");
+        " client connections.\n"
+        "\n"
+        "Clients log in as loadtest_0 through loadtest_<NumClients - 1>. Use "
+        "SeedLoadTestAccounts to create these accounts.\n");
+}
+
+/**
+ * Configures the given context to require the AccountServer's certificate to
+ * match its pin.
+ */
+void configureAccountServerVerification(asio::ssl::context& sslContext)
+{
+    const std::string pinPath{Paths::BASE_PATH + "account-server.pin"};
+    auto certificatePinOpt{TlsHelpers::loadCertificatePin(pinPath)};
+    if (!certificatePinOpt) {
+        LOG_FATAL("Failed to load AccountServer certificate pin.");
+    }
+
+    try {
+        sslContext.set_verify_mode(asio::ssl::verify_peer);
+        sslContext.set_verify_callback(
+            [certificatePin = *certificatePinOpt](
+                bool, asio::ssl::verify_context& verifyContext) noexcept {
+                return TlsHelpers::verifyPinnedCertificate(certificatePin,
+                                                           verifyContext);
+            });
+    } catch (const asio::system_error& e) {
+        LOG_FATAL("Failed to configure AccountServer certificate pin '%s': %s",
+                  pinPath.c_str(), e.what());
+    }
 }
 
 void connectClients(unsigned int numClients, unsigned int connectionWaitTimeMs,
@@ -124,12 +160,21 @@ try {
     // Init SDL_net once for all clients to use.
     SDLNet_Init();
 
+    // Set up the AccountServer networking, shared by all clients.
+    asio::io_context ioContext{};
+    asio::ssl::context sslContext{asio::ssl::context::tls_client};
+    configureAccountServerVerification(sslContext);
+    auto workGuard{asio::make_work_guard(ioContext)};
+    std::jthread ioThread{[&ioContext]() { ioContext.run(); }};
+
     // Construct the clients.
     LOG_INFO("Client entities will move at %u inputs per second.",
              inputsPerSecond);
     std::vector<std::unique_ptr<SimulatedClient>> clients(numClients);
     for (std::size_t i{0}; i < clients.size(); ++i) {
-        clients[i] = std::make_unique<SimulatedClient>(inputsPerSecond);
+        clients[i] = std::make_unique<SimulatedClient>(
+            static_cast<unsigned int>(i), inputsPerSecond, ioContext,
+            sslContext);
     }
 
     // Start the client connections thread.
@@ -157,6 +202,12 @@ try {
     }
 
     connectionThreadObj.join();
+
+    // Stop the IO thread before the clients (and their AccountServer
+    // connections) are destroyed.
+    workGuard.reset();
+    ioContext.stop();
+    ioThread.join();
 
     return 0;
 } catch (std::exception& e) {

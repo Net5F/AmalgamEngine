@@ -26,7 +26,15 @@ namespace AccountServer
 class Database
 {
 public:
+    /**
+     * Opens the Accounts.db next to our executable.
+     */
     Database();
+
+    /**
+     * Opens the database at the given path. Creates it if it doesn't exist.
+     */
+    explicit Database(const std::string& databasePath);
 
     //-------------------------------------------------------------------------
     // Accounts

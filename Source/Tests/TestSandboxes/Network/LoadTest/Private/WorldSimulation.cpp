@@ -27,15 +27,20 @@ WorldSimulation::WorldSimulation(NetworkSimulation& inNetwork,
     network.registerCurrentTickPtr(&currentTick);
 }
 
-void WorldSimulation::connect()
+void WorldSimulation::connect(
+    const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket)
 {
-    network.connect();
+    network.connect(worldTicket);
 
     // Wait for the player's ID from the server.
     ConnectionResponse connectionResponse{};
     if (!(connectionResponseQueue.waitPop(connectionResponse,
                                           CONNECTION_RESPONSE_WAIT_US))) {
         LOG_FATAL("Server did not respond.");
+    }
+    if (connectionResponse.result != ConnectionResponse::Success) {
+        LOG_FATAL("Server rejected connection. Result: %u",
+                  static_cast<unsigned int>(connectionResponse.result));
     }
 
     // Get our info from the connection response.
