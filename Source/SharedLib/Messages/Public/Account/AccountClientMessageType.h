@@ -16,13 +16,13 @@ enum class AccountClientMessageType : Uint8 {
     RegisterRequest,
     LoginRequest,
     LogoutRequest,
-    RequestWorldTicket,
+    ServiceTicketRequest,
 
     // Server -> Client Messages
     RegisterResponse,
     LoginResponse,
     LogoutResponse,
-    ServiceTicketIssued,
+    ServiceTicketResponse,
 };
 
 } // End namespace AM

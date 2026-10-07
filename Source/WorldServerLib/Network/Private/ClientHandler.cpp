@@ -193,9 +193,9 @@ void ClientHandler::processTicketResults(ClientMap& clientMap)
             continue;
         }
 
-        const ConsumeWorldTicketResponse& response{ticketResult.response};
+        const ConsumeServiceTicketResponse& response{ticketResult.response};
         switch (response.result) {
-            case ConsumeWorldTicketResponse::Success: {
+            case ConsumeServiceTicketResponse::Success: {
                 client->setAuthState(Client::AuthState::Authenticated);
                 LOG_INFO("Client authenticated. NetID: %u, AccountID: %lld",
                          ticketResult.netID,
@@ -206,7 +206,7 @@ void ClientHandler::processTicketResults(ClientMap& clientMap)
                     ClientConnected{ticketResult.netID, response.accountID});
                 break;
             }
-            case ConsumeWorldTicketResponse::InvalidTicket: {
+            case ConsumeServiceTicketResponse::InvalidTicket: {
                 LOG_INFO("Rejected client: Invalid ticket. NetID: %u",
                          ticketResult.netID);
                 rejectClient(*client, ConnectionResponse::InvalidTicket);
@@ -351,9 +351,10 @@ void ClientHandler::processConnectionRequest(
     //       result to processTicketResults() through a queue.
     client->setAuthState(Client::AuthState::Validating);
     std::weak_ptr<Client> weakClient{client};
-    accountEndpoint.consumeWorldTicket(
+    accountEndpoint.consumeServiceTicket(
         connectionRequest.ticket,
-        [this, netID, weakClient](const ConsumeWorldTicketResponse& response) {
+        [this, netID,
+         weakClient](const ConsumeServiceTicketResponse& response) {
             ticketResultQueue.enqueue(
                 TicketResult{netID, weakClient, response});
         });

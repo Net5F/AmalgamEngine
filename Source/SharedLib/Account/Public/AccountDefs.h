@@ -32,7 +32,22 @@ inline constexpr std::size_t SERVICE_TICKET_BYTES{32};
 /** The service that a ticket authorizes the client to connect to. */
 enum class ServiceTicketAudience : Uint8 {
     WorldServer,
-    ChatServer
+    ChatServer,
+    // Note: Keep this last.
+    Count
 };
+
+/**
+ * Returns true if the given audience is a real audience value.
+ *
+ * Audiences are received over the network, so they must be checked before
+ * use.
+ */
+inline constexpr bool
+    isValidServiceTicketAudience(ServiceTicketAudience audience)
+{
+    return static_cast<Uint8>(audience)
+           < static_cast<Uint8>(ServiceTicketAudience::Count);
+}
 
 } // End namespace AM

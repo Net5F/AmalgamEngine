@@ -47,18 +47,18 @@ target_sources(SharedLib
         Public/World/UseItemOnEntityRequest.h
         Public/Account/AccountClientMessageType.h
         Public/Account/AccountServiceMessageType.h
-        Public/Account/ConsumeWorldTicketRequest.h
-        Public/Account/ConsumeWorldTicketResponse.h
+        Public/Account/ConsumeServiceTicketRequest.h
+        Public/Account/ConsumeServiceTicketResponse.h
         Public/Account/LoginRequest.h
         Public/Account/LoginResponse.h
         Public/Account/LogoutRequest.h
         Public/Account/LogoutResponse.h
         Public/Account/RegisterRequest.h
         Public/Account/RegisterResponse.h
-        Public/Account/RequestWorldTicket.h
         Public/Account/ServiceHeartbeat.h
         Public/Account/ServiceHeartbeatResponse.h
-        Public/Account/ServiceTicketIssued.h
+        Public/Account/ServiceTicketRequest.h
+        Public/Account/ServiceTicketResponse.h
 )
 
 target_include_directories(SharedLib

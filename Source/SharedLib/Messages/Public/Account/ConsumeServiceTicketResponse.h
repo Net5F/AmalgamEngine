@@ -7,17 +7,17 @@ namespace AM
 {
 
 /**
- * Sent by the Account Server after attempting to consume a World Server
- * connection ticket.
+ * Sent by the Account Server after attempting to consume a service connection
+ * ticket.
  */
-struct ConsumeWorldTicketResponse {
+struct ConsumeServiceTicketResponse {
     static constexpr AccountServiceMessageType MESSAGE_TYPE{
-        AccountServiceMessageType::ConsumeWorldTicketResponse};
+        AccountServiceMessageType::ConsumeServiceTicketResponse};
 
     /** Maximum serialized account-status length. */
     static constexpr std::size_t ACCOUNT_STATUS_MAX{32};
 
-    /** The requestID of the ConsumeWorldTicketRequest that this responds
+    /** The requestID of the ConsumeServiceTicketRequest that this responds
         to. */
     Uint32 requestID{0};
 
@@ -40,14 +40,14 @@ struct ConsumeWorldTicketResponse {
 
 template<typename S>
 void serialize(S& serializer,
-               ConsumeWorldTicketResponse& consumeWorldTicketResponse)
+               ConsumeServiceTicketResponse& consumeServiceTicketResponse)
 {
-    serializer.value4b(consumeWorldTicketResponse.requestID);
-    serializer.value1b(consumeWorldTicketResponse.result);
-    serializer.value8b(consumeWorldTicketResponse.accountID);
-    serializer.value8b(consumeWorldTicketResponse.accountSessionID);
-    serializer.text1b(consumeWorldTicketResponse.accountStatus,
-                      ConsumeWorldTicketResponse::ACCOUNT_STATUS_MAX);
+    serializer.value4b(consumeServiceTicketResponse.requestID);
+    serializer.value1b(consumeServiceTicketResponse.result);
+    serializer.value8b(consumeServiceTicketResponse.accountID);
+    serializer.value8b(consumeServiceTicketResponse.accountSessionID);
+    serializer.text1b(consumeServiceTicketResponse.accountStatus,
+                      ConsumeServiceTicketResponse::ACCOUNT_STATUS_MAX);
 }
 
 } // End namespace AM

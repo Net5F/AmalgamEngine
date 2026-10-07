@@ -3,7 +3,7 @@
 #include "Database.h"
 #include "CryptoHelpers.h"
 #include "Deserialize.h"
-#include "ConsumeWorldTicketRequest.h"
+#include "ConsumeServiceTicketRequest.h"
 #include "ServiceHeartbeat.h"
 #include "ServiceHeartbeatResponse.h"
 #include "Log.h"
@@ -37,8 +37,8 @@ void ServiceMessageProcessor::processReceivedMessage(
 {
     // Match the enum values to their message types.
     switch (messageType) {
-        case AccountServiceMessageType::ConsumeWorldTicketRequest: {
-            handleMessage<ConsumeWorldTicketRequest>(handle, messageBuffer);
+        case AccountServiceMessageType::ConsumeServiceTicketRequest: {
+            handleMessage<ConsumeServiceTicketRequest>(handle, messageBuffer);
             break;
         }
         case AccountServiceMessageType::ServiceHeartbeat: {
@@ -56,12 +56,25 @@ void ServiceMessageProcessor::processReceivedMessage(
 }
 
 void ServiceMessageProcessor::handleMessage(
-    ConnectionHandle handle, const ConsumeWorldTicketRequest& message)
+    ConnectionHandle handle, const ConsumeServiceTicketRequest& message)
 {
+    // Validate the audience.
+    // Note: A correctly-behaving service will never send an invalid audience,
+    //       so we treat it as a malformed message.
+    if (!isValidServiceTicketAudience(message.audience)) {
+        LOG_ERROR("Received consume ticket request with invalid audience: %u",
+                  static_cast<unsigned int>(message.audience));
+        disconnectCallback(handle, asio::error::make_error_code(
+                                       asio::error::invalid_argument));
+        return;
+    }
+
     // Note: We use a DB worker so we don't hold up the network thread.
     asio::post(databasePool, [this, handle, requestID = message.requestID,
+                              audience = message.audience,
                               ticket = message.ticket]() {
-        ConsumeWorldTicketResponse response{consumeWorldTicket(ticket)};
+        ConsumeServiceTicketResponse response{
+            consumeServiceTicket(audience, ticket)};
         response.requestID = requestID;
 
         // Send the response (must be done on the network thread).
@@ -79,36 +92,38 @@ void ServiceMessageProcessor::handleMessage(ConnectionHandle handle,
     sendCallback(handle, messageFramer.frameMessage(ServiceHeartbeatResponse{}));
 }
 
-ConsumeWorldTicketResponse ServiceMessageProcessor::consumeWorldTicket(
+ConsumeServiceTicketResponse ServiceMessageProcessor::consumeServiceTicket(
+    ServiceTicketAudience audience,
     const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket)
 {
-    ConsumeWorldTicketResponse response{};
+    ConsumeServiceTicketResponse response{};
 
     std::optional<std::string> ticketHash{CryptoHelpers::hashSecret(ticket)};
     if (!ticketHash) {
         LOG_ERROR("Failed to hash service ticket.");
-        response.result = ConsumeWorldTicketResponse::InternalError;
+        response.result = ConsumeServiceTicketResponse::InternalError;
         return response;
     }
 
+    // Note: This only matches tickets that were issued for this audience, so
+    //       a ticket for one service can't be used to connect to another.
     Database::ConsumedServiceTicketInfo ticketInfo{
-        database.consumeServiceTicket(*ticketHash,
-                                      ServiceTicketAudience::WorldServer)};
+        database.consumeServiceTicket(*ticketHash, audience)};
     if (ticketInfo.result
         == Database::ConsumedServiceTicketInfo::Result::DatabaseError) {
-        response.result = ConsumeWorldTicketResponse::InternalError;
+        response.result = ConsumeServiceTicketResponse::InternalError;
         return response;
     }
     if (ticketInfo.result
         == Database::ConsumedServiceTicketInfo::Result::TicketNotFound) {
-        response.result = ConsumeWorldTicketResponse::InvalidTicket;
+        response.result = ConsumeServiceTicketResponse::InvalidTicket;
         return response;
     }
 
     response.accountID = ticketInfo.accountID;
     response.accountSessionID = ticketInfo.accountSessionID;
     response.accountStatus = std::move(ticketInfo.accountStatus);
-    response.result = ConsumeWorldTicketResponse::Success;
+    response.result = ConsumeServiceTicketResponse::Success;
     return response;
 }
 

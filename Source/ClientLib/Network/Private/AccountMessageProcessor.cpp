@@ -3,7 +3,7 @@
 #include "LoginResponse.h"
 #include "LogoutResponse.h"
 #include "RegisterResponse.h"
-#include "ServiceTicketIssued.h"
+#include "ServiceTicketResponse.h"
 #include "Deserialize.h"
 #include "QueuedEvents.h"
 #include "Log.h"
@@ -38,8 +38,8 @@ void AccountMessageProcessor::processReceivedMessage(
             dispatchMessage<LogoutResponse>(messageBuffer);
             break;
         }
-        case AccountClientMessageType::ServiceTicketIssued: {
-            dispatchMessage<ServiceTicketIssued>(messageBuffer);
+        case AccountClientMessageType::ServiceTicketResponse: {
+            dispatchMessage<ServiceTicketResponse>(messageBuffer);
             break;
         }
         default: {

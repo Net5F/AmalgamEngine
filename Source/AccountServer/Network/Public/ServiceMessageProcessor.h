@@ -4,7 +4,7 @@
 #include "AccountServiceMessageType.h"
 #include "ConnectionHandle.h"
 #include "SimpleMessageFramer.h"
-#include "ConsumeWorldTicketResponse.h"
+#include "ConsumeServiceTicketResponse.h"
 #include "asio/error_code.hpp"
 #include "asio/io_context.hpp"
 #include "asio/thread_pool.hpp"
@@ -15,7 +15,7 @@
 
 namespace AM
 {
-struct ConsumeWorldTicketRequest;
+struct ConsumeServiceTicketRequest;
 struct ServiceHeartbeat;
 
 namespace AccountServer
@@ -61,7 +61,7 @@ private:
     // Handlers
     //-------------------------------------------------------------------------
     void handleMessage(ConnectionHandle handle,
-                       const ConsumeWorldTicketRequest& message);
+                       const ConsumeServiceTicketRequest& message);
     void handleMessage(ConnectionHandle handle,
                        const ServiceHeartbeat& message);
 
@@ -69,10 +69,14 @@ private:
     // Helpers
     //-------------------------------------------------------------------------
     /**
-     * Attempts to consume the given World Server ticket.
+     * Attempts to consume the given ticket. Only succeeds if the ticket was
+     * issued for the given audience.
      * Returns an appropriate response message.
+     *
+     * Note: audience must already be validated.
      */
-    ConsumeWorldTicketResponse consumeWorldTicket(
+    ConsumeServiceTicketResponse consumeServiceTicket(
+        ServiceTicketAudience audience,
         const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket);
 
     template<typename Message>

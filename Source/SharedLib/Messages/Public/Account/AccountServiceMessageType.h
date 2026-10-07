@@ -14,11 +14,11 @@ enum class AccountServiceMessageType : Uint8 {
     NotSet,
 
     // Service -> Account Server
-    ConsumeWorldTicketRequest,
+    ConsumeServiceTicketRequest,
     ServiceHeartbeat,
 
     // Account Server -> Service
-    ConsumeWorldTicketResponse,
+    ConsumeServiceTicketResponse,
     ServiceHeartbeatResponse,
 };
 

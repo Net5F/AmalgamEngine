@@ -3,9 +3,10 @@
 #include "LoginRequest.h"
 #include "LogoutRequest.h"
 #include "RegisterRequest.h"
-#include "RequestWorldTicket.h"
+#include "ServiceTicketRequest.h"
 #include "Log.h"
 #include <openssl/crypto.h>
+#include <algorithm>
 
 namespace AM
 {
@@ -22,7 +23,7 @@ AccountSession::AccountSession(Network& inNetwork,
 , connectionEventQueue{networkEventDispatcher}
 , loginState{LoginState::LoggedOut}
 , registrationPending{false}
-, worldTicketRequestPending{false}
+, serviceTicketRequestPending{}
 , accountID{0}
 , sessionToken{}
 , idleExpiresAt{0}
@@ -62,7 +63,7 @@ void AccountSession::tick()
         handleLogoutResponse(logoutResponse);
     }
 
-    ServiceTicketIssued newServiceTicketResponse{};
+    ServiceTicketResponse newServiceTicketResponse{};
     while (serviceTicketQueue.pop(newServiceTicketResponse)) {
         handleServiceTicketResponse(newServiceTicketResponse);
     }
@@ -108,14 +109,21 @@ bool AccountSession::logout()
     return true;
 }
 
-bool AccountSession::requestWorldTicket()
+bool AccountSession::requestServiceTicket(ServiceTicketAudience audience)
 {
-    if ((loginState != LoginState::LoggedIn) || worldTicketRequestPending) {
+    if (!isValidServiceTicketAudience(audience)) {
+        LOG_INFO("Tried to request a service ticket with an invalid audience.");
         return false;
     }
 
-    worldTicketRequestPending = true;
-    network.accountEndpoint.send(RequestWorldTicket{sessionToken});
+    bool& requestPending{
+        serviceTicketRequestPending[static_cast<std::size_t>(audience)]};
+    if ((loginState != LoginState::LoggedIn) || requestPending) {
+        return false;
+    }
+
+    requestPending = true;
+    network.accountEndpoint.send(ServiceTicketRequest{audience, sessionToken});
     return true;
 }
 
@@ -200,16 +208,21 @@ void AccountSession::handleLogoutResponse(const LogoutResponse& response)
     logoutCompletedSig.publish(response.result);
 }
 
-void AccountSession::handleServiceTicketResponse(ServiceTicketIssued& response)
+void AccountSession::handleServiceTicketResponse(
+    ServiceTicketResponse& response)
 {
-    if (!worldTicketRequestPending) {
+    // Match the response to its request.
+    if (!isValidServiceTicketAudience(response.audience)
+        || !serviceTicketRequestPending[static_cast<std::size_t>(
+            response.audience)]) {
         OPENSSL_cleanse(response.ticket.data(), response.ticket.size());
         LOG_INFO("Received an unexpected service-ticket response.");
         return;
     }
 
-    worldTicketRequestPending = false;
-    if (response.result == ServiceTicketIssued::InvalidSession) {
+    serviceTicketRequestPending[static_cast<std::size_t>(response.audience)]
+        = false;
+    if (response.result == ServiceTicketResponse::InvalidSession) {
         clearSession();
     }
     serviceTicketRequestCompletedSig.publish(response);
@@ -222,9 +235,10 @@ void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
         return;
     }
 
-    bool requestWasPending{(loginState == LoginState::LoggingIn)
-                           || (loginState == LoginState::LoggingOut)
-                           || registrationPending || worldTicketRequestPending};
+    bool requestWasPending{
+        (loginState == LoginState::LoggingIn)
+        || (loginState == LoginState::LoggingOut) || registrationPending
+        || std::ranges::contains(serviceTicketRequestPending, true)};
     if (!requestWasPending) {
         // Account connections intentionally close after becoming idle. The
         // authenticated session remains valid independently of the socket.
@@ -232,7 +246,7 @@ void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
     }
 
     registrationPending = false;
-    worldTicketRequestPending = false;
+    serviceTicketRequestPending.fill(false);
     if (loginState == LoginState::LoggingIn) {
         clearSession();
     }
@@ -249,7 +263,7 @@ void AccountSession::clearSession() noexcept
     OPENSSL_cleanse(sessionToken.data(), sessionToken.size());
     idleExpiresAt = 0;
     absoluteExpiresAt = 0;
-    worldTicketRequestPending = false;
+    serviceTicketRequestPending.fill(false);
     loginState = LoginState::LoggedOut;
 }
 

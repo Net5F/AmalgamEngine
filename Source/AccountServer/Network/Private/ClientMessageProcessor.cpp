@@ -6,7 +6,7 @@
 #include "RegisterRequest.h"
 #include "LoginRequest.h"
 #include "LogoutRequest.h"
-#include "RequestWorldTicket.h"
+#include "ServiceTicketRequest.h"
 #include "AccountHelpers.h"
 #include "Log.h"
 #include "asio/error.hpp"
@@ -72,8 +72,8 @@ void ClientMessageProcessor::processReceivedMessage(
             handleMessage<LogoutRequest>(handle, messageBuffer);
             break;
         }
-        case AccountClientMessageType::RequestWorldTicket: {
-            handleMessage<RequestWorldTicket>(handle, messageBuffer);
+        case AccountClientMessageType::ServiceTicketRequest: {
+            handleMessage<ServiceTicketRequest>(handle, messageBuffer);
             break;
         }
         default: {
@@ -134,11 +134,23 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
 }
 
 void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
-                                           const RequestWorldTicket& message)
+                                           const ServiceTicketRequest& message)
 {
+    // Validate the audience.
+    // Note: A real client will never send an invalid audience, so we treat it
+    //       as a malformed message.
+    if (!isValidServiceTicketAudience(message.audience)) {
+        LOG_INFO("Received service ticket request with invalid audience: %u",
+                 static_cast<unsigned int>(message.audience));
+        disconnectCallback(handle, asio::error::make_error_code(
+                                       asio::error::invalid_argument));
+        return;
+    }
+
     respondFromDatabasePool(
-        handle, [this, accountSessionToken = message.accountSessionToken]() {
-            return issueWorldTicket(accountSessionToken);
+        handle, [this, audience = message.audience,
+                 accountSessionToken = message.accountSessionToken]() {
+            return issueServiceTicket(audience, accountSessionToken);
         });
 }
 
@@ -282,17 +294,20 @@ LogoutResponse ClientMessageProcessor::logoutSession(
     return response;
 }
 
-ServiceTicketIssued ClientMessageProcessor::issueWorldTicket(
+ServiceTicketResponse ClientMessageProcessor::issueServiceTicket(
+    ServiceTicketAudience audience,
     const std::array<Uint8, SESSION_TOKEN_BYTES>& accountSessionToken)
 {
-    ServiceTicketIssued response{};
+    // Note: The audience is echoed back even on failure, so the client can
+    //       match the response to its request.
+    ServiceTicketResponse response{.audience{audience}};
 
     // Validate (and refresh) the session that's requesting the ticket.
     std::optional<std::string> sessionTokenHash{
         CryptoHelpers::hashSecret(accountSessionToken)};
     if (!sessionTokenHash) {
         LOG_ERROR("Failed to hash account session token.");
-        response.result = ServiceTicketIssued::InternalError;
+        response.result = ServiceTicketResponse::InternalError;
         return response;
     }
 
@@ -300,12 +315,12 @@ ServiceTicketIssued ClientMessageProcessor::issueWorldTicket(
         *sessionTokenHash, Config::ACCOUNT_SESSION_IDLE_TIMEOUT_S)};
     if (sessionInfo.result
         == Database::AccountSessionInfo::Result::DatabaseError) {
-        response.result = ServiceTicketIssued::InternalError;
+        response.result = ServiceTicketResponse::InternalError;
         return response;
     }
     if (sessionInfo.result
         == Database::AccountSessionInfo::Result::SessionNotFound) {
-        response.result = ServiceTicketIssued::InvalidSession;
+        response.result = ServiceTicketResponse::InvalidSession;
         return response;
     }
 
@@ -316,7 +331,7 @@ ServiceTicketIssued ClientMessageProcessor::issueWorldTicket(
         CryptoHelpers::hashSecret(serviceTicket)};
     if (!serviceTicketHash) {
         LOG_ERROR("Failed to hash service ticket.");
-        response.result = ServiceTicketIssued::InternalError;
+        response.result = ServiceTicketResponse::InternalError;
         return response;
     }
 
@@ -325,30 +340,27 @@ ServiceTicketIssued ClientMessageProcessor::issueWorldTicket(
     Sint64 expiresAt{std::min(currentTime + Config::SERVICE_TICKET_LIFETIME_S,
                               sessionInfo.absoluteExpiresAt)};
     if (expiresAt <= currentTime) {
-        response.result = ServiceTicketIssued::InvalidSession;
+        response.result = ServiceTicketResponse::InvalidSession;
         return response;
     }
 
     // Create the ticket.
-    constexpr ServiceTicketAudience audience{
-        ServiceTicketAudience::WorldServer};
     Database::CreateServiceTicketResult createResult{
         database.createServiceTicket(sessionInfo.sessionID, *serviceTicketHash,
                                      audience, expiresAt)};
     if (createResult
         == Database::CreateServiceTicketResult::SessionUnavailable) {
-        response.result = ServiceTicketIssued::InvalidSession;
+        response.result = ServiceTicketResponse::InvalidSession;
         return response;
     }
     if (createResult == Database::CreateServiceTicketResult::DatabaseError) {
-        response.result = ServiceTicketIssued::InternalError;
+        response.result = ServiceTicketResponse::InternalError;
         return response;
     }
 
     response.ticket = serviceTicket;
-    response.audience = audience;
     response.expiresAt = expiresAt;
-    response.result = ServiceTicketIssued::Success;
+    response.result = ServiceTicketResponse::Success;
     return response;
 }
 

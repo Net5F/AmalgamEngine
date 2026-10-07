@@ -2,7 +2,7 @@
 #include "LoadTestAccounts.h"
 #include "MessageProcessorContext.h"
 #include "LoginRequest.h"
-#include "RequestWorldTicket.h"
+#include "ServiceTicketRequest.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include <functional>
@@ -89,16 +89,17 @@ std::array<Uint8, SERVICE_TICKET_BYTES> SimulatedClient::requestWorldTicket()
     }
 
     // Request a World Server ticket.
-    accountEndpoint.send(RequestWorldTicket{loginResponse.sessionToken});
+    accountEndpoint.send(ServiceTicketRequest{
+        ServiceTicketAudience::WorldServer, loginResponse.sessionToken});
 
-    ServiceTicketIssued ticketResponse{};
+    ServiceTicketResponse ticketResponse{};
     if (!(serviceTicketQueue.waitPop(ticketResponse,
                                      ACCOUNT_RESPONSE_WAIT_US))) {
         LOG_FATAL("AccountServer did not respond to ticket request. "
                   "Username: %s",
                   username.c_str());
     }
-    if (ticketResponse.result != ServiceTicketIssued::Success) {
+    if (ticketResponse.result != ServiceTicketResponse::Success) {
         LOG_FATAL("Failed to get World Server ticket for %s. Result: %u",
                   username.c_str(),
                   static_cast<unsigned int>(ticketResponse.result));

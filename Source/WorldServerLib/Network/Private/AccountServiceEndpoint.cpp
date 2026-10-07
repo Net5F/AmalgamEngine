@@ -1,5 +1,5 @@
 #include "AccountServiceEndpoint.h"
-#include "ConsumeWorldTicketRequest.h"
+#include "ConsumeServiceTicketRequest.h"
 #include "ServiceHeartbeat.h"
 #include "UserConfig.h"
 #include "Deserialize.h"
@@ -77,28 +77,28 @@ void AccountServiceEndpoint::start()
     });
 }
 
-void AccountServiceEndpoint::consumeWorldTicket(
-    const WorldTicket& ticket, ConsumeWorldTicketCallback callback)
+void AccountServiceEndpoint::consumeServiceTicket(
+    const ServiceTicket& ticket, ConsumeServiceTicketCallback callback)
 {
     asio::post(ioContext,
                [this, ticket, callback = std::move(callback)]() mutable {
-                   consumeWorldTicketOnIOThread(ticket, std::move(callback));
+                   consumeServiceTicketOnIOThread(ticket, std::move(callback));
                });
 }
 
-void AccountServiceEndpoint::consumeWorldTicketOnIOThread(
-    const WorldTicket& ticket, ConsumeWorldTicketCallback callback)
+void AccountServiceEndpoint::consumeServiceTicketOnIOThread(
+    const ServiceTicket& ticket, ConsumeServiceTicketCallback callback)
 {
     if (!callback) {
-        LOG_INFO("Ignoring a world ticket request with no callback.");
+        LOG_INFO("Ignoring a service ticket request with no callback.");
         return;
     }
 
     // If we aren't connected, fail immediately.
     if (connectionState != ConnectionState::Connected) {
         LOG_INFO("Failed to send an AccountServer request: Not connected.");
-        callback(ConsumeWorldTicketResponse{
-            .result{ConsumeWorldTicketResponse::InternalError}});
+        callback(ConsumeServiceTicketResponse{
+            .result{ConsumeServiceTicketResponse::InternalError}});
         return;
     }
 
@@ -106,19 +106,22 @@ void AccountServiceEndpoint::consumeWorldTicketOnIOThread(
     if (pendingRequests.size() >= MAX_PENDING_REQUESTS) {
         LOG_INFO("Failed to queue an AccountServer request: Too many pending "
                  "requests.");
-        callback(ConsumeWorldTicketResponse{
-            .result{ConsumeWorldTicketResponse::InternalError}});
+        callback(ConsumeServiceTicketResponse{
+            .result{ConsumeServiceTicketResponse::InternalError}});
         return;
     }
 
     // Frame the request.
     const Uint32 requestID{nextRequestID++};
-    BinaryBufferSharedPtr framedMessage{messageFramer.frameMessage(
-        ConsumeWorldTicketRequest{.requestID{requestID}, .ticket{ticket}})};
-    if (!framedMessage) {
-        callback(ConsumeWorldTicketResponse{
+    BinaryBufferSharedPtr framedMessage{
+        messageFramer.frameMessage(ConsumeServiceTicketRequest{
             .requestID{requestID},
-            .result{ConsumeWorldTicketResponse::InternalError}});
+            .audience{ServiceTicketAudience::WorldServer},
+            .ticket{ticket}})};
+    if (!framedMessage) {
+        callback(ConsumeServiceTicketResponse{
+            .requestID{requestID},
+            .result{ConsumeServiceTicketResponse::InternalError}});
         return;
     }
 
@@ -300,7 +303,7 @@ void AccountServiceEndpoint::sendRequest(Uint32 requestID,
 }
 
 void AccountServiceEndpoint::completeRequest(
-    Uint32 requestID, const ConsumeWorldTicketResponse& response)
+    Uint32 requestID, const ConsumeServiceTicketResponse& response)
 {
     auto requestIt{pendingRequests.find(requestID)};
     if (requestIt == pendingRequests.end()) {
@@ -309,7 +312,7 @@ void AccountServiceEndpoint::completeRequest(
 
     // Note: We remove the request before calling the callback, in case the
     //       callback causes more requests to be completed.
-    ConsumeWorldTicketCallback callback{std::move(requestIt->second)};
+    ConsumeServiceTicketCallback callback{std::move(requestIt->second)};
     pendingRequests.erase(requestIt);
 
     callback(response);
@@ -318,23 +321,23 @@ void AccountServiceEndpoint::completeRequest(
 void AccountServiceEndpoint::failRequest(Uint32 requestID)
 {
     completeRequest(requestID,
-                    ConsumeWorldTicketResponse{
+                    ConsumeServiceTicketResponse{
                         .requestID{requestID},
-                        .result{ConsumeWorldTicketResponse::InternalError}});
+                        .result{ConsumeServiceTicketResponse::InternalError}});
 }
 
 void AccountServiceEndpoint::failAllRequests()
 {
     // Note: We move the requests into a local first, in case a callback
     //       causes the map to be modified.
-    std::unordered_map<Uint32, ConsumeWorldTicketCallback> failedRequests{
+    std::unordered_map<Uint32, ConsumeServiceTicketCallback> failedRequests{
         std::move(pendingRequests)};
     pendingRequests.clear();
 
     for (auto& [requestID, callback] : failedRequests) {
-        callback(ConsumeWorldTicketResponse{
+        callback(ConsumeServiceTicketResponse{
             .requestID{requestID},
-            .result{ConsumeWorldTicketResponse::InternalError}});
+            .result{ConsumeServiceTicketResponse::InternalError}});
     }
 }
 
@@ -429,8 +432,8 @@ void AccountServiceEndpoint::onMessageReceived(
     AccountServiceMessageType messageType, std::span<const Uint8> messageBuffer)
 {
     switch (messageType) {
-        case AccountServiceMessageType::ConsumeWorldTicketResponse: {
-            ConsumeWorldTicketResponse response{};
+        case AccountServiceMessageType::ConsumeServiceTicketResponse: {
+            ConsumeServiceTicketResponse response{};
             if (!Deserialize::fromBuffer(messageBuffer.data(),
                                          messageBuffer.size(), response)) {
                 LOG_INFO("Failed to deserialize an AccountServer message.");
@@ -457,7 +460,7 @@ void AccountServiceEndpoint::onMessageReceived(
 }
 
 void AccountServiceEndpoint::handleMessage(
-    const ConsumeWorldTicketResponse& response)
+    const ConsumeServiceTicketResponse& response)
 {
     if (!pendingRequests.contains(response.requestID)) {
         LOG_INFO("Received a response for an unknown AccountServer request: "

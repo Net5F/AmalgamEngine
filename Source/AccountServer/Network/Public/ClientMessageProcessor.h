@@ -7,7 +7,7 @@
 #include "RegisterResponse.h"
 #include "LoginResponse.h"
 #include "LogoutResponse.h"
-#include "ServiceTicketIssued.h"
+#include "ServiceTicketResponse.h"
 #include "asio/error_code.hpp"
 #include "asio/thread_pool.hpp"
 #include "asio/io_context.hpp"
@@ -22,7 +22,7 @@ namespace AM
 struct RegisterRequest;
 struct LoginRequest;
 struct LogoutRequest;
-struct RequestWorldTicket;
+struct ServiceTicketRequest;
 
 namespace AccountServer
 {
@@ -76,7 +76,7 @@ private:
     void handleMessage(ConnectionHandle handle, const LogoutRequest& message);
 
     void handleMessage(ConnectionHandle handle,
-                       const RequestWorldTicket& message);
+                       const ServiceTicketRequest& message);
 
     //-------------------------------------------------------------------------
     // Helpers
@@ -103,9 +103,12 @@ private:
         const std::array<Uint8, SESSION_TOKEN_BYTES>& sessionToken);
 
     /**
-     * Attempts to issue a single-use ticket for the World Server.
+     * Attempts to issue a single-use ticket for the given service.
+     *
+     * Note: audience must already be validated.
      */
-    ServiceTicketIssued issueWorldTicket(
+    ServiceTicketResponse issueServiceTicket(
+        ServiceTicketAudience audience,
         const std::array<Uint8, SESSION_TOKEN_BYTES>& accountSessionToken);
 
     /**

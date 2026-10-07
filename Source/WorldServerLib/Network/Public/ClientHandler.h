@@ -5,7 +5,7 @@
 #include "Acceptor.h"
 #include "IDPool.h"
 #include "ConnectionResponse.h"
-#include "ConsumeWorldTicketResponse.h"
+#include "ConsumeServiceTicketResponse.h"
 #include "readerwriterqueue.h"
 #include "tracy/Tracy.hpp"
 #include <thread>
@@ -163,7 +163,7 @@ private:
         /** Used to make sure the client didn't disconnect (and have its netID
             reused) while we were waiting. */
         std::weak_ptr<Client> client{};
-        ConsumeWorldTicketResponse response{};
+        ConsumeServiceTicketResponse response{};
     };
     /** Holds ticket results until the receive thread can process them.
         Written to by the network IO thread, read by the receive thread. */

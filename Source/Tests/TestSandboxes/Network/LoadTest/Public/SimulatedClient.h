@@ -6,7 +6,7 @@
 #include "AccountClientEndpoint.h"
 #include "AccountDefs.h"
 #include "LoginResponse.h"
-#include "ServiceTicketIssued.h"
+#include "ServiceTicketResponse.h"
 #include "QueuedEvents.h"
 #include "asio/io_context.hpp"
 #include "asio/ssl/context.hpp"
@@ -85,7 +85,7 @@ private:
 
     /** AccountServer responses, received from accountEndpoint. */
     EventQueue<LoginResponse> loginResponseQueue;
-    EventQueue<ServiceTicketIssued> serviceTicketQueue;
+    EventQueue<ServiceTicketResponse> serviceTicketQueue;
 
     /** If true, this client is connected to the server and we've processed the
         ConnectionResponse. */

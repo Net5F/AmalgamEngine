@@ -5,7 +5,7 @@
 #include "LoginResponse.h"
 #include "LogoutResponse.h"
 #include "RegisterResponse.h"
-#include "ServiceTicketIssued.h"
+#include "ServiceTicketResponse.h"
 #include "QueuedEvents.h"
 #include "entt/signal/sigh.hpp"
 #include <array>
@@ -51,8 +51,11 @@ public:
     /** Revokes the current account session. */
     bool logout();
 
-    /** Requests a one-use ticket for the WorldServer. */
-    bool requestWorldTicket();
+    /**
+     * Requests a one-use ticket for the given service. Returns false if we
+     * aren't logged in, or if a request for this audience is already pending.
+     */
+    bool requestServiceTicket(ServiceTicketAudience audience);
 
     LoginState getLoginState() const noexcept;
     bool isAuthenticated() const noexcept;
@@ -64,7 +67,7 @@ private:
     void handleLoginResponse(LoginResponse& response);
     void handleRegisterResponse(RegisterResponse& response);
     void handleLogoutResponse(const LogoutResponse& response);
-    void handleServiceTicketResponse(ServiceTicketIssued& response);
+    void handleServiceTicketResponse(ServiceTicketResponse& response);
     void handleConnectionEvent(const AccountConnectionEvent& event);
 
     void clearSession() noexcept;
@@ -74,13 +77,15 @@ private:
     EventQueue<LoginResponse> loginResponseQueue;
     EventQueue<RegisterResponse> registerResponseQueue;
     EventQueue<LogoutResponse> logoutResponseQueue;
-    EventQueue<ServiceTicketIssued> serviceTicketQueue;
+    EventQueue<ServiceTicketResponse> serviceTicketQueue;
     EventQueue<AccountConnectionEvent> connectionEventQueue;
 
     /** The current state of our various operations. */
     LoginState loginState;
     bool registrationPending;
-    bool worldTicketRequestPending;
+    /** Tracks which audiences have a service ticket request pending. */
+    std::array<bool, static_cast<std::size_t>(ServiceTicketAudience::Count)>
+        serviceTicketRequestPending;
 
     /** If we're logged in, these are our current session's info. */
     Sint64 accountID;
@@ -91,7 +96,7 @@ private:
     entt::sigh<void(LoginResponse::Result)> loginCompletedSig;
     entt::sigh<void(const RegisterResponse&)> registrationCompletedSig;
     entt::sigh<void(LogoutResponse::Result)> logoutCompletedSig;
-    entt::sigh<void(const ServiceTicketIssued&)>
+    entt::sigh<void(const ServiceTicketResponse&)>
         serviceTicketRequestCompletedSig;
     entt::sigh<void()> requestConnectionFailedSig;
 
@@ -106,8 +111,9 @@ public:
     /** A logout request completed and the session model has been updated. */
     entt::sink<entt::sigh<void(LogoutResponse::Result)>> logoutCompleted;
 
-    /** A service-ticket request completed. */
-    entt::sink<entt::sigh<void(const ServiceTicketIssued&)>>
+    /** A service-ticket request completed. Check the response's audience to
+        see which request it was for. */
+    entt::sink<entt::sigh<void(const ServiceTicketResponse&)>>
         serviceTicketRequestCompleted;
 
     /** An in-progress request lost its AccountServer connection. */

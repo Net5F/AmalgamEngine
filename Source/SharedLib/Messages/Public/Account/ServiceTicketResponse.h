@@ -8,13 +8,13 @@ namespace AM
 {
 
 /**
- * Sent by the server in response to a service-ticket request.
+ * Sent by the server in response to a ServiceTicketRequest.
  */
-struct ServiceTicketIssued {
+struct ServiceTicketResponse {
     // The message enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr AccountClientMessageType MESSAGE_TYPE{
-        AccountClientMessageType::ServiceTicketIssued};
+        AccountClientMessageType::ServiceTicketResponse};
 
     enum Result : Uint8 {
         Success,
@@ -27,7 +27,9 @@ struct ServiceTicketIssued {
     /** If result == success, this authorizes one connection attempt. */
     std::array<Uint8, SERVICE_TICKET_BYTES> ticket{};
 
-    /** If result == success, this identifies the authorized service. */
+    /** The service that the ticket authorizes a connection to. Matches the
+        request's audience, so the client can tell which request this
+        responds to. */
     ServiceTicketAudience audience{ServiceTicketAudience::WorldServer};
 
     /** If result == success, this is the ticket's Unix expiration timestamp. */
@@ -35,12 +37,12 @@ struct ServiceTicketIssued {
 };
 
 template<typename S>
-void serialize(S& serializer, ServiceTicketIssued& serviceTicketIssued)
+void serialize(S& serializer, ServiceTicketResponse& serviceTicketResponse)
 {
-    serializer.value1b(serviceTicketIssued.result);
-    serializer.container1b(serviceTicketIssued.ticket);
-    serializer.value1b(serviceTicketIssued.audience);
-    serializer.value8b(serviceTicketIssued.expiresAt);
+    serializer.value1b(serviceTicketResponse.result);
+    serializer.container1b(serviceTicketResponse.ticket);
+    serializer.value1b(serviceTicketResponse.audience);
+    serializer.value8b(serviceTicketResponse.expiresAt);
 }
 
 } // End namespace AM

@@ -2,7 +2,7 @@
 
 #include "AccountDefs.h"
 #include "AccountServiceMessageType.h"
-#include "ConsumeWorldTicketResponse.h"
+#include "ConsumeServiceTicketResponse.h"
 #include "SimpleConnection.h"
 #include "SimpleMessageFramer.h"
 #include "asio/io_context.hpp"
@@ -43,7 +43,7 @@ namespace WorldServer
 class AccountServiceEndpoint
 {
 public:
-    using WorldTicket = std::array<Uint8, SERVICE_TICKET_BYTES>;
+    using ServiceTicket = std::array<Uint8, SERVICE_TICKET_BYTES>;
 
     /**
      * Called with the AccountServer's response to a ticket request.
@@ -54,8 +54,8 @@ public:
      * Note: This is called on the network IO thread. Callers should forward
      *       the result to their own thread rather than doing work here.
      */
-    using ConsumeWorldTicketCallback
-        = std::function<void(const ConsumeWorldTicketResponse&)>;
+    using ConsumeServiceTicketCallback
+        = std::function<void(const ConsumeServiceTicketResponse&)>;
 
     AccountServiceEndpoint(asio::io_context& inIoContext,
                            asio::ssl::context& inSSLContext);
@@ -69,8 +69,9 @@ public:
     void start();
 
     /**
-     * Asks the AccountServer to validate and consume the given World Server
-     * ticket.
+     * Asks the AccountServer to validate and consume the given ticket.
+     *
+     * The ticket is only accepted if it was issued for the World Server.
      *
      * If we aren't currently connected to the AccountServer, the request
      * fails immediately.
@@ -78,8 +79,8 @@ public:
      * The callback is always called exactly once, unless this endpoint is
      * destroyed first.
      */
-    void consumeWorldTicket(const WorldTicket& ticket,
-                            ConsumeWorldTicketCallback callback);
+    void consumeServiceTicket(const ServiceTicket& ticket,
+                              ConsumeServiceTicketCallback callback);
 
 private:
     using Connection = SimpleConnection<AccountServiceMessageType>;
@@ -108,8 +109,8 @@ private:
     /** The max number of requests that may be awaiting a response. */
     static constexpr std::size_t MAX_PENDING_REQUESTS{1000};
 
-    void consumeWorldTicketOnIOThread(const WorldTicket& ticket,
-                                      ConsumeWorldTicketCallback callback);
+    void consumeServiceTicketOnIOThread(const ServiceTicket& ticket,
+                                        ConsumeServiceTicketCallback callback);
 
     /** Connection logic */
     void connectOnIOThread();
@@ -143,7 +144,7 @@ private:
      * removes the request.
      */
     void completeRequest(Uint32 requestID,
-                         const ConsumeWorldTicketResponse& response);
+                         const ConsumeServiceTicketResponse& response);
 
     /**
      * Fails the given request with an InternalError result.
@@ -165,7 +166,7 @@ private:
     void onMessageReceived(AccountServiceMessageType messageType,
                            std::span<const Uint8> messageBuffer);
 
-    void handleMessage(const ConsumeWorldTicketResponse& response);
+    void handleMessage(const ConsumeServiceTicketResponse& response);
 
     asio::io_context& ioContext;
     asio::ssl::context& sslContext;
@@ -183,7 +184,7 @@ private:
     SimpleMessageFramer<AccountServiceMessageType> messageFramer;
 
     /** Maps request IDs to the callback that's waiting on a response. */
-    std::unordered_map<Uint32, ConsumeWorldTicketCallback> pendingRequests;
+    std::unordered_map<Uint32, ConsumeServiceTicketCallback> pendingRequests;
 
     /** The ID to give the next request. */
     Uint32 nextRequestID;
