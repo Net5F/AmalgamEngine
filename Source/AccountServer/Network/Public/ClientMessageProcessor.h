@@ -7,6 +7,7 @@
 #include "RegisterResponse.h"
 #include "LoginResponse.h"
 #include "LogoutResponse.h"
+#include "RecoverAccountResponse.h"
 #include "ServiceTicketResponse.h"
 #include "asio/error_code.hpp"
 #include "asio/thread_pool.hpp"
@@ -22,6 +23,7 @@ namespace AM
 struct RegisterRequest;
 struct LoginRequest;
 struct LogoutRequest;
+struct RecoverAccountRequest;
 struct ServiceTicketRequest;
 
 namespace AccountServer
@@ -76,6 +78,9 @@ private:
     void handleMessage(ConnectionHandle handle, const LogoutRequest& message);
 
     void handleMessage(ConnectionHandle handle,
+                       const RecoverAccountRequest& message);
+
+    void handleMessage(ConnectionHandle handle,
                        const ServiceTicketRequest& message);
 
     //-------------------------------------------------------------------------
@@ -101,6 +106,15 @@ private:
      */
     LogoutResponse logoutSession(
         const std::array<Uint8, SESSION_TOKEN_BYTES>& sessionToken);
+
+    /**
+     * Attempts to use the given recovery key to set a new password on the
+     * account with the given username.
+     * Returns an appropriate response message.
+     */
+    RecoverAccountResponse recoverAccount(const std::string& username,
+                                          const std::string& recoveryKey,
+                                          const std::string& newPassword);
 
     /**
      * Attempts to issue a single-use ticket for the given service.

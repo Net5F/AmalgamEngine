@@ -28,6 +28,8 @@ Database::Database(const std::string& databasePath)
 , registerAccountQuery{nullptr}
 , insertRecoveryKeyQuery{nullptr}
 , getAccountLoginInfoQuery{nullptr}
+, consumeRecoveryKeyQuery{nullptr}
+, updatePasswordQuery{nullptr}
 , createSessionQuery{nullptr}
 , validateSessionQuery{nullptr}
 , revokeSessionQuery{nullptr}
@@ -62,6 +64,28 @@ Database::Database(const std::string& databasePath)
             FROM accounts
             WHERE normalized_username = lower(:username)
             LIMIT 1
+        )");
+
+    consumeRecoveryKeyQuery = std::make_unique<SQLite::Statement>(database, R"(
+            UPDATE account_recovery_keys
+            SET used_at = unixepoch()
+            WHERE key_hash = :key_hash
+              AND used_at IS NULL
+              AND revoked_at IS NULL
+              AND account_id = (
+                  SELECT account_id
+                  FROM accounts
+                  WHERE normalized_username = lower(:username)
+                    AND status = 'active'
+              )
+            RETURNING account_id
+        )");
+
+    updatePasswordQuery = std::make_unique<SQLite::Statement>(database, R"(
+            UPDATE accounts
+            SET password_hash = :password_hash,
+                updated_at = unixepoch()
+            WHERE account_id = :account_id
         )");
 
     createSessionQuery = std::make_unique<SQLite::Statement>(database, R"(
@@ -236,6 +260,61 @@ Database::AccountLoginInfo
     }
 
     return loginInfo;
+}
+
+Database::RecoverAccountResult Database::recoverAccount(
+    const std::string& username, const std::string& recoveryKeyHash,
+    const std::string& newPasswordHash, const std::string& newRecoveryKeyHash)
+{
+    try {
+        SQLite::Transaction transaction{database};
+
+        // Consume the recovery key. This also confirms that it belongs to the
+        // given active account.
+        consumeRecoveryKeyQuery->bind(":username", username);
+        consumeRecoveryKeyQuery->bind(":key_hash", recoveryKeyHash.data(),
+                                      static_cast<int>(recoveryKeyHash.size()));
+
+        if (!(consumeRecoveryKeyQuery->executeStep())) {
+            consumeRecoveryKeyQuery->reset();
+            return RecoverAccountResult::InvalidAccountDetails;
+        }
+
+        Sint64 accountID{consumeRecoveryKeyQuery->getColumn(0).getInt64()};
+        consumeRecoveryKeyQuery->reset();
+
+        // Replace the password.
+        updatePasswordQuery->bind(":account_id", accountID);
+        updatePasswordQuery->bind(":password_hash", newPasswordHash);
+        updatePasswordQuery->exec();
+        updatePasswordQuery->reset();
+
+        // Insert the replacement recovery key.
+        insertRecoveryKeyQuery->bind(":account_id", accountID);
+        insertRecoveryKeyQuery->bind(
+            ":key_hash", newRecoveryKeyHash.data(),
+            static_cast<int>(newRecoveryKeyHash.size()));
+        insertRecoveryKeyQuery->exec();
+        insertRecoveryKeyQuery->reset();
+
+        // Log out everywhere, in case the account was compromised.
+        // Note: Outstanding service tickets become unusable along with their
+        //       sessions.
+        revokeAllSessionsQuery->bind(":account_id", accountID);
+        revokeAllSessionsQuery->exec();
+        revokeAllSessionsQuery->reset();
+
+        transaction.commit();
+        return RecoverAccountResult::Success;
+    } catch (std::exception& e) {
+        // Ensure the pre-built statements are reusable after a failure.
+        consumeRecoveryKeyQuery->tryReset();
+        updatePasswordQuery->tryReset();
+        insertRecoveryKeyQuery->tryReset();
+        revokeAllSessionsQuery->tryReset();
+        LOG_ERROR("Failed to recover account: %s", e.what());
+        return RecoverAccountResult::DatabaseError;
+    }
 }
 
 Database::CreateSessionResult

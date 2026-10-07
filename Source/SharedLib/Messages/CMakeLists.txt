@@ -53,6 +53,8 @@ target_sources(SharedLib
         Public/Account/LoginResponse.h
         Public/Account/LogoutRequest.h
         Public/Account/LogoutResponse.h
+        Public/Account/RecoverAccountRequest.h
+        Public/Account/RecoverAccountResponse.h
         Public/Account/RegisterRequest.h
         Public/Account/RegisterResponse.h
         Public/Account/ServiceHeartbeat.h

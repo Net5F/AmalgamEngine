@@ -69,6 +69,28 @@ public:
      */
     AccountLoginInfo getAccountLoginInfo(const std::string& username);
 
+    enum class RecoverAccountResult {
+        Success,
+        InvalidAccountDetails,
+        DatabaseError
+    };
+    /**
+     * Atomically consumes an account's recovery key, replaces its password,
+     * issues it a new recovery key, and revokes all of its sessions.
+     *
+     * @param username The account's username (normalized before lookup).
+     * @param recoveryKeyHash The 32-byte hash of the recovery key to consume.
+     * @param newPasswordHash The already-hashed new password.
+     * @param newRecoveryKeyHash The 32-byte hash of the replacement key.
+     * @return InvalidAccountDetails if no active account with the given
+     *         username has a matching unused, unrevoked recovery key,
+     *         DatabaseError if any step fails, otherwise Success.
+     */
+    RecoverAccountResult recoverAccount(const std::string& username,
+                                        const std::string& recoveryKeyHash,
+                                        const std::string& newPasswordHash,
+                                        const std::string& newRecoveryKeyHash);
+
     //-------------------------------------------------------------------------
     // Sessions
     //-------------------------------------------------------------------------
@@ -179,6 +201,8 @@ protected:
     std::unique_ptr<SQLite::Statement> registerAccountQuery;
     std::unique_ptr<SQLite::Statement> insertRecoveryKeyQuery;
     std::unique_ptr<SQLite::Statement> getAccountLoginInfoQuery;
+    std::unique_ptr<SQLite::Statement> consumeRecoveryKeyQuery;
+    std::unique_ptr<SQLite::Statement> updatePasswordQuery;
     std::unique_ptr<SQLite::Statement> createSessionQuery;
     std::unique_ptr<SQLite::Statement> validateSessionQuery;
     std::unique_ptr<SQLite::Statement> revokeSessionQuery;

@@ -6,6 +6,7 @@
 #include "RegisterRequest.h"
 #include "LoginRequest.h"
 #include "LogoutRequest.h"
+#include "RecoverAccountRequest.h"
 #include "ServiceTicketRequest.h"
 #include "AccountHelpers.h"
 #include "Log.h"
@@ -72,6 +73,10 @@ void ClientMessageProcessor::processReceivedMessage(
             handleMessage<LogoutRequest>(handle, messageBuffer);
             break;
         }
+        case AccountClientMessageType::RecoverAccountRequest: {
+            handleMessage<RecoverAccountRequest>(handle, messageBuffer);
+            break;
+        }
         case AccountClientMessageType::ServiceTicketRequest: {
             handleMessage<ServiceTicketRequest>(handle, messageBuffer);
             break;
@@ -131,6 +136,36 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
                             [this, sessionToken = message.sessionToken]() {
                                 return logoutSession(sessionToken);
                             });
+}
+
+void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
+                                           const RecoverAccountRequest& message)
+{
+    // Validate the new password.
+    AccountHelpers::ValidateResult passwordResult{
+        AccountHelpers::validatePassword(message.newPassword)};
+    if (!(passwordResult.success())) {
+        sendCallback(handle,
+                     messageFramer.frameMessage(RecoverAccountResponse{
+                         .result{RecoverAccountResponse::InvalidPassword}}));
+        return;
+    }
+
+    // A key of the wrong length can never match, so skip the expensive
+    // password hashing.
+    if (message.recoveryKey.size() != RECOVERY_KEY_CHARACTERS) {
+        sendCallback(handle,
+                     messageFramer.frameMessage(RecoverAccountResponse{.result{
+                         RecoverAccountResponse::InvalidAccountDetails}}));
+        return;
+    }
+
+    // Attempt to recover the account.
+    respondFromDatabasePool(handle, [this, username = message.username,
+                                     recoveryKey = message.recoveryKey,
+                                     newPassword = message.newPassword]() {
+        return recoverAccount(username, recoveryKey, newPassword);
+    });
 }
 
 void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
@@ -289,6 +324,61 @@ LogoutResponse ClientMessageProcessor::logoutSession(
     }
     else {
         response.result = LogoutResponse::Success;
+    }
+
+    return response;
+}
+
+RecoverAccountResponse
+    ClientMessageProcessor::recoverAccount(const std::string& username,
+                                           const std::string& recoveryKey,
+                                           const std::string& newPassword)
+{
+    RecoverAccountResponse response{};
+
+    // Hash the given recovery key, so we can look it up.
+    std::optional<std::string> recoveryKeyHash{
+        CryptoHelpers::hashSecret(recoveryKey)};
+    if (!recoveryKeyHash) {
+        LOG_ERROR("Failed to hash recovery key.");
+        response.result = RecoverAccountResponse::InternalError;
+        return response;
+    }
+
+    // Hash the new password.
+    // Note: We do this even if the key turns out to be wrong, so that every
+    //       attempt takes roughly the same amount of time.
+    std::optional<std::string> newPasswordHash{
+        CryptoHelpers::hashPassword(newPassword)};
+    if (!newPasswordHash) {
+        LOG_ERROR("Failed to hash password.");
+        response.result = RecoverAccountResponse::InternalError;
+        return response;
+    }
+
+    // Recovery keys are single-use, so generate a replacement.
+    std::string newRecoveryKey{CryptoHelpers::generateRecoveryKey()};
+    std::optional<std::string> newRecoveryKeyHash{
+        CryptoHelpers::hashSecret(newRecoveryKey)};
+    if (!newRecoveryKeyHash) {
+        LOG_ERROR("Failed to hash recovery key.");
+        response.result = RecoverAccountResponse::InternalError;
+        return response;
+    }
+
+    // Attempt to recover the account.
+    Database::RecoverAccountResult result{database.recoverAccount(
+        username, *recoveryKeyHash, *newPasswordHash, *newRecoveryKeyHash)};
+    if (result == Database::RecoverAccountResult::InvalidAccountDetails) {
+        response.result = RecoverAccountResponse::InvalidAccountDetails;
+    }
+    else if (result == Database::RecoverAccountResult::DatabaseError) {
+        response.result = RecoverAccountResponse::InternalError;
+    }
+    else {
+        // Success
+        response.recoveryKey = std::move(newRecoveryKey);
+        response.result = RecoverAccountResponse::Success;
     }
 
     return response;

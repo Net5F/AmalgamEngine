@@ -16,12 +16,14 @@ enum class AccountClientMessageType : Uint8 {
     RegisterRequest,
     LoginRequest,
     LogoutRequest,
+    RecoverAccountRequest,
     ServiceTicketRequest,
 
     // Server -> Client Messages
     RegisterResponse,
     LoginResponse,
     LogoutResponse,
+    RecoverAccountResponse,
     ServiceTicketResponse,
 };
 
