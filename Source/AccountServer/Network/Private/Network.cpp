@@ -1,5 +1,6 @@
 #include "Network.h"
 #include "Database.h"
+#include "UserConfig.h"
 #include "TlsHelpers.h"
 #include "Paths.h"
 #include "Log.h"
@@ -17,7 +18,7 @@ Network::Network(asio::io_context& inIoContext, Database& inDatabase)
 : ioContext{inIoContext}
 , clientSSLContext{asio::ssl::context::tls_server}
 , serviceSSLContext{asio::ssl::context::tls_server}
-, databasePool{1}
+, databasePool{UserConfig::get().getDatabaseWorkerCount()}
 , clientEndpoint{inIoContext, clientSSLContext, databasePool, inDatabase}
 , serviceEndpoint{inIoContext, serviceSSLContext, databasePool, inDatabase}
 {

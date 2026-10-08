@@ -1,5 +1,6 @@
 #pragma once
 
+#include "UserConfigInitializer.h"
 #include "Database.h"
 #include "Network.h"
 #include "SDL_Wrappers/SDL.h"
@@ -26,6 +27,10 @@ public:
 
 private:
     SDL sdl;
+
+    /** Initializes UserConfig. Must be constructed after SDL is initialized
+        and before anything that reads from UserConfig. */
+    UserConfigInitializer userConfigInitializer;
 
     /** The user account database. */
     Database database;

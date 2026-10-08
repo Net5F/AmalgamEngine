@@ -1,0 +1,67 @@
+#include "UserConfig.h"
+#include "Paths.h"
+#include "Log.h"
+#include "nlohmann/json.hpp"
+#include <string>
+#include <fstream>
+
+namespace AM
+{
+namespace AccountServer
+{
+
+UserConfig::UserConfig()
+: databaseWorkerCount{0}
+{
+    // Open the file.
+    std::string fullPath{Paths::BASE_PATH};
+    fullPath += "UserConfig.json";
+    std::ifstream workingFile(fullPath);
+    if (!(workingFile.is_open())) {
+        LOG_FATAL("Failed to open UserConfig.json");
+    }
+
+    // Parse the file into a json structure.
+    nlohmann::json json;
+    try {
+        json = nlohmann::json::parse(workingFile, nullptr, true, true);
+    } catch (nlohmann::json::exception& e) {
+        LOG_FATAL("Failed to parse UserConfig.json: %s", e.what());
+    }
+
+    // Initialize our members.
+    try {
+        init(json);
+    } catch (nlohmann::json::exception& e) {
+        LOG_FATAL("%s", e.what());
+    }
+}
+
+UserConfig& UserConfig::get()
+{
+    static UserConfig userConfig;
+    return userConfig;
+}
+
+unsigned int UserConfig::getDatabaseWorkerCount()
+{
+    return databaseWorkerCount;
+}
+
+void UserConfig::setDatabaseWorkerCount(unsigned int inDatabaseWorkerCount)
+{
+    if (inDatabaseWorkerCount == 0) {
+        LOG_FATAL("Invalid databaseWorkerCount value: %u. Must be at least 1.",
+                  inDatabaseWorkerCount);
+    }
+    databaseWorkerCount = inDatabaseWorkerCount;
+}
+
+void UserConfig::init(nlohmann::json& json)
+{
+    // Database worker count.
+    setDatabaseWorkerCount(json.at("databaseWorkerCount"));
+}
+
+} // End namespace AccountServer
+} // End namespace AM

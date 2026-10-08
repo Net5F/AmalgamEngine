@@ -4,6 +4,7 @@
 #include "SQLiteCpp/SQLiteCpp.h"
 #include <SDL3/SDL_stdinc.h>
 #include <memory>
+#include <mutex>
 #include <string>
 
 namespace AM
@@ -20,8 +21,9 @@ namespace AccountServer
  * Secrets (recovery keys, session tokens, service tickets) are never stored
  * directly. Instead, we store their hashes (see CryptoHelpers::hashSecret()).
  *
- * Note: This class isn't thread-safe. It must only be accessed from 1 thread
- *       at a time (currently, the single database worker).
+ * Note: This class is thread-safe. Each public function holds databaseMutex
+ *       for its duration, so calls from multiple database workers are
+ *       serialized.
  */
 class Database
 {
@@ -193,6 +195,9 @@ protected:
      * Creates our tables in Accounts.db, if they don't already exist.
      */
     void initTables();
+
+    /** Serializes access to database and our pre-built queries. */
+    std::mutex databaseMutex;
 
     /** File-backed database, storing account data. */
     SQLite::Database database;

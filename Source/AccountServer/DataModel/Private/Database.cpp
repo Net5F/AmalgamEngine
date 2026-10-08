@@ -1,6 +1,7 @@
 #include "Database.h"
 #include "Paths.h"
 #include "Log.h"
+#include <mutex>
 
 #ifdef SQLITECPP_ENABLE_ASSERT_HANDLER
 namespace SQLite
@@ -199,6 +200,8 @@ Database::RegisterResult
                               const std::string& passwordHash,
                               const std::string& recoveryKeyHash)
 {
+    std::scoped_lock lock{databaseMutex};
+
     try {
         SQLite::Transaction transaction{database};
 
@@ -235,6 +238,8 @@ Database::RegisterResult
 Database::AccountLoginInfo
     Database::getAccountLoginInfo(const std::string& username)
 {
+    std::scoped_lock lock{databaseMutex};
+
     AccountLoginInfo loginInfo{};
 
     try {
@@ -266,6 +271,8 @@ Database::RecoverAccountResult Database::recoverAccount(
     const std::string& username, const std::string& recoveryKeyHash,
     const std::string& newPasswordHash, const std::string& newRecoveryKeyHash)
 {
+    std::scoped_lock lock{databaseMutex};
+
     try {
         SQLite::Transaction transaction{database};
 
@@ -321,6 +328,8 @@ Database::CreateSessionResult
     Database::createSession(Sint64 accountID, const std::string& tokenHash,
                             Sint64 idleExpiresAt, Sint64 absoluteExpiresAt)
 {
+    std::scoped_lock lock{databaseMutex};
+
     try {
         createSessionQuery->bind(":account_id", accountID);
         createSessionQuery->bind(":token_hash", tokenHash.data(),
@@ -346,6 +355,8 @@ Database::CreateSessionResult
 Database::AccountSessionInfo
     Database::validateSession(const std::string& tokenHash, Sint64 idleTimeoutS)
 {
+    std::scoped_lock lock{databaseMutex};
+
     AccountSessionInfo sessionInfo{};
 
     try {
@@ -382,6 +393,8 @@ Database::AccountSessionInfo
 Database::RevokeSessionResult
     Database::revokeSession(const std::string& tokenHash)
 {
+    std::scoped_lock lock{databaseMutex};
+
     try {
         revokeSessionQuery->bind(":token_hash", tokenHash.data(),
                                  static_cast<int>(tokenHash.size()));
@@ -403,6 +416,8 @@ Database::RevokeSessionResult
 
 Database::RevokeAllSessionsResult Database::revokeAllSessions(Sint64 accountID)
 {
+    std::scoped_lock lock{databaseMutex};
+
     try {
         revokeAllSessionsQuery->bind(":account_id", accountID);
         revokeAllSessionsQuery->exec();
@@ -419,6 +434,8 @@ Database::CreateServiceTicketResult Database::createServiceTicket(
     Sint64 accountSessionID, const std::string& tokenHash,
     ServiceTicketAudience audience, Sint64 expiresAt)
 {
+    std::scoped_lock lock{databaseMutex};
+
     try {
         createServiceTicketQuery->bind(":account_session_id", accountSessionID);
         createServiceTicketQuery->bind(":token_hash", tokenHash.data(),
@@ -445,6 +462,8 @@ Database::ConsumedServiceTicketInfo
     Database::consumeServiceTicket(const std::string& tokenHash,
                                    ServiceTicketAudience audience)
 {
+    std::scoped_lock lock{databaseMutex};
+
     ConsumedServiceTicketInfo ticketInfo{};
 
     try {

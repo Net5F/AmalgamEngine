@@ -1,0 +1,8 @@
+{
+    // The number of worker threads used to process database requests.
+    // Each request hashes secrets (e.g. passwords) before touching the
+    // database, so more workers let more requests be processed in parallel.
+    // Must be at least 1. A good upper limit is the number of available
+    // CPU cores, minus 1 for the network thread.
+    "databaseWorkerCount": 1
+}

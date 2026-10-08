@@ -36,6 +36,12 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(AccountServer PUBLIC /W3 /permissive-)
 endif()
 
+# If any of our needed files don't exist in the build directory, copy them.
+# Note: We don't copy every time, since it would overwrite any changes that 
+#       we hadn't copied to the Resources directory yet.
+include(${AmalgamEngine_SOURCE_DIR}/CMake/copy_if_does_not_exist.cmake)
+copy_if_does_not_exist("Resources/AccountServer/Common/UserConfig.json")
+
 # Copy local TLS credentials to the build directory.
 file(COPY
     "${AmalgamEngine_SOURCE_DIR}/TlsCredentials/Local/account-server.crt"

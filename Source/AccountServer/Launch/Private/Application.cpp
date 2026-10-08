@@ -9,6 +9,7 @@ namespace AccountServer
 {
 Application::Application()
 : sdl{0}
+, userConfigInitializer{}
 , database{}
 , ioContext{}
 , network{ioContext, database}
