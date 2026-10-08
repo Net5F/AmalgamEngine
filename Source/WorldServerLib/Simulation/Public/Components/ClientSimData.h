@@ -20,8 +20,13 @@ struct ClientSimData {
         We track this here so the sim knows where to send messages related to
         the entity.
         We also use this to remove the entity from the sim when the Client
-        disconnects.*/
+        disconnects.
+        Note: While the client is logging out (disconnected, but the entity
+              hasn't been removed yet), this will be NULL_NETWORK_ID. */
     NetworkID netID{0};
+
+    /** The ID of the account that this client is logged in to. */
+    Sint64 accountID{0};
 
     /** Tracks the entities that are in range of this client's entity. */
     std::vector<entt::entity> entitiesInAOI{};

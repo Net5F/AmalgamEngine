@@ -61,6 +61,20 @@ public:
         in seconds. */
     static constexpr float SAVE_PERIOD_S{60 * 15};
 
+    /** How long a client's entity stays in the world after the client
+        disconnects, in seconds. If the same account logs in during this time,
+        it takes control of the existing entity.
+        If an account logs in while it already has a connected client, the old
+        client is disconnected and this delay applies as usual.
+        TODO: If we ever want to support a client-requested, cancellable
+              logout countdown (e.g. "Logging out in 20 seconds", cancelled by
+              moving), add a LOGOUT_DELAY_S. Entities that finish that
+              countdown should be removed immediately instead of lingering. */
+    static constexpr double DISCONNECT_LINGER_S{10};
+    static constexpr unsigned int DISCONNECT_LINGER_TICKS{
+        static_cast<unsigned int>(DISCONNECT_LINGER_S
+                                  / SharedConfig::SIM_TICK_TIMESTEP_S)};
+
     //-------------------------------------------------------------------------
     // Network
     //-------------------------------------------------------------------------

@@ -123,6 +123,19 @@ public:
     AuthState getAuthState() const;
     void setAuthState(AuthState inAuthState);
 
+    /**
+     * Note: The account ID should only be accessed from the receive thread.
+     *       It's only valid once this client is Authenticated.
+     */
+    Sint64 getAccountID() const;
+    void setAccountID(Sint64 inAccountID);
+
+    /**
+     * Forcibly disconnects this client. It'll be erased the next time
+     * isConnected() is checked.
+     */
+    void disconnect();
+
 private:
     //--------------------------------------------------------------------------
     // Helpers
@@ -231,6 +244,9 @@ private:
     //--------------------------------------------------------------------------
     /** This client's current authentication state. */
     AuthState authState;
+
+    /** The ID of the account that this client authenticated as. */
+    Sint64 accountID;
 
     /** Tracks how long it's been since this client connected. Used to drop
         clients that don't authenticate within AUTH_TIMEOUT_S. */

@@ -102,9 +102,24 @@ private:
     void processTicketResults(ClientMap& clientMap);
 
     /**
+     * Disconnects and erases any authenticated clients that are logged in to
+     * the given account.
+     */
+    void disconnectAccountClients(ClientMap& clientMap, Sint64 accountID);
+
+    /**
      * Erase any disconnected clients from the endpoint's client map.
      */
     void eraseDisconnectedClients(ClientMap& clientMap);
+
+    /**
+     * Erases the given client from the endpoint's client map. If the sim knows
+     * about the client, notifies it of the disconnect.
+     *
+     * @return The iterator following the erased client.
+     */
+    ClientMap::iterator eraseClient(ClientMap& clientMap,
+                                    ClientMap::iterator clientIt);
 
     /**
      * Receives any waiting client messages and passes them to

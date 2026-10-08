@@ -24,6 +24,7 @@ Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 , peer{std::move(inPeer)}
 , receiveTimer{}
 , authState{AuthState::AwaitingRequest}
+, accountID{0}
 , authTimer{}
 , latestSentSimTick{0}
 , tickDiffHistory{Config::TICKDIFF_TARGET}
@@ -300,6 +301,21 @@ Client::AuthState Client::getAuthState() const
 void Client::setAuthState(AuthState inAuthState)
 {
     authState = inAuthState;
+}
+
+Sint64 Client::getAccountID() const
+{
+    return accountID;
+}
+
+void Client::setAccountID(Sint64 inAccountID)
+{
+    accountID = inAccountID;
+}
+
+void Client::disconnect()
+{
+    peer = nullptr;
 }
 
 void Client::addExplicitConfirmation(std::size_t& currentIndex,

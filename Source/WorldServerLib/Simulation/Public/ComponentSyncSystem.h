@@ -50,6 +50,16 @@ private:
     template <typename ComponentTypeList>
     void addUpdateComponents(auto& updateObservers);
 
+    /**
+     * For each entity that a client was just attached to, replaces its
+     * ComponentUpdate with all of its current self-init components.
+     *
+     * Normally, self components only get sent when they change. When a client
+     * takes over an entity that's already in the world (e.g. if they log back
+     * in before their old entity is removed), it needs the full state.
+     */
+    void addAttachedClientComponents();
+
     /** Used to get the current tick. */
     Simulation& simulation;
     /** Used for fetching component data. */
@@ -58,6 +68,10 @@ private:
     Network& network;
     /** Used to update Collision components when GraphicState is updated. */
     GraphicData& graphicData;
+
+    /** Observes ClientSimData construction, so we know when a client gets
+        attached to an entity. */
+    EnttObserver clientAttachedObserver;
 
     // Note: Check the top of the cpp file for file-local types and variables.
     //       We keep some templated code there to reduce compile times.

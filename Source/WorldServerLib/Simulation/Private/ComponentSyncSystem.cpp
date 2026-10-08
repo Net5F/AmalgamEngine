@@ -69,7 +69,12 @@ ComponentSyncSystem::ComponentSyncSystem(const SimulationContext& inSimContext)
 , world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
 , graphicData{inSimContext.graphicData}
+, clientAttachedObserver{}
 {
+    // Observe client attachments, so we can send them their full self state.
+    clientAttachedObserver.bind(world.registry);
+    clientAttachedObserver.on_construct<ClientSimData>();
+
     // Self-Init
     boost::mp11::mp_for_each<SelfInitComponentTypes>([&](auto I) {
         using ComponentType = decltype(I);
@@ -144,6 +149,7 @@ void ComponentSyncSystem::sendSelfUpdates()
     addConstructDestroyComponents<SelfInitComponentTypes>(
         selfConstructObservers, selfDestroyObservers);
     addUpdateComponents<SelfUpdateComponentTypes>(selfUpdateObservers);
+    addAttachedClientComponents();
 
     // Send the update to the each entity's client.
     for (auto& [updatedEntity, componentUpdate] : componentUpdateMap) {
@@ -170,6 +176,44 @@ void ComponentSyncSystem::sendSelfUpdates()
     }
 
     componentUpdateMap.clear();
+}
+
+void ComponentSyncSystem::addAttachedClientComponents()
+{
+    entt::registry& registry{world.registry};
+
+    for (entt::entity entity : clientAttachedObserver) {
+        if (!registry.all_of<IsClientEntity, ClientSimData>(entity)) {
+            continue;
+        }
+
+        // Replace any partial update with the entity's full current state.
+        ComponentUpdate& componentUpdate{componentUpdateMap[entity]};
+        componentUpdate.updatedComponents.clear();
+        componentUpdate.destroyedComponents.clear();
+        boost::mp11::mp_for_each<SelfInitComponentTypes>([&](auto I) {
+            using ComponentType = decltype(I);
+            if (!registry.all_of<ComponentType>(entity)) {
+                return;
+            }
+
+            if constexpr (std::is_empty_v<ComponentType>) {
+                // Note: Can't registry.get() empty types.
+                componentUpdate.updatedComponents.push_back(ComponentType{});
+            }
+            else {
+                componentUpdate.updatedComponents.emplace_back(
+                    registry.get<ComponentType>(entity));
+            }
+        });
+
+        // If the entity has no self components, don't send an empty message.
+        if (componentUpdate.updatedComponents.empty()) {
+            componentUpdateMap.erase(entity);
+        }
+    }
+
+    clientAttachedObserver.clear();
 }
 
 void ComponentSyncSystem::sendInRangeUpdates()

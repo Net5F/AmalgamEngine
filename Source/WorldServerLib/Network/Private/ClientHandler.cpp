@@ -196,7 +196,14 @@ void ClientHandler::processTicketResults(ClientMap& clientMap)
         const ConsumeServiceTicketResponse& response{ticketResult.response};
         switch (response.result) {
             case ConsumeServiceTicketResponse::Success: {
+                // If this account is already logged in, disconnect the old client.
+                // Note: The old client's disconnect event must reach the sim
+                //       before this client's connect event, so the sim can
+                //       hand the account's entity over to this client.
+                disconnectAccountClients(clientMap, response.accountID);
+
                 client->setAuthState(Client::AuthState::Authenticated);
+                client->setAccountID(response.accountID);
                 LOG_INFO("Client authenticated. NetID: %u, AccountID: %lld",
                          ticketResult.netID,
                          static_cast<long long>(response.accountID));
@@ -223,44 +230,67 @@ void ClientHandler::processTicketResults(ClientMap& clientMap)
     }
 }
 
+void ClientHandler::disconnectAccountClients(ClientMap& clientMap,
+                                             Sint64 accountID)
+{
+    for (auto it = clientMap.begin(); it != clientMap.end();) {
+        Client& client{*(it->second)};
+        if ((client.getAuthState() == Client::AuthState::Authenticated)
+            && (client.getAccountID() == accountID)) {
+            LOG_INFO("Disconnecting client: Account logged in from another "
+                     "connection. NetID: %u, AccountID: %lld",
+                     it->first, static_cast<long long>(accountID));
+            client.disconnect();
+            it = eraseClient(clientMap, it);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
 void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
 {
     ZoneScoped;
 
     /* Erase any disconnected clients. */
     for (auto it = clientMap.begin(); it != clientMap.end();) {
-        std::shared_ptr<Client>& client{it->second};
-
-        if (!(client->isConnected())) {
-            // Save the ID and auth state since we're going to erase this
-            // client.
-            NetworkID clientID{it->first};
-            bool wasAuthenticated{client->getAuthState()
-                                  == Client::AuthState::Authenticated};
-
-            {
-                // Need to modify the map, acquire a write lock.
-                std::unique_lock writeLock{endpoint.getClientMapMutex()};
-
-                // Erase the disconnected client.
-                networkIDPool.freeID(it->first);
-                it = clientMap.erase(it);
-            }
-
-            clientCount--;
-
-            // If the sim knows about this client, notify it that the client
-            // was disconnected.
-            LOG_INFO("Erased disconnected client with netID: %u.", clientID);
-            if (wasAuthenticated) {
-                dispatcher.emplace<ClientConnectionEvent>(
-                    ClientDisconnected{clientID});
-            }
+        if (!(it->second->isConnected())) {
+            it = eraseClient(clientMap, it);
         }
         else {
             ++it;
         }
     }
+}
+
+ClientMap::iterator ClientHandler::eraseClient(ClientMap& clientMap,
+                                               ClientMap::iterator clientIt)
+{
+    // Save the ID and auth state since we're going to erase this client.
+    NetworkID clientID{clientIt->first};
+    bool wasAuthenticated{clientIt->second->getAuthState()
+                          == Client::AuthState::Authenticated};
+
+    {
+        // Need to modify the map, acquire a write lock.
+        std::unique_lock writeLock{endpoint.getClientMapMutex()};
+
+        // Erase the disconnected client.
+        networkIDPool.freeID(clientID);
+        clientIt = clientMap.erase(clientIt);
+    }
+
+    clientCount--;
+
+    // If the sim knows about this client, notify it that the client was
+    // disconnected.
+    LOG_INFO("Erased disconnected client with netID: %u.", clientID);
+    if (wasAuthenticated) {
+        dispatcher.emplace<ClientConnectionEvent>(ClientDisconnected{clientID});
+    }
+
+    return clientIt;
 }
 
 int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
