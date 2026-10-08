@@ -30,8 +30,10 @@ class IMessageProcessorExtension;
  * Provides a convenient interface for connecting to the server, sending
  * and receiving messages, and other network-related functionality.
  *
- * TODO: Add comment about how this connection behaves (see 
- *       AccountClientEndpoint.h).
+ * Once connected, this connection stays open as long as messages are flowing.
+ * When no messages need to be sent, a heartbeat is instead sent from client ->
+ * server. If the server receives no messages from a client for a period of
+ * time, the connection times out and must be re-established.
  *
  * Note: ServerConnectionSystem is responsible for calling connect() and
  *       disconnect(). If a connection error is detected, this class will push a

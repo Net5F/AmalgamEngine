@@ -34,8 +34,10 @@ class AccountServiceEndpoint;
  * Internally, manages client connections and orchestrates message sending
  * and receiving.
  *
- * TODO: Add comment about how this connection behaves (see
- *       AccountClientEndpoint.h).
+ * Once connected, this connection stays open as long as messages are flowing.
+ * When no messages need to be sent, a heartbeat is instead sent from client ->
+ * server. If the server receives no messages from a client for a period of
+ * time, the connection times out and must be re-established.
  */
 class WorldClientEndpoint
 {
