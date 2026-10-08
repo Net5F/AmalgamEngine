@@ -2,6 +2,7 @@
 #include "Network.h"
 #include "LoginRequest.h"
 #include "LogoutRequest.h"
+#include "RecoverAccountRequest.h"
 #include "RegisterRequest.h"
 #include "ServiceTicketRequest.h"
 #include "Log.h"
@@ -19,10 +20,12 @@ AccountSession::AccountSession(Network& inNetwork,
 , loginResponseQueue{networkEventDispatcher}
 , registerResponseQueue{networkEventDispatcher}
 , logoutResponseQueue{networkEventDispatcher}
+, recoverAccountResponseQueue{networkEventDispatcher}
 , serviceTicketQueue{networkEventDispatcher}
 , connectionEventQueue{networkEventDispatcher}
 , loginState{LoginState::LoggedOut}
 , registrationPending{false}
+, recoveryPending{false}
 , serviceTicketRequestPending{}
 , accountID{0}
 , sessionToken{}
@@ -31,11 +34,13 @@ AccountSession::AccountSession(Network& inNetwork,
 , loginCompletedSig{}
 , registrationCompletedSig{}
 , logoutCompletedSig{}
+, recoveryCompletedSig{}
 , serviceTicketRequestCompletedSig{}
 , requestConnectionFailedSig{}
 , loginCompleted{loginCompletedSig}
 , registrationCompleted{registrationCompletedSig}
 , logoutCompleted{logoutCompletedSig}
+, recoveryCompleted{recoveryCompletedSig}
 , serviceTicketRequestCompleted{serviceTicketRequestCompletedSig}
 , requestConnectionFailed{requestConnectionFailedSig}
 {
@@ -63,6 +68,11 @@ void AccountSession::tick()
         handleLogoutResponse(logoutResponse);
     }
 
+    RecoverAccountResponse newRecoverAccountResponse{};
+    while (recoverAccountResponseQueue.pop(newRecoverAccountResponse)) {
+        handleRecoverAccountResponse(newRecoverAccountResponse);
+    }
+
     ServiceTicketResponse newServiceTicketResponse{};
     while (serviceTicketQueue.pop(newServiceTicketResponse)) {
         handleServiceTicketResponse(newServiceTicketResponse);
@@ -77,7 +87,8 @@ void AccountSession::tick()
 bool AccountSession::login(const std::string& username,
                            const std::string& password)
 {
-    if ((loginState != LoginState::LoggedOut) || registrationPending) {
+    if ((loginState != LoginState::LoggedOut) || registrationPending
+        || recoveryPending) {
         return false;
     }
 
@@ -89,12 +100,28 @@ bool AccountSession::login(const std::string& username,
 bool AccountSession::registerAccount(const std::string& username,
                                      const std::string& password)
 {
-    if ((loginState != LoginState::LoggedOut) || registrationPending) {
+    if ((loginState != LoginState::LoggedOut) || registrationPending
+        || recoveryPending) {
         return false;
     }
 
     registrationPending = true;
     network.accountEndpoint.send(RegisterRequest{username, password});
+    return true;
+}
+
+bool AccountSession::recoverAccount(const std::string& username,
+                                    const std::string& recoveryKey,
+                                    const std::string& newPassword)
+{
+    if ((loginState != LoginState::LoggedOut) || registrationPending
+        || recoveryPending) {
+        return false;
+    }
+
+    recoveryPending = true;
+    network.accountEndpoint.send(
+        RecoverAccountRequest{username, recoveryKey, newPassword});
     return true;
 }
 
@@ -208,6 +235,21 @@ void AccountSession::handleLogoutResponse(const LogoutResponse& response)
     logoutCompletedSig.publish(response.result);
 }
 
+void AccountSession::handleRecoverAccountResponse(
+    RecoverAccountResponse& response)
+{
+    if (!recoveryPending) {
+        OPENSSL_cleanse(response.recoveryKey.data(),
+                        response.recoveryKey.size());
+        LOG_INFO("Received an unexpected account recovery response.");
+        return;
+    }
+
+    recoveryPending = false;
+    recoveryCompletedSig.publish(response);
+    OPENSSL_cleanse(response.recoveryKey.data(), response.recoveryKey.size());
+}
+
 void AccountSession::handleServiceTicketResponse(
     ServiceTicketResponse& response)
 {
@@ -238,6 +280,7 @@ void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
     bool requestWasPending{
         (loginState == LoginState::LoggingIn)
         || (loginState == LoginState::LoggingOut) || registrationPending
+        || recoveryPending
         || std::ranges::contains(serviceTicketRequestPending, true)};
     if (!requestWasPending) {
         // Account connections intentionally close after becoming idle. The
@@ -246,6 +289,7 @@ void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
     }
 
     registrationPending = false;
+    recoveryPending = false;
     serviceTicketRequestPending.fill(false);
     if (loginState == LoginState::LoggingIn) {
         clearSession();

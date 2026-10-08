@@ -2,6 +2,7 @@
 #include "MessageProcessorContext.h"
 #include "LoginResponse.h"
 #include "LogoutResponse.h"
+#include "RecoverAccountResponse.h"
 #include "RegisterResponse.h"
 #include "ServiceTicketResponse.h"
 #include "Deserialize.h"
@@ -36,6 +37,10 @@ void AccountMessageProcessor::processReceivedMessage(
         }
         case AccountClientMessageType::LogoutResponse: {
             dispatchMessage<LogoutResponse>(messageBuffer);
+            break;
+        }
+        case AccountClientMessageType::RecoverAccountResponse: {
+            dispatchMessage<RecoverAccountResponse>(messageBuffer);
             break;
         }
         case AccountClientMessageType::ServiceTicketResponse: {

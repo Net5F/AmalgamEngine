@@ -4,6 +4,7 @@
 #include "AccountDefs.h"
 #include "LoginResponse.h"
 #include "LogoutResponse.h"
+#include "RecoverAccountResponse.h"
 #include "RegisterResponse.h"
 #include "ServiceTicketResponse.h"
 #include "QueuedEvents.h"
@@ -48,6 +49,12 @@ public:
     bool registerAccount(const std::string& username,
                          const std::string& password);
 
+    /** Starts an account recovery request, which uses the account's recovery
+        key to set a new password. */
+    bool recoverAccount(const std::string& username,
+                        const std::string& recoveryKey,
+                        const std::string& newPassword);
+
     /** Revokes the current account session. */
     bool logout();
 
@@ -67,6 +74,7 @@ private:
     void handleLoginResponse(LoginResponse& response);
     void handleRegisterResponse(RegisterResponse& response);
     void handleLogoutResponse(const LogoutResponse& response);
+    void handleRecoverAccountResponse(RecoverAccountResponse& response);
     void handleServiceTicketResponse(ServiceTicketResponse& response);
     void handleConnectionEvent(const AccountConnectionEvent& event);
 
@@ -77,12 +85,14 @@ private:
     EventQueue<LoginResponse> loginResponseQueue;
     EventQueue<RegisterResponse> registerResponseQueue;
     EventQueue<LogoutResponse> logoutResponseQueue;
+    EventQueue<RecoverAccountResponse> recoverAccountResponseQueue;
     EventQueue<ServiceTicketResponse> serviceTicketQueue;
     EventQueue<AccountConnectionEvent> connectionEventQueue;
 
     /** The current state of our various operations. */
     LoginState loginState;
     bool registrationPending;
+    bool recoveryPending;
     /** Tracks which audiences have a service ticket request pending. */
     std::array<bool, static_cast<std::size_t>(ServiceTicketAudience::Count)>
         serviceTicketRequestPending;
@@ -96,6 +106,7 @@ private:
     entt::sigh<void(LoginResponse::Result)> loginCompletedSig;
     entt::sigh<void(const RegisterResponse&)> registrationCompletedSig;
     entt::sigh<void(LogoutResponse::Result)> logoutCompletedSig;
+    entt::sigh<void(const RecoverAccountResponse&)> recoveryCompletedSig;
     entt::sigh<void(const ServiceTicketResponse&)>
         serviceTicketRequestCompletedSig;
     entt::sigh<void()> requestConnectionFailedSig;
@@ -110,6 +121,10 @@ public:
 
     /** A logout request completed and the session model has been updated. */
     entt::sink<entt::sigh<void(LogoutResponse::Result)>> logoutCompleted;
+
+    /** An account recovery request completed. */
+    entt::sink<entt::sigh<void(const RecoverAccountResponse&)>>
+        recoveryCompleted;
 
     /** A service-ticket request completed. Check the response's audience to
         see which request it was for. */
