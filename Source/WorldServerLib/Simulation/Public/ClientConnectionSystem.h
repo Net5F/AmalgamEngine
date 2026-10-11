@@ -24,7 +24,7 @@ class GraphicData;
  * updating the client's entity.
  *
  * When a client disconnects, its entity lingers in the world for
- * Config::DISCONNECT_LINGER_S before being removed. If the same account
+ * Config::LOGOUT_DELAY_S before being removed. If the same account
  * connects during that time, the new client takes control of the existing
  * entity.
  *

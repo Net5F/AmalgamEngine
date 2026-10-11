@@ -61,22 +61,18 @@ public:
         in seconds. */
     static constexpr float SAVE_PERIOD_S{60 * 15};
 
-    /** How long a client's entity stays in the world after the client
-        disconnects, in seconds. If the same account logs in during this time,
-        it takes control of the existing entity.
-        If an account logs in while it already has a connected client, the old
-        client is disconnected and this delay applies as usual.
-        Note: Clients that log out explicitly (see LOGOUT_DELAY_S) skip this
-              delay. */
-    static constexpr double DISCONNECT_LINGER_S{10};
-    static constexpr unsigned int DISCONNECT_LINGER_TICKS{
-        static_cast<unsigned int>(DISCONNECT_LINGER_S
-                                  / SharedConfig::SIM_TICK_TIMESTEP_S)};
-
-    /** How long a client's explicit logout takes, in seconds. If the client's
-        entity moves or casts during this time, the logout is canceled.
-        When the logout finishes, the entity is removed from the world
-        immediately (it doesn't linger). */
+    /** How long it takes a client's entity to leave the world, in seconds.
+        Applies to both ways of leaving:
+          - Explicit logout: The client requests a logout and its entity
+            stays in the world during the countdown. If the entity moves or
+            casts, the logout is canceled. When the countdown finishes, the
+            entity is removed immediately.
+          - Disconnect: The client disconnects without logging out and its
+            entity lingers for this long before being removed. If the same
+            account logs in during this time, it takes control of the
+            existing entity.
+            If an account logs in while it already has a connected client,
+            the old client is disconnected and this delay applies as usual. */
     static constexpr double LOGOUT_DELAY_S{20};
     static constexpr unsigned int LOGOUT_DELAY_TICKS{
         static_cast<unsigned int>(LOGOUT_DELAY_S

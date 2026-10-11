@@ -120,7 +120,7 @@ void ClientConnectionSystem::processDisconnectEvent(
     logoutTickMap.erase(accountID);
 
     // If entities don't linger, remove the entity immediately.
-    if (Config::DISCONNECT_LINGER_TICKS == 0) {
+    if (Config::LOGOUT_DELAY_TICKS == 0) {
         removeClientEntity(accountID);
         return;
     }
@@ -131,7 +131,7 @@ void ClientConnectionSystem::processDisconnectEvent(
 
     // Start lingering.
     removalTickMap[accountID]
-        = simulation.getCurrentTick() + Config::DISCONNECT_LINGER_TICKS;
+        = simulation.getCurrentTick() + Config::LOGOUT_DELAY_TICKS;
     LOG_INFO("Client disconnected, entity is lingering. netID: %u, "
              "entityID: %u",
              clientDisconnected.clientID, entity);
