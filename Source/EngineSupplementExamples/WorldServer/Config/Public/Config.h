@@ -66,13 +66,20 @@ public:
         it takes control of the existing entity.
         If an account logs in while it already has a connected client, the old
         client is disconnected and this delay applies as usual.
-        TODO: If we ever want to support a client-requested, cancellable
-              logout countdown (e.g. "Logging out in 20 seconds", cancelled by
-              moving), add a LOGOUT_DELAY_S. Entities that finish that
-              countdown should be removed immediately instead of lingering. */
+        Note: Clients that log out explicitly (see LOGOUT_DELAY_S) skip this
+              delay. */
     static constexpr double DISCONNECT_LINGER_S{10};
     static constexpr unsigned int DISCONNECT_LINGER_TICKS{
         static_cast<unsigned int>(DISCONNECT_LINGER_S
+                                  / SharedConfig::SIM_TICK_TIMESTEP_S)};
+
+    /** How long a client's explicit logout takes, in seconds. If the client's
+        entity moves or casts during this time, the logout is canceled.
+        When the logout finishes, the entity is removed from the world
+        immediately (it doesn't linger). */
+    static constexpr double LOGOUT_DELAY_S{20};
+    static constexpr unsigned int LOGOUT_DELAY_TICKS{
+        static_cast<unsigned int>(LOGOUT_DELAY_S
                                   / SharedConfig::SIM_TICK_TIMESTEP_S)};
 
     //-------------------------------------------------------------------------

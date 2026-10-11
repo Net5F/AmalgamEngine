@@ -20,6 +20,7 @@
 #include "UseItemOnEntityRequest.h"
 #include "DialogueChoiceRequest.h"
 #include "CastRequest.h"
+#include "WorldLogoutRequest.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
@@ -145,6 +146,11 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
         case EngineMessageType::CastRequest: {
             dispatchWithNetID<CastRequest>(netID, {messageBuffer, messageSize},
                                            networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::WorldLogoutRequest: {
+            dispatchWithNetID<WorldLogoutRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {

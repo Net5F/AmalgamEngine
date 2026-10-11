@@ -45,6 +45,8 @@ target_sources(SharedLib
         Public/World/TileExtentClearLayers.h
         Public/World/TileRemoveLayer.h
         Public/World/UseItemOnEntityRequest.h
+        Public/World/WorldLogoutRequest.h
+        Public/World/WorldLogoutUpdate.h
         Public/Account/AccountClientMessageType.h
         Public/Account/AccountServiceMessageType.h
         Public/Account/ConsumeServiceTicketRequest.h

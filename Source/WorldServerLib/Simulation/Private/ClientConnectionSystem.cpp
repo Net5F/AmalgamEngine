@@ -7,10 +7,12 @@
 #include "Config.h"
 #include "Serialize.h"
 #include "ConnectionResponse.h"
+#include "WorldLogoutUpdate.h"
 #include "Input.h"
 #include "Rotation.h"
 #include "Position.h"
 #include "PreviousPosition.h"
+#include "CastState.h"
 #include "Name.h"
 #include "Inventory.h"
 #include "ClientSimData.h"
@@ -31,9 +33,15 @@ ClientConnectionSystem::ClientConnectionSystem(
 , network{inSimContext.network}
 , graphicData{inSimContext.graphicData}
 , clientConnectionEventQueue{network.clientEndpoint.getEventDispatcher()}
+, logoutRequestQueue{inSimContext.networkEventDispatcher}
+, castStartedObserver{}
 , accountEntityMap{}
 , removalTickMap{}
+, logoutTickMap{}
+, loggedOutNetIDs{}
 {
+    castStartedObserver.bind(world.registry);
+    castStartedObserver.on_construct<CastState>();
 }
 
 void ClientConnectionSystem::processConnectionEvents()
@@ -57,6 +65,15 @@ void ClientConnectionSystem::processConnectionEvents()
                    clientConnectionEvent);
     }
 
+    // Start or cancel any requested logouts.
+    WorldLogoutRequest logoutRequest{};
+    while (logoutRequestQueue.pop(logoutRequest)) {
+        processLogoutRequest(logoutRequest);
+    }
+
+    // Cancel or complete any ongoing logouts.
+    updateLogouts();
+
     // Remove any entities that finished lingering.
     removeExpiredEntities();
 }
@@ -79,6 +96,11 @@ void ClientConnectionSystem::processConnectEvent(
 void ClientConnectionSystem::processDisconnectEvent(
     const ClientDisconnected& clientDisconnected)
 {
+    // If this client already logged out, its entity is already gone.
+    if (loggedOutNetIDs.erase(clientDisconnected.clientID)) {
+        return;
+    }
+
     // Find the disconnected client's associated entity.
     auto disconnectedEntityIt{world.netIDMap.find(clientDisconnected.clientID)};
     if (disconnectedEntityIt == world.netIDMap.end()) {
@@ -93,6 +115,9 @@ void ClientConnectionSystem::processDisconnectEvent(
     ClientSimData& client{world.registry.get<ClientSimData>(entity)};
     client.netID = NULL_NETWORK_ID;
     Sint64 accountID{client.accountID};
+
+    // If the client was logging out, stop. The entity will linger as usual.
+    logoutTickMap.erase(accountID);
 
     // If entities don't linger, remove the entity immediately.
     if (Config::DISCONNECT_LINGER_TICKS == 0) {
@@ -198,6 +223,143 @@ void ClientConnectionSystem::attachClientToEntity(
 
     // Build and send the response.
     sendConnectionResponse(clientConnected.clientID, entity);
+}
+
+void ClientConnectionSystem::processLogoutRequest(
+    const WorldLogoutRequest& logoutRequest)
+{
+    // Find the entity ID of the client that sent this request.
+    entt::entity clientEntity{world.getClientEntity(logoutRequest.netID)};
+    if (clientEntity == entt::null) {
+        // Client doesn't exist (may have disconnected), skip this request.
+        return;
+    }
+    Sint64 accountID{world.registry.get<ClientSimData>(clientEntity).accountID};
+
+    if (logoutRequest.type == WorldLogoutRequest::Start) {
+        // If this client is already logging out, ignore the request.
+        if (logoutTickMap.contains(accountID)) {
+            return;
+        }
+
+        // Entities can't log out while moving.
+        if (entityIsMoving(clientEntity)) {
+            network.clientEndpoint.send(
+                logoutRequest.netID,
+                WorldLogoutUpdate{WorldLogoutUpdate::Canceled});
+            return;
+        }
+
+        // Start the countdown.
+        // Note: If the delay is 0, updateLogouts() will complete it this tick.
+        logoutTickMap[accountID]
+            = simulation.getCurrentTick() + Config::LOGOUT_DELAY_TICKS;
+        network.clientEndpoint.send(
+            logoutRequest.netID,
+            WorldLogoutUpdate{WorldLogoutUpdate::Started,
+                              static_cast<float>(Config::LOGOUT_DELAY_S)});
+    }
+    else if (logoutRequest.type == WorldLogoutRequest::Cancel) {
+        if (logoutTickMap.contains(accountID)) {
+            cancelLogout(accountID, clientEntity);
+        }
+    }
+}
+
+void ClientConnectionSystem::updateLogouts()
+{
+    entt::registry& registry{world.registry};
+
+    // Cancel the logouts of any entities that started casting.
+    for (entt::entity entity : castStartedObserver) {
+        if (ClientSimData * client{registry.try_get<ClientSimData>(entity)}) {
+            if (logoutTickMap.contains(client->accountID)) {
+                cancelLogout(client->accountID, entity);
+            }
+        }
+    }
+    castStartedObserver.clear();
+
+    // Cancel the logouts of any entities that moved, and complete any that
+    // finished counting down.
+    Uint32 currentTick{simulation.getCurrentTick()};
+    for (auto it = logoutTickMap.begin(); it != logoutTickMap.end();) {
+        auto [accountID, logoutTick] = *it;
+        ++it;
+
+        auto entityIt{accountEntityMap.find(accountID)};
+        if ((entityIt == accountEntityMap.end())
+            || !(registry.valid(entityIt->second))) {
+            LOG_ERROR("Failed to find entity for accountID: %lld while "
+                      "logging out.",
+                      static_cast<long long>(accountID));
+            logoutTickMap.erase(accountID);
+            continue;
+        }
+
+        entt::entity entity{entityIt->second};
+        if (entityIsMoving(entity)) {
+            cancelLogout(accountID, entity);
+        }
+        else if (currentTick >= logoutTick) {
+            completeLogout(accountID, entity);
+        }
+    }
+}
+
+void ClientConnectionSystem::cancelLogout(Sint64 accountID, entt::entity entity)
+{
+    logoutTickMap.erase(accountID);
+
+    NetworkID netID{world.registry.get<ClientSimData>(entity).netID};
+    network.clientEndpoint.send(netID,
+                                WorldLogoutUpdate{WorldLogoutUpdate::Canceled});
+}
+
+void ClientConnectionSystem::completeLogout(Sint64 accountID,
+                                            entt::entity entity)
+{
+    logoutTickMap.erase(accountID);
+
+    // Tell the client that it's logged out. It'll disconnect when it receives
+    // this.
+    ClientSimData& client{world.registry.get<ClientSimData>(entity)};
+    NetworkID netID{client.netID};
+    network.clientEndpoint.send(
+        netID, WorldLogoutUpdate{WorldLogoutUpdate::Completed});
+
+    // Detach the client from its entity. When the client disconnects, we'll
+    // ignore the event.
+    world.netIDMap.erase(netID);
+    client.netID = NULL_NETWORK_ID;
+    loggedOutNetIDs.insert(netID);
+
+    // Remove the entity immediately (skipping the linger time).
+    removeClientEntity(accountID);
+    LOG_INFO("Client logged out. netID: %u, accountID: %lld", netID,
+             static_cast<long long>(accountID));
+}
+
+bool ClientConnectionSystem::entityIsMoving(entt::entity entity)
+{
+    entt::registry& registry{world.registry};
+
+    // If the entity is trying to move, it counts as moving (even if it's
+    // blocked).
+    if (registry.get<Input>(entity).inputStates.any()) {
+        return true;
+    }
+
+    // If the entity's position changed last tick (e.g. it was pushed or is
+    // falling), it's moving.
+    if (const PreviousPosition* previousPosition{
+            registry.try_get<PreviousPosition>(entity)}) {
+        if (registry.get<Position>(entity) != *previousPosition) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void ClientConnectionSystem::removeExpiredEntities()

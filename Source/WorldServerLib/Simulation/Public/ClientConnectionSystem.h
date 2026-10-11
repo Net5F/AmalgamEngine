@@ -3,8 +3,11 @@
 #include "NetworkDefs.h"
 #include "ClientConnectionEvent.h"
 #include "QueuedEvents.h"
+#include "WorldLogoutRequest.h"
+#include "EnttObserver.h"
 #include "entt/fwd.hpp"
 #include <unordered_map>
+#include <unordered_set>
 
 namespace AM
 {
@@ -25,6 +28,11 @@ class GraphicData;
  * connects during that time, the new client takes control of the existing
  * entity.
  *
+ * Clients can also request an explicit logout. This starts a countdown of
+ * Config::LOGOUT_DELAY_S, which is canceled if the entity moves or casts.
+ * When the countdown finishes, the entity is removed immediately (it doesn't
+ * linger), and the client is told to disconnect.
+ *
  * Note: If an account connects while it already has a connected client, the
  *       Network disconnects the old client before telling us about the new
  *       one, so we see it as a normal disconnect followed by a quick reconnect.
@@ -36,8 +44,8 @@ public:
 
     /**
      * Processes new connections and disconnections, updating the sim state
-     * appropriately. Removes the entities of any clients whose linger time
-     * has expired.
+     * appropriately. Processes logout requests and updates ongoing logouts.
+     * Removes the entities of any clients whose linger time has expired.
      */
     void processConnectionEvents();
 
@@ -65,6 +73,33 @@ private:
      */
     void attachClientToEntity(const ClientConnected& clientConnected,
                               entt::entity entity);
+
+    /**
+     * Starts or cancels the requesting client's logout.
+     */
+    void processLogoutRequest(const WorldLogoutRequest& logoutRequest);
+
+    /**
+     * Cancels any logouts whose entity moved or cast, and completes any
+     * logouts whose countdown has finished.
+     */
+    void updateLogouts();
+
+    /**
+     * Ends the given account's logout countdown and tells its client.
+     */
+    void cancelLogout(Sint64 accountID, entt::entity entity);
+
+    /**
+     * Removes the given account's entity from the sim immediately and tells
+     * its client that the logout completed.
+     */
+    void completeLogout(Sint64 accountID, entt::entity entity);
+
+    /**
+     * Returns true if the given entity is moving or trying to move.
+     */
+    bool entityIsMoving(entt::entity entity);
 
     /**
      * Removes any entities whose linger time has expired.
@@ -98,6 +133,13 @@ private:
 
     EventQueue<ClientConnectionEvent> clientConnectionEventQueue;
 
+    EventQueue<WorldLogoutRequest> logoutRequestQueue;
+
+    /** Observes CastState construction, so we can cancel logouts when the
+        entity casts something (even instant casts, which never persist a
+        CastState across ticks). */
+    EnttObserver castStartedObserver;
+
     /** Maps account IDs to their client entity. Includes entities that are
         lingering. */
     std::unordered_map<Sint64, entt::entity> accountEntityMap;
@@ -105,6 +147,15 @@ private:
     /** Maps the account IDs of entities that are lingering -> the tick
         that their entity should be removed on. */
     std::unordered_map<Sint64, Uint32> removalTickMap;
+
+    /** Maps the account IDs of entities that are logging out -> the tick
+        that their logout will complete on. */
+    std::unordered_map<Sint64, Uint32> logoutTickMap;
+
+    /** The network IDs of clients that completed a logout, but haven't
+        disconnected yet. Their entity is already gone, so we ignore their
+        disconnect event. */
+    std::unordered_set<NetworkID> loggedOutNetIDs;
 };
 
 } // End namespace WorldServer

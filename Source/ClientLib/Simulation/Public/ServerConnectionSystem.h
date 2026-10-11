@@ -4,6 +4,7 @@
 #include "ConnectionRequest.h"
 #include "ConnectionResponse.h"
 #include "ConnectionError.h"
+#include "WorldLogoutUpdate.h"
 #include "Timer.h"
 #include "entt/signal/fwd.hpp"
 #include <SDL3/SDL_stdinc.h>
@@ -23,6 +24,10 @@ class GraphicData;
 /**
  * Processes server connect/disconnect events and initializes the sim state
  * when we connect.
+ *
+ * Also passes the server's WorldLogoutUpdates to the UI. When the server tells
+ * us our logout completed, we disconnect.
+ * Note: The UI sends WorldLogoutRequests to the server directly.
  */
 class ServerConnectionSystem
 {
@@ -36,7 +41,8 @@ public:
      * Waits for connection events from the UI. When one is received, attempts
      * to connect to the server.
      *
-     * While connected, detects disconnects and sends the disconnect event.
+     * While connected, detects disconnects and sends the disconnect event,
+     * and processes logout updates.
      */
     void processConnectionEvents();
 
@@ -49,6 +55,12 @@ private:
     static constexpr double CONNECTION_RESPONSE_WAIT_S{5};
 
     void onUIConnectionRequest(ConnectionRequest& connectionRequest);
+
+    /**
+     * Passes any received logout updates to the UI. If our logout completed,
+     * disconnects and returns to the Disconnected state.
+     */
+    void processLogoutUpdates();
 
     /**
      * Disconnects the endpoint, returns to the Disconnected state, and sends
@@ -91,6 +103,9 @@ private:
 
     /** Connection error events, received from the server. */
     EventQueue<ConnectionError> connectionErrorQueue;
+
+    /** Logout updates, received from the server. */
+    EventQueue<WorldLogoutUpdate> logoutUpdateQueue;
 
     /** Tracks the state of our connection with the server. */
     ConnectionState connectionState;

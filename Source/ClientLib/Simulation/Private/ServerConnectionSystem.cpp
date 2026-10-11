@@ -41,6 +41,7 @@ ServerConnectionSystem::ServerConnectionSystem(
 , connectionRequestQueue{}
 , connectionResponseQueue{inSimContext.networkEventDispatcher}
 , connectionErrorQueue{inSimContext.networkEventDispatcher}
+, logoutUpdateQueue{inSimContext.networkEventDispatcher}
 , connectionState{ConnectionState::Disconnected}
 , connectionAttemptTimer{}
 {
@@ -102,6 +103,12 @@ void ServerConnectionSystem::processConnectionEvents()
             return;
         }
     }
+    else if (connectionState == ConnectionState::Connected) {
+        processLogoutUpdates();
+        if (connectionState == ConnectionState::Disconnected) {
+            return;
+        }
+    }
 
     // If the connection is lost, reset all network and sim state.
     ConnectionError connectionError;
@@ -140,6 +147,34 @@ void ServerConnectionSystem::onUIConnectionRequest(
     ConnectionRequest& connectionRequest)
 {
     connectionRequestQueue.emplace(connectionRequest);
+}
+
+void ServerConnectionSystem::processLogoutUpdates()
+{
+    WorldLogoutUpdate logoutUpdate{};
+    while (logoutUpdateQueue.pop(logoutUpdate)) {
+        if (logoutUpdate.type == WorldLogoutUpdate::Completed) {
+            // The server removed our entity. Disconnect and reset our state.
+            network.worldEndpoint.disconnect();
+
+            // Our disconnect may have queued a redundant error. Since this
+            // was an intentional disconnect, we discard it.
+            // Note: disconnect() joined the receive thread, so nothing else
+            //       will be pushed.
+            while (connectionErrorQueue.pop()) {
+            }
+
+            clearSimState();
+            connectionState = ConnectionState::Disconnected;
+            LOG_INFO("Logged out.");
+
+            simEventDispatcher.trigger(logoutUpdate);
+            return;
+        }
+
+        // Started or Canceled. Pass it to the UI.
+        simEventDispatcher.trigger(logoutUpdate);
+    }
 }
 
 void ServerConnectionSystem::initSimState(

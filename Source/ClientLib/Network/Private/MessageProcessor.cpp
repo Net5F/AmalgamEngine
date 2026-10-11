@@ -22,6 +22,7 @@
 #include "DialogueResponse.h"
 #include "CastFailed.h"
 #include "CastStarted.h"
+#include "WorldLogoutUpdate.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
@@ -136,6 +137,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         case EngineMessageType::CastStarted: {
             dispatchMessage<CastStarted>(messageBuffer, messageSize,
                                          networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::WorldLogoutUpdate: {
+            dispatchMessage<WorldLogoutUpdate>(messageBuffer, messageSize,
+                                               networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {
