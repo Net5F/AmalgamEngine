@@ -82,7 +82,8 @@ void ServiceMessageProcessor::handleMessage(ConnectionHandle handle,
                                             const ServiceHeartbeat&)
 {
     // Respond so the service knows we're still here.
-    sendCallback(handle, messageFramer.frameMessage(ServiceHeartbeatResponse{}));
+    sendCallback(handle,
+                 messageFramer.frameMessage(ServiceHeartbeatResponse{}));
 }
 
 ConsumeServiceTicketResponse ServiceMessageProcessor::consumeServiceTicket(

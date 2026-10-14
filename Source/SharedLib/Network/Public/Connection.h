@@ -27,8 +27,8 @@ public:
 
     Connection(asio::ip::tcp::socket socket, asio::ssl::context& sslContext,
                const TlsTransport::ClassConfig& config)
-    : tlsTransport{std::make_shared<TlsTransport>(
-          std::move(socket), sslContext, config)}
+    : tlsTransport{
+          std::make_shared<TlsTransport>(std::move(socket), sslContext, config)}
     , readyCallback{}
     , disconnectCallback{}
     , state{State::NotStarted}
@@ -197,7 +197,8 @@ private:
         startReadLoop();
     }
 
-    // Note: We don't expect these to throw. It's up to the caller to ensure that.
+    // Note: We don't expect these to throw. It's up to the caller to ensure
+    //       that.
     ReadyCallback readyCallback;
     DisconnectCallback disconnectCallback;
 

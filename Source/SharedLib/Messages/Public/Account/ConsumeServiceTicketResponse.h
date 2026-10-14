@@ -22,11 +22,7 @@ struct ConsumeServiceTicketResponse {
         to. */
     Uint32 requestID{0};
 
-    enum Result : Uint8 {
-        Success,
-        InvalidTicket,
-        InternalError
-    };
+    enum Result : Uint8 { Success, InvalidTicket, InternalError };
     Result result{Result::InternalError};
 
     /** If result == success, this identifies the authenticated account. */

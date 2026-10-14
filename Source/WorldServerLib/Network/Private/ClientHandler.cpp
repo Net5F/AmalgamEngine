@@ -196,10 +196,11 @@ void ClientHandler::processTicketResults(ClientMap& clientMap)
         const ConsumeServiceTicketResponse& response{ticketResult.response};
         switch (response.result) {
             case ConsumeServiceTicketResponse::Success: {
-                // If this account is already logged in, disconnect the old client.
-                // Note: The old client's disconnect event must reach the sim
-                //       before this client's connect event, so the sim can
-                //       hand the account's entity over to this client.
+                // If this account is already logged in, disconnect the old
+                // client.
+                // Note: The old client's disconnect event must reach
+                //       the sim before this client's connect event, so the sim
+                //       can hand the account's entity over to this client.
                 disconnectAccountClients(clientMap, response.accountID);
 
                 client->setAuthState(Client::AuthState::Authenticated);
@@ -209,9 +210,8 @@ void ClientHandler::processTicketResults(ClientMap& clientMap)
                          static_cast<long long>(response.accountID));
 
                 // Notify the sim that a client was connected.
-                dispatcher.emplace<ClientConnectionEvent>(
-                    ClientConnected{ticketResult.netID, response.accountID,
-                                    response.username});
+                dispatcher.emplace<ClientConnectionEvent>(ClientConnected{
+                    ticketResult.netID, response.accountID, response.username});
                 break;
             }
             case ConsumeServiceTicketResponse::InvalidTicket: {

@@ -27,8 +27,8 @@ asio::steady_timer::duration toTimerDuration(double seconds)
 }
 } // namespace
 
-AccountServiceEndpoint::AccountServiceEndpoint(
-    asio::io_context& inIoContext, asio::ssl::context& inSSLContext)
+AccountServiceEndpoint::AccountServiceEndpoint(asio::io_context& inIoContext,
+                                               asio::ssl::context& inSSLContext)
 : ioContext{inIoContext}
 , sslContext{inSSLContext}
 , connectionTimer{inIoContext}
@@ -113,9 +113,8 @@ void AccountServiceEndpoint::consumeServiceTicketOnIOThread(
 
     // Frame the request.
     const Uint32 requestID{nextRequestID++};
-    BinaryBufferSharedPtr framedMessage{
-        messageFramer.frameMessage(ConsumeServiceTicketRequest{
-            .requestID{requestID}, .ticket{ticket}})};
+    BinaryBufferSharedPtr framedMessage{messageFramer.frameMessage(
+        ConsumeServiceTicketRequest{.requestID{requestID}, .ticket{ticket}})};
     if (!framedMessage) {
         callback(ConsumeServiceTicketResponse{
             .requestID{requestID},

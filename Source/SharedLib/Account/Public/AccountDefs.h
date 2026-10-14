@@ -33,7 +33,6 @@ inline constexpr std::size_t SERVICE_TICKET_BYTES{32};
 enum class ServiceTicketAudience : Uint8 {
     WorldServer,
     ChatServer,
-    // Note: Keep this last.
     Count
 };
 

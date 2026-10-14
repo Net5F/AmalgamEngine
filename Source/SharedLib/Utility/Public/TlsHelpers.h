@@ -10,7 +10,7 @@ namespace ssl
 {
 class verify_context;
 }
-}
+} // namespace asio
 
 // OpenSSL's SSL and X509 types.
 struct ssl_st;
@@ -40,7 +40,7 @@ public:
     };
     /**
      * Loads and returns the TLS pin at the given path.
-     * @return A valid pin, or null if the pin was not found or invalid. If 
+     * @return A valid pin, or null if the pin was not found or invalid. If
      * returning null, an appropriate error message will be printed.
      */
     static std::optional<CertificatePin>
@@ -53,10 +53,10 @@ public:
      *                 check that the certificate is authorized for that use.
      * @return true if the pin is valid, else false.
      */
-    static bool verifyPinnedCertificate(
-        const CertificatePin& expectedPin,
-        asio::ssl::verify_context& verifyContext,
-        PeerRole peerRole = PeerRole::Server) noexcept;
+    static bool
+        verifyPinnedCertificate(const CertificatePin& expectedPin,
+                                asio::ssl::verify_context& verifyContext,
+                                PeerRole peerRole = PeerRole::Server) noexcept;
 
     /**
      * Returns the pin of the certificate that the peer presented during the

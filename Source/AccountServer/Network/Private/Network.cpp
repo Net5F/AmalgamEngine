@@ -126,8 +126,7 @@ void Network::configureServicePeerVerification()
                 return false;
             });
     } catch (const asio::system_error& e) {
-        LOG_FATAL("Failed to configure service certificate pins: %s",
-                  e.what());
+        LOG_FATAL("Failed to configure service certificate pins: %s", e.what());
     }
 }
 

@@ -84,8 +84,8 @@ std::optional<TlsHelpers::CertificatePin>
 }
 
 bool TlsHelpers::verifyPinnedCertificate(
-    const CertificatePin& expectedPin,
-    asio::ssl::verify_context& verifyContext, PeerRole peerRole) noexcept
+    const CertificatePin& expectedPin, asio::ssl::verify_context& verifyContext,
+    PeerRole peerRole) noexcept
 {
     X509_STORE_CTX* storeContext{verifyContext.native_handle()};
     if (storeContext == nullptr) {

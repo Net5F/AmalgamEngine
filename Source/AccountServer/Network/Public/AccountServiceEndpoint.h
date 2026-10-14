@@ -29,7 +29,7 @@ class Database;
  * to them when logging in.
  *
  * Peers are authenticated through mutual TLS: the given sslContext must
- * require a client certificate and verify it against the services' pins.
+ * require a client certificate and verify it against the service's pins.
  * Because of this, any connection that completes its handshake is trusted.
  * Once the handshake completes, we compare the peer's certificate against
  * each service's pin to identify which service it is. A service can only
@@ -94,8 +94,7 @@ private:
      * Returns the service that the given connection belongs to, or null if
      * it isn't an active service connection.
      */
-    std::optional<ServiceTicketAudience>
-        findService(ConnectionHandle handle);
+    std::optional<ServiceTicketAudience> findService(ConnectionHandle handle);
 
     asio::io_context& ioContext;
     asio::ssl::context& sslContext;

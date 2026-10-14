@@ -13,7 +13,7 @@ namespace AM
  *
  * Note: The ticket is only accepted if it was issued for the requesting
  *       service. The AccountServer identifies the service by its TLS
- *       certificate, so there's no need to send an audience.
+ *       certificate.
  */
 struct ConsumeServiceTicketRequest {
     static constexpr AccountServiceMessageType MESSAGE_TYPE{
