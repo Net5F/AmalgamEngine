@@ -18,12 +18,12 @@
 namespace AM
 {
 class Acceptor;
+class AccountServiceEndpoint;
 
 namespace WorldServer
 {
 struct MessageProcessorContext;
 class IMessageProcessorExtension;
-class AccountServiceEndpoint;
 
 /**
  * Manages communication with clients (ran by users).

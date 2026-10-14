@@ -19,14 +19,13 @@
 
 namespace AM
 {
-namespace WorldServer
-{
 
 /**
- * Manages communication with the AccountServer.
+ * Used by our internal services (world server, chat server) to communicate
+ * with the AccountServer.
  *
- * We use this connection to validate the tickets that clients present to us
- * when logging in.
+ * Services use this connection to validate the tickets that clients present
+ * to them when logging in.
  *
  * Peers are authenticated through mutual TLS: the given sslContext must
  * present our certificate, and must verify the AccountServer's certificate
@@ -39,6 +38,12 @@ namespace WorldServer
  *
  * Note: Public functions are thread-safe. All other work happens on the
  *       network IO thread.
+ *
+ * Note: This file is in a "Shared" subdirectory because the AccountServer
+ *       has its own AccountServiceEndpoint.h (the other side of this
+ *       connection), and it links SharedLib. A flat include would be
+ *       ambiguous there, so this one must be included as
+ *       "Shared/AccountServiceEndpoint.h".
  */
 class AccountServiceEndpoint
 {
@@ -57,8 +62,16 @@ public:
     using ConsumeServiceTicketCallback
         = std::function<void(const ConsumeServiceTicketResponse&)>;
 
+    /**
+     * @param inSSLContext Must present the service's certificate, and verify
+     *                     the AccountServer's certificate against its pin.
+     * @param inServerIP The AccountServer's IP address.
+     * @param inServerPort The AccountServer's service port.
+     */
     AccountServiceEndpoint(asio::io_context& inIoContext,
-                           asio::ssl::context& inSSLContext);
+                           asio::ssl::context& inSSLContext,
+                           const std::string& inServerIP,
+                           unsigned int inServerPort);
 
     ~AccountServiceEndpoint();
 
@@ -71,7 +84,8 @@ public:
     /**
      * Asks the AccountServer to validate and consume the given ticket.
      *
-     * The ticket is only accepted if it was issued for the World Server.
+     * The ticket is only accepted if it was issued for the service that owns
+     * this client.
      *
      * If we aren't currently connected to the AccountServer, the request
      * fails immediately.
@@ -88,7 +102,7 @@ private:
     enum class ConnectionState { Disconnected, Connecting, Connected };
 
     // Note: If a project ever cares to configure any of these, they can be
-    //       moved into Config.h.
+    //       made constructor parameters.
     static constexpr double CONNECTING_TIMEOUT_S{5};
     static constexpr double PARTIAL_RECEIVE_TIMEOUT_S{10};
     /** How often we send a heartbeat. Must be well below the AccountServer's
@@ -114,7 +128,7 @@ private:
 
     /** Connection logic */
     void connectOnIOThread();
-    void beginConnect(std::string serverIP, unsigned int serverPort);
+    void beginConnect();
     void handleConnectionFailure(std::size_t currentAttempt,
                                  const asio::error_code& error);
     void disconnectWithError(const asio::error_code& error);
@@ -171,6 +185,10 @@ private:
     asio::io_context& ioContext;
     asio::ssl::context& sslContext;
 
+    /** The AccountServer's address. */
+    std::string serverIP;
+    unsigned int serverPort;
+
     /** Used to time out connection attempts. */
     asio::steady_timer connectionTimer;
     /** Used to wait between reconnect attempts. */
@@ -201,5 +219,4 @@ private:
     std::size_t connectionAttempt;
 };
 
-} // namespace WorldServer
 } // namespace AM

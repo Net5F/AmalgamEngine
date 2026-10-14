@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WorldClientEndpoint.h"
-#include "AccountServiceEndpoint.h"
+#include "Shared/AccountServiceEndpoint.h"
 #include "asio/executor_work_guard.hpp"
 #include "asio/io_context.hpp"
 #include "asio/ssl/context.hpp"

@@ -1,7 +1,6 @@
-#include "AccountServiceEndpoint.h"
+#include "Shared/AccountServiceEndpoint.h"
 #include "ConsumeServiceTicketRequest.h"
 #include "ServiceHeartbeat.h"
-#include "UserConfig.h"
 #include "Deserialize.h"
 #include "Log.h"
 #include "asio/error.hpp"
@@ -15,8 +14,6 @@
 
 namespace AM
 {
-namespace WorldServer
-{
 namespace
 {
 /** Returns the given number of seconds as a timer duration. */
@@ -28,9 +25,13 @@ asio::steady_timer::duration toTimerDuration(double seconds)
 } // namespace
 
 AccountServiceEndpoint::AccountServiceEndpoint(asio::io_context& inIoContext,
-                                               asio::ssl::context& inSSLContext)
+                                               asio::ssl::context& inSSLContext,
+                                               const std::string& inServerIP,
+                                               unsigned int inServerPort)
 : ioContext{inIoContext}
 , sslContext{inSSLContext}
+, serverIP{inServerIP}
+, serverPort{inServerPort}
 , connectionTimer{inIoContext}
 , reconnectTimer{inIoContext}
 , heartbeatTimer{inIoContext}
@@ -67,8 +68,8 @@ void AccountServiceEndpoint::start()
 {
     asio::post(ioContext, [this]() {
         if (started) {
-            LOG_INFO("Attempted to start AccountServiceEndpoint more than "
-                     "once.");
+            LOG_INFO(
+                "Attempted to start AccountServiceEndpoint more than once.");
             return;
         }
 
@@ -134,13 +135,10 @@ void AccountServiceEndpoint::connectOnIOThread()
     }
 
     connectionState = ConnectionState::Connecting;
-    UserConfig::ServerAddress serverAddress{
-        UserConfig::get().getAccountServerAddress()};
-    beginConnect(std::move(serverAddress.IP), serverAddress.port);
+    beginConnect();
 }
 
-void AccountServiceEndpoint::beginConnect(std::string serverIP,
-                                          unsigned int serverPort)
+void AccountServiceEndpoint::beginConnect()
 {
     if (connectionState != ConnectionState::Connecting) {
         return;
@@ -469,5 +467,4 @@ void AccountServiceEndpoint::handleMessage(
     completeRequest(response.requestID, response);
 }
 
-} // namespace WorldServer
 } // namespace AM

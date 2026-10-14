@@ -1,5 +1,6 @@
 #include "Network.h"
 #include "MessageProcessorContext.h"
+#include "UserConfig.h"
 #include "TlsHelpers.h"
 #include "Paths.h"
 #include "Log.h"
@@ -16,7 +17,9 @@ namespace WorldServer
 Network::Network(const MessageProcessorContext& inMessageProcessorContext)
 : ioContext{}
 , accountSSLContext{asio::ssl::context::tls_client}
-, accountEndpoint{ioContext, accountSSLContext}
+, accountEndpoint{ioContext, accountSSLContext,
+                  UserConfig::get().getAccountServerAddress().IP,
+                  UserConfig::get().getAccountServerAddress().port}
 , clientEndpoint{inMessageProcessorContext, accountEndpoint}
 , workGuard{}
 , ioThread{}

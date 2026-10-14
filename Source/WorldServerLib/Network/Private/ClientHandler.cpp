@@ -1,6 +1,6 @@
 #include "ClientHandler.h"
 #include "WorldClientEndpoint.h"
-#include "AccountServiceEndpoint.h"
+#include "Shared/AccountServiceEndpoint.h"
 #include "NetworkDefs.h"
 #include "SocketSet.h"
 #include "ClientConnectionEvent.h"

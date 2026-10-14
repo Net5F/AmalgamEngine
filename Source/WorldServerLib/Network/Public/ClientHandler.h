@@ -19,12 +19,12 @@
 namespace AM
 {
 class EventDispatcher;
+class AccountServiceEndpoint;
 
 namespace WorldServer
 {
 class WorldClientEndpoint;
 class MessageProcessor;
-class AccountServiceEndpoint;
 
 /**
  * Handles all asynchronous activity that the Clients require.

@@ -63,10 +63,24 @@ target_sources(SharedLib
         Public/Account/ServiceHeartbeatResponse.h
         Public/Account/ServiceTicketRequest.h
         Public/Account/ServiceTicketResponse.h
+        Public/Chat/ChatClientMessageType.h
+        Public/Chat/ChatConnectionRequest.h
+        Public/Chat/ChatConnectionResponse.h
+        Public/Chat/ChatError.h
+        Public/Chat/ChatHeartbeat.h
+        Public/Chat/ChatHeartbeatResponse.h
+        Public/Chat/ChatMessage.h
+        Public/Chat/ChatSendRequest.h
+        Public/Chat/ChatServiceHeartbeat.h
+        Public/Chat/ChatServiceHeartbeatResponse.h
+        Public/Chat/ChatServiceMessageType.h
+        Public/Chat/PlayerPositionsUpdate.h
+        Public/Chat/PlayersLeftWorld.h
 )
 
 target_include_directories(SharedLib
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/World
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/Account
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Chat
 )

@@ -75,6 +75,14 @@ public:
         to be within the entity's "Area of Interest" cylinder. */
     static constexpr float AOI_HALF_HEIGHT{TILE_WORLD_HEIGHT * 3};
 
+    /** The number of world units around an entity that are considered to be
+        within range of its local chat messages. */
+    static constexpr float LOCAL_CHAT_RADIUS{AOI_RADIUS};
+
+    /** The number of world units above and below an entity that are considered
+        to be within range of its local chat messages. */
+    static constexpr float LOCAL_CHAT_HALF_HEIGHT{AOI_HALF_HEIGHT};
+
     /** The string ID of the default graphic set for entities. */
     static constexpr const char* DEFAULT_ENTITY_GRAPHIC_SET{"ghost"};
 

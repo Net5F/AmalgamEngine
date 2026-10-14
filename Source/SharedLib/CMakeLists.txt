@@ -53,6 +53,7 @@ endif()
 
 # Build all of the subdirectories.
 add_subdirectory(Account)
+add_subdirectory(Chat)
 add_subdirectory(Messages)
 add_subdirectory(Network)
 add_subdirectory(Simulation)
