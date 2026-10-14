@@ -19,8 +19,10 @@ Network::Network(asio::io_context& inIoContext, Database& inDatabase)
 , clientSSLContext{asio::ssl::context::tls_server}
 , serviceSSLContext{asio::ssl::context::tls_server}
 , databasePool{UserConfig::get().getDatabaseWorkerCount()}
+, servicePins{loadServicePins()}
 , clientEndpoint{inIoContext, clientSSLContext, databasePool, inDatabase}
-, serviceEndpoint{inIoContext, serviceSSLContext, databasePool, inDatabase}
+, serviceEndpoint{inIoContext, serviceSSLContext, databasePool, inDatabase,
+                  servicePins}
 {
     loadServerCredentials(clientSSLContext);
     loadServerCredentials(serviceSSLContext);
@@ -69,29 +71,63 @@ void Network::loadServerCredentials(asio::ssl::context& context)
     }
 }
 
-void Network::configureServicePeerVerification()
+AccountServiceEndpoint::ServicePins Network::loadServicePins()
 {
-    const std::string pinPath{Paths::BASE_PATH + "world-server.pin"};
-    auto certificatePinOpt{TlsHelpers::loadCertificatePin(pinPath)};
-    if (!certificatePinOpt) {
-        LOG_FATAL("Failed to load WorldServer certificate pin.");
+    AccountServiceEndpoint::ServicePins pins{};
+    for (std::size_t i{0}; i < pins.size(); ++i) {
+        auto service{static_cast<ServiceTicketAudience>(i)};
+        const char* pinFileName{};
+        switch (service) {
+            case ServiceTicketAudience::WorldServer: {
+                pinFileName = "world-server.pin";
+                break;
+            }
+            case ServiceTicketAudience::ChatServer: {
+                pinFileName = "chat-server.pin";
+                break;
+            }
+            default: {
+                LOG_FATAL("Missing pin file for service: %u",
+                          static_cast<unsigned int>(service));
+            }
+        }
+
+        const std::string pinPath{Paths::BASE_PATH + pinFileName};
+        auto certificatePinOpt{TlsHelpers::loadCertificatePin(pinPath)};
+        if (!certificatePinOpt) {
+            LOG_FATAL("Failed to load service certificate pin '%s'.",
+                      pinPath.c_str());
+        }
+
+        pins[i] = *certificatePinOpt;
     }
 
-    // Require connecting services to present a certificate that matches the
-    // pin. Unauthenticated peers will fail the handshake.
+    return pins;
+}
+
+void Network::configureServicePeerVerification()
+{
+    // Require connecting services to present a certificate that matches one
+    // of our pins. Unauthenticated peers will fail the handshake.
+    // Note: Once the handshake completes, serviceEndpoint checks the peer's
+    //       pin again to identify which service it is.
     try {
         serviceSSLContext.set_verify_mode(
             asio::ssl::verify_peer | asio::ssl::verify_fail_if_no_peer_cert);
         serviceSSLContext.set_verify_callback(
-            [certificatePin = *certificatePinOpt](
+            [pins = servicePins](
                 bool, asio::ssl::verify_context& verifyContext) noexcept {
-                return TlsHelpers::verifyPinnedCertificate(
-                    certificatePin, verifyContext,
-                    TlsHelpers::PeerRole::Client);
+                for (const TlsHelpers::CertificatePin& pin : pins) {
+                    if (TlsHelpers::verifyPinnedCertificate(
+                            pin, verifyContext, TlsHelpers::PeerRole::Client)) {
+                        return true;
+                    }
+                }
+                return false;
             });
     } catch (const asio::system_error& e) {
-        LOG_FATAL("Failed to configure WorldServer certificate pin '%s': %s",
-                  pinPath.c_str(), e.what());
+        LOG_FATAL("Failed to configure service certificate pins: %s",
+                  e.what());
     }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "NetworkID.h"
+#include <string>
 #include <variant>
 
 namespace AM
@@ -16,6 +17,9 @@ struct ClientConnected {
 
     /** The ID of the account that the client authenticated as. */
     Sint64 accountID{0};
+
+    /** The username of the account that the client authenticated as. */
+    std::string username{};
 };
 
 /**

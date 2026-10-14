@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AccountDefs.h"
 #include "AccountServiceMessageType.h"
 #include <string>
 
@@ -36,6 +37,9 @@ struct ConsumeServiceTicketResponse {
 
     /** If result == success, this is the account's current status. */
     std::string accountStatus{};
+
+    /** If result == success, this is the account's username. */
+    std::string username{};
 };
 
 template<typename S>
@@ -48,6 +52,8 @@ void serialize(S& serializer,
     serializer.value8b(consumeServiceTicketResponse.accountSessionID);
     serializer.text1b(consumeServiceTicketResponse.accountStatus,
                       ConsumeServiceTicketResponse::ACCOUNT_STATUS_MAX);
+    serializer.text1b(consumeServiceTicketResponse.username,
+                      USERNAME_MAX_LENGTH);
 }
 
 } // End namespace AM

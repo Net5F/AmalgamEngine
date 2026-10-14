@@ -178,6 +178,7 @@ public:
         Sint64 accountSessionID{0};
         Sint64 accountID{0};
         std::string accountStatus{};
+        std::string username{};
         Sint64 consumedAt{0};
     };
     /**

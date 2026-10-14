@@ -48,11 +48,13 @@ public:
      * Deserializes and handles received messages.
      *
      * @param handle The connection that the message came from.
+     * @param service The service that the connection belongs to.
      * @param messageType The type of the received message.
      * @param messageBuffer A buffer containing a serialized message, starting
      * at index 0.
      */
     void processReceivedMessage(ConnectionHandle handle,
+                                ServiceTicketAudience service,
                                 AccountServiceMessageType messageType,
                                 std::span<const Uint8> messageBuffer);
 
@@ -60,9 +62,9 @@ private:
     //-------------------------------------------------------------------------
     // Handlers
     //-------------------------------------------------------------------------
-    void handleMessage(ConnectionHandle handle,
+    void handleMessage(ConnectionHandle handle, ServiceTicketAudience service,
                        const ConsumeServiceTicketRequest& message);
-    void handleMessage(ConnectionHandle handle,
+    void handleMessage(ConnectionHandle handle, ServiceTicketAudience service,
                        const ServiceHeartbeat& message);
 
     //-------------------------------------------------------------------------
@@ -72,15 +74,13 @@ private:
      * Attempts to consume the given ticket. Only succeeds if the ticket was
      * issued for the given audience.
      * Returns an appropriate response message.
-     *
-     * Note: audience must already be validated.
      */
     ConsumeServiceTicketResponse consumeServiceTicket(
         ServiceTicketAudience audience,
         const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket);
 
     template<typename Message>
-    void handleMessage(ConnectionHandle handle,
+    void handleMessage(ConnectionHandle handle, ServiceTicketAudience service,
                        std::span<const Uint8> messageBuffer);
 
     asio::io_context& networkIoContext;

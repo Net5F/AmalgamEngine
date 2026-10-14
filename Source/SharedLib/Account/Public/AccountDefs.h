@@ -50,4 +50,20 @@ inline constexpr bool
            < static_cast<Uint8>(ServiceTicketAudience::Count);
 }
 
+/**
+ * Returns a display name for the given audience's service. Useful for logging.
+ */
+inline constexpr const char*
+    getServiceTicketAudienceName(ServiceTicketAudience audience)
+{
+    switch (audience) {
+        case ServiceTicketAudience::WorldServer:
+            return "WorldServer";
+        case ServiceTicketAudience::ChatServer:
+            return "ChatServer";
+        default:
+            return "Unknown";
+    }
+}
+
 } // End namespace AM

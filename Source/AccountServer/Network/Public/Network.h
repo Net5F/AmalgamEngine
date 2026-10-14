@@ -2,6 +2,7 @@
 
 #include "AccountClientEndpoint.h"
 #include "AccountServiceEndpoint.h"
+#include "TlsHelpers.h"
 #include "asio/ssl/context.hpp"
 #include "asio/thread_pool.hpp"
 
@@ -39,8 +40,13 @@ private:
     void loadServerCredentials(asio::ssl::context& context);
 
     /**
+     * Loads the pins of each service that's allowed to connect to us.
+     */
+    static AccountServiceEndpoint::ServicePins loadServicePins();
+
+    /**
      * Configures serviceSSLContext to require a client certificate that
-     * matches the world server's pin.
+     * matches one of our service pins.
      */
     void configureServicePeerVerification();
 
@@ -55,6 +61,10 @@ private:
     asio::ssl::context serviceSSLContext;
 
     asio::thread_pool databasePool;
+
+    /** The pins of each service that's allowed to connect to us, indexed by
+        service. */
+    AccountServiceEndpoint::ServicePins servicePins;
 
     AccountClientEndpoint clientEndpoint;
 

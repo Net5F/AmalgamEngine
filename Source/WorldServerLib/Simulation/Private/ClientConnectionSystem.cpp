@@ -147,11 +147,10 @@ entt::entity ClientConnectionSystem::createClientEntity(
     //       are added to the same group, the ref will be invalidated.
     entt::entity newEntity{world.createEntity(world.getSpawnPoint())};
 
-    // TODO: When player accounts are added, a lot of this should be changed to
-    //       load the persisted data from the account.
+    // TODO: A lot of this should be changed to load the persisted data from
+    //       the account.
     registry.emplace<IsClientEntity>(newEntity);
-    registry.emplace<Name>(
-        newEntity, "Player " + std::to_string(static_cast<Uint32>(newEntity)));
+    registry.emplace<Name>(newEntity, clientConnected.username);
     registry.emplace<Inventory>(newEntity);
 
     registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,

@@ -118,6 +118,15 @@ public:
      */
     bool isReady() const { return state == State::Ready; }
 
+    /**
+     * Returns the underlying OpenSSL handle. Useful for inspecting the
+     * peer's certificate once the handshake has completed.
+     */
+    TlsTransport::NativeHandle nativeHandle()
+    {
+        return tlsTransport->nativeHandle();
+    }
+
 protected:
     /**
      * Tells our derived class to begin reading messages.

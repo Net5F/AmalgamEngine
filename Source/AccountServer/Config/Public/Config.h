@@ -55,9 +55,10 @@ public:
     // Service network
     //-------------------------------------------------------------------------
     /** The maximum number of service connections that we will allow at once.
-        Only 1 world server is supported, but a few extra slots let it
-        reconnect while a stale connection is still being cleaned up. */
-    static constexpr unsigned int MAX_SERVICE_CONNECTIONS{4};
+        Only 1 connection per service is supported, but a few extra slots let
+        services reconnect while a stale connection is still being cleaned
+        up. */
+    static constexpr unsigned int MAX_SERVICE_CONNECTIONS{6};
 
     /** How long a connected service can be idle before timing out.
         Services send periodic heartbeats, so this only triggers if the

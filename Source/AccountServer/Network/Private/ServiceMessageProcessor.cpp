@@ -32,17 +32,18 @@ ServiceMessageProcessor::ServiceMessageProcessor(
 }
 
 void ServiceMessageProcessor::processReceivedMessage(
-    ConnectionHandle handle, AccountServiceMessageType messageType,
-    std::span<const Uint8> messageBuffer)
+    ConnectionHandle handle, ServiceTicketAudience service,
+    AccountServiceMessageType messageType, std::span<const Uint8> messageBuffer)
 {
     // Match the enum values to their message types.
     switch (messageType) {
         case AccountServiceMessageType::ConsumeServiceTicketRequest: {
-            handleMessage<ConsumeServiceTicketRequest>(handle, messageBuffer);
+            handleMessage<ConsumeServiceTicketRequest>(handle, service,
+                                                       messageBuffer);
             break;
         }
         case AccountServiceMessageType::ServiceHeartbeat: {
-            handleMessage<ServiceHeartbeat>(handle, messageBuffer);
+            handleMessage<ServiceHeartbeat>(handle, service, messageBuffer);
             break;
         }
         default: {
@@ -56,25 +57,16 @@ void ServiceMessageProcessor::processReceivedMessage(
 }
 
 void ServiceMessageProcessor::handleMessage(
-    ConnectionHandle handle, const ConsumeServiceTicketRequest& message)
+    ConnectionHandle handle, ServiceTicketAudience service,
+    const ConsumeServiceTicketRequest& message)
 {
-    // Validate the audience.
-    // Note: A correctly-behaving service will never send an invalid audience,
-    //       so we treat it as a malformed message.
-    if (!isValidServiceTicketAudience(message.audience)) {
-        LOG_ERROR("Received consume ticket request with invalid audience: %u",
-                  static_cast<unsigned int>(message.audience));
-        disconnectCallback(handle, asio::error::make_error_code(
-                                       asio::error::invalid_argument));
-        return;
-    }
-
     // Note: We use a DB worker so we don't hold up the network thread.
+    // Note: The requesting service is the audience, so a service can only
+    //       consume tickets that were issued for it.
     asio::post(databasePool, [this, handle, requestID = message.requestID,
-                              audience = message.audience,
-                              ticket = message.ticket]() {
+                              service, ticket = message.ticket]() {
         ConsumeServiceTicketResponse response{
-            consumeServiceTicket(audience, ticket)};
+            consumeServiceTicket(service, ticket)};
         response.requestID = requestID;
 
         // Send the response (must be done on the network thread).
@@ -86,6 +78,7 @@ void ServiceMessageProcessor::handleMessage(
 }
 
 void ServiceMessageProcessor::handleMessage(ConnectionHandle handle,
+                                            ServiceTicketAudience,
                                             const ServiceHeartbeat&)
 {
     // Respond so the service knows we're still here.
@@ -123,13 +116,15 @@ ConsumeServiceTicketResponse ServiceMessageProcessor::consumeServiceTicket(
     response.accountID = ticketInfo.accountID;
     response.accountSessionID = ticketInfo.accountSessionID;
     response.accountStatus = std::move(ticketInfo.accountStatus);
+    response.username = std::move(ticketInfo.username);
     response.result = ConsumeServiceTicketResponse::Success;
     return response;
 }
 
 template<typename Message>
 void ServiceMessageProcessor::handleMessage(
-    ConnectionHandle handle, std::span<const Uint8> messageBuffer)
+    ConnectionHandle handle, ServiceTicketAudience service,
+    std::span<const Uint8> messageBuffer)
 {
     // Deserialize the message.
     Message message{};
@@ -141,7 +136,7 @@ void ServiceMessageProcessor::handleMessage(
     }
 
     // Pass it to the appropriate handler.
-    handleMessage(handle, message);
+    handleMessage(handle, service, message);
 }
 
 } // End namespace AccountServer

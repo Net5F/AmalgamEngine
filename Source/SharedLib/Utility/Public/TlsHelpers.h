@@ -12,6 +12,10 @@ class verify_context;
 }
 }
 
+// OpenSSL's SSL and X509 types.
+struct ssl_st;
+struct x509_st;
+
 /**
  * Static functions for working with the asio TLS interface.
  */
@@ -53,6 +57,28 @@ public:
         const CertificatePin& expectedPin,
         asio::ssl::verify_context& verifyContext,
         PeerRole peerRole = PeerRole::Server) noexcept;
+
+    /**
+     * Returns the pin of the certificate that the peer presented during the
+     * given connection's handshake.
+     *
+     * Note: This doesn't verify the certificate. It's intended for telling
+     *       apart peers that were already verified during the handshake
+     *       (e.g. by verifyPinnedCertificate()).
+     *
+     * @return The peer's pin, or null if the peer didn't present a
+     *         certificate or the pin couldn't be computed.
+     */
+    static std::optional<CertificatePin>
+        getPeerCertificatePin(ssl_st* ssl) noexcept;
+
+private:
+    /**
+     * Returns the pin (SHA-256 digest of the public key info) of the given
+     * certificate, or null if it couldn't be computed.
+     */
+    static std::optional<CertificatePin>
+        computeCertificatePin(x509_st* certificate) noexcept;
 };
 
 } // End namespace AM

@@ -115,9 +115,7 @@ void AccountServiceEndpoint::consumeServiceTicketOnIOThread(
     const Uint32 requestID{nextRequestID++};
     BinaryBufferSharedPtr framedMessage{
         messageFramer.frameMessage(ConsumeServiceTicketRequest{
-            .requestID{requestID},
-            .audience{ServiceTicketAudience::WorldServer},
-            .ticket{ticket}})};
+            .requestID{requestID}, .ticket{ticket}})};
     if (!framedMessage) {
         callback(ConsumeServiceTicketResponse{
             .requestID{requestID},

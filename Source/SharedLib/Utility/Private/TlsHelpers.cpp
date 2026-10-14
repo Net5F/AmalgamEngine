@@ -5,6 +5,7 @@
 #include "asio/system_error.hpp"
 #include <openssl/crypto.h>
 #include <openssl/evp.h>
+#include <openssl/ssl.h>
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
 #include <openssl/x509v3.h>
@@ -98,29 +99,10 @@ bool TlsHelpers::verifyPinnedCertificate(
         return false;
     }
 
-    X509_PUBKEY* subjectPublicKeyInfo{X509_get_X509_PUBKEY(certificate)};
-    if (subjectPublicKeyInfo == nullptr) {
-        return false;
-    }
-
-    unsigned char* encodedSubjectPublicKeyInfo{};
-    int encodedLength{
-        i2d_X509_PUBKEY(subjectPublicKeyInfo, &encodedSubjectPublicKeyInfo)};
-    if ((encodedLength <= 0) || (encodedSubjectPublicKeyInfo == nullptr)) {
-        OPENSSL_free(encodedSubjectPublicKeyInfo);
-        return false;
-    }
-
-    std::array<unsigned char, EVP_MAX_MD_SIZE> publicKeyDigest{};
-    unsigned int digestLength{};
-    int digestResult{EVP_Digest(
-        encodedSubjectPublicKeyInfo, static_cast<std::size_t>(encodedLength),
-        publicKeyDigest.data(), &digestLength, EVP_sha256(), nullptr)};
-    OPENSSL_free(encodedSubjectPublicKeyInfo);
-
-    if ((digestResult != 1)
-        || (digestLength != expectedPin.size())
-        || (CRYPTO_memcmp(publicKeyDigest.data(), expectedPin.data(),
+    std::optional<CertificatePin> certificatePin{
+        computeCertificatePin(certificate)};
+    if (!certificatePin
+        || (CRYPTO_memcmp(certificatePin->data(), expectedPin.data(),
                           expectedPin.size())
             != 0)) {
         return false;
@@ -144,6 +126,58 @@ bool TlsHelpers::verifyPinnedCertificate(
     // required leaf checks pass.
     X509_STORE_CTX_set_error(storeContext, X509_V_OK);
     return true;
+}
+
+std::optional<TlsHelpers::CertificatePin>
+    TlsHelpers::getPeerCertificatePin(SSL* ssl) noexcept
+{
+    if (ssl == nullptr) {
+        return {};
+    }
+
+    // Note: get0 doesn't increment the certificate's reference count, so we
+    //       don't need to free it.
+    X509* certificate{SSL_get0_peer_certificate(ssl)};
+    if (certificate == nullptr) {
+        return {};
+    }
+
+    return computeCertificatePin(certificate);
+}
+
+std::optional<TlsHelpers::CertificatePin>
+    TlsHelpers::computeCertificatePin(X509* certificate) noexcept
+{
+    // The pin is the SHA-256 digest of the certificate's DER-encoded
+    // SubjectPublicKeyInfo.
+    X509_PUBKEY* subjectPublicKeyInfo{X509_get_X509_PUBKEY(certificate)};
+    if (subjectPublicKeyInfo == nullptr) {
+        return {};
+    }
+
+    unsigned char* encodedSubjectPublicKeyInfo{};
+    int encodedLength{
+        i2d_X509_PUBKEY(subjectPublicKeyInfo, &encodedSubjectPublicKeyInfo)};
+    if ((encodedLength <= 0) || (encodedSubjectPublicKeyInfo == nullptr)) {
+        OPENSSL_free(encodedSubjectPublicKeyInfo);
+        return {};
+    }
+
+    std::array<unsigned char, EVP_MAX_MD_SIZE> publicKeyDigest{};
+    unsigned int digestLength{};
+    int digestResult{EVP_Digest(
+        encodedSubjectPublicKeyInfo, static_cast<std::size_t>(encodedLength),
+        publicKeyDigest.data(), &digestLength, EVP_sha256(), nullptr)};
+    OPENSSL_free(encodedSubjectPublicKeyInfo);
+
+    if ((digestResult != 1) || (digestLength != SHA256_BYTES)) {
+        return {};
+    }
+
+    CertificatePin certificatePin{};
+    std::ranges::copy_n(publicKeyDigest.begin(), certificatePin.size(),
+                        certificatePin.begin());
+    return certificatePin;
 }
 
 } // End namespace AM

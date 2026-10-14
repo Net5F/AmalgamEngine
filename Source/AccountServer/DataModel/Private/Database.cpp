@@ -191,6 +191,14 @@ Database::Database(const std::string& databasePath)
                     WHERE sessions.session_id
                               = service_tickets.account_session_id
                 ),
+                (
+                    SELECT accounts.username
+                    FROM account_sessions AS sessions
+                    JOIN accounts
+                      ON accounts.account_id = sessions.account_id
+                    WHERE sessions.session_id
+                              = service_tickets.account_session_id
+                ),
                 consumed_at
         )");
 }
@@ -485,8 +493,10 @@ Database::ConsumedServiceTicketInfo
             = consumeServiceTicketQuery->getColumn(1).getInt64();
         ticketInfo.accountStatus
             = consumeServiceTicketQuery->getColumn(2).getString();
+        ticketInfo.username
+            = consumeServiceTicketQuery->getColumn(3).getString();
         ticketInfo.consumedAt
-            = consumeServiceTicketQuery->getColumn(3).getInt64();
+            = consumeServiceTicketQuery->getColumn(4).getInt64();
 
         consumeServiceTicketQuery->reset();
         ticketInfo.result = ConsumedServiceTicketInfo::Result::Success;

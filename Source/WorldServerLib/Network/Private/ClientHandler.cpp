@@ -210,7 +210,8 @@ void ClientHandler::processTicketResults(ClientMap& clientMap)
 
                 // Notify the sim that a client was connected.
                 dispatcher.emplace<ClientConnectionEvent>(
-                    ClientConnected{ticketResult.netID, response.accountID});
+                    ClientConnected{ticketResult.netID, response.accountID,
+                                    response.username});
                 break;
             }
             case ConsumeServiceTicketResponse::InvalidTicket: {
