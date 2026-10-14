@@ -11,6 +11,8 @@ add_subdirectory(WorldServerLib)
 
 add_subdirectory(AccountServer)
 
+add_subdirectory(ChatServer)
+
 if (AM_BUILD_RESOURCE_IMPORTER)
     add_subdirectory(ResourceImporter)
 endif()

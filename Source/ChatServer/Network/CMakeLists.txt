@@ -1,0 +1,21 @@
+target_sources(ChatServer
+    PRIVATE
+        Private/ChatClientEndpoint.cpp
+        Private/ChatServiceEndpoint.cpp
+        Private/ClientMessageProcessor.cpp
+        Private/Network.cpp
+        Private/ServiceMessageProcessor.cpp
+    PUBLIC
+        Public/ChatClientEndpoint.h
+        Public/ChatServiceEndpoint.h
+        Public/ClientMessageProcessor.h
+        Public/Network.h
+        Public/ServiceMessageProcessor.h
+)
+
+target_include_directories(ChatServer
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public
+)

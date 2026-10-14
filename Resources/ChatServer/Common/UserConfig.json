@@ -1,0 +1,5 @@
+{
+    // The IP address and service port of the AccountServer.
+    "accountServerIP": "127.0.0.1",
+    "accountServerPort": 41497
+}

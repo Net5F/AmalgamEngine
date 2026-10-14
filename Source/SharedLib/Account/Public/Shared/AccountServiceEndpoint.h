@@ -39,11 +39,10 @@ namespace AM
  * Note: Public functions are thread-safe. All other work happens on the
  *       network IO thread.
  *
- * Note: This file is in a "Shared" subdirectory because the AccountServer
- *       has its own AccountServiceEndpoint.h (the other side of this
- *       connection), and it links SharedLib. A flat include would be
- *       ambiguous there, so this one must be included as
- *       "Shared/AccountServiceEndpoint.h".
+ * Note: This file is in a "Shared" subdirectory because AccountServer has its
+ *       own AccountServiceEndpoint.h (the other side of this connection), and
+ *       it links SharedLib. A flat include would be ambiguous there, so this
+ *       one must be included as "Shared/AccountServiceEndpoint.h".
  */
 class AccountServiceEndpoint
 {
@@ -76,18 +75,18 @@ public:
     ~AccountServiceEndpoint();
 
     /**
-     * Connects to the AccountServer. Must be called once before any requests
+     * Connects to the account server. Must be called once before any requests
      * will succeed.
      */
     void start();
 
     /**
-     * Asks the AccountServer to validate and consume the given ticket.
+     * Asks the account server to validate and consume the given ticket.
      *
      * The ticket is only accepted if it was issued for the service that owns
      * this client.
      *
-     * If we aren't currently connected to the AccountServer, the request
+     * If we aren't currently connected to the account server, the request
      * fails immediately.
      *
      * The callback is always called exactly once, unless this endpoint is
