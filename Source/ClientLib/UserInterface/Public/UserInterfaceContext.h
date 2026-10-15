@@ -14,6 +14,7 @@ class Simulation;
 class WorldObjectLocator;
 class Network;
 class AccountSession;
+class ChatSession;
 class GraphicData;
 class ItemData;
 class IconData;
@@ -34,6 +35,9 @@ public:
 
     /** Account authentication and session state. */
     AccountSession& accountSession;
+
+    /** Chat sending, receiving, and connection state. */
+    ChatSession& chatSession;
 
     /** UI -> Sim events. */
     entt::dispatcher& uiEventDispatcher;

@@ -2,6 +2,7 @@ target_sources(ClientLib
 	PRIVATE
 		Private/AccountClientEndpoint.cpp
 		Private/AccountMessageProcessor.cpp
+		Private/ChatClientEndpoint.cpp
 		Private/Network.cpp
 		Private/MessageProcessor.cpp
 		Private/WorldClientEndpoint.cpp
@@ -9,6 +10,8 @@ target_sources(ClientLib
 		Public/AccountClientEndpoint.h
 		Public/AccountConnectionEvent.h
 		Public/AccountMessageProcessor.h
+		Public/ChatClientEndpoint.h
+		Public/ChatConnectionEvent.h
 		Public/ConnectionError.h
 		Public/IMessageProcessorExtension.h
 		Public/MessageProcessor.h

@@ -3,6 +3,7 @@
 #include "OSEventHandler.h"
 #include "UserConfigInitializer.h"
 #include "AccountSession.h"
+#include "ChatSession.h"
 #include "Network.h"
 #include "Simulation.h"
 #include "Renderer.h"
@@ -180,6 +181,7 @@ private:
     MessageProcessorContext messageProcessorContext;
     Network network;
     AccountSession accountSession;
+    ChatSession chatSession;
 
     SimulationContext simulationContext;
     Simulation simulation;

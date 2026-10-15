@@ -61,6 +61,9 @@ public:
     ServerAddress getAccountServerAddress();
     void setAccountServerAddress(const ServerAddress& inServerAddress);
 
+    ServerAddress getChatServerAddress();
+    void setChatServerAddress(const ServerAddress& inServerAddress);
+
 private:
     /**
      * Initializes our members using the given json.
@@ -81,6 +84,9 @@ private:
 
     std::string accountServerIP;
     unsigned int accountServerPort;
+
+    std::string chatServerIP;
+    unsigned int chatServerPort;
 };
 
 } // End namespace Client

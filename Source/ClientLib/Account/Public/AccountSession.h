@@ -32,8 +32,7 @@ class AccountSession
 public:
     enum class LoginState { LoggedOut, LoggingIn, LoggedIn, LoggingOut };
 
-    AccountSession(Network& inNetwork,
-                   EventDispatcher& networkEventDispatcher);
+    AccountSession(Network& inNetwork, EventDispatcher& networkEventDispatcher);
     ~AccountSession();
 
     AccountSession(const AccountSession&) = delete;
@@ -116,8 +115,7 @@ public:
     entt::sink<entt::sigh<void(LoginResponse::Result)>> loginCompleted;
 
     /** An account-registration request completed. */
-    entt::sink<entt::sigh<void(const RegisterResponse&)>>
-        registrationCompleted;
+    entt::sink<entt::sigh<void(const RegisterResponse&)>> registrationCompleted;
 
     /** A logout request completed and the session model has been updated. */
     entt::sink<entt::sigh<void(LogoutResponse::Result)>> logoutCompleted;
@@ -127,11 +125,14 @@ public:
         recoveryCompleted;
 
     /** A service-ticket request completed. Check the response's audience to
-        see which request it was for. */
+        see which request it was for.
+        If the AccountServer connection is lost while a request is pending,
+        this is published with result == InternalError. */
     entt::sink<entt::sigh<void(const ServiceTicketResponse&)>>
         serviceTicketRequestCompleted;
 
-    /** An in-progress request lost its AccountServer connection. */
+    /** An in-progress login, logout, registration, or recovery request lost
+        its AccountServer connection. */
     entt::sink<entt::sigh<void()>> requestConnectionFailed;
 };
 

@@ -12,15 +12,19 @@ namespace Client
 
 Network::Network(const MessageProcessorContext& inMessageProcessorContext)
 : ioContext{}
-, sslContext{asio::ssl::context::tls_client}
+, accountSSLContext{asio::ssl::context::tls_client}
+, chatSSLContext{asio::ssl::context::tls_client}
 , worldEndpoint{inMessageProcessorContext}
-, accountEndpoint{ioContext, sslContext, inMessageProcessorContext}
+, accountEndpoint{ioContext, accountSSLContext, inMessageProcessorContext}
+, chatEndpoint{ioContext, chatSSLContext, inMessageProcessorContext}
 , workGuard{}
 , ioThread{}
 , started{false}
 {
     // Load and set each server's pin.
-    loadCertificatePin("account-server.pin", "AccountServer");
+    loadCertificatePin(accountSSLContext, "account-server.pin",
+                       "AccountServer");
+    loadCertificatePin(chatSSLContext, "chat-server.pin", "ChatServer");
 }
 
 Network::~Network()
@@ -55,7 +59,8 @@ void Network::stop()
     started = false;
 }
 
-void Network::loadCertificatePin(const std::string& fileName,
+void Network::loadCertificatePin(asio::ssl::context& sslContext,
+                                 const std::string& fileName,
                                  const std::string& serverName)
 {
     const std::string pinPath{Paths::BASE_PATH + fileName};

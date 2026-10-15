@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AccountClientEndpoint.h"
+#include "ChatClientEndpoint.h"
 #include "WorldClientEndpoint.h"
 #include "asio/executor_work_guard.hpp"
 #include "asio/io_context.hpp"
@@ -21,7 +22,10 @@ class Network
 {
 private:
     asio::io_context ioContext;
-    asio::ssl::context sslContext;
+    /** Each server has its own pinned certificate, so each needs its own
+        context. */
+    asio::ssl::context accountSSLContext;
+    asio::ssl::context chatSSLContext;
 
 public:
     Network(const MessageProcessorContext& inMessageProcessorContext);
@@ -33,6 +37,7 @@ public:
 
     WorldClientEndpoint worldEndpoint;
     AccountClientEndpoint accountEndpoint;
+    ChatClientEndpoint chatEndpoint;
 
 private:
     using WorkGuard
@@ -41,9 +46,11 @@ private:
     void stop();
 
     /**
-     * Attempts to load the given certificate pin and set it for use.
+     * Attempts to load the given certificate pin and set it for use in the
+     * given context.
      */
-    void loadCertificatePin(const std::string& fileName,
+    void loadCertificatePin(asio::ssl::context& sslContext,
+                            const std::string& fileName,
                             const std::string& serverName);
 
     std::optional<WorkGuard> workGuard;

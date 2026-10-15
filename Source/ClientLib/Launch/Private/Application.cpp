@@ -31,6 +31,7 @@ Application::Application()
 , messageProcessorContext{networkEventDispatcher}
 , network{messageProcessorContext}
 , accountSession{network, networkEventDispatcher}
+, chatSession{network, accountSession, networkEventDispatcher}
 , simulationContext{simulation,
                     network,
                     simEventDispatcher,
@@ -45,6 +46,7 @@ Application::Application()
             userInterface.getWorldObjectLocator(),
             network,
             accountSession,
+            chatSession,
             uiEventDispatcher,
             simEventDispatcher,
             networkEventDispatcher,
@@ -123,8 +125,11 @@ void Application::start()
         // Let the simulation process an iteration if it needs to.
         simCaller.update();
 
-        // Process account responses before the UI observes session state.
+        // Process account and chat events before the UI observes session
+        // state.
+        // Note: Chat must be after account, since it follows the login state.
         accountSession.tick();
+        chatSession.tick();
 
         // Let the UI widgets tick if they need to.
         uiCaller.update();

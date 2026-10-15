@@ -7,7 +7,6 @@
 #include "ServiceTicketRequest.h"
 #include "Log.h"
 #include <openssl/crypto.h>
-#include <algorithm>
 
 namespace AM
 {
@@ -277,11 +276,23 @@ void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
         return;
     }
 
-    bool requestWasPending{
-        (loginState == LoginState::LoggingIn)
-        || (loginState == LoginState::LoggingOut) || registrationPending
-        || recoveryPending
-        || std::ranges::contains(serviceTicketRequestPending, true)};
+    // Fail any pending service-ticket requests.
+    // Note: These go through serviceTicketRequestCompleted instead of
+    //       requestConnectionFailed, so that each requester (e.g. the UI for
+    //       WorldServer tickets, ChatSession for ChatServer tickets) only
+    //       handles failures of its own requests.
+    for (std::size_t i{0}; i < serviceTicketRequestPending.size(); ++i) {
+        if (serviceTicketRequestPending[i]) {
+            serviceTicketRequestPending[i] = false;
+            serviceTicketRequestCompletedSig.publish(ServiceTicketResponse{
+                .result{ServiceTicketResponse::InternalError},
+                .audience{static_cast<ServiceTicketAudience>(i)}});
+        }
+    }
+
+    bool requestWasPending{(loginState == LoginState::LoggingIn)
+                           || (loginState == LoginState::LoggingOut)
+                           || registrationPending || recoveryPending};
     if (!requestWasPending) {
         // Account connections intentionally close after becoming idle. The
         // authenticated session remains valid independently of the socket.
@@ -290,7 +301,6 @@ void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
 
     registrationPending = false;
     recoveryPending = false;
-    serviceTicketRequestPending.fill(false);
     if (loginState == LoginState::LoggingIn) {
         clearSession();
     }

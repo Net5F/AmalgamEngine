@@ -26,5 +26,9 @@
 
   // The IP address and port of the AccountServer.
   "accountServerIP": "127.0.0.1",
-  "accountServerPort": 41498
+  "accountServerPort": 41498,
+
+  // The IP address and port of the ChatServer.
+  "chatServerIP": "127.0.0.1",
+  "chatServerPort": 41496
 }
