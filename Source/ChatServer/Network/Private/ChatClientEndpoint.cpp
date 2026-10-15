@@ -9,8 +9,9 @@ namespace AM
 namespace ChatServer
 {
 
-ChatClientEndpoint::ChatClientEndpoint(asio::io_context& inIoContext,
-                                       asio::ssl::context& inSSLContext)
+ChatClientEndpoint::ChatClientEndpoint(
+    asio::io_context& inIoContext, asio::ssl::context& inSSLContext,
+    AccountServiceEndpoint& inAccountEndpoint)
 : ioContext{inIoContext}
 , sslContext{inSSLContext}
 , connectionRegistry(Config::MAX_CLIENTS)
@@ -20,7 +21,8 @@ ChatClientEndpoint::ChatClientEndpoint(asio::io_context& inIoContext,
       std::bind_front(&ChatClientEndpoint::connectionFactory, this),
       std::bind_front(&ChatClientEndpoint::onConnectionAccepted, this),
       std::bind_front(&ChatClientEndpoint::onAcceptorError, this))
-, messageProcessor{std::bind_front(&ChatClientEndpoint::sendMessage, this),
+, messageProcessor{inAccountEndpoint,
+                   std::bind_front(&ChatClientEndpoint::sendMessage, this),
                    std::bind_front(&ChatClientEndpoint::disconnect, this)}
 {
 }
@@ -92,6 +94,7 @@ void ChatClientEndpoint::onConnectionDisconnected(ConnectionHandle handle,
     else {
         LOG_INFO("Chat client disconnected: %s", error.message().c_str());
     }
+    messageProcessor.onClientDisconnected(handle);
     connectionRegistry.erase(handle);
 }
 

@@ -20,7 +20,7 @@ struct ChatSendRequest {
     /** The channel to send the message to. */
     ChatChannel channel{ChatChannel::Global};
 
-    /** The message's text. Must be valid UTF-8. */
+    /** The message's text. Must pass ChatHelpers::validateChatText(). */
     std::string text{};
 };
 

@@ -12,6 +12,8 @@
 
 namespace AM
 {
+class AccountServiceEndpoint;
+
 namespace ChatServer
 {
 
@@ -27,7 +29,8 @@ class ChatClientEndpoint
 {
 public:
     ChatClientEndpoint(asio::io_context& inIoContext,
-                       asio::ssl::context& inSSLContext);
+                       asio::ssl::context& inSSLContext,
+                       AccountServiceEndpoint& inAccountEndpoint);
 
     /**
      * Starts our acceptor.

@@ -88,6 +88,17 @@ public:
 
     /** The max size, in bytes, for an outgoing service message payload. */
     static constexpr std::size_t SERVICE_MAX_WRITE_PAYLOAD_SIZE{500};
+
+    //-------------------------------------------------------------------------
+    // Chat
+    //-------------------------------------------------------------------------
+    /** The max number of messages that a client can send in a quick burst.
+        Once used up, clients can send 1 message per
+        CHAT_MESSAGE_REFILL_INTERVAL_S. */
+    static constexpr double CHAT_MESSAGE_BURST_LIMIT{5};
+
+    /** How long it takes for a client to regain 1 message of their burst. */
+    static constexpr double CHAT_MESSAGE_REFILL_INTERVAL_S{1};
 };
 
 } // End namespace ChatServer

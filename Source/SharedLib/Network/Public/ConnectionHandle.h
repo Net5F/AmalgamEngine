@@ -1,7 +1,16 @@
 #pragma once
 
 #include <SDL3/SDL_stdinc.h>
+#include <functional>
 #include <limits>
+
+namespace AM
+{
+class ConnectionHandle;
+}
+
+template<>
+struct std::hash<AM::ConnectionHandle>;
 
 namespace AM
 {
@@ -34,6 +43,7 @@ public:
 private:
     template<typename ConnectionType>
     friend class ConnectionRegistry;
+    friend struct std::hash<ConnectionHandle>;
 
     static constexpr unsigned int ID_BITS{std::numeric_limits<ID>::digits};
     static constexpr Value ID_MASK{std::numeric_limits<ID>::max()};
@@ -48,10 +58,7 @@ private:
     {
     }
 
-    constexpr ID id() const
-    {
-        return static_cast<ID>(packedValue & ID_MASK);
-    }
+    constexpr ID id() const { return static_cast<ID>(packedValue & ID_MASK); }
 
     constexpr Generation generation() const
     {
@@ -66,3 +73,12 @@ static_assert(sizeof(ConnectionHandle) == sizeof(ConnectionHandle::Value));
 inline constexpr ConnectionHandle NULL_CONNECTION_HANDLE{};
 
 } // namespace AM
+
+/** Allows ConnectionHandle to be used as a key in unordered containers. */
+template<>
+struct std::hash<AM::ConnectionHandle> {
+    std::size_t operator()(const AM::ConnectionHandle& handle) const noexcept
+    {
+        return std::hash<AM::ConnectionHandle::Value>{}(handle.packedValue);
+    }
+};
