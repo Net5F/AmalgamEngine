@@ -21,8 +21,8 @@ Network::Network(asio::io_context& inIoContext)
 , accountEndpoint{inIoContext, accountSSLContext,
                   UserConfig::get().getAccountServerAddress().IP,
                   UserConfig::get().getAccountServerAddress().port}
-, clientEndpoint{inIoContext, clientSSLContext, accountEndpoint}
 , playerLocator{}
+, clientEndpoint{inIoContext, clientSSLContext, accountEndpoint, playerLocator}
 , serviceEndpoint{inIoContext, serviceSSLContext, playerLocator}
 {
     loadCredentials(clientSSLContext);

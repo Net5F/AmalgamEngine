@@ -16,6 +16,7 @@ class AccountServiceEndpoint;
 
 namespace ChatServer
 {
+class PlayerLocator;
 
 /**
  * Manages communication with clients (ran by users).
@@ -30,7 +31,8 @@ class ChatClientEndpoint
 public:
     ChatClientEndpoint(asio::io_context& inIoContext,
                        asio::ssl::context& inSSLContext,
-                       AccountServiceEndpoint& inAccountEndpoint);
+                       AccountServiceEndpoint& inAccountEndpoint,
+                       PlayerLocator& inPlayerLocator);
 
     /**
      * Starts our acceptor.

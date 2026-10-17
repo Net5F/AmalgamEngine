@@ -1,11 +1,14 @@
 #pragma once
 
-#include "Vector3.h"
+#include "Position.h"
 #include <SDL3/SDL_stdinc.h>
 #include <unordered_map>
+#include <vector>
 
 namespace AM
 {
+struct Cylinder;
+
 namespace ChatServer
 {
 
@@ -41,10 +44,28 @@ public:
      */
     void clear();
 
+    /**
+     * Returns the given player's position, or nullptr if they aren't in the
+     * world.
+     */
+    const Position* getPosition(Sint64 accountID) const;
+
+    /**
+     * Returns the account IDs of all players whose positions intersect the
+     * given cylinder.
+     *
+     * Note: This checks every player in the world. If the player count grows
+     *       large enough for this to matter, we can add a spatial grid.
+     */
+    std::vector<Sint64>& getPlayers(const Cylinder& cylinder);
+
 private:
     /** Maps account IDs -> the position of that account's client entity.
         Only contains players that are in the world. */
-    std::unordered_map<Sint64, Vector3> playerPositions;
+    std::unordered_map<Sint64, Position> playerPositions;
+
+    /** The vector that we use to return results. */
+    std::vector<Sint64> returnVector;
 };
 
 } // End namespace ChatServer

@@ -21,6 +21,7 @@ class AccountServiceEndpoint;
 
 namespace ChatServer
 {
+class PlayerLocator;
 
 /**
  * Processes ChatClientMessageType messages.
@@ -48,6 +49,7 @@ public:
         = std::function<void(ConnectionHandle, const asio::error_code&)>;
 
     ClientMessageProcessor(AccountServiceEndpoint& inAccountEndpoint,
+                           PlayerLocator& inPlayerLocator,
                            SendCallback inSendCallback,
                            DisconnectCallback inDisconnectCallback);
 
@@ -132,12 +134,23 @@ private:
      */
     void broadcast(BinaryBufferSharedPtr message);
 
+    /**
+     * Sends the given message to every authenticated client whose player is
+     * within local chat range of the given sender's player.
+     * @return true if the sender is in the world, else false (nothing was
+     *         sent).
+     */
+    bool sendLocal(Sint64 senderAccountID, BinaryBufferSharedPtr message);
+
     template<typename Message>
     void handleMessage(ConnectionHandle handle, ClientSession& session,
                        std::span<const Uint8> messageBuffer);
 
     /** Used to validate client tickets. */
     AccountServiceEndpoint& accountEndpoint;
+
+    /** Used to find which players are within range of local chat. */
+    PlayerLocator& playerLocator;
 
     /** Used to send messages through the owning endpoint. */
     SendCallback sendCallback;

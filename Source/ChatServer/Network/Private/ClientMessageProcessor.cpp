@@ -1,5 +1,8 @@
 #include "ClientMessageProcessor.h"
+#include "PlayerLocator.h"
 #include "Config.h"
+#include "SharedConfig.h"
+#include "Cylinder.h"
 #include "Deserialize.h"
 #include "ChatConnectionRequest.h"
 #include "ChatConnectionResponse.h"
@@ -22,9 +25,10 @@ namespace ChatServer
 {
 
 ClientMessageProcessor::ClientMessageProcessor(
-    AccountServiceEndpoint& inAccountEndpoint, SendCallback inSendCallback,
-    DisconnectCallback inDisconnectCallback)
+    AccountServiceEndpoint& inAccountEndpoint, PlayerLocator& inPlayerLocator,
+    SendCallback inSendCallback, DisconnectCallback inDisconnectCallback)
 : accountEndpoint{inAccountEndpoint}
+, playerLocator{inPlayerLocator}
 , sendCallback{std::move(inSendCallback)}
 , disconnectCallback{std::move(inDisconnectCallback)}
 , messageFramer{Config::MAX_WRITE_PAYLOAD_SIZE}
@@ -157,11 +161,17 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
             break;
         }
         case ChatChannel::Local: {
-            // Note: Local chat requires knowing where players are, which the
-            //       world server will tell us. Until then, nobody is
-            //       considered to be in the world.
-            sendCallback(handle, messageFramer.frameMessage(
-                                     ChatError{.type{ChatError::NotInWorld}}));
+            // Note: If the sender isn't in the world (e.g. they're still
+            //       loading in, or the world server is down), they have no
+            //       position to send from.
+            if (!sendLocal(session.accountID,
+                           messageFramer.frameMessage(
+                               ChatMessage{.channel{ChatChannel::Local},
+                                           .senderName{session.username},
+                                           .text{message.text}}))) {
+                sendCallback(handle, messageFramer.frameMessage(ChatError{
+                                         .type{ChatError::NotInWorld}}));
+            }
             break;
         }
         default: {
@@ -275,6 +285,38 @@ void ClientMessageProcessor::broadcast(BinaryBufferSharedPtr message)
     for (ConnectionHandle handle : recipients) {
         sendCallback(handle, message);
     }
+}
+
+bool ClientMessageProcessor::sendLocal(Sint64 senderAccountID,
+                                       BinaryBufferSharedPtr message)
+{
+    const Position* senderPosition{playerLocator.getPosition(senderAccountID)};
+    if (!senderPosition) {
+        return false;
+    }
+
+    // Gather the recipients first.
+    // Note: The sender is within range of themselves, so they'll be included.
+    // Note: A failed send will disconnect the client, which removes it from
+    //       accountClients, so we can't send while iterating.
+    std::vector<ConnectionHandle> recipients{};
+    for (Sint64 accountID : playerLocator.getPlayers(
+             Cylinder{*senderPosition, SharedConfig::LOCAL_CHAT_RADIUS,
+                      SharedConfig::LOCAL_CHAT_HALF_HEIGHT})) {
+        // Note: A player may be in the world without being connected to chat.
+        auto accountIt{accountClients.find(accountID)};
+        if (accountIt != accountClients.end()) {
+            recipients.push_back(accountIt->second);
+        }
+    }
+
+    // Send the message.
+    // Note: All recipients share the same framed buffer.
+    for (ConnectionHandle handle : recipients) {
+        sendCallback(handle, message);
+    }
+
+    return true;
 }
 
 template<typename Message>

@@ -61,8 +61,9 @@ private:
         AccountServer to present its pinned certificate (mutual TLS). */
     asio::ssl::context accountSSLContext;
 
-    // Note: accountEndpoint must be constructed before clientEndpoint, since
-    //       clientEndpoint uses it to validate tickets.
+    // Note: accountEndpoint and playerLocator must be constructed before
+    //       clientEndpoint, since clientEndpoint uses them to validate tickets
+    //       and route local chat.
     AccountServiceEndpoint accountEndpoint;
 
     /** Where players are in the world. Updated by serviceEndpoint. */

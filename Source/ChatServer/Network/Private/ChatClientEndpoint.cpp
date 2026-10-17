@@ -11,7 +11,7 @@ namespace ChatServer
 
 ChatClientEndpoint::ChatClientEndpoint(
     asio::io_context& inIoContext, asio::ssl::context& inSSLContext,
-    AccountServiceEndpoint& inAccountEndpoint)
+    AccountServiceEndpoint& inAccountEndpoint, PlayerLocator& inPlayerLocator)
 : ioContext{inIoContext}
 , sslContext{inSSLContext}
 , connectionRegistry(Config::MAX_CLIENTS)
@@ -21,7 +21,7 @@ ChatClientEndpoint::ChatClientEndpoint(
       std::bind_front(&ChatClientEndpoint::connectionFactory, this),
       std::bind_front(&ChatClientEndpoint::onConnectionAccepted, this),
       std::bind_front(&ChatClientEndpoint::onAcceptorError, this))
-, messageProcessor{inAccountEndpoint,
+, messageProcessor{inAccountEndpoint, inPlayerLocator,
                    std::bind_front(&ChatClientEndpoint::sendMessage, this),
                    std::bind_front(&ChatClientEndpoint::disconnect, this)}
 {
