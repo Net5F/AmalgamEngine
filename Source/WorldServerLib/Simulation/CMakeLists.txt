@@ -3,6 +3,7 @@ target_sources(WorldServerLib
         Private/AISystem.cpp
         Private/CastHelper.cpp
         Private/CastSystem.cpp
+        Private/ChatPositionSyncSystem.cpp
         Private/ChunkStreamingSystem.cpp
         Private/ClientAOISystem.cpp
         Private/ClientConnectionSystem.cpp
@@ -34,6 +35,7 @@ target_sources(WorldServerLib
         Public/AISystem.h
         Public/CastHelper.h
         Public/CastSystem.h
+        Public/ChatPositionSyncSystem.h
         Public/ChunkStreamingSystem.h
         Public/ClientAOISystem.h
         Public/ClientConnectionSystem.h

@@ -1,11 +1,13 @@
 #pragma once
 
 #include "WorldClientEndpoint.h"
+#include "ChatServiceEndpoint.h"
 #include "Shared/AccountServiceEndpoint.h"
 #include "asio/executor_work_guard.hpp"
 #include "asio/io_context.hpp"
 #include "asio/ssl/context.hpp"
 #include <optional>
+#include <string>
 #include <thread>
 
 namespace AM
@@ -29,6 +31,10 @@ private:
         AccountServer to present its pinned certificate (mutual TLS). */
     asio::ssl::context accountSSLContext;
 
+    /** Used by chatEndpoint. Presents our certificate and requires the
+        ChatServer to present its pinned certificate (mutual TLS). */
+    asio::ssl::context chatSSLContext;
+
 public:
     Network(const MessageProcessorContext& inMessageProcessorContext);
 
@@ -41,6 +47,7 @@ public:
     //       clientEndpoint starts threads that use it.
     AccountServiceEndpoint accountEndpoint;
     WorldClientEndpoint clientEndpoint;
+    ChatServiceEndpoint chatEndpoint;
 
 private:
     using WorkGuard
@@ -49,15 +56,19 @@ private:
     void stop();
 
     /**
-     * Loads our certificate and private key into accountSSLContext.
+     * Loads our certificate and private key into the given context.
      */
-    void loadServiceCredentials();
+    void loadServiceCredentials(asio::ssl::context& context);
 
     /**
-     * Configures accountSSLContext to require the AccountServer's
-     * certificate to match its pin.
+     * Configures the given context to require the server's certificate to
+     * match the pin in the given file.
+     *
+     * @param serverName The server's name, for logging.
      */
-    void configureAccountServerVerification();
+    void configureServerVerification(asio::ssl::context& context,
+                                     const std::string& pinFileName,
+                                     const char* serverName);
 
     std::optional<WorkGuard> workGuard;
     std::jthread ioThread;

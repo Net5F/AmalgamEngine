@@ -18,6 +18,7 @@
 #include "ComponentSyncSystem.h"
 #include "ChunkStreamingSystem.h"
 #include "ScriptDataSystem.h"
+#include "ChatPositionSyncSystem.h"
 #include "SaveSystem.h"
 #include <SDL3/SDL_stdinc.h>
 #include <atomic>
@@ -143,6 +144,7 @@ private:
     ComponentSyncSystem componentSyncSystem;
     ChunkStreamingSystem chunkStreamingSystem;
     ScriptDataSystem scriptDataSystem;
+    ChatPositionSyncSystem chatPositionSyncSystem;
     SaveSystem saveSystem;
 };
 

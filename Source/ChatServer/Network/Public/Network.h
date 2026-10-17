@@ -3,6 +3,7 @@
 #include "Shared/AccountServiceEndpoint.h"
 #include "ChatClientEndpoint.h"
 #include "ChatServiceEndpoint.h"
+#include "PlayerLocator.h"
 #include "asio/ssl/context.hpp"
 
 namespace asio
@@ -63,6 +64,9 @@ private:
     // Note: accountEndpoint must be constructed before clientEndpoint, since
     //       clientEndpoint uses it to validate tickets.
     AccountServiceEndpoint accountEndpoint;
+
+    /** Where players are in the world. Updated by serviceEndpoint. */
+    PlayerLocator playerLocator;
 
     ChatClientEndpoint clientEndpoint;
 

@@ -74,9 +74,8 @@ public:
             If an account logs in while it already has a connected client,
             the old client is disconnected and this delay applies as usual. */
     static constexpr double LOGOUT_DELAY_S{20};
-    static constexpr unsigned int LOGOUT_DELAY_TICKS{
-        static_cast<unsigned int>(LOGOUT_DELAY_S
-                                  / SharedConfig::SIM_TICK_TIMESTEP_S)};
+    static constexpr unsigned int LOGOUT_DELAY_TICKS{static_cast<unsigned int>(
+        LOGOUT_DELAY_S / SharedConfig::SIM_TICK_TIMESTEP_S)};
 
     //-------------------------------------------------------------------------
     // Network
@@ -134,6 +133,19 @@ public:
     /** The minimum number of fresh diffs we'll use to calculate an adjustment.
         Aims to prevent thrashing. */
     static constexpr unsigned int MIN_FRESH_DIFFS{3};
+
+    //-------------------------------------------------------------------------
+    // Chat
+    //-------------------------------------------------------------------------
+    /** How often we send client entity positions to the chat server, in
+        seconds.
+        The chat server uses these positions to route local chat, so a client
+        whose entity moves may briefly hear (or miss) messages based on where
+        its entity was. */
+    static constexpr double CHAT_POSITION_UPDATE_INTERVAL_S{1};
+    static constexpr unsigned int CHAT_POSITION_UPDATE_INTERVAL_TICKS{
+        static_cast<unsigned int>(CHAT_POSITION_UPDATE_INTERVAL_S
+                                  / SharedConfig::SIM_TICK_TIMESTEP_S)};
 };
 
 } // End namespace WorldServer

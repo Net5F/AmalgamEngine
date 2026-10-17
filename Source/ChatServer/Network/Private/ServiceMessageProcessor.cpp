@@ -1,6 +1,9 @@
 #include "ServiceMessageProcessor.h"
+#include "PlayerLocator.h"
 #include "Config.h"
 #include "Deserialize.h"
+#include "PlayerPositionsUpdate.h"
+#include "PlayersLeftWorld.h"
 #include "ChatServiceHeartbeat.h"
 #include "ChatServiceHeartbeatResponse.h"
 #include "Log.h"
@@ -13,8 +16,10 @@ namespace ChatServer
 {
 
 ServiceMessageProcessor::ServiceMessageProcessor(
-    SendCallback inSendCallback, DisconnectCallback inDisconnectCallback)
-: sendCallback{std::move(inSendCallback)}
+    PlayerLocator& inPlayerLocator, SendCallback inSendCallback,
+    DisconnectCallback inDisconnectCallback)
+: playerLocator{inPlayerLocator}
+, sendCallback{std::move(inSendCallback)}
 , disconnectCallback{std::move(inDisconnectCallback)}
 , messageFramer{Config::SERVICE_MAX_WRITE_PAYLOAD_SIZE}
 {
@@ -26,6 +31,14 @@ void ServiceMessageProcessor::processReceivedMessage(
 {
     // Match the enum values to their message types.
     switch (messageType) {
+        case ChatServiceMessageType::PlayerPositionsUpdate: {
+            handleMessage<PlayerPositionsUpdate>(handle, messageBuffer);
+            break;
+        }
+        case ChatServiceMessageType::PlayersLeftWorld: {
+            handleMessage<PlayersLeftWorld>(handle, messageBuffer);
+            break;
+        }
         case ChatServiceMessageType::ChatServiceHeartbeat: {
             handleMessage<ChatServiceHeartbeat>(handle, messageBuffer);
             break;
@@ -37,6 +50,24 @@ void ServiceMessageProcessor::processReceivedMessage(
                                            asio::error::invalid_argument));
             break;
         }
+    }
+}
+
+void ServiceMessageProcessor::handleMessage(
+    ConnectionHandle, const PlayerPositionsUpdate& message)
+{
+    for (const PlayerPositionsUpdate::PlayerPosition& playerPosition :
+         message.playerPositions) {
+        playerLocator.setPosition(playerPosition.accountID,
+                                  playerPosition.position);
+    }
+}
+
+void ServiceMessageProcessor::handleMessage(ConnectionHandle,
+                                            const PlayersLeftWorld& message)
+{
+    for (Sint64 accountID : message.accountIDs) {
+        playerLocator.remove(accountID);
     }
 }
 

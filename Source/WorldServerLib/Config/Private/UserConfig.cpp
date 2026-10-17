@@ -13,6 +13,8 @@ namespace WorldServer
 UserConfig::UserConfig()
 : accountServerIP{}
 , accountServerPort{0}
+, chatServerIP{}
+, chatServerPort{0}
 {
     // Open the file.
     std::string fullPath{Paths::BASE_PATH};
@@ -55,11 +57,25 @@ void UserConfig::setAccountServerAddress(const ServerAddress& inServerAddress)
     accountServerPort = inServerAddress.port;
 }
 
+UserConfig::ServerAddress UserConfig::getChatServerAddress()
+{
+    return {chatServerIP, chatServerPort};
+}
+
+void UserConfig::setChatServerAddress(const ServerAddress& inServerAddress)
+{
+    chatServerIP = inServerAddress.IP;
+    chatServerPort = inServerAddress.port;
+}
+
 void UserConfig::init(nlohmann::json& json)
 {
     // AccountServer address.
     setAccountServerAddress(
         {json.at("accountServerIP"), json.at("accountServerPort")});
+
+    // ChatServer address.
+    setChatServerAddress({json.at("chatServerIP"), json.at("chatServerPort")});
 }
 
 } // End namespace WorldServer

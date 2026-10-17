@@ -10,10 +10,13 @@
 
 namespace AM
 {
+struct PlayerPositionsUpdate;
+struct PlayersLeftWorld;
 struct ChatServiceHeartbeat;
 
 namespace ChatServer
 {
+class PlayerLocator;
 
 /**
  * Processes ChatServiceMessageType messages.
@@ -32,7 +35,8 @@ public:
     using DisconnectCallback
         = std::function<void(ConnectionHandle, const asio::error_code&)>;
 
-    ServiceMessageProcessor(SendCallback inSendCallback,
+    ServiceMessageProcessor(PlayerLocator& inPlayerLocator,
+                            SendCallback inSendCallback,
                             DisconnectCallback inDisconnectCallback);
 
     /**
@@ -52,6 +56,12 @@ private:
     // Handlers
     //-------------------------------------------------------------------------
     void handleMessage(ConnectionHandle handle,
+                       const PlayerPositionsUpdate& message);
+
+    void handleMessage(ConnectionHandle handle,
+                       const PlayersLeftWorld& message);
+
+    void handleMessage(ConnectionHandle handle,
                        const ChatServiceHeartbeat& message);
 
     //-------------------------------------------------------------------------
@@ -60,6 +70,9 @@ private:
     template<typename Message>
     void handleMessage(ConnectionHandle handle,
                        std::span<const Uint8> messageBuffer);
+
+    /** Used to track where players are. */
+    PlayerLocator& playerLocator;
 
     /** Used to send messages through the owning endpoint. */
     SendCallback sendCallback;

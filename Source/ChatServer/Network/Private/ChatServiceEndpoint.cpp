@@ -1,4 +1,5 @@
 #include "ChatServiceEndpoint.h"
+#include "PlayerLocator.h"
 #include "Config.h"
 #include "Log.h"
 #include "asio/error.hpp"
@@ -11,9 +12,11 @@ namespace ChatServer
 {
 
 ChatServiceEndpoint::ChatServiceEndpoint(asio::io_context& inIoContext,
-                                         asio::ssl::context& inSSLContext)
+                                         asio::ssl::context& inSSLContext,
+                                         PlayerLocator& inPlayerLocator)
 : ioContext{inIoContext}
 , sslContext{inSSLContext}
+, playerLocator{inPlayerLocator}
 , connectionRegistry(Config::MAX_SERVICE_CONNECTIONS)
 , acceptor(
       inIoContext,
@@ -21,7 +24,8 @@ ChatServiceEndpoint::ChatServiceEndpoint(asio::io_context& inIoContext,
       std::bind_front(&ChatServiceEndpoint::connectionFactory, this),
       std::bind_front(&ChatServiceEndpoint::onConnectionAccepted, this),
       std::bind_front(&ChatServiceEndpoint::onAcceptorError, this))
-, messageProcessor{std::bind_front(&ChatServiceEndpoint::sendMessage, this),
+, messageProcessor{inPlayerLocator,
+                   std::bind_front(&ChatServiceEndpoint::sendMessage, this),
                    std::bind_front(&ChatServiceEndpoint::disconnect, this)}
 , worldServerHandle{NULL_CONNECTION_HANDLE}
 {
@@ -99,6 +103,9 @@ void ChatServiceEndpoint::onConnectionReady(ConnectionHandle handle)
                    asio::error::make_error_code(asio::error::shut_down));
     }
 
+    // The new world server will resend every player's position.
+    playerLocator.clear();
+
     worldServerHandle = handle;
     LOG_INFO("WorldServer connected.");
 }
@@ -109,6 +116,9 @@ void ChatServiceEndpoint::onConnectionDisconnected(
     if (handle == worldServerHandle) {
         LOG_INFO("WorldServer disconnected: %s", error.message().c_str());
         worldServerHandle = NULL_CONNECTION_HANDLE;
+
+        // Without the world server, we can't know where players are.
+        playerLocator.clear();
     }
     else {
         LOG_INFO("Service connection disconnected: %s",

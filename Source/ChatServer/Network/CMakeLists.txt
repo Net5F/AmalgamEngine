@@ -5,12 +5,14 @@ target_sources(ChatServer
         Private/ClientMessageProcessor.cpp
         Private/Network.cpp
         Private/ServiceMessageProcessor.cpp
+        Private/PlayerLocator.cpp
     PUBLIC
         Public/ChatClientEndpoint.h
         Public/ChatServiceEndpoint.h
         Public/ClientMessageProcessor.h
         Public/Network.h
         Public/ServiceMessageProcessor.h
+        Public/PlayerLocator.h
 )
 
 target_include_directories(ChatServer

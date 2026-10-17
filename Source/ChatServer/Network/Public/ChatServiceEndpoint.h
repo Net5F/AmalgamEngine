@@ -14,6 +14,7 @@ namespace AM
 {
 namespace ChatServer
 {
+class PlayerLocator;
 
 /**
  * Manages communication with our other internal services (world server).
@@ -29,6 +30,10 @@ namespace ChatServer
  * completes its handshake while another is active, the old one is assumed to
  * be stale and is disconnected.
  *
+ * When the world server connects or disconnects, playerLocator is cleared.
+ * The world server is expected to resend every player's position after
+ * connecting.
+ *
  * The world server holds this connection open, sending periodic heartbeats
  * (which we respond to). If we stop receiving messages, we assume the world
  * server is gone and disconnect on timeout. The world server is expected to
@@ -38,7 +43,8 @@ class ChatServiceEndpoint
 {
 public:
     ChatServiceEndpoint(asio::io_context& inIoContext,
-                        asio::ssl::context& inSSLContext);
+                        asio::ssl::context& inSSLContext,
+                        PlayerLocator& inPlayerLocator);
 
     /**
      * Starts our acceptor.
@@ -67,6 +73,10 @@ private:
 
     asio::io_context& ioContext;
     asio::ssl::context& sslContext;
+
+    /** Used to forget where players are when the world server connects or
+        disconnects. */
+    PlayerLocator& playerLocator;
 
     ConnectionRegistry<Connection> connectionRegistry;
 

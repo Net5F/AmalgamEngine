@@ -58,6 +58,7 @@ Simulation::Simulation(const SimulationContext& inSimContext)
 , componentSyncSystem{inSimContext}
 , chunkStreamingSystem{inSimContext}
 , scriptDataSystem{inSimContext}
+, chatPositionSyncSystem{inSimContext}
 , saveSystem{inSimContext}
 {
     // Register our current tick pointer with the classes that care.
@@ -183,6 +184,10 @@ void Simulation::tick()
 
     // Respond to script data requests.
     scriptDataSystem.sendScripts();
+
+    // Tell the chat server where client entities are, for routing local
+    // chat.
+    chatPositionSyncSystem.sendPositionUpdates();
 
     // If any category of data is due for saving, save it.
     saveSystem.saveIfNecessary();

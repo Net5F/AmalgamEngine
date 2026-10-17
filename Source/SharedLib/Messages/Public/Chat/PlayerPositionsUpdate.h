@@ -29,7 +29,8 @@ struct PlayerPositionsUpdate {
         /** The ID of the player's account. */
         Sint64 accountID{0};
 
-        /** The player entity's position, in world units. */
+        /** The position of the account's client entity, in world
+            units. */
         Vector3 position{};
     };
 
@@ -48,7 +49,7 @@ struct PlayerPositionsUpdate {
     static_assert(MAX_SERIALIZED_SIZE <= std::numeric_limits<Uint16>::max(),
                   "A full message must fit in a single frame.");
 
-    /** The players whose positions have changed. */
+    /** The positions of the players that are in the world. */
     std::vector<PlayerPosition> playerPositions{};
 };
 

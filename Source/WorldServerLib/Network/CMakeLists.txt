@@ -1,11 +1,13 @@
 target_sources(WorldServerLib
     PRIVATE
+        Private/ChatServiceEndpoint.cpp
         Private/Client.cpp
         Private/ClientHandler.cpp
         Private/MessageProcessor.cpp
         Private/Network.cpp
         Private/WorldClientEndpoint.cpp
     PUBLIC
+        Public/ChatServiceEndpoint.h
         Public/Client.h
         Public/ClientMap.h
         Public/ClientConnectionEvent.h
