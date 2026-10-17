@@ -7,7 +7,7 @@
 using namespace AM;
 using namespace AM::AccountServer;
 
-// SDL3 needs this signature for main, but we don't use the parameters.
+// SDL needs this signature for main.
 int main(int, char**)
 try {
     // Set up file logging.

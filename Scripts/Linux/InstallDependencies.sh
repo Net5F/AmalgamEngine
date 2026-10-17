@@ -5,4 +5,4 @@
 
 sudo apt update
 
-sudo apt install g++ cmake libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libsdl2-gfx-dev libgtk-3-dev ninja-build
+sudo apt install g++ cmake libsdl3-dev libsdl3-image-dev libsdl3-mixer-dev libsdl3-ttf-dev libgtk-3-dev ninja-build

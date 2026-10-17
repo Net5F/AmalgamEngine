@@ -82,6 +82,9 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/ChatServer/Common/
 
 # Add platform-specific files to the install step.
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/ChatServer/Windows/
+            DESTINATION ${CMAKE_PROJECT_NAME}/ChatServer)
+
     # On Windows, provide the SDL3 DLLs.
     install(FILES
             ${AM_SDL3_RUNTIME_DLL}
@@ -90,5 +93,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
     # FindOpenSSL doesn't expose its runtime DLLs as imported targets.
     install(FILES ${AM_OPENSSL_RUNTIME_DLLS}
+            DESTINATION ${CMAKE_PROJECT_NAME}/ChatServer)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/ChatServer/Linux/
             DESTINATION ${CMAKE_PROJECT_NAME}/ChatServer)
 endif()

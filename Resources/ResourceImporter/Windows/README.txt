@@ -8,6 +8,6 @@ No installation is required, just run the .exe file.
 
 If you have issues, please make sure that you have the latest Visual C++ Redistributable:
     Direct link
-        https://aka.ms/vs/17/release/vc_redist.x64.exe
+        https://aka.ms/vc14/vc_redist.x64.exe
     Microsoft support page
-        https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170
+        https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist

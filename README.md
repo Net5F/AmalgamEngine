@@ -40,7 +40,7 @@ Note: The Resource Importer should be built within your project, since it relies
 #### MinGW
 For MSYS2/MinGW, we don't have a dependency install script. Here's the list:
 
-    pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-gdb mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_image mingw-w64-x86_64-SDL2_mixer mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_gfx mingw-w64-x86_64-SDL2_net mingw-w64-x86_64-catch
+    pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-gdb mingw-w64-x86_64-sdl3 mingw-w64-x86_64-sdl3-image mingw-w64-x86_64-sdl3-mixer mingw-w64-x86_64-sdl3-ttf mingw-w64-x86_64-catch
     
 Then, build through the Eclipse project or follow the Linux instructions for a command line build.
 
@@ -58,7 +58,7 @@ Note: This is only tested on Ubuntu 20.04. If you have experience in multi-distr
 
 Note: AmalgamEngine requires GCC to build on macOS. Clang / Apple Clang does not yet support C++ features required by this project (as of Apple Clang 14 / Clang 15).
 
-1. Use the Homebrew package manager to install dependencies: `brew install gcc make cmake ninja sdl2 sdl2_image sdl2_mixer sdl2_ttf sdl2_gfx sdl2_net`
+1. Use the Homebrew package manager to install dependencies: `brew install gcc make cmake ninja sdl3 sdl3_image sdl3_mixer sdl3_ttf`
 1. (From the base of the repo) `mkdir -p Build/macOS/Release`
 1. `cd Build/macOS/Release`
 1. `CC=gcc-NN CXX=g++-NN cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../../../`. Replace the `NN` in `gcc-NN` and `g++-NN` with the version of GCC that you installed with Homebrew. This is important, as using `gcc` without a version number will alias to `clang`.
