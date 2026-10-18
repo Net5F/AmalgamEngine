@@ -10,7 +10,7 @@ namespace AM
 namespace Client
 {
 /**
- * Contains configuration constants relevant to the Client.
+ * Contains configuration constants relevant to Client.
  */
 class Config
 {

@@ -20,7 +20,7 @@ class AccountSession;
 /**
  * Owns the client's ChatServer session.
  *
- * While the account is logged in, this keeps us connected to the ChatServer:
+ * While the account is logged in, this keeps us connected to ChatServer:
  * it requests a ChatServer ticket, connects with it, and if the connection
  * fails or is lost, waits (with backoff) and repeats with a new ticket. When
  * the account logs out (or starts logging out), the connection is closed.
@@ -35,9 +35,9 @@ public:
     enum class State {
         /** Not logged in, so not connected. */
         Disconnected,
-        /** Waiting for the AccountServer to give us a ChatServer ticket. */
+        /** Waiting for AccountServer to give us a ChatServer ticket. */
         RequestingTicket,
-        /** Connecting to and authenticating with the ChatServer. */
+        /** Connecting to and authenticating with ChatServer. */
         Connecting,
         /** Authenticated. Chat can be sent and received. */
         Connected,
@@ -54,7 +54,7 @@ public:
     ChatSession& operator=(const ChatSession&) = delete;
 
     /**
-     * Processes events received from the ChatServer, and connects or
+     * Processes events received from ChatServer, and connects or
      * disconnects to match the account's login state.
      *
      * Must be called after AccountSession::tick().
@@ -66,7 +66,7 @@ public:
      *
      * Note: The text isn't validated here. Callers should check it with
      *       ChatHelpers::validateChatText(), so they can show the user why
-     *       it was invalid. The ChatServer will reply with a ChatError if
+     *       it was invalid. ChatServer will reply with a ChatError if
      *       it's invalid.
      *
      * @return false if we aren't connected, else true.
@@ -75,7 +75,7 @@ public:
 
     State getState() const noexcept;
 
-    /** Returns true if we're connected to the ChatServer. */
+    /** Returns true if we're connected to ChatServer. */
     bool isConnected() const noexcept;
 
 private:
@@ -124,7 +124,7 @@ public:
     /** A chat message was received (including our own sent messages). */
     entt::sink<entt::sigh<void(const ChatMessage&)>> messageReceived;
 
-    /** The ChatServer rejected one of our sent messages. */
+    /** ChatServer rejected one of our sent messages. */
     entt::sink<entt::sigh<void(ChatError::Type)>> errorReceived;
 };
 

@@ -33,7 +33,7 @@ class MessageProcessor;
  * been detected as disconnected, and receives available messages.
  *
  * Newly accepted clients must send a ConnectionRequest containing a World
- * Server ticket. We validate the ticket with the AccountServer, and only tell
+ * Server ticket. We validate the ticket with AccountServer, and only tell
  * the sim about the client once it succeeds. Until then, any other messages
  * from the client are dropped.
  *
@@ -96,7 +96,7 @@ private:
     void acceptNewClients(ClientMap& clientMap);
 
     /**
-     * Processes any ticket validation results that the AccountServer has sent
+     * Processes any ticket validation results that AccountServer has sent
      * us, authenticating or rejecting the associated clients.
      */
     void processTicketResults(ClientMap& clientMap);
@@ -144,7 +144,7 @@ private:
 
     /**
      * If the given client is awaiting authentication, sends the request's
-     * ticket to the AccountServer for validation.
+     * ticket to AccountServer for validation.
      */
     void processConnectionRequest(const std::shared_ptr<Client>& client,
                                   std::span<Uint8> messageBuffer);
@@ -171,7 +171,7 @@ private:
     /** Used to validate the tickets that clients send us. */
     AccountServiceEndpoint& accountEndpoint;
 
-    /** A ticket validation result, received from the AccountServer. */
+    /** A ticket validation result, received from AccountServer. */
     struct TicketResult {
         /** The client that sent the ticket. */
         NetworkID netID{0};

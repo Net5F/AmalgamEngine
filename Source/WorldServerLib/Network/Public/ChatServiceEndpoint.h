@@ -24,13 +24,13 @@ namespace WorldServer
 {
 
 /**
- * Used to communicate with the ChatServer.
+ * Used to communicate with ChatServer.
  *
  * We use this connection to tell the chat server where client entities are,
  * so it can route local chat.
  *
  * Peers are authenticated through mutual TLS: the given sslContext must
- * present our certificate, and must verify the ChatServer's certificate
+ * present our certificate, and must verify ChatServer's certificate
  * against its pin.
  *
  * We hold this connection open for as long as we're running. Once start() is
@@ -49,10 +49,10 @@ class ChatServiceEndpoint
 {
 public:
     /**
-     * @param inSSLContext Must present our certificate, and verify the
+     * @param inSSLContext Must present our certificate, and verify
      *                     ChatServer's certificate against its pin.
-     * @param inServerIP The ChatServer's IP address.
-     * @param inServerPort The ChatServer's service port.
+     * @param inServerIP ChatServer's IP address.
+     * @param inServerPort ChatServer's service port.
      */
     ChatServiceEndpoint(asio::io_context& inIoContext,
                         asio::ssl::context& inSSLContext,
@@ -89,11 +89,11 @@ private:
     //       made constructor parameters.
     static constexpr double CONNECTING_TIMEOUT_S{5};
     static constexpr double PARTIAL_RECEIVE_TIMEOUT_S{10};
-    /** How often we send a heartbeat. Must be well below the ChatServer's
+    /** How often we send a heartbeat. Must be well below ChatServer's
         SERVICE_IDLE_TIMEOUT_S, so it doesn't time us out. */
     static constexpr double HEARTBEAT_INTERVAL_S{15};
-    /** How long we'll go without receiving anything before assuming the
-        ChatServer is gone. The ChatServer responds to each heartbeat, so this
+    /** How long we'll go without receiving anything before assuming
+        ChatServer is gone. ChatServer responds to each heartbeat, so this
         is 3 missed heartbeat responses. */
     static constexpr double IDLE_TIMEOUT_S{HEARTBEAT_INTERVAL_S * 3};
     /** How long we wait before reconnecting after a connection failure or
@@ -165,7 +165,7 @@ private:
     asio::io_context& ioContext;
     asio::ssl::context& sslContext;
 
-    /** The ChatServer's address. */
+    /** ChatServer's address. */
     std::string serverIP;
     unsigned int serverPort;
 

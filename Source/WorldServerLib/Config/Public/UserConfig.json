@@ -5,11 +5,11 @@
  */
 
 {
-  // The IP address and service port of the AccountServer.
+  // AccountServer's IP address and service port.
   "accountServerIP": "127.0.0.1",
   "accountServerPort": 41497,
 
-  // The IP address and service port of the ChatServer.
+  // ChatServer's IP address and service port.
   "chatServerIP": "127.0.0.1",
   "chatServerPort": 41495
 }

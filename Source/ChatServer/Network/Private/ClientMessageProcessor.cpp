@@ -110,7 +110,7 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
                                            ClientSession& session,
                                            const ChatConnectionRequest& message)
 {
-    // Ask the AccountServer to validate the ticket.
+    // Ask AccountServer to validate the ticket.
     // Note: The callback is called on the network IO thread (this thread).
     //       The client may have disconnected by the time it's called.
     session.state = ClientSession::State::ValidatingTicket;

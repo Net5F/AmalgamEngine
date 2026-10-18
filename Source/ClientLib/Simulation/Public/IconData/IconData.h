@@ -15,7 +15,7 @@ namespace Client
  * rendering-specific icon data and provides an interface for accessing it.
  *
  * The data in this class is immutable. To modify it, edit ResourceData.json
- * using the ResourceImporter.
+ * using ResourceImporter.
  */
 class IconData : public IconDataBase
 {

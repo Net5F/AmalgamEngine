@@ -12,7 +12,7 @@ namespace AM
  * consume a connection ticket that a client presented to it.
  *
  * Note: The ticket is only accepted if it was issued for the requesting
- *       service. The AccountServer identifies the service by its TLS
+ *       service. AccountServer identifies the service by its TLS
  *       certificate.
  */
 struct ConsumeServiceTicketRequest {

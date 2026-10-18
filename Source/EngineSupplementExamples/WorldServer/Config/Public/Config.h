@@ -11,7 +11,7 @@ namespace AM
 namespace WorldServer
 {
 /**
- * Contains configuration constants relevant to the World Server.
+ * Contains configuration constants relevant to WorldServer.
  */
 class Config
 {

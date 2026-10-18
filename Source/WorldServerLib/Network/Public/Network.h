@@ -17,7 +17,7 @@ namespace WorldServer
 struct MessageProcessorContext;
 
 /**
- * Owns the World Server's network endpoints.
+ * Owns WorldServer's network endpoints.
  *
  * Also owns and runs the asynchronous IO thread used by the asio-based
  * endpoints.
@@ -27,11 +27,11 @@ class Network
 private:
     asio::io_context ioContext;
 
-    /** Used by accountEndpoint. Presents our certificate and requires the
+    /** Used by accountEndpoint. Presents our certificate and requires
         AccountServer to present its pinned certificate (mutual TLS). */
     asio::ssl::context accountSSLContext;
 
-    /** Used by chatEndpoint. Presents our certificate and requires the
+    /** Used by chatEndpoint. Presents our certificate and requires
         ChatServer to present its pinned certificate (mutual TLS). */
     asio::ssl::context chatSSLContext;
 

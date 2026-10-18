@@ -42,7 +42,7 @@ void printUsage()
 }
 
 /**
- * Configures the given context to require the AccountServer's certificate to
+ * Configures the given context to require AccountServer's certificate to
  * match its pin.
  */
 void configureAccountServerVerification(asio::ssl::context& sslContext)

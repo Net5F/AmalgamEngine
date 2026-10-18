@@ -20,7 +20,7 @@ namespace AM
  * provides an interface for accessing it.
  *
  * The data in this class is immutable. To modify it, edit ResourceData.json
- * using the ResourceImporter.
+ * using ResourceImporter.
  */
 class GraphicDataBase
 {

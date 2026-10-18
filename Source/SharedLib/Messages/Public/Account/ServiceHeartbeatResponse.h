@@ -6,7 +6,7 @@ namespace AM
 {
 
 /**
- * Sent by the Account Server in response to a ServiceHeartbeat.
+ * Sent by AccountServer in response to a ServiceHeartbeat.
  */
 struct ServiceHeartbeatResponse {
     static constexpr AccountServiceMessageType MESSAGE_TYPE{

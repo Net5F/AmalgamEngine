@@ -34,10 +34,10 @@ SimulatedClient::SimulatedClient(unsigned int inAccountIndex,
 
 void SimulatedClient::connect()
 {
-    // Get a ticket from the AccountServer.
+    // Get a ticket from AccountServer.
     std::array<Uint8, SERVICE_TICKET_BYTES> worldTicket{requestWorldTicket()};
 
-    // Connect to the WorldServer.
+    // Connect to WorldServer.
     worldSim.connect(worldTicket);
 
     // Start the tick timer at the current time.

@@ -9,7 +9,7 @@ namespace AM
 /**
  * Sent by the client after connecting, to request entry into the world.
  *
- * The server validates the given ticket with the AccountServer. If it's
+ * The server validates the given ticket with AccountServer. If it's
  * valid, the client is added to the sim. Either way, the server responds with
  * a ConnectionResponse.
  */
@@ -19,7 +19,7 @@ struct ConnectionRequest {
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::ConnectionRequest};
 
-    /** The single-use World Server ticket that the client received from the
+    /** The single-use World Server ticket that the client received from
         AccountServer. */
     std::array<Uint8, SERVICE_TICKET_BYTES> ticket{};
 };

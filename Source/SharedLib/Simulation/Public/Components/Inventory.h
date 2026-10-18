@@ -57,7 +57,7 @@ public:
      * @return true if the item was added, else false (inventory is full).
      *
      * Note: This doesn't check if itemID is a valid item.
-     * Note: On the Server, you likely don't want to call this directly. See
+     * Note: On the server, you likely don't want to call this directly. See
      *       InventoryHelpers.h.
      */
     bool addItem(ItemID itemID, Uint8 count, Uint8 maxStackSize);
@@ -68,7 +68,7 @@ public:
      * @return true if the item was removed, else false (slot index isn't valid,
      *         count is 0).
      *
-     * Note: On the Server, you likely don't want to call this directly. See
+     * Note: On the server, you likely don't want to call this directly. See
      *       InventoryHelpers.h.
      */
     bool removeItem(Uint8 slotIndex, Uint8 count);

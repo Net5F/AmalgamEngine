@@ -368,7 +368,7 @@ void AccountServiceEndpoint::onSocketConnected(
     connectingSocket.reset();
 
     // Register callbacks and start the handshake process.
-    // Note: The AccountServer's certificate is verified against its pin
+    // Note: AccountServer's certificate is verified against its pin
     //       during the handshake, and it verifies ours.
     connection->setMessageCallback(
         [this](AccountServiceMessageType messageType,

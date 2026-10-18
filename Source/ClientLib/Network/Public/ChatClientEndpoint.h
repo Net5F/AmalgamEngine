@@ -27,12 +27,12 @@ namespace Client
 struct MessageProcessorContext;
 
 /**
- * Manages communication with the ChatServer.
+ * Manages communication with ChatServer.
  *
  * Unlike the AccountServer connection, this connection is held open for as
  * long as we're logged in. Once authenticated, we send periodic heartbeats
- * (which the ChatServer responds to). If we stop receiving messages, we assume
- * the ChatServer is gone and disconnect on timeout.
+ * (which ChatServer responds to). If we stop receiving messages, we assume
+ * ChatServer is gone and disconnect on timeout.
  *
  * Each connection consumes a single-use ticket, so this class doesn't
  * reconnect on its own. Instead, it pushes a ChatConnectionEvent when the
@@ -51,7 +51,7 @@ public:
     ~ChatClientEndpoint();
 
     /**
-     * Connects to the ChatServer and authenticates using the given ticket.
+     * Connects to ChatServer and authenticates using the given ticket.
      * If a connection is already open, it's closed first.
      *
      * @return An ID for this connection. All ChatConnectionEvents for it will
@@ -80,10 +80,10 @@ private:
     static constexpr double CONNECTING_TIMEOUT_S{5};
     static constexpr double PARTIAL_RECEIVE_TIMEOUT_S{10};
     /** How often we send a heartbeat while authenticated. Must be well below
-        the ChatServer's idle timeout. */
+        ChatServer's idle timeout. */
     static constexpr double HEARTBEAT_INTERVAL_S{10};
     /** If we receive nothing (including heartbeat responses) for this long,
-        we assume the ChatServer is gone. */
+        we assume ChatServer is gone. */
     static constexpr double IDLE_TIMEOUT_S{30};
     static constexpr std::size_t MAX_QUEUED_WRITE_BYTES{4000};
     static constexpr std::size_t MAX_QUEUED_WRITES{20};
@@ -94,7 +94,7 @@ private:
         Disconnected,
         /** Establishing the TCP connection and TLS handshake. */
         Connecting,
-        /** Waiting for the ChatServer to validate our ticket. */
+        /** Waiting for ChatServer to validate our ticket. */
         Authenticating,
         Authenticated
     };

@@ -104,7 +104,7 @@ void Network::configureAccountServerVerification()
         LOG_FATAL("Failed to load AccountServer certificate pin.");
     }
 
-    // Require the AccountServer to present a certificate that matches the
+    // Require AccountServer to present a certificate that matches the
     // pin. Unauthenticated peers will fail the handshake.
     try {
         accountSSLContext.set_verify_mode(asio::ssl::verify_peer);

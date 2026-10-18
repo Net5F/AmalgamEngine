@@ -77,7 +77,7 @@ private:
         enum class State {
             /** We're waiting for the client to send a ChatConnectionRequest. */
             AwaitingTicket,
-            /** We're waiting for the AccountServer to validate the client's
+            /** We're waiting for AccountServer to validate the client's
                 ticket. */
             ValidatingTicket,
             /** The client is logged in and can send and receive chat. */
@@ -117,7 +117,7 @@ private:
     // Helpers
     //-------------------------------------------------------------------------
     /**
-     * Handles the AccountServer's response to the given client's ticket.
+     * Handles AccountServer's response to the given client's ticket.
      */
     void handleTicketResponse(ConnectionHandle handle,
                               const ConsumeServiceTicketResponse& response);

@@ -16,7 +16,7 @@ namespace Client
 struct MessageProcessorContext;
 
 /**
- * Owns and runs the Client's network endpoints.
+ * Owns and runs Client's network endpoints.
  */
 class Network
 {

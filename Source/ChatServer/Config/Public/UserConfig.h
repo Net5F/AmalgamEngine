@@ -46,7 +46,7 @@ private:
      */
     void init(nlohmann::json& json);
 
-    /** The AccountServer's IP address and service port. */
+    /** AccountServer's IP address and service port. */
     std::string accountServerIP;
     unsigned int accountServerPort;
 };

@@ -377,7 +377,7 @@ void ClientHandler::processConnectionRequest(
         return;
     }
 
-    // Ask the AccountServer to validate the ticket.
+    // Ask AccountServer to validate the ticket.
     // Note: The callback is called on the network IO thread, so we pass the
     //       result to processTicketResults() through a queue.
     client->setAuthState(Client::AuthState::Validating);

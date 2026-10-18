@@ -43,7 +43,7 @@ public:
 
     /** The maximum amount of outgoing bytes we'll allow at once before
         considering the client to be hostile and closing the connection.
-        Larger than the AccountServer's, since a busy channel may send a burst
+        Larger than AccountServer's, since a busy channel may send a burst
         of messages to every client. */
     static constexpr std::size_t MAX_QUEUED_WRITE_BYTES{32000};
 

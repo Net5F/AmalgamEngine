@@ -6,10 +6,10 @@ namespace AM
 {
 
 /**
- * Sent periodically by a service to keep its connection to the Account Server
- * open, and to detect if the Account Server has gone away.
+ * Sent periodically by a service to keep its connection to AccountServer
+ * open, and to detect if AccountServer has gone away.
  *
- * The Account Server responds with a ServiceHeartbeatResponse.
+ * AccountServer responds with a ServiceHeartbeatResponse.
  */
 struct ServiceHeartbeat {
     static constexpr AccountServiceMessageType MESSAGE_TYPE{

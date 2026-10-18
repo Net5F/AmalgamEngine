@@ -18,7 +18,7 @@ namespace AM
  * Also adds the "Null" icon, for use as a default.
  *
  * The data in this class is immutable. To modify it, edit ResourceData.json
- * using the ResourceImporter.
+ * using ResourceImporter.
  */
 class IconDataBase
 {

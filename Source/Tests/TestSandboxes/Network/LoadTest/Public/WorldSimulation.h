@@ -50,7 +50,7 @@ private:
 
     /** How long the sim should wait for the server to send a connection
         response, in microseconds.
-        Note: The server has to validate our ticket with the AccountServer
+        Note: The server has to validate our ticket with AccountServer
               before responding. */
     static constexpr int CONNECTION_RESPONSE_WAIT_US{5 * 1000 * 1000};
 

@@ -24,5 +24,5 @@ Amalgam Engine README.
 
 The following ports are used:
     41498 (TCP) - Client connections. Must be reachable by players.
-    41497 (TCP) - Service connections. Only needs to be reachable by the
+    41497 (TCP) - Service connections. Only needs to be reachable by
                   ChatServer and WorldServer.

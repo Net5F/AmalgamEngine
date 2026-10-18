@@ -230,7 +230,7 @@ void ChatServiceEndpoint::onSocketConnected(
     connectingSocket.reset();
 
     // Register callbacks and start the handshake process.
-    // Note: The ChatServer's certificate is verified against its pin during
+    // Note: ChatServer's certificate is verified against its pin during
     //       the handshake, and it verifies ours.
     connection->setMessageCallback(
         [this](ChatServiceMessageType messageType,

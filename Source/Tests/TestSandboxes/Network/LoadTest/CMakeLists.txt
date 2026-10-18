@@ -71,7 +71,7 @@ endif()
 file(COPY ${CMAKE_SOURCE_DIR}/Resources/Client/Common/UserConfig.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
-# Copy the AccountServer's local TLS pin to the build directory.
+# Copy AccountServer's local TLS pin to the build directory.
 file(COPY
     "${AmalgamEngine_SOURCE_DIR}/TlsCredentials/Local/account-server.pin"
     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")

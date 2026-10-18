@@ -21,7 +21,7 @@ struct ChatConnectionResponse {
         /** The client's ticket was invalid, expired, or already used. */
         InvalidTicket,
         /** The server failed to validate the client's ticket (e.g. it
-            couldn't reach the AccountServer). */
+            couldn't reach AccountServer). */
         InternalError
     };
     Result result{Result::InternalError};

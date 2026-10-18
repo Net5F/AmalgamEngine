@@ -15,16 +15,16 @@ namespace Client
  */
 struct ChatConnectionEvent {
     enum class Type {
-        /** The ChatServer accepted our ticket. Chat can now be sent and
+        /** ChatServer accepted our ticket. Chat can now be sent and
             received. */
         Authenticated,
-        /** The ChatServer rejected our ticket. */
+        /** ChatServer rejected our ticket. */
         InvalidTicket,
-        /** The ChatServer failed to validate our ticket. */
+        /** ChatServer failed to validate our ticket. */
         Rejected,
-        /** We failed to connect to the ChatServer. */
+        /** We failed to connect to ChatServer. */
         ConnectionFailed,
-        /** We lost our connection to the ChatServer. */
+        /** We lost our connection to ChatServer. */
         Disconnected
     };
 

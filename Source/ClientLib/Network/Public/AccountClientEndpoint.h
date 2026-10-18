@@ -29,7 +29,7 @@ namespace Client
 struct MessageProcessorContext;
 
 /**
- * Manages communication with the AccountServer.
+ * Manages communication with AccountServer.
  *
  * This connection behaves like a webpage talking to a web server: clients 
  * connect lazily when user input triggers a message, connection stays open as
@@ -48,7 +48,7 @@ public:
 
     /**
      * Queues a typed message to be sent on the network thread. If necessary,
-     * a connection to the AccountServer is established first.
+     * a connection to AccountServer is established first.
      */
     template<typename Message>
     void send(const Message& message);

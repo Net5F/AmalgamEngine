@@ -34,7 +34,7 @@ public:
      * @param inInputsPerSecond How many inputs to send per second.
      * @param ioContext Used by our AccountServer connection. Must be run by
      *                  the caller.
-     * @param sslContext Used by our AccountServer connection. Must verify the
+     * @param sslContext Used by our AccountServer connection. Must verify
      *                   AccountServer's certificate.
      */
     SimulatedClient(unsigned int inAccountIndex, unsigned int inInputsPerSecond,
@@ -42,8 +42,8 @@ public:
                     asio::ssl::context& sslContext);
 
     /**
-     * Logs in to the AccountServer, then uses the resulting ticket to connect
-     * to the WorldServer.
+     * Logs in to AccountServer, then uses the resulting ticket to connect
+     * to WorldServer.
      *
      * Blocks until connected. Errors if any step fails.
      */
@@ -65,7 +65,7 @@ private:
     static constexpr std::int64_t ACCOUNT_RESPONSE_WAIT_US{10 * 1000 * 1000};
 
     /**
-     * Logs in to the AccountServer and requests a World Server ticket.
+     * Logs in to AccountServer and requests a World Server ticket.
      *
      * Blocks until complete. Errors if any step fails.
      */

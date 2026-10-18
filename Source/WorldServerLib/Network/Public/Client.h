@@ -35,7 +35,7 @@ public:
     enum class AuthState {
         /** We're waiting for the client to send a ConnectionRequest. */
         AwaitingRequest,
-        /** We're waiting for the AccountServer to validate the client's
+        /** We're waiting for AccountServer to validate the client's
             ticket. */
         Validating,
         /** The client's ticket was rejected. If the client doesn't

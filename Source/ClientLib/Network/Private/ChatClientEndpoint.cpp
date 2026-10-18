@@ -245,7 +245,7 @@ void ChatClientEndpoint::onConnectionReady(Uint32 connectionID)
         return;
     }
 
-    // Present our ticket. The ChatServer will respond with a
+    // Present our ticket. ChatServer will respond with a
     // ChatConnectionResponse.
     // Note: From here, our idle timeout bounds how long we'll wait.
     cancelTimer(connectionTimer);
@@ -280,7 +280,7 @@ void ChatClientEndpoint::onConnectionDisconnected(Uint32 connectionID,
 void ChatClientEndpoint::onMessageReceived(ChatClientMessageType messageType,
                                            std::span<const Uint8> messageBuffer)
 {
-    // The ChatServer only sends a ChatConnectionResponse while we're
+    // ChatServer only sends a ChatConnectionResponse while we're
     // authenticating, and only sends the others after we're authenticated.
     bool isResponse{messageType
                     == ChatClientMessageType::ChatConnectionResponse};
@@ -310,7 +310,7 @@ void ChatClientEndpoint::onMessageReceived(ChatClientMessageType messageType,
                                     ChatConnectionEvent::Type::Authenticated);
             }
             else {
-                // The ChatServer expects us to close the connection.
+                // ChatServer expects us to close the connection.
                 closeOnIOThread();
                 emitConnectionEvent(
                     connectionID,

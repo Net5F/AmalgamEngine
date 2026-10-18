@@ -42,7 +42,7 @@ private:
     void configureServicePeerVerification();
 
     /**
-     * Configures accountSSLContext to require the AccountServer's
+     * Configures accountSSLContext to require AccountServer's
      * certificate to match its pin.
      */
     void configureAccountServerVerification();
@@ -57,7 +57,7 @@ private:
         certificate (mutual TLS). */
     asio::ssl::context serviceSSLContext;
 
-    /** Used by accountEndpoint. Presents our certificate and requires the
+    /** Used by accountEndpoint. Presents our certificate and requires
         AccountServer to present its pinned certificate (mutual TLS). */
     asio::ssl::context accountSSLContext;
 

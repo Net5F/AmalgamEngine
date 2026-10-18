@@ -8,7 +8,7 @@ namespace AM
 {
 
 /**
- * Sent by the Account Server after attempting to consume a service connection
+ * Sent by AccountServer after attempting to consume a service connection
  * ticket.
  */
 struct ConsumeServiceTicketResponse {

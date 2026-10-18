@@ -21,7 +21,7 @@ class Network;
 /**
  * Owns the client's authenticated account state and controls account requests.
  *
- * Account credentials are forwarded directly to the AccountServer and are not
+ * Account credentials are forwarded directly to AccountServer and are not
  * retained. A successful login's session token remains here for the lifetime
  * of the session so later service-ticket and logout requests can use it.
  *
@@ -38,7 +38,7 @@ public:
     AccountSession(const AccountSession&) = delete;
     AccountSession& operator=(const AccountSession&) = delete;
 
-    /** Processes responses received from the AccountServer. */
+    /** Processes responses received from AccountServer. */
     void tick();
 
     /** Starts a login request. Returns false if another request conflicts. */

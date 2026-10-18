@@ -22,13 +22,13 @@ namespace AM
 
 /**
  * Used by our internal services (world server, chat server) to communicate
- * with the AccountServer.
+ * with AccountServer.
  *
  * Services use this connection to validate the tickets that clients present
  * to them when logging in.
  *
  * Peers are authenticated through mutual TLS: the given sslContext must
- * present our certificate, and must verify the AccountServer's certificate
+ * present our certificate, and must verify AccountServer's certificate
  * against its pin.
  *
  * We hold this connection open for as long as we're running. Once start() is
@@ -50,9 +50,9 @@ public:
     using ServiceTicket = std::array<Uint8, SERVICE_TICKET_BYTES>;
 
     /**
-     * Called with the AccountServer's response to a ticket request.
+     * Called with AccountServer's response to a ticket request.
      *
-     * If the AccountServer couldn't be reached or the connection was lost
+     * If AccountServer couldn't be reached or the connection was lost
      * before it responded, response.result will be InternalError.
      *
      * Note: This is called on the network IO thread. Callers should forward
@@ -63,9 +63,9 @@ public:
 
     /**
      * @param inSSLContext Must present the service's certificate, and verify
-     *                     the AccountServer's certificate against its pin.
-     * @param inServerIP The AccountServer's IP address.
-     * @param inServerPort The AccountServer's service port.
+     *                     AccountServer's certificate against its pin.
+     * @param inServerIP AccountServer's IP address.
+     * @param inServerPort AccountServer's service port.
      */
     AccountServiceEndpoint(asio::io_context& inIoContext,
                            asio::ssl::context& inSSLContext,
@@ -104,11 +104,11 @@ private:
     //       made constructor parameters.
     static constexpr double CONNECTING_TIMEOUT_S{5};
     static constexpr double PARTIAL_RECEIVE_TIMEOUT_S{10};
-    /** How often we send a heartbeat. Must be well below the AccountServer's
+    /** How often we send a heartbeat. Must be well below AccountServer's
         SERVICE_IDLE_TIMEOUT_S, so it doesn't time us out. */
     static constexpr double HEARTBEAT_INTERVAL_S{15};
-    /** How long we'll go without receiving anything before assuming the
-        AccountServer is gone. The AccountServer responds to each heartbeat,
+    /** How long we'll go without receiving anything before assuming
+        AccountServer is gone. AccountServer responds to each heartbeat,
         so this is 3 missed heartbeat responses. */
     static constexpr double IDLE_TIMEOUT_S{HEARTBEAT_INTERVAL_S * 3};
     /** How long we wait before reconnecting after a connection failure or
@@ -184,7 +184,7 @@ private:
     asio::io_context& ioContext;
     asio::ssl::context& sslContext;
 
-    /** The AccountServer's address. */
+    /** AccountServer's address. */
     std::string serverIP;
     unsigned int serverPort;
 

@@ -18,7 +18,7 @@ void printUsage()
 {
     std::printf(
         "Usage: SeedLoadTestAccounts <AccountsDbPath> <NumAccounts>\n"
-        "  AccountsDbPath: The path to the AccountServer's Accounts.db.\n"
+        "  AccountsDbPath: The path to AccountServer's Accounts.db.\n"
         "  NumAccounts: How many load test accounts should exist.\n"
         "\n"
         "Creates the accounts %s0 through %s<NumAccounts - 1>, all with the "
