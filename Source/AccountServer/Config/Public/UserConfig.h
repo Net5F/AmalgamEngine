@@ -34,6 +34,9 @@ public:
     unsigned int getDatabaseWorkerCount();
     void setDatabaseWorkerCount(unsigned int inDatabaseWorkerCount);
 
+    unsigned int getMaxClients();
+    void setMaxClients(unsigned int inMaxClients);
+
 private:
     /**
      * Initializes our members using the given json.
@@ -42,6 +45,9 @@ private:
     void init(nlohmann::json& json);
 
     unsigned int databaseWorkerCount;
+
+    /** The maximum number of clients that we will allow at once. */
+    unsigned int maxClients;
 };
 
 } // End namespace AccountServer

@@ -25,9 +25,6 @@ public:
     /** The port that the server listens for incoming service connections on. */
     static constexpr unsigned int SERVER_SERVICE_PORT{41495};
 
-    /** The maximum number of clients that we will allow at once. */
-    static constexpr unsigned int MAX_CLIENTS{1000};
-
     /** How long a connecting (or handshaking) client can be idle before timing
         out. */
     static constexpr double CONNECTING_TIMEOUT_S{5};

@@ -39,6 +39,9 @@ public:
     ServerAddress getAccountServerAddress();
     void setAccountServerAddress(const ServerAddress& inServerAddress);
 
+    unsigned int getMaxClients();
+    void setMaxClients(unsigned int inMaxClients);
+
 private:
     /**
      * Initializes our members using the given json.
@@ -49,6 +52,9 @@ private:
     /** AccountServer's IP address and service port. */
     std::string accountServerIP;
     unsigned int accountServerPort;
+
+    /** The maximum number of clients that we will allow at once. */
+    unsigned int maxClients;
 };
 
 } // End namespace ChatServer

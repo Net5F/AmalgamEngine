@@ -1,5 +1,6 @@
 #include "ChatClientEndpoint.h"
 #include "Config.h"
+#include "UserConfig.h"
 #include "Log.h"
 #include <functional>
 #include <utility>
@@ -14,7 +15,7 @@ ChatClientEndpoint::ChatClientEndpoint(
     AccountServiceEndpoint& inAccountEndpoint, PlayerLocator& inPlayerLocator)
 : ioContext{inIoContext}
 , sslContext{inSSLContext}
-, connectionRegistry(Config::MAX_CLIENTS)
+, connectionRegistry(UserConfig::get().getMaxClients())
 , acceptor(
       inIoContext,
       asio::ip::tcp::endpoint{asio::ip::tcp::v4(), Config::SERVER_CLIENT_PORT},

@@ -4,5 +4,8 @@
     // database, so more workers let more requests be processed in parallel.
     // Must be at least 1. A good upper limit is the number of available
     // CPU cores, minus 1 for the network thread.
-    "databaseWorkerCount": 1
+    "databaseWorkerCount": 1,
+
+    // The maximum number of clients that we will allow at once.
+    "maxClients": 1000
 }

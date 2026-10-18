@@ -1,5 +1,6 @@
 #include "AccountClientEndpoint.h"
 #include "Config.h"
+#include "UserConfig.h"
 #include "Log.h"
 #include <functional>
 #include <utility>
@@ -15,7 +16,7 @@ AccountClientEndpoint::AccountClientEndpoint(asio::io_context& inIoContext,
                                              Database& inDatabase)
 : ioContext{inIoContext}
 , sslContext{inSSLContext}
-, connectionRegistry(Config::MAX_CLIENTS)
+, connectionRegistry(UserConfig::get().getMaxClients())
 , acceptor(
       inIoContext,
       asio::ip::tcp::endpoint{asio::ip::tcp::v4(), Config::SERVER_CLIENT_PORT},

@@ -1,5 +1,8 @@
 {
     // AccountServer's IP address and service port.
     "accountServerIP": "127.0.0.1",
-    "accountServerPort": 41497
+    "accountServerPort": 41497,
+
+    // The maximum number of clients that we will allow at once.
+    "maxClients": 1000
 }

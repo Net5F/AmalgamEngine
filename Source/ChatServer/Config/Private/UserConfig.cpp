@@ -13,6 +13,7 @@ namespace ChatServer
 UserConfig::UserConfig()
 : accountServerIP{}
 , accountServerPort{0}
+, maxClients{0}
 {
     // Open the file.
     std::string fullPath{Paths::BASE_PATH};
@@ -55,11 +56,28 @@ void UserConfig::setAccountServerAddress(const ServerAddress& inServerAddress)
     accountServerPort = inServerAddress.port;
 }
 
+unsigned int UserConfig::getMaxClients()
+{
+    return maxClients;
+}
+
+void UserConfig::setMaxClients(unsigned int inMaxClients)
+{
+    if (inMaxClients == 0) {
+        LOG_FATAL("Invalid maxClients value: %u. Must be at least 1.",
+                  inMaxClients);
+    }
+    maxClients = inMaxClients;
+}
+
 void UserConfig::init(nlohmann::json& json)
 {
     // AccountServer address.
     setAccountServerAddress(
         {json.at("accountServerIP"), json.at("accountServerPort")});
+
+    // Max clients.
+    setMaxClients(json.at("maxClients"));
 }
 
 } // End namespace ChatServer
