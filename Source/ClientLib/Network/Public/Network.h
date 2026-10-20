@@ -24,6 +24,7 @@ private:
     asio::io_context ioContext;
     /** Each server has its own pinned certificate, so each needs its own
         context. */
+    asio::ssl::context worldSSLContext;
     asio::ssl::context accountSSLContext;
     asio::ssl::context chatSSLContext;
 

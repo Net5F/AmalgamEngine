@@ -12,9 +12,10 @@ namespace Client
 
 Network::Network(const MessageProcessorContext& inMessageProcessorContext)
 : ioContext{}
+, worldSSLContext{asio::ssl::context::tls_client}
 , accountSSLContext{asio::ssl::context::tls_client}
 , chatSSLContext{asio::ssl::context::tls_client}
-, worldEndpoint{inMessageProcessorContext}
+, worldEndpoint{ioContext, worldSSLContext, inMessageProcessorContext}
 , accountEndpoint{ioContext, accountSSLContext, inMessageProcessorContext}
 , chatEndpoint{ioContext, chatSSLContext, inMessageProcessorContext}
 , workGuard{}
@@ -22,6 +23,7 @@ Network::Network(const MessageProcessorContext& inMessageProcessorContext)
 , started{false}
 {
     // Load and set each server's pin.
+    loadCertificatePin(worldSSLContext, "world-server.pin", "WorldServer");
     loadCertificatePin(accountSSLContext, "account-server.pin",
                        "AccountServer");
     loadCertificatePin(chatSSLContext, "chat-server.pin", "ChatServer");

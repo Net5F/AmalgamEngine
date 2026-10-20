@@ -5,7 +5,9 @@ target_sources(ClientLib
 		Private/ChatClientEndpoint.cpp
 		Private/Network.cpp
 		Private/MessageProcessor.cpp
+		Private/WorldBatchComposer.cpp
 		Private/WorldClientEndpoint.cpp
+		Private/WorldConnection.cpp
 	PUBLIC
 		Public/AccountClientEndpoint.h
 		Public/AccountConnectionEvent.h
@@ -18,7 +20,10 @@ target_sources(ClientLib
 		Public/MessageProcessorContext.h
 		Public/Network.h
 		Public/PlayerMovementUpdate.h
+		Public/WorldBatchComposer.h
 		Public/WorldClientEndpoint.h
+		Public/WorldConnection.h
+		Public/WorldMessageFramer.h
 )
 
 target_include_directories(ClientLib

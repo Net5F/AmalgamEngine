@@ -134,8 +134,8 @@ void ServerConnectionSystem::abortConnectionAttempt(
 
     // The server may have closed the socket after responding, which would
     // have queued a redundant error. We report our own error instead.
-    // Note: disconnect() joined the receive thread, so nothing else will be
-    //       pushed.
+    // Note: disconnect() waits for the IO thread to close the connection, so
+    //       nothing else will be pushed.
     while (connectionErrorQueue.pop()) {
     }
 
@@ -157,10 +157,11 @@ void ServerConnectionSystem::processLogoutUpdates()
             // The server removed our entity. Disconnect and reset our state.
             network.worldEndpoint.disconnect();
 
-            // Our disconnect may have queued a redundant error. Since this
-            // was an intentional disconnect, we discard it.
-            // Note: disconnect() joined the receive thread, so nothing else
-            //       will be pushed.
+            // The server may have closed the socket before our disconnect,
+            // which would have queued a redundant error. Since this was an
+            // intentional disconnect, we discard it.
+            // Note: disconnect() waits for the IO thread to close the
+            //       connection, so nothing else will be pushed.
             while (connectionErrorQueue.pop()) {
             }
 

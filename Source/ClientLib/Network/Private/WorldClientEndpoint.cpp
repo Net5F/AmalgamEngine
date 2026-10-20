@@ -8,76 +8,80 @@
 #include "UserConfig.h"
 #include "NetworkStats.h"
 #include "IMessageProcessorExtension.h"
-#include "AMAssert.h"
-#include "SDL_net.h"
+#include "asio/error.hpp"
+#include "asio/ip/address.hpp"
+#include "asio/system_error.hpp"
 #include <openssl/crypto.h>
+#include <chrono>
+#include <future>
+#include <limits>
 
 namespace AM
 {
 namespace Client
 {
 WorldClientEndpoint::WorldClientEndpoint(
+    asio::io_context& inIoContext, asio::ssl::context& inSSLContext,
     const MessageProcessorContext& inMessageProcessorContext)
-: server{nullptr}
-, pendingWorldTicket{}
+: ioContext{inIoContext}
+, sslContext{inSSLContext}
 , networkEventDispatcher{inMessageProcessorContext.networkEventDispatcher}
 , messageProcessor{inMessageProcessorContext}
+, connectionTimer{inIoContext}
+, connectingSocket{}
+, connection{}
+, pendingWorldTicket{}
+, connectionState{ConnectionState::Disconnected}
+, currentConnectionID{0}
+, connectionActive{false}
+, messagesSentSinceTick{0}
+, currentTickPtr{nullptr}
+, netstatsLoggingEnabled{true}
+, ticksSinceNetstatsLog{0}
 , tickAdjustment{0}
 , adjustmentIteration{0}
 , isApplyingTickAdjustment{false}
-, messagesSentSinceTick{0}
-, currentTickPtr{nullptr}
-, receiveThreadObj{}
-, exitRequested{false}
-, headerRecBuffer(SERVER_HEADER_SIZE)
-, batchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
-, decompressedBatchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
-, netstatsLoggingEnabled{true}
-, ticksSinceNetstatsLog{0}
 {
-    if (!Config::RUN_OFFLINE) {
-        SDLNet_Init();
-    }
 }
 
 WorldClientEndpoint::~WorldClientEndpoint()
 {
-    exitRequested = true;
-
-    if (!Config::RUN_OFFLINE) {
-        if (receiveThreadObj.joinable()) {
-            receiveThreadObj.join();
-        }
-        SDLNet_Quit();
-    }
+    // Note: Network stops the IO thread before destroying us, so we can close
+    //       directly.
+    closeOnIOThread();
 }
 
 void WorldClientEndpoint::connect(
     const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket)
 {
-    if (server != nullptr) {
+    if (connectionActive) {
         LOG_INFO("Attempted to connect while connected.");
         return;
     }
 
-    // Save the ticket so the receive thread can send it once connected.
-    pendingWorldTicket = worldTicket;
-
-    // Spin up the receive thread (will start the connection attempt).
-    exitRequested = false;
-    receiveThreadObj
-        = std::jthread(&WorldClientEndpoint::connectAndReceive, this);
+    connectionActive = true;
+    asio::post(ioContext, [this, ticketCopy = worldTicket]() mutable {
+        connectOnIOThread(ticketCopy);
+        OPENSSL_cleanse(ticketCopy.data(), ticketCopy.size());
+    });
 }
 
 void WorldClientEndpoint::disconnect()
 {
-    // Spin down the receive thread.
-    exitRequested = true;
-    if (receiveThreadObj.joinable()) {
-        receiveThreadObj.join();
-    }
-    server = nullptr;
-    OPENSSL_cleanse(pendingWorldTicket.data(), pendingWorldTicket.size());
+    connectionActive = false;
+
+    // Wait for the IO thread to close the connection. This guarantees that
+    // nothing else will be pushed for it once we return.
+    std::promise<void> closedPromise{};
+    std::future<void> closedFuture{closedPromise.get_future()};
+    asio::post(ioContext, [this, &closedPromise]() {
+        closeOnIOThread();
+        closedPromise.set_value();
+    });
+    closedFuture.wait();
+
+    // The IO thread is done with this connection, reset our shared state.
+    tickAdjustment = 0;
     adjustmentIteration = 0;
     isApplyingTickAdjustment = false;
     messagesSentSinceTick = 0;
@@ -86,7 +90,7 @@ void WorldClientEndpoint::disconnect()
 
 void WorldClientEndpoint::tick()
 {
-    if (!Config::RUN_OFFLINE && (server != nullptr)) {
+    if (!Config::RUN_OFFLINE && connectionActive) {
         // If the sim is running, send a heartbeat if we need to.
         if (*currentTickPtr != 0) {
             sendHeartbeatIfNecessary();
@@ -154,27 +158,230 @@ void WorldClientEndpoint::setMessageProcessorExtension(
     messageProcessor.setExtension(extension);
 }
 
-void WorldClientEndpoint::sendBytes(const BinaryBufferSharedPtr& message)
+void WorldClientEndpoint::connectOnIOThread(
+    const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket)
 {
-    if ((server == nullptr) || !(server->isConnected())) {
-        // Note: Receive thread is responsible for emitting ConnectionError.
-        LOG_INFO("Tried to send while server is disconnected.");
+    // If a connection is already open, close it.
+    closeOnIOThread();
+
+    const Uint32 connectionID{currentConnectionID};
+    connectionState = ConnectionState::Connecting;
+    pendingWorldTicket = worldTicket;
+
+    UserConfig::ServerAddress serverAddress{
+        UserConfig::get().getWorldServerAddress()};
+    asio::error_code error{};
+    asio::ip::address address{asio::ip::make_address(serverAddress.IP, error)};
+    if (error || (serverAddress.port > std::numeric_limits<Uint16>::max())) {
+        if (!error) {
+            error = asio::error::make_error_code(asio::error::invalid_argument);
+        }
+        handleConnectionFailure(connectionID, error);
         return;
     }
-    // Note: serializeAndSend() is responsible for checking message size.
 
-    // Send the message.
-    NetworkResult result{server->send(message)};
-    if (result == NetworkResult::Success) {
-        messagesSentSinceTick++;
+    connectingSocket = std::make_shared<asio::ip::tcp::socket>(ioContext);
+    std::shared_ptr<asio::ip::tcp::socket> socket{connectingSocket};
 
-        // Record the number of sent bytes.
-        NetworkStats::recordBytesSent(
-            static_cast<unsigned int>(message->size()));
+    // Attempt to connect, with a timeout.
+    // Note: The timeout also covers the TLS handshake (see onSocketConnected).
+    try {
+        connectionTimer.expires_after(
+            std::chrono::duration_cast<asio::steady_timer::duration>(
+                std::chrono::duration<double>(CONNECTING_TIMEOUT_S)));
+        connectionTimer.async_wait([this, socket, connectionID](
+                                       const asio::error_code& timerError) {
+            if (timerError || (connectionID != currentConnectionID)
+                || (connectionState != ConnectionState::Connecting)) {
+                return;
+            }
+
+            asio::error_code ignoredError{};
+            socket->cancel(ignoredError);
+            socket->close(ignoredError);
+            handleConnectionFailure(connectionID, asio::error::make_error_code(
+                                                      asio::error::timed_out));
+        });
+
+        socket->async_connect(
+            asio::ip::tcp::endpoint{
+                address, static_cast<unsigned short>(serverAddress.port)},
+            [this, socket, connectionID](const asio::error_code& connectError) {
+                onSocketConnected(socket, connectionID, connectError);
+            });
+    } catch (const asio::system_error& e) {
+        handleConnectionFailure(connectionID, e.code());
+    }
+}
+
+void WorldClientEndpoint::closeOnIOThread()
+{
+    // Note: Bumping the ID makes any late callbacks for this connection
+    //       ignore themselves.
+    ++currentConnectionID;
+    connectionState = ConnectionState::Disconnected;
+    cancelTimer(connectionTimer);
+    OPENSSL_cleanse(pendingWorldTicket.data(), pendingWorldTicket.size());
+
+    asio::error_code ignoredError{};
+    if (connectingSocket) {
+        connectingSocket->cancel(ignoredError);
+        connectingSocket->close(ignoredError);
+        connectingSocket.reset();
+    }
+    if (connection) {
+        connection->close();
+        connection.reset();
+    }
+}
+
+void WorldClientEndpoint::handleConnectionFailure(Uint32 connectionID,
+                                                  const asio::error_code& error)
+{
+    if ((connectionID != currentConnectionID)
+        || (connectionState != ConnectionState::Connecting)) {
+        return;
+    }
+
+    LOG_INFO("WorldServer connection failed: %s", error.message().c_str());
+    closeOnIOThread();
+    networkEventDispatcher.emplace<ConnectionError>(
+        ConnectionError::Type::Failed);
+}
+
+void WorldClientEndpoint::cancelTimer(asio::steady_timer& timer)
+{
+    try {
+        timer.cancel();
+    } catch (const asio::system_error& e) {
+        LOG_INFO("Failed to cancel WorldServer timer: %s",
+                 e.code().message().c_str());
+    }
+}
+
+void WorldClientEndpoint::onSocketConnected(
+    std::shared_ptr<asio::ip::tcp::socket> socket, Uint32 connectionID,
+    const asio::error_code& error)
+{
+    if ((connectionID != currentConnectionID)
+        || (connectionState != ConnectionState::Connecting)) {
+        return;
+    }
+
+    if (error) {
+        handleConnectionFailure(connectionID, error);
+        return;
+    }
+
+    // Disable Nagle's algorithm. Most of our messages are small and
+    // latency-sensitive (e.g. inputs).
+    asio::error_code optionError{};
+    socket->set_option(asio::ip::tcp::no_delay{true}, optionError);
+    if (optionError) {
+        handleConnectionFailure(connectionID, optionError);
+        return;
+    }
+
+    // Socket successfully connected. Configure and create the new connection.
+    // Note: We leave connectionTimer running, so it also bounds the TLS
+    //       handshake.
+    TlsTransport::ClassConfig tlsTransportConfig{
+        .handshakeTimeoutS{CONNECTING_TIMEOUT_S},
+        .maxQueuedWriteBytes{MAX_QUEUED_WRITE_BYTES},
+        .maxQueuedMessages{MAX_QUEUED_WRITES}};
+    WorldConnection::ClassConfig connectionConfig{
+        .tlsTransportConfig{tlsTransportConfig},
+        .idleTimeoutS{IDLE_TIMEOUT_S}};
+
+    connection = std::make_shared<WorldConnection>(
+        std::move(*socket), sslContext, connectionConfig);
+    connectingSocket.reset();
+
+    connection->setBatchCallback(
+        [this](const WorldBatchComposer::ReceivedBatch& batch) {
+            onBatchReceived(batch);
+        });
+    connection->startClient(
+        [this, connectionID](AM::Connection&) {
+            onConnectionReady(connectionID);
+        },
+        [this, connectionID](const asio::error_code& disconnectError) {
+            onConnectionDisconnected(connectionID, disconnectError);
+        });
+}
+
+void WorldClientEndpoint::onConnectionReady(Uint32 connectionID)
+{
+    if ((connectionID != currentConnectionID)
+        || (connectionState != ConnectionState::Connecting)) {
+        return;
+    }
+
+    // Present our ticket. The server will validate it and send us a
+    // ConnectionResponse.
+    // Note: From here, ServerConnectionSystem's response timeout and our
+    //       idle timeout bound how long we'll wait.
+    cancelTimer(connectionTimer);
+    connectionState = ConnectionState::Connected;
+    BinaryBufferSharedPtr connectionRequest{WorldMessageFramer::frameMessage(
+        ConnectionRequest{pendingWorldTicket}, adjustmentIteration)};
+    OPENSSL_cleanse(pendingWorldTicket.data(), pendingWorldTicket.size());
+    sendOnIOThread(std::move(connectionRequest));
+}
+
+void WorldClientEndpoint::onConnectionDisconnected(
+    Uint32 connectionID, const asio::error_code& error)
+{
+    if (connectionID != currentConnectionID) {
+        return;
+    }
+
+    ConnectionState previousState{connectionState};
+    LOG_INFO("WorldServer disconnected: %s", error.message().c_str());
+    closeOnIOThread();
+
+    networkEventDispatcher.emplace<ConnectionError>(
+        (previousState == ConnectionState::Connected)
+            ? ConnectionError::Type::Disconnected
+            : ConnectionError::Type::Failed);
+}
+
+void WorldClientEndpoint::onBatchReceived(
+    const WorldBatchComposer::ReceivedBatch& batch)
+{
+    // Check if we need to adjust the tick offset.
+    adjustIfNeeded(batch.tickAdjustment, batch.adjustmentIteration);
+
+    // Process the messages.
+    for (const WorldBatchComposer::ReceivedMessage& message : batch.messages) {
+        messageProcessor.processReceivedMessage(
+            message.type, message.payload.data(), message.payload.size());
+    }
+
+    // Record the number of received bytes.
+    NetworkStats::recordBytesReceived(batch.wireSize);
+}
+
+void WorldClientEndpoint::sendOnIOThread(BinaryBufferSharedPtr message)
+{
+    if (!message) {
+        return;
+    }
+    if ((connectionState != ConnectionState::Connected) || !connection) {
+        LOG_INFO("Dropped a WorldServer message: Not connected.");
+        return;
+    }
+
+    // Note: If the send fails, the connection will call our disconnect
+    //       callback, which resets connection. We hold a reference so it
+    //       outlives the call.
+    std::shared_ptr<WorldConnection> activeConnection{connection};
+    std::size_t messageSize{message->size()};
+    if (activeConnection->sendFramed(std::move(message))) {
+        NetworkStats::recordBytesSent(messageSize);
     }
     else {
-        // Note: Receive thread is responsible for emitting ConnectionError.
-        LOG_INFO("Message send failed.");
+        LOG_INFO("Failed to queue a WorldServer message.");
     }
 }
 
@@ -187,118 +394,6 @@ void WorldClientEndpoint::sendHeartbeatIfNecessary()
     }
 
     messagesSentSinceTick = 0;
-}
-
-void WorldClientEndpoint::connectAndReceive()
-{
-    // Try to connect.
-    UserConfig::ServerAddress serverAddress{
-        UserConfig::get().getWorldServerAddress()};
-    server = Peer::initiate(serverAddress.IP, serverAddress.port);
-    if (server != nullptr) {
-        // Present our ticket. The server will validate it and send us a
-        // ConnectionResponse.
-        send(ConnectionRequest{pendingWorldTicket});
-        OPENSSL_cleanse(pendingWorldTicket.data(), pendingWorldTicket.size());
-    }
-    else {
-        OPENSSL_cleanse(pendingWorldTicket.data(), pendingWorldTicket.size());
-        networkEventDispatcher.emplace<ConnectionError>(
-            ConnectionError::Type::Failed);
-        return;
-    }
-
-    // Receive message batches from the server.
-    while (!exitRequested) {
-        if (!(server->isReady(true))) {
-            // There wasn't any activity, delay so we don't waste CPU
-            // spinning.
-            SDL_Delay(INACTIVE_DELAY_TIME_MS);
-        }
-
-        // Data is waiting. Receive it.
-        int bytesReceived{
-            server->receiveBytes(headerRecBuffer.data(), SERVER_HEADER_SIZE)};
-        if (bytesReceived < 0) {
-            LOG_INFO("Found server to be disconnected while trying to receive "
-                     "header.");
-            networkEventDispatcher.emplace<ConnectionError>(
-                ConnectionError::Type::Disconnected);
-            return;
-        }
-
-        processBatch();
-    }
-}
-
-void WorldClientEndpoint::processBatch()
-{
-    // Start tracking the number of received bytes.
-    unsigned int bytesReceived{SERVER_HEADER_SIZE};
-
-    // Check if we need to adjust the tick offset.
-    adjustIfNeeded(headerRecBuffer[ServerHeaderIndex::TickAdjustment],
-                   headerRecBuffer[ServerHeaderIndex::AdjustmentIteration]);
-
-    /* Process the BatchSize header field. */
-    // Read the high bit of batchSize to tell whether the batch is compressed
-    // or not. If the high bit is set, the batch is compressed.
-    Uint16 batchSize{
-        ByteTools::read16(&(headerRecBuffer[ServerHeaderIndex::BatchSize]))};
-    bool batchIsCompressed{(batchSize & (1U << 15)) != 0};
-
-    // Reset the high bit of batchSize to get the real size.
-    batchSize &= ~(1U << 15);
-
-    /* Process the batch, if it contains any data. */
-    if (batchSize > 0) {
-        // Receive the expected bytes.
-        int result{server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
-        if (result < 0) {
-            LOG_INFO("Found server to be disconnected while trying to receive "
-                     "batch.");
-            return;
-        }
-
-        // Track the number of bytes we've received.
-        bytesReceived += MESSAGE_HEADER_SIZE + batchSize;
-
-        // If the payload is compressed, decompress it.
-        Uint8* bufferToUse{&(batchRecBuffer[0])};
-        if (batchIsCompressed) {
-            batchSize = static_cast<Uint16>(
-                ByteTools::decompress(&(batchRecBuffer[0]), batchSize,
-                                      &(decompressedBatchRecBuffer[0]),
-                                      SharedConfig::MAX_BATCH_SIZE));
-
-            bufferToUse = &(decompressedBatchRecBuffer[0]);
-        }
-
-        // Process the messages.
-        std::size_t bufferIndex{0};
-        while (bufferIndex < batchSize) {
-            Uint8 messageType{
-                bufferToUse[bufferIndex + MessageHeaderIndex::MessageType]};
-            Uint16 messageSize{ByteTools::read16(
-                &(bufferToUse[bufferIndex + MessageHeaderIndex::Size]))};
-
-            messageProcessor.processReceivedMessage(
-                messageType,
-                &(bufferToUse[bufferIndex + MessageHeaderIndex::MessageStart]),
-                messageSize);
-
-            bufferIndex += MESSAGE_HEADER_SIZE + messageSize;
-            AM_ASSERT((bufferIndex <= batchSize),
-                      "Buffer index is wrong. %u, %u", bufferIndex, batchSize);
-        }
-
-        AM_ASSERT((bufferIndex == batchSize),
-                  "Didn't process correct number of bytes. %u, %u", bufferIndex,
-                  batchSize);
-    }
-
-    // Record the number of received bytes.
-    NetworkStats::recordBytesReceived(bytesReceived);
 }
 
 void WorldClientEndpoint::adjustIfNeeded(Sint8 receivedTickAdj,

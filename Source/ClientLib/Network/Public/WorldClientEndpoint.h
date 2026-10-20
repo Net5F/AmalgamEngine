@@ -3,23 +3,24 @@
 #include "SharedConfig.h"
 #include "NetworkDefs.h"
 #include "MessageProcessor.h"
-#include "Serialize.h"
-#include "Peer.h"
-#include "Deserialize.h"
-#include "ByteTools.h"
+#include "WorldConnection.h"
+#include "WorldMessageFramer.h"
 #include "AccountDefs.h"
 #include "Log.h"
+#include "asio/io_context.hpp"
+#include "asio/ip/tcp.hpp"
+#include "asio/post.hpp"
+#include "asio/ssl/context.hpp"
+#include "asio/steady_timer.hpp"
 #include <SDL3/SDL_stdinc.h>
 #include <array>
-#include <string>
 #include <memory>
 #include <atomic>
-#include <thread>
+#include <utility>
 
 namespace AM
 {
-struct ConnectionResponse;
-struct EntityUpdate;
+class EventDispatcher;
 
 namespace Client
 {
@@ -33,7 +34,8 @@ class IMessageProcessorExtension;
  * Once connected, this connection stays open as long as messages are flowing.
  * When no messages need to be sent, a heartbeat is instead sent from client ->
  * server. If the server receives no messages from a client for a period of
- * time, the connection times out and must be re-established.
+ * time, the connection times out and must be re-established. Similarly, if we
+ * receive nothing from the server for a period of time, we disconnect.
  *
  * Note: ServerConnectionSystem is responsible for calling connect() and
  *       disconnect(). If a connection error is detected, this class will push a
@@ -43,15 +45,13 @@ class WorldClientEndpoint
 {
 public:
     WorldClientEndpoint(
+        asio::io_context& inIoContext, asio::ssl::context& inSSLContext,
         const MessageProcessorContext& inMessageProcessorContext);
 
     ~WorldClientEndpoint();
 
-    // TODO: If the IP provided in UserConfig.json is invalid, the receive
-    //       thread will stall for a long time while waiting for
-    //       SDLNet_TCP_Open() to return. If we move off SDL_Net, improve this.
     /**
-     * Spins up the connectAndReceive thread. Once connected, sends a
+     * Starts an async connection attempt. Once connected, sends a
      * ConnectionRequest with the given ticket.
      *
      * Note: ServerConnectionSystem is responsible for calling this. See class
@@ -60,7 +60,10 @@ public:
     void connect(const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket);
 
     /**
-     * Cleans up our server connection and spins down the receive thread.
+     * Closes our server connection.
+     *
+     * Blocks until the IO thread has closed the connection. Once this
+     * returns, no more events will be pushed for the closed connection.
      *
      * Note: ServerConnectionSystem is responsible for calling this. See class
      *       comment.
@@ -68,16 +71,16 @@ public:
     void disconnect();
 
     /**
-     * Updates accumulatedTime. If greater than the tick timestep and no
-     * messages have been sent since the last heartbeat, sends a message.
+     * If the tick timestep has passed and no messages have been sent since
+     * the last heartbeat, sends a heartbeat.
      *
      * Also logs network statistics periodically.
      */
     void tick();
 
     /**
-     * Sends a message over the network.
-     * Errors if the server is disconnected.
+     * Queues a message to be sent on the IO thread.
+     * If we aren't connected, the message is dropped.
      *
      * @param message A structure that defines MESSAGE_TYPE and has an
      * associated serialize() function.
@@ -119,38 +122,55 @@ public:
     void setMessageProcessorExtension(IMessageProcessorExtension* extension);
 
 private:
-    /**
-     * How long the receive loop in connectAndReceive should delay if no
-     * socket activity was reported on the socket.
-     */
-    static constexpr unsigned int INACTIVE_DELAY_TIME_MS{1};
+    // Note: If a project ever cares to configure any of these, they can be
+    //       moved into Config.h.
+    static constexpr double CONNECTING_TIMEOUT_S{5};
+    /** If we receive nothing for this long, we assume the server is gone.
+        Once the sim is running, the server sends us a batch every tick. */
+    static constexpr double IDLE_TIMEOUT_S{10};
+    /** Large enough to hold a couple max-size messages (which are only sent
+        when a dev is modifying the world). */
+    static constexpr std::size_t MAX_QUEUED_WRITE_BYTES{
+        2 * CLIENT_MAX_MESSAGE_SIZE};
+    /** Large enough to handle bursts, e.g. requesting item data for a full
+        inventory. */
+    static constexpr std::size_t MAX_QUEUED_WRITES{1000};
+
+    enum class ConnectionState {
+        Disconnected,
+        /** Establishing the TCP connection and TLS handshake. */
+        Connecting,
+        /** Connected and ConnectionRequest sent. ServerConnectionSystem
+            handles the server's ConnectionResponse. */
+        Connected
+    };
+
+    /** Connection logic */
+    void connectOnIOThread(
+        const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket);
+    void closeOnIOThread();
+    void handleConnectionFailure(Uint32 connectionID,
+                                 const asio::error_code& error);
+    void cancelTimer(asio::steady_timer& timer);
+
+    /** Event handlers. */
+    void onSocketConnected(std::shared_ptr<asio::ip::tcp::socket> socket,
+                           Uint32 connectionID, const asio::error_code& error);
+    void onConnectionReady(Uint32 connectionID);
+    void onConnectionDisconnected(Uint32 connectionID,
+                                  const asio::error_code& error);
+    void onBatchReceived(const WorldBatchComposer::ReceivedBatch& batch);
 
     /**
-     * Sends bytes over the network.
-     * Errors if the server is disconnected.
+     * Queues a framed message on the current connection.
      */
-    void sendBytes(const BinaryBufferSharedPtr& message);
+    void sendOnIOThread(BinaryBufferSharedPtr message);
 
     /**
      * If we haven't sent any messages since the last network tick, sends a
      * heartbeat.
      */
     void sendHeartbeatIfNecessary();
-
-    /**
-     * Thread function, started from connect().
-     *
-     * First, tries to connect to the server.
-     * If successful, receives messages from the server and passes them to
-     * processBatch().
-     */
-    void connectAndReceive();
-
-    /**
-     * Processes the received header and following batch.
-     * If any messages are expected, receives the messages.
-     */
-    void processBatch();
 
     /**
      * Checks if we need to process the received adjustment, does so if
@@ -166,11 +186,8 @@ private:
      */
     void logNetworkStatistics();
 
-    std::shared_ptr<Peer> server;
-
-    /** The ticket to present to the server after connecting. Set by
-        connect(), cleared after it's sent. */
-    std::array<Uint8, SERVICE_TICKET_BYTES> pendingWorldTicket;
+    asio::io_context& ioContext;
+    asio::ssl::context& sslContext;
 
     /** Used to dispatch events from the network to the simulation. */
     EventDispatcher& networkEventDispatcher;
@@ -179,15 +196,28 @@ private:
         pushes messages into the eventDispatcher. */
     MessageProcessor messageProcessor;
 
-    /** The adjustment that the server has told us to apply to the tick. */
-    std::atomic<int> tickAdjustment;
+    //-------------------------------------------------------------------------
+    // IO thread state
+    //-------------------------------------------------------------------------
+    /** Bounds the TCP connection and TLS handshake. */
+    asio::steady_timer connectionTimer;
+    std::shared_ptr<asio::ip::tcp::socket> connectingSocket;
+    std::shared_ptr<WorldConnection> connection;
 
-    /** Tracks what iteration of tick offset adjustments we're on.
-        Used to make sure that we don't double-count adjustments. */
-    std::atomic<Uint8> adjustmentIteration;
+    /** The ticket to present once connected. Cleared after it's sent. */
+    std::array<Uint8, SERVICE_TICKET_BYTES> pendingWorldTicket;
 
-    /** True when we're waiting for the sim to finish applying an adjustment. */
-    std::atomic<bool> isApplyingTickAdjustment;
+    ConnectionState connectionState;
+
+    /** The ID of the connection that the IO thread is currently working on.
+        Used to discard late async callbacks for old connections. */
+    Uint32 currentConnectionID;
+
+    //-------------------------------------------------------------------------
+    // Main thread state
+    //-------------------------------------------------------------------------
+    /** True between connect() and disconnect(). */
+    bool connectionActive;
 
     /** Tracks if we've sent a message since the last network tick.
         Used to determine if we need to heartbeat. */
@@ -195,20 +225,6 @@ private:
 
     /** Pointer to the game's current tick. */
     const std::atomic<Uint32>* currentTickPtr;
-
-    /** Calls pollForMessages(). */
-    std::jthread receiveThreadObj;
-    /** Turn false to signal that the receive thread should end. */
-    std::atomic<bool> exitRequested;
-
-    /** Holds a received server header while we process it. */
-    BinaryBuffer headerRecBuffer;
-    /** Holds a received message batch while we pass its messages to
-        MessageProcessor. */
-    BinaryBuffer batchRecBuffer;
-    /** If a batch is compressed, it's decompressed into this buffer before
-        processing. */
-    BinaryBuffer decompressedBatchRecBuffer;
 
     /** The number of seconds we'll wait before logging our network
         statistics. */
@@ -223,47 +239,41 @@ private:
 
     /** The number of ticks since we last logged our network statistics. */
     unsigned int ticksSinceNetstatsLog;
+
+    //-------------------------------------------------------------------------
+    // Shared state
+    //-------------------------------------------------------------------------
+    /** The adjustment that the server has told us to apply to the tick. */
+    std::atomic<int> tickAdjustment;
+
+    /** Tracks what iteration of tick offset adjustments we're on.
+        Used to make sure that we don't double-count adjustments. */
+    std::atomic<Uint8> adjustmentIteration;
+
+    /** True when we're waiting for the sim to finish applying an adjustment. */
+    std::atomic<bool> isApplyingTickAdjustment;
 };
 
 template<typename Message>
 void WorldClientEndpoint::send(const Message& message)
 {
-    // Check that the message isn't too big.
-    // Note: We don't compress messages on this side, so we know the final
-    //       message size at this point.
-    std::size_t totalMessageSize{CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE
-                                 + Serialize::measureSize(message)};
-    if (totalMessageSize > CLIENT_MAX_MESSAGE_SIZE) {
-        LOG_INFO("Tried to send a too-large message. Size: %u, max: %u",
-                 totalMessageSize, CLIENT_MAX_MESSAGE_SIZE);
+    if (!connectionActive) {
+        LOG_INFO("Tried to send while server is disconnected.");
         return;
     }
 
-    // Serialize the message struct into a buffer, leaving room for the
-    // headers.
-    BinaryBufferSharedPtr messageBuffer{
-        std::make_shared<BinaryBuffer>(totalMessageSize)};
-    std::size_t messageSize{Serialize::toBuffer(
-        messageBuffer->data(), messageBuffer->size(), message,
-        (CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE))};
+    // Frame the message here, so the IO thread only has to queue it.
+    BinaryBufferSharedPtr framedMessage{
+        WorldMessageFramer::frameMessage(message, adjustmentIteration)};
+    if (!framedMessage) {
+        return;
+    }
 
-    // Copy the adjustment iteration into the client header.
-    messageBuffer->at(ClientHeaderIndex::AdjustmentIteration)
-        = adjustmentIteration;
-
-    // Copy the message type into the message header.
-    // TODO: Add a nice compile-time message if Message doesn't define
-    //       MESSAGE_TYPE.
-    messageBuffer->at(CLIENT_HEADER_SIZE + MessageHeaderIndex::MessageType)
-        = static_cast<Uint8>(Message::MESSAGE_TYPE);
-
-    // Copy the message size into the message header.
-    ByteTools::write16(static_cast<Uint16>(messageSize),
-                       (messageBuffer->data() + CLIENT_HEADER_SIZE
-                        + MessageHeaderIndex::Size));
-
-    // Send the message.
-    sendBytes(messageBuffer);
+    messagesSentSinceTick++;
+    asio::post(ioContext,
+               [this, framedMessage = std::move(framedMessage)]() mutable {
+                   sendOnIOThread(std::move(framedMessage));
+               });
 }
 
 } // namespace Client
