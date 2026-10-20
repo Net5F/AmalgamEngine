@@ -7,6 +7,7 @@
 #include "Config.h"
 #include "UserConfig.h"
 #include "NetworkStats.h"
+#include "ByteTools.h"
 #include "IMessageProcessorExtension.h"
 #include "asio/error.hpp"
 #include "asio/ip/address.hpp"
@@ -323,10 +324,17 @@ void WorldClientEndpoint::onConnectionReady(Uint32 connectionID)
     //       idle timeout bound how long we'll wait.
     cancelTimer(connectionTimer);
     connectionState = ConnectionState::Connected;
-    BinaryBufferSharedPtr connectionRequest{WorldMessageFramer::frameMessage(
-        ConnectionRequest{pendingWorldTicket}, adjustmentIteration)};
+    ConnectionRequest connectionRequest{pendingWorldTicket};
+    BinaryBufferSharedPtr framedRequest{WorldMessageFramer::frameMessage(
+        connectionRequest, adjustmentIteration)};
+    OPENSSL_cleanse(connectionRequest.ticket.data(),
+                    connectionRequest.ticket.size());
     OPENSSL_cleanse(pendingWorldTicket.data(), pendingWorldTicket.size());
-    sendOnIOThread(std::move(connectionRequest));
+    if (!framedRequest) {
+        return;
+    }
+
+    sendOnIOThread(ByteTools::makeWipedOnRelease(std::move(*framedRequest)));
 }
 
 void WorldClientEndpoint::onConnectionDisconnected(

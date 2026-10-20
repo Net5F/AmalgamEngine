@@ -3,6 +3,7 @@
 #include "AMAssert.h"
 #include <SDL3/SDL_endian.h>
 #include "lz4.h"
+#include <openssl/crypto.h>
 
 // If the system has data access alignment restrictions, our casting may fail.
 #if defined(sparc) || defined(mips) || defined(__arm__)
@@ -84,6 +85,17 @@ std::size_t ByteTools::decompress(const Uint8* sourceBuffer,
     }
 
     return decompressedLength;
+}
+
+BinaryBufferSharedPtr ByteTools::makeWipedOnRelease(BinaryBuffer&& buffer)
+{
+    // Note: Moving the vector transfers its storage, so the original bytes
+    //       aren't left behind in a copy.
+    return BinaryBufferSharedPtr{
+        new BinaryBuffer(std::move(buffer)), [](BinaryBuffer* wipedBuffer) {
+            OPENSSL_cleanse(wipedBuffer->data(), wipedBuffer->size());
+            delete wipedBuffer;
+        }};
 }
 
 } // End namespace AM

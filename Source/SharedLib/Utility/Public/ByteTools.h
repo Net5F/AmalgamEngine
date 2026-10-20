@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BinaryBuffer.h"
 #include <SDL3/SDL_stdinc.h>
 
 /**
@@ -74,6 +75,17 @@ public:
     static std::size_t decompress(const Uint8* sourceBuffer,
                                   std::size_t sourceLength, Uint8* destBuffer,
                                   std::size_t destLength);
+
+    //-------------------------------------------------------------------------
+    // Sensitive Data
+    //-------------------------------------------------------------------------
+    /**
+     * Takes ownership of the given buffer, returning a shared pointer that
+     * wipes the buffer's contents when it's released.
+     *
+     * Used for buffers that contain sensitive data, e.g. tickets.
+     */
+    static BinaryBufferSharedPtr makeWipedOnRelease(BinaryBuffer&& buffer);
 };
 
 } // End namespace AM

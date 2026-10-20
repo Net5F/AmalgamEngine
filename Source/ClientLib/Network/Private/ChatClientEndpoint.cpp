@@ -8,6 +8,8 @@
 #include "ChatMessage.h"
 #include "Deserialize.h"
 #include "QueuedEvents.h"
+#include "SimpleMessageFramer.h"
+#include "ByteTools.h"
 #include "asio/error.hpp"
 #include "asio/ip/address.hpp"
 #include "asio/system_error.hpp"
@@ -250,10 +252,20 @@ void ChatClientEndpoint::onConnectionReady(Uint32 connectionID)
     // Note: From here, our idle timeout bounds how long we'll wait.
     cancelTimer(connectionTimer);
     connectionState = ConnectionState::Authenticating;
-    if (!connection->send(ChatConnectionRequest{pendingTicket})) {
+    // Note: We frame the request ourselves so that we can wipe the ticket from
+    //       every buffer that holds it.
+    ChatConnectionRequest connectionRequest{pendingTicket};
+    BinaryBufferSharedPtr framedRequest{
+        SimpleMessageFramer<ChatClientMessageType>{MAX_WRITE_PAYLOAD_SIZE}
+            .frameMessage(connectionRequest)};
+    OPENSSL_cleanse(connectionRequest.ticket.data(),
+                    connectionRequest.ticket.size());
+    OPENSSL_cleanse(pendingTicket.data(), pendingTicket.size());
+    if (!framedRequest
+        || !connection->sendFramed(
+            ByteTools::makeWipedOnRelease(std::move(*framedRequest)))) {
         LOG_INFO("Failed to queue ChatServer connection request.");
     }
-    OPENSSL_cleanse(pendingTicket.data(), pendingTicket.size());
 }
 
 void ChatClientEndpoint::onConnectionDisconnected(Uint32 connectionID,
