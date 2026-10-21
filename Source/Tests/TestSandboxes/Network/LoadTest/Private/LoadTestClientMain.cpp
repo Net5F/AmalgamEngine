@@ -1,5 +1,4 @@
 #include <SDL3/SDL.h>
-#include "SDL_net.h"
 
 #include "SDL_Wrappers/SDL.h"
 
@@ -42,15 +41,17 @@ void printUsage()
 }
 
 /**
- * Configures the given context to require AccountServer's certificate to
- * match its pin.
+ * Configures the given context to require the server's certificate to match
+ * the pin in the given file.
  */
-void configureAccountServerVerification(asio::ssl::context& sslContext)
+void configureServerVerification(asio::ssl::context& sslContext,
+                                 const std::string& pinFileName,
+                                 const char* serverName)
 {
-    const std::string pinPath{Paths::BASE_PATH + "account-server.pin"};
+    const std::string pinPath{Paths::BASE_PATH + pinFileName};
     auto certificatePinOpt{TlsHelpers::loadCertificatePin(pinPath)};
     if (!certificatePinOpt) {
-        LOG_FATAL("Failed to load AccountServer certificate pin.");
+        LOG_FATAL("Failed to load %s certificate pin.", serverName);
     }
 
     try {
@@ -62,7 +63,7 @@ void configureAccountServerVerification(asio::ssl::context& sslContext)
                                                            verifyContext);
             });
     } catch (const asio::system_error& e) {
-        LOG_FATAL("Failed to configure AccountServer certificate pin '%s': %s",
+        LOG_FATAL("Failed to configure %s certificate pin '%s': %s", serverName,
                   pinPath.c_str(), e.what());
     }
 }
@@ -157,13 +158,14 @@ try {
         }
     }
 
-    // Init SDL_net once for all clients to use.
-    SDLNet_Init();
-
-    // Set up the AccountServer networking, shared by all clients.
+    // Set up the networking, shared by all clients.
     asio::io_context ioContext{};
-    asio::ssl::context sslContext{asio::ssl::context::tls_client};
-    configureAccountServerVerification(sslContext);
+    asio::ssl::context accountSSLContext{asio::ssl::context::tls_client};
+    configureServerVerification(accountSSLContext, "account-server.pin",
+                                "AccountServer");
+    asio::ssl::context worldSSLContext{asio::ssl::context::tls_client};
+    configureServerVerification(worldSSLContext, "world-server.pin",
+                                "WorldServer");
     auto workGuard{asio::make_work_guard(ioContext)};
     std::jthread ioThread{[&ioContext]() { ioContext.run(); }};
 
@@ -174,7 +176,7 @@ try {
     for (std::size_t i{0}; i < clients.size(); ++i) {
         clients[i] = std::make_unique<SimulatedClient>(
             static_cast<unsigned int>(i), inputsPerSecond, ioContext,
-            sslContext);
+            accountSSLContext, worldSSLContext);
     }
 
     // Start the client connections thread.
@@ -193,18 +195,16 @@ try {
         }
 
         // Process the simulated clients.
+        // Note: This is safe to do, whether the client is connected or not.
         for (auto& client : clients) {
-            // Note: These are both safe to do, whether the client is connected
-            //       or not.
-            client->receiveAndProcess();
             client->tick();
         }
     }
 
     connectionThreadObj.join();
 
-    // Stop the IO thread before the clients (and their AccountServer
-    // connections) are destroyed.
+    // Stop the IO thread before the clients (and their connections) are
+    // destroyed.
     workGuard.reset();
     ioContext.stop();
     ioThread.join();

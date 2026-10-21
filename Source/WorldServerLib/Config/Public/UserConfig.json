@@ -11,5 +11,8 @@
 
   // ChatServer's IP address and service port.
   "chatServerIP": "127.0.0.1",
-  "chatServerPort": 41495
+  "chatServerPort": 41495,
+
+  // The maximum number of clients that we will allow at once.
+  "maxClients": 1000
 }

@@ -83,6 +83,48 @@ public:
     }
 
     /**
+     * If a connection occupies the given slot ID, returns its handle.
+     * Otherwise returns a null handle.
+     */
+    ConnectionHandle getHandle(ConnectionHandle::ID id) const
+    {
+        if ((id == 0) || (id >= entries.size())) {
+            return {};
+        }
+
+        const Entry& entry{entries[id]};
+        if (!entry.connection) {
+            return {};
+        }
+        return ConnectionHandle{id, entry.generation};
+    }
+
+    /**
+     * Calls the given function with the handle and shared_ptr of each
+     * connection in this registry.
+     *
+     * The function may erase connections (including the one it was given),
+     * but connections that are added during iteration may be skipped.
+     */
+    template<typename Function>
+    void forEach(Function&& function)
+    {
+        for (std::size_t id{1}; id < entries.size(); ++id) {
+            const Entry& entry{entries[id]};
+            if (!entry.connection) {
+                continue;
+            }
+
+            // Note: We copy the pointer so the connection outlives the call,
+            //       even if the function erases it.
+            std::shared_ptr<ConnectionType> connection{entry.connection};
+            function(ConnectionHandle{static_cast<ConnectionHandle::ID>(id),
+                                      entry.generation},
+                     connection);
+        }
+    }
+
+    /**
      * Attempts to delete the given connection from this registry.
      * @return true if erased, else false (connection not found).
      */

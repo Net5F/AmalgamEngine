@@ -1,9 +1,7 @@
 #include "WorldSimulation.h"
-#include "NetworkSimulation.h"
+#include "WorldClientEndpoint.h"
 #include "Config.h"
-#include "Serialize.h"
 #include "InputChangeRequest.h"
-#include "Peer.h"
 #include "Log.h"
 #include <memory>
 #include <algorithm>
@@ -13,24 +11,25 @@ namespace AM
 namespace LTC
 {
 
-WorldSimulation::WorldSimulation(NetworkSimulation& inNetwork,
+WorldSimulation::WorldSimulation(Client::WorldClientEndpoint& inWorldEndpoint,
+                                 EventDispatcher& networkEventDispatcher,
                                  unsigned int inInputsPerSecond)
-: network{inNetwork}
-, connectionResponseQueue{network.getEventDispatcher()}
-, connectionErrorQueue{network.getEventDispatcher()}
+: worldEndpoint{inWorldEndpoint}
+, connectionResponseQueue{networkEventDispatcher}
+, connectionErrorQueue{networkEventDispatcher}
 , clientEntity{entt::null}
 , currentTick{0}
 , inputsPerSecond{inInputsPerSecond}
 , ticksTillInput{0}
 , isMovingRight{false}
 {
-    network.registerCurrentTickPtr(&currentTick);
+    worldEndpoint.registerCurrentTickPtr(&currentTick);
 }
 
 void WorldSimulation::connect(
     const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket)
 {
-    network.connect(worldTicket);
+    worldEndpoint.connect(worldTicket);
 
     // Wait for the player's ID from the server.
     ConnectionResponse connectionResponse{};
@@ -65,7 +64,7 @@ void WorldSimulation::tick()
     Uint32 targetTick{currentTick + 1};
 
     // Apply any adjustments that we received from the server.
-    targetTick += network.transferTickAdjustment();
+    targetTick += worldEndpoint.transferTickAdjustment();
 
     // Process ticks until we match what the server wants.
     // This may cause us to not process any ticks, or to process multiple
@@ -101,7 +100,7 @@ void WorldSimulation::sendNextInput()
     }
 
     // Send the client input message.
-    network.serializeAndSend<InputChangeRequest>(inputChangeRequest);
+    worldEndpoint.send(inputChangeRequest);
 }
 
 } // End namespace LTC

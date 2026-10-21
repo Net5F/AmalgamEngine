@@ -17,7 +17,6 @@
 #include "entt/signal/dispatcher.hpp"
 
 #include "SDL_Wrappers/SDL.h"
-#include "SDL_Wrappers/SDLNet.h"
 
 #include <atomic>
 #include <thread>
@@ -79,8 +78,6 @@ private:
     // SDL Objects
     //-------------------------------------------------------------------------
     SDL sdl;
-
-    SDLNet sdlNet;
 
     //-------------------------------------------------------------------------
     // Event Busses

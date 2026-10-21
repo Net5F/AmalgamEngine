@@ -1,51 +1,203 @@
 #pragma once
 
-#include "Peer.h"
-#include "SocketSet.h"
-#include "TcpSocket.h"
-#include "SDL_net.h"
+#include "Log.h"
+#include "asio/error.hpp"
+#include "asio/error_code.hpp"
+#include "asio/io_context.hpp"
+#include "asio/ip/tcp.hpp"
+#include "asio/socket_base.hpp"
+#include <exception>
+#include <functional>
 #include <memory>
-#include <string>
+#include <utility>
 
 namespace AM
 {
 /**
- * Owns a listener socket and provides an interface for accepting new Peers.
+ * Reusable asynchronous TCP listener for accepting connections.
+ *
+ * The parent Endpoint class supplies connection construction and registration
+ * callbacks. TLS handshaking remains the responsibility of Connection.
  */
+template<typename ConnectionType>
 class Acceptor
 {
 public:
-    Acceptor(Uint16 port, const std::shared_ptr<SocketSet>& inClientSet);
+    using ConnectionFactory
+        = std::function<std::shared_ptr<ConnectionType>(asio::ip::tcp::socket)>;
+    using AcceptCallback = std::function<void(std::shared_ptr<ConnectionType>)>;
+    using ErrorCallback = std::function<void(const asio::error_code&)>;
 
-    ~Acceptor();
+    Acceptor(asio::io_context& ioContext, asio::ip::tcp::endpoint endpoint,
+             ConnectionFactory connectionFactory, AcceptCallback acceptCallback,
+             ErrorCallback errorCallback)
+    : acceptLoop{std::make_shared<AcceptLoop>(
+          ioContext, std::move(endpoint), std::move(connectionFactory),
+          std::move(acceptCallback), std::move(errorCallback))}
+    {
+    }
 
-    /**
-     * If a peer is waiting to connect, opens a connection to the peer and
-     * adds it to the clientSet.
-     *
-     * @return A pointer to a new peer, if one was waiting. Else, nullptr.
-     */
-    std::unique_ptr<Peer> accept();
+    Acceptor(Acceptor&& other) noexcept
+    : acceptLoop{std::move(other.acceptLoop)}
+    {
+    }
 
-    /**
-     * If a peer is waiting to connect, opens a connection to the peer and
-     * immediately closes it.
-     *
-     * Use this to close connections when you're at maximum capacity.
-     *
-     * @return true if a peer was waiting, else false.
-     */
-    bool reject();
+    Acceptor(const Acceptor&) = delete;
+    Acceptor& operator=(const Acceptor&) = delete;
+
+    ~Acceptor() { stop(); }
+
+    Acceptor& operator=(Acceptor&& other) noexcept
+    {
+        if (this != &other) {
+            stop();
+            acceptLoop = std::move(other.acceptLoop);
+        }
+        return *this;
+    }
+
+    bool start() { return acceptLoop && acceptLoop->start(); }
+
+    void stop()
+    {
+        if (acceptLoop) {
+            acceptLoop->stop();
+        }
+    }
+
+    bool isRunning() const { return acceptLoop && acceptLoop->running; }
 
 private:
-    /** Our listener socket. */
-    TcpSocket socket;
+    /**
+     * Manages the async TCP connection accept loop.
+     *
+     * We use a separate class so it can be owned as a shared_ptr by the async
+     * context, making it safe to call, even during shutdown.
+     */
+    struct AcceptLoop : public std::enable_shared_from_this<AcceptLoop> {
+        AcceptLoop(asio::io_context& ioContext,
+                   asio::ip::tcp::endpoint inEndpoint,
+                   ConnectionFactory inConnectionFactory,
+                   AcceptCallback inAcceptCallback,
+                   ErrorCallback inErrorCallback)
+        : acceptor{ioContext}
+        , endpoint{std::move(inEndpoint)}
+        , connectionFactory{std::move(inConnectionFactory)}
+        , acceptCallback{std::move(inAcceptCallback)}
+        , errorCallback{std::move(inErrorCallback)}
+        , running{false}
+        {
+        }
 
-    /** The set that we use to check if our socket has activity. */
-    SocketSet listenerSet;
+        /**
+         * Starts the accept loop.
+         */
+        bool start()
+        {
+            if (running) {
+                return true;
+            }
+            if (!connectionFactory || !acceptCallback) {
+                reportError(asio::error::make_error_code(
+                    asio::error::invalid_argument));
+                return false;
+            }
 
-    /** A pointer to the set to add accepted clients to. */
-    std::shared_ptr<SocketSet> clientSet;
+            asio::error_code error{};
+            acceptor.open(endpoint.protocol(), error);
+            if (!error) {
+                acceptor.set_option(asio::socket_base::reuse_address{true},
+                                    error);
+            }
+            if (!error) {
+                acceptor.bind(endpoint, error);
+            }
+            if (!error) {
+                acceptor.listen(asio::socket_base::max_listen_connections,
+                                error);
+            }
+            if (error) {
+                asio::error_code ignoredError{};
+                acceptor.close(ignoredError);
+                reportError(error);
+                return false;
+            }
+
+            running = true;
+            acceptNext();
+            return true;
+        }
+
+        /**
+         * Stops the accept loop.
+         */
+        void stop()
+        {
+            if (!running && !acceptor.is_open()) {
+                return;
+            }
+
+            running = false;
+            asio::error_code ignoredError{};
+            acceptor.cancel(ignoredError);
+            acceptor.close(ignoredError);
+        }
+
+        /**
+         * Stages an async handler for the next accept event.
+         */
+        void acceptNext()
+        {
+            if (!running) {
+                return;
+            }
+
+            std::shared_ptr<AcceptLoop> self{this->shared_from_this()};
+            acceptor.async_accept([self](const asio::error_code& error,
+                                         asio::ip::tcp::socket socket) {
+                if (!self->running) {
+                    return;
+                }
+                if (error) {
+                    if (error != asio::error::operation_aborted) {
+                        self->reportError(error);
+                        self->acceptNext();
+                    }
+                    return;
+                }
+
+                try {
+                    std::shared_ptr<ConnectionType> connection{
+                        self->connectionFactory(std::move(socket))};
+                    if (connection) {
+                        self->acceptCallback(std::move(connection));
+                    }
+                } catch (const std::exception& e) {
+                    LOG_ERROR("Failed to construct connection: %s", e.what());
+                    self->reportError(
+                        asio::error::make_error_code(asio::error::fault));
+                }
+
+                self->acceptNext();
+            });
+        }
+
+        void reportError(const asio::error_code& error)
+        {
+            if (errorCallback) {
+                errorCallback(error);
+            }
+        }
+
+        asio::ip::tcp::acceptor acceptor;
+        asio::ip::tcp::endpoint endpoint;
+        ConnectionFactory connectionFactory;
+        AcceptCallback acceptCallback;
+        ErrorCallback errorCallback;
+        bool running;
+    };
+
+    std::shared_ptr<AcceptLoop> acceptLoop;
 };
 
-} /* End namespace AM */
+} // namespace AM

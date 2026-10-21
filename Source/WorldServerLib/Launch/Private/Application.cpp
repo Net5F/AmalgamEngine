@@ -3,6 +3,7 @@
 #include "Log.h"
 
 #include "tracy/Tracy.hpp"
+#include <SDL3/SDL_timer.h>
 #include <functional>
 #include <string>
 #include <iostream>
@@ -13,7 +14,6 @@ namespace WorldServer
 {
 Application::Application()
 : sdl{0}
-, sdlNet{}
 , networkEventDispatcher{}
 , userConfigInitializer{}
 , resourceData{}

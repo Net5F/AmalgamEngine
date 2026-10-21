@@ -2,21 +2,24 @@ target_sources(WorldServerLib
     PRIVATE
         Private/ChatServiceEndpoint.cpp
         Private/Client.cpp
-        Private/ClientHandler.cpp
         Private/MessageProcessor.cpp
         Private/Network.cpp
+        Private/WorldBatchFramer.cpp
+        Private/WorldClientConnection.cpp
         Private/WorldClientEndpoint.cpp
+        Private/WorldClientMessageComposer.cpp
     PUBLIC
         Public/ChatServiceEndpoint.h
         Public/Client.h
-        Public/ClientMap.h
         Public/ClientConnectionEvent.h
-        Public/ClientHandler.h
         Public/IMessageProcessorExtension.h
         Public/MessageProcessor.h
         Public/MessageProcessorContext.h
         Public/Network.h
+        Public/WorldBatchFramer.h
+        Public/WorldClientConnection.h
         Public/WorldClientEndpoint.h
+        Public/WorldClientMessageComposer.h
 )
 
 target_include_directories(WorldServerLib

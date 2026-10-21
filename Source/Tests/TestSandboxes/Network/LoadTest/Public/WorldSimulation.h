@@ -13,10 +13,15 @@
 namespace AM
 {
 struct InputChangeRequest;
+class EventDispatcher;
+
+namespace Client
+{
+class WorldClientEndpoint;
+}
 
 namespace LTC
 {
-class NetworkSimulation;
 
 /**
  * Represents the Simulation for a single simulated client.
@@ -27,7 +32,9 @@ class NetworkSimulation;
 class WorldSimulation
 {
 public:
-    WorldSimulation(NetworkSimulation& network, unsigned int inInputsPerSecond);
+    WorldSimulation(Client::WorldClientEndpoint& inWorldEndpoint,
+                    EventDispatcher& networkEventDispatcher,
+                    unsigned int inInputsPerSecond);
 
     /**
      * Connects to the game server using the given ticket, waits for a
@@ -54,7 +61,7 @@ private:
               before responding. */
     static constexpr int CONNECTION_RESPONSE_WAIT_US{5 * 1000 * 1000};
 
-    NetworkSimulation& network;
+    Client::WorldClientEndpoint& worldEndpoint;
 
     /** Connection responses, received from the server. */
     EventQueue<ConnectionResponse> connectionResponseQueue;

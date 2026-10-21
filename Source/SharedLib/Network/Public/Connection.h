@@ -3,6 +3,9 @@
 #include "TlsTransport.h"
 #include "Log.h"
 #include "asio/error.hpp"
+#include "asio/steady_timer.hpp"
+#include "asio/system_error.hpp"
+#include <chrono>
 #include <exception>
 #include <functional>
 #include <memory>
@@ -19,7 +22,7 @@ namespace AM
 class Connection : public std::enable_shared_from_this<Connection>
 {
 private:
-    enum class State { NotStarted, Handshaking, Ready, Closed };
+    enum class State { NotStarted, Handshaking, Ready, Closing, Closed };
 
 public:
     using ReadyCallback = std::function<void(Connection&)>;
@@ -32,6 +35,7 @@ public:
     , readyCallback{}
     , disconnectCallback{}
     , state{State::NotStarted}
+    , closeTimer{tlsTransport->getExecutor()}
     {
     }
 
@@ -88,6 +92,7 @@ public:
         DisconnectCallback callback{std::move(disconnectCallback)};
         disconnectCallback = {};
 
+        cancelCloseTimer();
         tlsTransport->close();
 
         if (callback) {
@@ -105,7 +110,58 @@ public:
         }
 
         state = State::Closed;
+        cancelCloseTimer();
         tlsTransport->close();
+    }
+
+    /**
+     * Stops accepting sends. Once all queued sends have been written, closes
+     * our side of the connection and waits for the peer to close theirs.
+     * When that happens (or closeTimeoutS passes), disconnects and invokes
+     * the registered callback once.
+     *
+     * Use this instead of disconnect() when the peer should receive our
+     * final messages (e.g. a message telling it why it's being
+     * disconnected).
+     *
+     * Note: While closing, derived classes should keep reading (and
+     *       discarding) data, so that the peer closing is detected.
+     */
+    void closeAfterWrites(double closeTimeoutS)
+    {
+        if (state == State::Closing) {
+            return;
+        }
+        if (state != State::Ready) {
+            // There's nothing to flush, just disconnect.
+            disconnect(asio::error::make_error_code(asio::error::shut_down));
+            return;
+        }
+
+        state = State::Closing;
+
+        // If the peer doesn't close in time, give up on a clean close.
+        try {
+            closeTimer.expires_after(
+                std::chrono::duration_cast<asio::steady_timer::duration>(
+                    std::chrono::duration<double>(closeTimeoutS)));
+
+            std::weak_ptr<Connection> weakSelf{shared_from_this()};
+            closeTimer.async_wait([weakSelf](const asio::error_code& error) {
+                if (error == asio::error::operation_aborted) {
+                    return;
+                }
+                if (std::shared_ptr<Connection> self{weakSelf.lock()}) {
+                    self->disconnect(
+                        asio::error::make_error_code(asio::error::timed_out));
+                }
+            });
+        } catch (const asio::system_error& e) {
+            disconnect(e.code());
+            return;
+        }
+
+        tlsTransport->closeAfterWrites();
     }
 
     /**
@@ -117,6 +173,12 @@ public:
      * Returns true if the TLS handshake and peer validation have completed.
      */
     bool isReady() const { return state == State::Ready; }
+
+    /**
+     * Returns true if closeAfterWrites() was called and we're waiting for
+     * the connection to finish closing.
+     */
+    bool isClosing() const { return state == State::Closing; }
 
     /**
      * Returns the underlying OpenSSL handle. Useful for inspecting the
@@ -197,12 +259,25 @@ private:
         startReadLoop();
     }
 
+    void cancelCloseTimer()
+    {
+        try {
+            closeTimer.cancel();
+        } catch (const asio::system_error& e) {
+            LOG_INFO("Failed to cancel close timer: %s",
+                     e.code().message().c_str());
+        }
+    }
+
     // Note: We don't expect these to throw. It's up to the caller to ensure
     //       that.
     ReadyCallback readyCallback;
     DisconnectCallback disconnectCallback;
 
     State state;
+
+    /** Bounds how long closeAfterWrites() waits for the peer to close. */
+    asio::steady_timer closeTimer;
 };
 
 } // namespace AM

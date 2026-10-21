@@ -103,20 +103,4 @@ struct MessageHeaderIndex {
 static constexpr unsigned int MESSAGE_HEADER_SIZE{
     MessageHeaderIndex::MessageStart};
 
-//--------------------------------------------------------------------------
-// Enums, Structs
-//--------------------------------------------------------------------------
-/** All potential results for a network-layer send or receive. */
-enum class NetworkResult {
-    /** Indicates the value hasn't been set. Used for initialization. */
-    NotSet,
-    /** A message was successfully sent or received. */
-    Success,
-    /* A send or receive was attempted and the peer was found to be
-       disconnected. */
-    Disconnected,
-    /* A receive was successful but the message has not yet been completed. */
-    MessageNotComplete,
-};
-
 } // End namespace AM

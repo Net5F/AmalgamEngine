@@ -13,6 +13,7 @@ target_sources(SharedLib
         Public/World/ConnectionResponse.h
         Public/World/DialogueChoiceRequest.h
         Public/World/DialogueResponse.h
+        Public/World/DisconnectNotice.h
         Public/World/EngineMessageType.h
         Public/World/EntityDelete.h
         Public/World/EntityDeleteRequest.h

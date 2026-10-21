@@ -35,6 +35,10 @@ private:
         ChatServer to present its pinned certificate (mutual TLS). */
     asio::ssl::context chatSSLContext;
 
+    /** Used by clientEndpoint. Presents our certificate. Clients are
+        authenticated by their tickets, not certificates. */
+    asio::ssl::context clientSSLContext;
+
 public:
     Network(const MessageProcessorContext& inMessageProcessorContext);
 
@@ -44,7 +48,7 @@ public:
     void start();
 
     // Note: accountEndpoint must be constructed before clientEndpoint, since
-    //       clientEndpoint starts threads that use it.
+    //       clientEndpoint uses it.
     AccountServiceEndpoint accountEndpoint;
     WorldClientEndpoint clientEndpoint;
     ChatServiceEndpoint chatEndpoint;

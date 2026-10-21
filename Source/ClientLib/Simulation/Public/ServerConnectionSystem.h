@@ -5,6 +5,7 @@
 #include "ConnectionResponse.h"
 #include "ConnectionError.h"
 #include "WorldLogoutUpdate.h"
+#include "DisconnectNotice.h"
 #include "Timer.h"
 #include "entt/signal/fwd.hpp"
 #include <SDL3/SDL_stdinc.h>
@@ -69,6 +70,12 @@ private:
     void abortConnectionAttempt(ConnectionError::Type errorType);
 
     /**
+     * Sends a ConnectionError with the given type to the UI, disconnects the
+     * endpoint, and resets all sim state.
+     */
+    void disconnectFromServer(ConnectionError::Type errorType);
+
+    /**
      * Requests to connect to the game server, waits for an assigned EntityID,
      * and constructs the player.
      */
@@ -83,6 +90,13 @@ private:
      * Clears all sim state. Used when the connection is lost.
      */
     void clearSimState();
+
+    /**
+     * Returns the ConnectionError type that corresponds to the given
+     * DisconnectNotice reason.
+     */
+    ConnectionError::Type
+        getConnectionErrorType(DisconnectNotice::Reason reason);
 
     World& world;
     Network& network;
@@ -106,6 +120,9 @@ private:
 
     /** Logout updates, received from the server. */
     EventQueue<WorldLogoutUpdate> logoutUpdateQueue;
+
+    /** Disconnect notices, received from the server. */
+    EventQueue<DisconnectNotice> disconnectNoticeQueue;
 
     /** Tracks the state of our connection with the server. */
     ConnectionState connectionState;

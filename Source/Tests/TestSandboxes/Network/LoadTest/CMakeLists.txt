@@ -5,8 +5,6 @@ message(STATUS "Configuring Amalgam Engine Load Test Client")
 # Load test client
 add_executable(LoadTestClient
     Private/LoadTestClientMain.cpp
-    Private/NetworkSimulation.cpp
-    Public/NetworkSimulation.h
     Private/SimulatedClient.cpp
     Public/SimulatedClient.h
     Private/WorldSimulation.cpp
@@ -26,6 +24,13 @@ add_executable(LoadTestClient
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/AccountConnectionEvent.h
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/AccountMessageProcessor.cpp
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/AccountMessageProcessor.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/WorldBatchComposer.cpp
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/WorldBatchComposer.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/WorldClientEndpoint.cpp
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/WorldClientEndpoint.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/WorldConnection.cpp
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/WorldConnection.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/WorldMessageFramer.h
 )
 
 target_include_directories(LoadTestClient
@@ -71,9 +76,10 @@ endif()
 file(COPY ${CMAKE_SOURCE_DIR}/Resources/Client/Common/UserConfig.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
-# Copy AccountServer's local TLS pin to the build directory.
+# Copy AccountServer's and WorldServer's local TLS pins to the build directory.
 file(COPY
     "${AmalgamEngine_SOURCE_DIR}/TlsCredentials/Local/account-server.pin"
+    "${AmalgamEngine_SOURCE_DIR}/TlsCredentials/Local/world-server.pin"
     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
 # On Windows, copy runtime DLLs into the build folder so we can run our executable.

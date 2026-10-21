@@ -40,6 +40,15 @@ public:
 
     constexpr bool operator==(const ConnectionHandle&) const = default;
 
+    /**
+     * Returns this handle's slot ID. Unique among the live connections in its
+     * registry (0 for a null handle).
+     *
+     * Note: IDs are reused once a connection is erased. Use the full handle
+     *       when you need to detect that.
+     */
+    constexpr ID id() const { return static_cast<ID>(packedValue & ID_MASK); }
+
 private:
     template<typename ConnectionType>
     friend class ConnectionRegistry;
@@ -57,8 +66,6 @@ private:
                   | static_cast<Value>(inID)}
     {
     }
-
-    constexpr ID id() const { return static_cast<ID>(packedValue & ID_MASK); }
 
     constexpr Generation generation() const
     {

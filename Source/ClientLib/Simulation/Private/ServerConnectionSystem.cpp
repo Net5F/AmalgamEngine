@@ -42,6 +42,7 @@ ServerConnectionSystem::ServerConnectionSystem(
 , connectionResponseQueue{inSimContext.networkEventDispatcher}
 , connectionErrorQueue{inSimContext.networkEventDispatcher}
 , logoutUpdateQueue{inSimContext.networkEventDispatcher}
+, disconnectNoticeQueue{inSimContext.networkEventDispatcher}
 , connectionState{ConnectionState::Disconnected}
 , connectionAttemptTimer{}
 {
@@ -110,13 +111,23 @@ void ServerConnectionSystem::processConnectionEvents()
         }
     }
 
+    // If the server told us why it's disconnecting us, disconnect and report
+    // the reason.
+    // Note: Logouts are reported through WorldLogoutUpdate instead (see
+    //       processLogoutUpdates()).
+    DisconnectNotice disconnectNotice{};
+    if (disconnectNoticeQueue.pop(disconnectNotice)
+        && (disconnectNotice.reason != DisconnectNotice::Logout)) {
+        LOG_INFO("Server disconnected us. Reason: %u",
+                 static_cast<unsigned int>(disconnectNotice.reason));
+        disconnectFromServer(getConnectionErrorType(disconnectNotice.reason));
+        return;
+    }
+
     // If the connection is lost, reset all network and sim state.
     ConnectionError connectionError;
     if (connectionErrorQueue.pop(connectionError)) {
-        simEventDispatcher.trigger(connectionError);
-        network.worldEndpoint.disconnect();
-        clearSimState();
-        connectionState = ConnectionState::Disconnected;
+        disconnectFromServer(connectionError.type);
     }
 }
 
@@ -138,9 +149,30 @@ void ServerConnectionSystem::abortConnectionAttempt(
     //       nothing else will be pushed.
     while (connectionErrorQueue.pop()) {
     }
+    while (disconnectNoticeQueue.pop()) {
+    }
 
     connectionState = ConnectionState::Disconnected;
     simEventDispatcher.trigger<ConnectionError>({errorType});
+}
+
+void ServerConnectionSystem::disconnectFromServer(
+    ConnectionError::Type errorType)
+{
+    simEventDispatcher.trigger<ConnectionError>({errorType});
+    network.worldEndpoint.disconnect();
+
+    // The server may have sent a notice and closed the socket, which would
+    // have queued redundant events. We've already reported the error.
+    // Note: disconnect() waits for the IO thread to close the connection, so
+    //       nothing else will be pushed.
+    while (connectionErrorQueue.pop()) {
+    }
+    while (disconnectNoticeQueue.pop()) {
+    }
+
+    clearSimState();
+    connectionState = ConnectionState::Disconnected;
 }
 
 void ServerConnectionSystem::onUIConnectionRequest(
@@ -157,12 +189,14 @@ void ServerConnectionSystem::processLogoutUpdates()
             // The server removed our entity. Disconnect and reset our state.
             network.worldEndpoint.disconnect();
 
-            // The server may have closed the socket before our disconnect,
-            // which would have queued a redundant error. Since this was an
-            // intentional disconnect, we discard it.
+            // The server follows this update with a DisconnectNotice and
+            // closes the socket, which may have queued redundant events.
+            // Since this was an intentional disconnect, we discard them.
             // Note: disconnect() waits for the IO thread to close the
             //       connection, so nothing else will be pushed.
             while (connectionErrorQueue.pop()) {
+            }
+            while (disconnectNoticeQueue.pop()) {
             }
 
             clearSimState();
@@ -270,6 +304,28 @@ void ServerConnectionSystem::clearSimState()
     // The current tick needs to be set back to 0 so the Network knows to stop
     // sending heartbeats.
     currentTick = 0;
+}
+
+ConnectionError::Type ServerConnectionSystem::getConnectionErrorType(
+    DisconnectNotice::Reason reason)
+{
+    switch (reason) {
+        case DisconnectNotice::LoggedInElsewhere: {
+            return ConnectionError::Type::LoggedInElsewhere;
+        }
+        case DisconnectNotice::Kicked: {
+            return ConnectionError::Type::Kicked;
+        }
+        case DisconnectNotice::Banned: {
+            return ConnectionError::Type::Banned;
+        }
+        case DisconnectNotice::ServerShutdown: {
+            return ConnectionError::Type::ServerShutdown;
+        }
+        default: {
+            return ConnectionError::Type::Disconnected;
+        }
+    }
 }
 
 } // namespace Client

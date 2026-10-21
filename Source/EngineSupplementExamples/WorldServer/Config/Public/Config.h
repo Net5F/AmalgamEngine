@@ -98,9 +98,6 @@ public:
     /** The port that the server listens for incoming client connections on. */
     static constexpr unsigned int SERVER_PORT{41499};
 
-    /** The maximum number of clients that we will allow. */
-    static constexpr unsigned int MAX_CLIENTS{1010};
-
     /** How long we should wait before considering the client to be timed out.
         Arbitrarily chosen. If too high, we set ourselves up to take a huge
        spike of data for a very late client. */

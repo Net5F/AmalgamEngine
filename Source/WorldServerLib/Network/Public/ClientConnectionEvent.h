@@ -1,6 +1,8 @@
 #pragma once
 
 #include "NetworkID.h"
+#include "DisconnectNotice.h"
+#include <optional>
 #include <string>
 #include <variant>
 
@@ -30,6 +32,11 @@ struct ClientConnected {
 struct ClientDisconnected {
     /** The ID of the client that disconnected. */
     NetworkID clientID{0};
+
+    /** If we initiated the disconnect (see WorldClientEndpoint::disconnect()),
+        this is the reason that was given. If empty, the connection was lost
+        (e.g. the client disconnected or timed out). */
+    std::optional<DisconnectNotice::Reason> reason{};
 };
 
 /** Used to synchronize connect/disconnect events. Without this, we may observe

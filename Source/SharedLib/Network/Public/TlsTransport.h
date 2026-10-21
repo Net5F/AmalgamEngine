@@ -75,8 +75,23 @@ public:
 
     /**
      * Queues a complete frame for ordered delivery.
+     * Fails if closeAfterWrites() has been called.
      */
     bool asyncWrite(BinaryBufferSharedPtr buffer);
+
+    /**
+     * Stops accepting writes. Once all queued writes have been sent, shuts
+     * down the sending side of the socket.
+     *
+     * Reads continue to work, so the caller can wait for the peer to close
+     * its side (which will be reported as a read failure).
+     *
+     * Note: We only shut down the sending side because closing the socket
+     *       while the peer is still sending may cause our OS to reset the
+     *       connection, which can discard our final writes before the peer
+     *       reads them.
+     */
+    void closeAfterWrites();
 
     /**
      * Cancels outstanding operations and closes the underlying socket.
@@ -99,6 +114,7 @@ protected:
 private:
     bool sendNext();
     bool cancelHandshakeTimer();
+    void shutdownSend();
     void closeSocket();
 
     asio::ssl::stream<asio::ip::tcp::socket> stream;
@@ -116,6 +132,8 @@ private:
 
     FailureCallback failureCallback;
     bool closed;
+    /** If true, closeAfterWrites() was called. */
+    bool closingAfterWrites;
 };
 
 } // namespace AM

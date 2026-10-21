@@ -18,10 +18,12 @@ Network::Network(const MessageProcessorContext& inMessageProcessorContext)
 : ioContext{}
 , accountSSLContext{asio::ssl::context::tls_client}
 , chatSSLContext{asio::ssl::context::tls_client}
+, clientSSLContext{asio::ssl::context::tls_server}
 , accountEndpoint{ioContext, accountSSLContext,
                   UserConfig::get().getAccountServerAddress().IP,
                   UserConfig::get().getAccountServerAddress().port}
-, clientEndpoint{inMessageProcessorContext, accountEndpoint}
+, clientEndpoint{ioContext, clientSSLContext, inMessageProcessorContext,
+                 accountEndpoint}
 , chatEndpoint{ioContext, chatSSLContext,
                UserConfig::get().getChatServerAddress().IP,
                UserConfig::get().getChatServerAddress().port}
@@ -31,6 +33,7 @@ Network::Network(const MessageProcessorContext& inMessageProcessorContext)
 {
     loadServiceCredentials(accountSSLContext);
     loadServiceCredentials(chatSSLContext);
+    loadServiceCredentials(clientSSLContext);
     configureServerVerification(accountSSLContext, "account-server.pin",
                                 "AccountServer");
     configureServerVerification(chatSSLContext, "chat-server.pin",
@@ -59,6 +62,7 @@ void Network::start()
 
     accountEndpoint.start();
     chatEndpoint.start();
+    clientEndpoint.start();
 }
 
 void Network::stop()

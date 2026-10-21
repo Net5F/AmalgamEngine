@@ -3,7 +3,6 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
-#include "Peer.h"
 #include "Input.h"
 #include "ClientSimData.h"
 #include "Log.h"

@@ -23,7 +23,7 @@ try
 , queuedWriteBytes{0}
 , failureCallback{}
 , closed{false}
-{
+, closingAfterWrites{false} {
     if (SSL_set_min_proto_version(stream.native_handle(), TLS1_3_VERSION)
         != 1) {
         LOG_FATAL("Failed to require TLS 1.3.");
@@ -36,8 +36,7 @@ try
         LOG_FATAL("Failed to enable TCP keep-alive: %s",
                   error.message().c_str());
     }
-}
-catch (const asio::system_error& e) {
+} catch (const asio::system_error& e) {
     LOG_FATAL("Failed to construct TLS transport: %s", e.what());
 }
 
@@ -130,7 +129,7 @@ bool TlsTransport::asyncReadExactly(asio::mutable_buffer buffer,
 
 bool TlsTransport::asyncWrite(BinaryBufferSharedPtr buffer)
 {
-    if (closed || !buffer) {
+    if (closed || closingAfterWrites || !buffer) {
         return false;
     }
     if (buffer->empty()) {
@@ -153,6 +152,21 @@ bool TlsTransport::asyncWrite(BinaryBufferSharedPtr buffer)
     }
 
     return true;
+}
+
+void TlsTransport::closeAfterWrites()
+{
+    if (closed || closingAfterWrites) {
+        return;
+    }
+
+    closingAfterWrites = true;
+
+    // If there's no write in progress, we can shut down immediately.
+    // Otherwise, the write completion handler will do it.
+    if (writeQueue.empty()) {
+        shutdownSend();
+    }
 }
 
 void TlsTransport::close()
@@ -224,6 +238,10 @@ bool TlsTransport::sendNext()
 
                 self->queuedWriteBytes -= activeBuffer->size();
                 self->writeQueue.pop_front();
+                if (self->writeQueue.empty() && self->closingAfterWrites) {
+                    self->shutdownSend();
+                    return;
+                }
                 self->sendNext();
             });
     } catch (const asio::system_error& e) {
@@ -245,6 +263,13 @@ bool TlsTransport::cancelHandshakeTimer()
     }
 
     return true;
+}
+
+void TlsTransport::shutdownSend()
+{
+    asio::error_code ignoredError{};
+    stream.lowest_layer().shutdown(asio::ip::tcp::socket::shutdown_send,
+                                   ignoredError);
 }
 
 void TlsTransport::closeSocket()

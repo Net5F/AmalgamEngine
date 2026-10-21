@@ -15,6 +15,7 @@ UserConfig::UserConfig()
 , accountServerPort{0}
 , chatServerIP{}
 , chatServerPort{0}
+, maxClients{0}
 {
     // Open the file.
     std::string fullPath{Paths::BASE_PATH};
@@ -68,6 +69,20 @@ void UserConfig::setChatServerAddress(const ServerAddress& inServerAddress)
     chatServerPort = inServerAddress.port;
 }
 
+unsigned int UserConfig::getMaxClients()
+{
+    return maxClients;
+}
+
+void UserConfig::setMaxClients(unsigned int inMaxClients)
+{
+    if (inMaxClients == 0) {
+        LOG_FATAL("Invalid maxClients value: %u. Must be at least 1.",
+                  inMaxClients);
+    }
+    maxClients = inMaxClients;
+}
+
 void UserConfig::init(nlohmann::json& json)
 {
     // AccountServer address.
@@ -76,6 +91,9 @@ void UserConfig::init(nlohmann::json& json)
 
     // ChatServer address.
     setChatServerAddress({json.at("chatServerIP"), json.at("chatServerPort")});
+
+    // Max clients.
+    setMaxClients(json.at("maxClients"));
 }
 
 } // End namespace WorldServer

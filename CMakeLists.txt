@@ -93,9 +93,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     endforeach()
 endif()
 
-add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/SDL_net/"
-                 "${PROJECT_BINARY_DIR}/Libraries/SDL_net/")
-
 # Configure lz4.
 option(LZ4_BUILD_CLI "Build lz4 program" OFF)
 option(LZ4_BUILD_LEGACY_LZ4C "Build lz4c program with legacy argument support" OFF)

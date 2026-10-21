@@ -9,8 +9,8 @@ namespace AM
 /**
  * Sent by the server to tell a client about the state of its logout.
  *
- * When the client receives Completed, its entity has already been removed
- * from the world, and it should disconnect.
+ * When the client receives Completed, the server is disconnecting it and its
+ * entity is being removed from the world.
  */
 struct WorldLogoutUpdate {
     // The MessageType enum value that this message corresponds to.
@@ -24,7 +24,8 @@ struct WorldLogoutUpdate {
         /** The logout countdown was canceled (or couldn't be started), e.g.
             because the entity moved. */
         Canceled,
-        /** The logout countdown finished. The client's entity was removed. */
+        /** The logout countdown finished. The client is being disconnected and
+            its entity removed. */
         Completed
     };
 

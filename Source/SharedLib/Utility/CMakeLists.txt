@@ -9,7 +9,6 @@ target_sources(SharedLib
         Private/PeriodicCaller.cpp
         Private/SDL.cpp
         Private/SDLHelpers.cpp
-        Private/SDLNet.cpp
         Private/SDLRenderer.cpp
         Private/SDLWindow.cpp
         Private/StringTools.cpp
@@ -39,7 +38,6 @@ target_sources(SharedLib
         Public/Transforms.h
         Public/VariantTools.h
         Public/SDL_Wrappers/SDL.h
-        Public/SDL_Wrappers/SDLNet.h
         Public/SDL_Wrappers/SDLRenderer.h
         Public/SDL_Wrappers/SDLWindow.h
 )

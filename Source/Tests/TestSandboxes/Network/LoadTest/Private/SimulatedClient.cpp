@@ -15,21 +15,27 @@ namespace LTC
 SimulatedClient::SimulatedClient(unsigned int inAccountIndex,
                                  unsigned int inInputsPerSecond,
                                  asio::io_context& ioContext,
-                                 asio::ssl::context& sslContext)
+                                 asio::ssl::context& accountSSLContext,
+                                 asio::ssl::context& worldSSLContext)
 : accountIndex{inAccountIndex}
-, networkSim{}
-, networkCaller(std::bind_front(&NetworkSimulation::tick, &networkSim),
-                SharedConfig::CLIENT_NETWORK_TICK_TIMESTEP_S, "Network", true)
-, worldSim(networkSim, inInputsPerSecond)
+, networkEventDispatcher{}
+, worldEndpoint{ioContext, worldSSLContext,
+                Client::MessageProcessorContext{networkEventDispatcher}}
+, networkCaller(
+      std::bind_front(&Client::WorldClientEndpoint::tick, &worldEndpoint),
+      SharedConfig::CLIENT_NETWORK_TICK_TIMESTEP_S, "Network", true)
+, worldSim(worldEndpoint, networkEventDispatcher, inInputsPerSecond)
 , simCaller(std::bind_front(&WorldSimulation::tick, &worldSim),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
-, accountEndpoint{ioContext, sslContext,
-                  Client::MessageProcessorContext{
-                      networkSim.getEventDispatcher()}}
-, loginResponseQueue{networkSim.getEventDispatcher()}
-, serviceTicketQueue{networkSim.getEventDispatcher()}
+, accountEndpoint{ioContext, accountSSLContext,
+                  Client::MessageProcessorContext{networkEventDispatcher}}
+, loginResponseQueue{networkEventDispatcher}
+, serviceTicketQueue{networkEventDispatcher}
 , isConnected(false)
 {
+    // Network stats are global, so only the first client logs them (they
+    // cover every client's traffic).
+    worldEndpoint.setNetstatsLoggingEnabled(accountIndex == 0);
 }
 
 void SimulatedClient::connect()
@@ -47,20 +53,12 @@ void SimulatedClient::connect()
     isConnected = true;
 }
 
-void SimulatedClient::receiveAndProcess()
-{
-    // Note: This is safe to call, even if connect() is running on another
-    //       thread (it has an internal check).
-    networkSim.receiveAndProcess();
-}
-
 void SimulatedClient::tick()
 {
-    // Process the network.
-    networkCaller.update();
-
-    // If we're connected, process the world sim.
+    // Note: connect() runs on another thread. Once it sets isConnected, it's
+    //       done touching our state.
     if (isConnected) {
+        networkCaller.update();
         simCaller.update();
     }
 }

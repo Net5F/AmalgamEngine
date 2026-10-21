@@ -7,7 +7,6 @@
 #include "EnttObserver.h"
 #include "entt/fwd.hpp"
 #include <unordered_map>
-#include <unordered_set>
 
 namespace AM
 {
@@ -58,7 +57,7 @@ private:
 
     /**
      * Processes a newly disconnected client, starting its entity's linger
-     * time.
+     * time. If the client logged out, removes its entity immediately.
      */
     void processDisconnectEvent(const ClientDisconnected& clientDisconnected);
 
@@ -91,8 +90,9 @@ private:
     void cancelLogout(Sint64 accountID, entt::entity entity);
 
     /**
-     * Removes the given account's entity from the sim immediately and tells
-     * its client that the logout completed.
+     * Tells the given account's client that the logout completed, and
+     * disconnects it. The entity is removed once the disconnect event
+     * arrives.
      */
     void completeLogout(Sint64 accountID, entt::entity entity);
 
@@ -151,11 +151,6 @@ private:
     /** Maps the account IDs of entities that are logging out -> the tick
         that their logout will complete on. */
     std::unordered_map<Sint64, Uint32> logoutTickMap;
-
-    /** The network IDs of clients that completed a logout, but haven't
-        disconnected yet. Their entity is already gone, so we ignore their
-        disconnect event. */
-    std::unordered_set<NetworkID> loggedOutNetIDs;
 };
 
 } // End namespace WorldServer

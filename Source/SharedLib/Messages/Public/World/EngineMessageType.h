@@ -55,6 +55,7 @@ enum class EngineMessageType : Uint8 {
     CastFailed,
     CastStarted,
     WorldLogoutUpdate,
+    DisconnectNotice,
 
     // Bidirectional Messages
     TileAddLayer,

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NetworkSimulation.h"
+#include "WorldClientEndpoint.h"
 #include "WorldSimulation.h"
 #include "PeriodicCaller.h"
 #include "AccountClientEndpoint.h"
@@ -32,14 +32,16 @@ public:
     /**
      * @param inAccountIndex The index of the load test account to log in as.
      * @param inInputsPerSecond How many inputs to send per second.
-     * @param ioContext Used by our AccountServer connection. Must be run by
-     *                  the caller.
-     * @param sslContext Used by our AccountServer connection. Must verify
-     *                   AccountServer's certificate.
+     * @param ioContext Used by our connections. Must be run by the caller.
+     * @param accountSSLContext Used by our AccountServer connection. Must
+     *                          verify AccountServer's certificate.
+     * @param worldSSLContext Used by our WorldServer connection. Must verify
+     *                        WorldServer's certificate.
      */
     SimulatedClient(unsigned int inAccountIndex, unsigned int inInputsPerSecond,
                     asio::io_context& ioContext,
-                    asio::ssl::context& sslContext);
+                    asio::ssl::context& accountSSLContext,
+                    asio::ssl::context& worldSSLContext);
 
     /**
      * Logs in to AccountServer, then uses the resulting ticket to connect
@@ -50,12 +52,7 @@ public:
     void connect();
 
     /**
-     * Calls networkSim.receiveAndProcess().
-     */
-    void receiveAndProcess();
-
-    /**
-     * Calls the sim and network ticks.
+     * If we're connected, calls the sim and network ticks.
      */
     void tick();
 
@@ -74,7 +71,10 @@ private:
     /** The index of the load test account that we log in as. */
     const unsigned int accountIndex;
 
-    NetworkSimulation networkSim;
+    /** Used to dispatch events from the network to the simulation. */
+    EventDispatcher networkEventDispatcher;
+
+    Client::WorldClientEndpoint worldEndpoint;
     PeriodicCaller networkCaller;
 
     WorldSimulation worldSim;

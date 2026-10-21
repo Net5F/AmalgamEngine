@@ -49,6 +49,9 @@ public:
     ServerAddress getChatServerAddress();
     void setChatServerAddress(const ServerAddress& inServerAddress);
 
+    unsigned int getMaxClients();
+    void setMaxClients(unsigned int inMaxClients);
+
 private:
     /**
      * Initializes our members using the given json.
@@ -61,6 +64,9 @@ private:
 
     std::string chatServerIP;
     unsigned int chatServerPort;
+
+    /** The maximum number of clients that we will allow at once. */
+    unsigned int maxClients;
 };
 
 } // End namespace WorldServer
