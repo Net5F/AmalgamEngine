@@ -7,6 +7,7 @@
 #include "asio/write.hpp"
 #include <openssl/ssl.h>
 #include <utility>
+#include <vector>
 
 namespace AM
 {
@@ -21,6 +22,7 @@ try
 , handshakeTimer{stream.get_executor()}
 , writeQueue{}
 , queuedWriteBytes{0}
+, activeWriteCount{0}
 , failureCallback{}
 , closed{false}
 , closingAfterWrites{false} {
@@ -181,6 +183,7 @@ void TlsTransport::close()
     closeSocket();
     writeQueue.clear();
     queuedWriteBytes = 0;
+    activeWriteCount = 0;
 }
 
 bool TlsTransport::isOpen() const
@@ -209,6 +212,7 @@ void TlsTransport::reportFailure(const asio::error_code& error)
     closeSocket();
     writeQueue.clear();
     queuedWriteBytes = 0;
+    activeWriteCount = 0;
 
     if (failureCallback) {
         failureCallback(error);
@@ -222,12 +226,27 @@ bool TlsTransport::sendNext()
         return false;
     }
 
-    BinaryBufferSharedPtr activeBuffer{writeQueue.front()};
+    // Gather as many queued buffers as fit in one write, so that small
+    // messages share a TLS record.
+    // Note: We always take at least one buffer, even if it's over the limit.
+    std::vector<asio::const_buffer> gatheredBuffers{};
+    std::size_t gatheredBytes{0};
+    for (const BinaryBufferSharedPtr& buffer : writeQueue) {
+        if (!gatheredBuffers.empty()
+            && ((gatheredBytes + buffer->size()) > MAX_GATHER_WRITE_BYTES)) {
+            break;
+        }
+        gatheredBuffers.push_back(asio::buffer(*buffer));
+        gatheredBytes += buffer->size();
+    }
+    activeWriteCount = gatheredBuffers.size();
+
     std::shared_ptr<TlsTransport> self{shared_from_this()};
     try {
+        // Note: The buffers stay alive in writeQueue until this completes.
         asio::async_write(
-            stream, asio::buffer(*activeBuffer),
-            [self, activeBuffer](const asio::error_code& error, std::size_t) {
+            stream, gatheredBuffers,
+            [self, gatheredBytes](const asio::error_code& error, std::size_t) {
                 if (self->closed) {
                     return;
                 }
@@ -236,8 +255,12 @@ bool TlsTransport::sendNext()
                     return;
                 }
 
-                self->queuedWriteBytes -= activeBuffer->size();
-                self->writeQueue.pop_front();
+                self->queuedWriteBytes -= gatheredBytes;
+                self->writeQueue.erase(
+                    self->writeQueue.begin(),
+                    self->writeQueue.begin()
+                        + static_cast<std::ptrdiff_t>(self->activeWriteCount));
+                self->activeWriteCount = 0;
                 if (self->writeQueue.empty() && self->closingAfterWrites) {
                     self->shutdownSend();
                     return;

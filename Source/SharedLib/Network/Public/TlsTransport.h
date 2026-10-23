@@ -112,6 +112,12 @@ protected:
     void reportFailure(const asio::error_code& error);
 
 private:
+    /** The most bytes we'll gather into a single write.
+        Note: ssl::stream copies multi-buffer writes into an 8 KB stack buffer
+              before encrypting them, so going above this wouldn't produce
+              fewer TLS records. */
+    static constexpr std::size_t MAX_GATHER_WRITE_BYTES{8192};
+
     bool sendNext();
     bool cancelHandshakeTimer();
     void shutdownSend();
@@ -129,6 +135,9 @@ private:
 
     std::deque<BinaryBufferSharedPtr> writeQueue;
     std::size_t queuedWriteBytes;
+    /** How many buffers at the front of writeQueue belong to the write that's
+        currently in progress. */
+    std::size_t activeWriteCount;
 
     FailureCallback failureCallback;
     bool closed;
