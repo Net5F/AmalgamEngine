@@ -312,14 +312,10 @@ void ServerConnectionSystem::closeConnection()
 
     // Discard any events that were queued before the connection closed, so
     // they aren't processed in the next session.
-    while (connectionResponseQueue.pop()) {
-    }
-    while (connectionErrorQueue.pop()) {
-    }
-    while (logoutUpdateQueue.pop()) {
-    }
-    while (disconnectNoticeQueue.pop()) {
-    }
+    connectionResponseQueue.clear();
+    connectionErrorQueue.clear();
+    logoutUpdateQueue.clear();
+    disconnectNoticeQueue.clear();
 
     connectionState = ConnectionState::Disconnected;
 
