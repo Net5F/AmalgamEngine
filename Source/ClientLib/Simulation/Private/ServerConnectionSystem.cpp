@@ -5,6 +5,7 @@
 #include "Network.h"
 #include "GraphicData.h"
 #include "SimulationStarted.h"
+#include "SimulationStopped.h"
 #include "Name.h"
 #include "Inventory.h"
 #include "PreviousPosition.h"
@@ -141,38 +142,21 @@ void ServerConnectionSystem::abortConnectionAttempt(
     ConnectionError::Type errorType)
 {
     // Spin down the endpoint so we can try again later.
-    network.worldEndpoint.disconnect();
-
-    // The server may have closed the socket after responding, which would
-    // have queued a redundant error. We report our own error instead.
-    // Note: disconnect() waits for the IO thread to close the connection, so
-    //       nothing else will be pushed.
-    while (connectionErrorQueue.pop()) {
-    }
-    while (disconnectNoticeQueue.pop()) {
-    }
-
-    connectionState = ConnectionState::Disconnected;
+    // Note: The server may have closed the socket after responding, which
+    //       would have queued a redundant error. We report our own error
+    //       instead.
+    closeConnection();
     simEventDispatcher.trigger<ConnectionError>({errorType});
 }
 
 void ServerConnectionSystem::disconnectFromServer(
     ConnectionError::Type errorType)
 {
-    simEventDispatcher.trigger<ConnectionError>({errorType});
-    network.worldEndpoint.disconnect();
-
-    // The server may have sent a notice and closed the socket, which would
-    // have queued redundant events. We've already reported the error.
-    // Note: disconnect() waits for the IO thread to close the connection, so
-    //       nothing else will be pushed.
-    while (connectionErrorQueue.pop()) {
-    }
-    while (disconnectNoticeQueue.pop()) {
-    }
-
+    // Note: The server may have sent a notice and closed the socket, which
+    //       would have queued redundant events. We report a single error.
+    closeConnection();
     clearSimState();
-    connectionState = ConnectionState::Disconnected;
+    simEventDispatcher.trigger<ConnectionError>({errorType});
 }
 
 void ServerConnectionSystem::onUIConnectionRequest(
@@ -187,20 +171,12 @@ void ServerConnectionSystem::processLogoutUpdates()
     while (logoutUpdateQueue.pop(logoutUpdate)) {
         if (logoutUpdate.type == WorldLogoutUpdate::Completed) {
             // The server removed our entity. Disconnect and reset our state.
-            network.worldEndpoint.disconnect();
-
-            // The server follows this update with a DisconnectNotice and
-            // closes the socket, which may have queued redundant events.
-            // Since this was an intentional disconnect, we discard them.
-            // Note: disconnect() waits for the IO thread to close the
-            //       connection, so nothing else will be pushed.
-            while (connectionErrorQueue.pop()) {
-            }
-            while (disconnectNoticeQueue.pop()) {
-            }
-
+            // Note: The server follows this update with a DisconnectNotice
+            //       and closes the socket, which may have queued redundant
+            //       events. Since this was an intentional disconnect, they're
+            //       discarded.
+            closeConnection();
             clearSimState();
-            connectionState = ConnectionState::Disconnected;
             LOG_INFO("Logged out.");
 
             simEventDispatcher.trigger(logoutUpdate);
@@ -326,6 +302,29 @@ ConnectionError::Type ServerConnectionSystem::getConnectionErrorType(
             return ConnectionError::Type::Disconnected;
         }
     }
+}
+
+void ServerConnectionSystem::closeConnection()
+{
+    // Note: disconnect() waits for the IO thread to close the connection, so
+    //       nothing else will be pushed once it returns.
+    network.worldEndpoint.disconnect();
+
+    // Discard any events that were queued before the connection closed, so
+    // they aren't processed in the next session.
+    while (connectionResponseQueue.pop()) {
+    }
+    while (connectionErrorQueue.pop()) {
+    }
+    while (logoutUpdateQueue.pop()) {
+    }
+    while (disconnectNoticeQueue.pop()) {
+    }
+
+    connectionState = ConnectionState::Disconnected;
+
+    // Tell the rest of the app to discard any messages from this session.
+    simEventDispatcher.trigger<SimulationStopped>();
 }
 
 } // namespace Client

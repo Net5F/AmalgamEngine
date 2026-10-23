@@ -98,6 +98,12 @@ private:
     ConnectionError::Type
         getConnectionErrorType(DisconnectNotice::Reason reason);
 
+    /**
+     * Disconnects the endpoint, discards any queued connection events,
+     * returns to the Disconnected state, and sends SimulationStopped.
+     */
+    void closeConnection();
+
     World& world;
     Network& network;
     GraphicData& graphicData;

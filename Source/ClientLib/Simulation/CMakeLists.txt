@@ -58,6 +58,7 @@ target_sources(ClientLib
         Public/Components/InputHistory.h
         Public/Components/NeedsAdjacentChunks.h
         Public/Events/SimulationStarted.h
+        Public/Events/SimulationStopped.h
         Public/GraphicData/AnimationRenderData.h
         Public/GraphicData/GraphicData.h
         Public/GraphicData/SpriteRenderData.h

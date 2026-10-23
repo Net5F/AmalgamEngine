@@ -86,7 +86,10 @@ void Simulation::tick()
 
         // If we just lost connection, re-initialize our systems to prepare
         // them for the next run.
-        if ((previousConnectionState == ConnectionState::Connected)
+        // Note: We check for any previous state since we may connect and
+        //       disconnect in a single call, and messages may have been
+        //       queued during that time.
+        if ((previousConnectionState != ConnectionState::Disconnected)
             && (currentConnectionState == ConnectionState::Disconnected)) {
             initializeSystems();
         }
