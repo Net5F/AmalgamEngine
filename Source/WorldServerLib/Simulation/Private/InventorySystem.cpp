@@ -51,7 +51,7 @@ void InventorySystem::sendInventoryInits()
         }
 
         if (inventoryInit.slots.size() > 0) {
-            network.clientEndpoint.send(client.netID, inventoryInit);
+            network.clientEndpoint.send(client.clientHandle, inventoryInit);
         }
     }
 
@@ -65,7 +65,7 @@ void InventorySystem::processInventoryUpdates()
     while (inventoryOperationQueue.pop(inventoryOperation)) {
         std::visit(
             [&](const auto& operation) {
-                processOperation(inventoryOperation.netID, operation);
+                processOperation(inventoryOperation.clientHandle, operation);
             },
             inventoryOperation.operation);
     }
@@ -76,7 +76,7 @@ void InventorySystem::setExtension(ISimulationExtension* inExtension)
     extension = inExtension;
 }
 
-void InventorySystem::processOperation(NetworkID clientID,
+void InventorySystem::processOperation(ConnectionHandle clientHandle,
                                        const InventoryAddItem& inventoryAddItem)
 {
     // If the entity isn't valid, skip it.
@@ -93,12 +93,13 @@ void InventorySystem::processOperation(NetworkID clientID,
 }
 
 void InventorySystem::processOperation(
-    NetworkID clientID, const InventoryRemoveItem& inventoryRemoveItem)
+    ConnectionHandle clientHandle,
+    const InventoryRemoveItem& inventoryRemoveItem)
 {
     // Note: "Remove item" always applies to the client's own inventory.
 
     // Find the client's entity ID.
-    entt::entity clientEntity{world.getClientEntity(clientID)};
+    entt::entity clientEntity{world.getClientEntity(clientHandle)};
     if (clientEntity != entt::null) {
         // Try to remove the item, sending messages appropriately.
         world.inventoryHelper.removeItem(clientEntity,
@@ -108,18 +109,18 @@ void InventorySystem::processOperation(
 }
 
 void InventorySystem::processOperation(
-    NetworkID clientID, const InventoryMoveItem& inventoryMoveItem)
+    ConnectionHandle clientHandle, const InventoryMoveItem& inventoryMoveItem)
 {
     // Note: "Move item" always applies to the client's own inventory.
 
     // Find the client's entity ID.
-    entt::entity clientEntity{world.getClientEntity(clientID)};
+    entt::entity clientEntity{world.getClientEntity(clientHandle)};
     if (clientEntity != entt::null) {
         // If the move is successful, tell the client.
         Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
         if (inventory.moveItem(inventoryMoveItem.sourceSlotIndex,
                                inventoryMoveItem.destSlotIndex)) {
-            network.clientEndpoint.send(clientID,
+            network.clientEndpoint.send(clientHandle,
                                         InventoryOperation{inventoryMoveItem});
         }
     }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SharedConfig.h"
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 #include "NetworkDefs.h"
 #include "Client.h"
 #include "WorldClientConnection.h"
@@ -83,14 +83,14 @@ public:
      * Queues a message to be sent on the next tick().
      * Equivalent to calling serialize() and sendBytes().
      *
-     * @param networkID The client to send the message to.
+     * @param clientHandle The client to send the message to.
      * @param message A structure that defines MESSAGE_TYPE and has an
      * associated serialize() function.
      * @param messageTick Optional, used in certain cases to update the
      * Client's latestSentSimTick.
      */
     template<typename Message>
-    void send(NetworkID networkID, const Message& message,
+    void send(ConnectionHandle clientHandle, const Message& message,
               Uint32 messageTick = 0);
 
     /**
@@ -107,12 +107,13 @@ public:
      * Queues a serialized message to be sent on the next tick().
      * If the client has disconnected, the message is dropped.
      *
-     * @param networkID The client to send the message to.
+     * @param clientHandle The client to send the message to.
      * @param message The message to send.
      * @param messageTick Optional, used when sending entity movement updates
      * to update the Client's latestSentSimTick.
      */
-    void sendBytes(NetworkID networkID, const BinaryBufferSharedPtr& message,
+    void sendBytes(ConnectionHandle clientHandle,
+                   const BinaryBufferSharedPtr& message,
                    Uint32 messageTick = 0);
 
     /**
@@ -124,7 +125,8 @@ public:
      * the disconnect begins. Messages sent to the client after this call are
      * dropped.
      */
-    void disconnect(NetworkID networkID, DisconnectNotice::Reason reason);
+    void disconnect(ConnectionHandle clientHandle,
+                    DisconnectNotice::Reason reason);
 
     /**
      * Disconnects all clients, as if disconnect() was called for each.
@@ -166,10 +168,6 @@ private:
     static constexpr std::size_t MAX_QUEUED_WRITES{40};
     static constexpr std::size_t MAX_QUEUED_WRITE_BYTES{
         10 * SharedConfig::MAX_BATCH_SIZE};
-    /** Network IDs are registry slot IDs. Since IDs are reserved by marching
-        forward, these extra slots make it unlikely that an ID will be reused
-        before the sim has processed the disconnect of its previous owner. */
-    static constexpr std::size_t NETWORK_ID_REUSE_BUFFER{100};
 
     /** The number of seconds we'll wait before logging our network
         statistics. */
@@ -183,7 +181,7 @@ private:
     struct OutboxEntry {
         /** The client that this entry is for. If null and disconnectReason
             is set, applies to all clients. */
-        NetworkID netID{NULL_NETWORK_ID};
+        ConnectionHandle clientHandle{};
         /** The message to send. If null, this is a disconnect. */
         BinaryBufferSharedPtr message{};
         /** See sendBytes(). */
@@ -242,7 +240,7 @@ private:
      * the client, pushes a ClientDisconnected event.
      *
      * Note: The client stays in the registry until the connection finishes
-     *       closing, so its network ID isn't reused early.
+     *       closing.
      */
     void beginClosingClient(Client& client,
                             std::optional<DisconnectNotice::Reason> reason);
@@ -251,12 +249,6 @@ private:
      * Sends the given outbox entries to their clients.
      */
     void flushOnIOThread(std::vector<OutboxEntry>& entries, Uint32 currentTick);
-
-    /**
-     * Returns the client with the given network ID, or nullptr if there
-     * isn't one.
-     */
-    std::shared_ptr<Client> findClient(NetworkID networkID);
 
     /**
      * Returns the sim's current tick.
@@ -309,14 +301,14 @@ private:
 };
 
 template<typename Message>
-void WorldClientEndpoint::send(NetworkID networkID, const Message& message,
-                               Uint32 messageTick)
+void WorldClientEndpoint::send(ConnectionHandle clientHandle,
+                               const Message& message, Uint32 messageTick)
 {
     // Serialize and frame the message.
     BinaryBufferSharedPtr messageBuffer{serialize(message)};
 
     // Send the message.
-    sendBytes(networkID, messageBuffer, messageTick);
+    sendBytes(clientHandle, messageBuffer, messageTick);
 }
 
 template<typename Message>

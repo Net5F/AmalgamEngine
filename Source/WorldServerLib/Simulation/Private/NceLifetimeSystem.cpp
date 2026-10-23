@@ -112,7 +112,7 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
                                               entityInitRequest.entity)};
     if (newEntity == entt::null) {
         network.clientEndpoint.send(
-            entityInitRequest.netID,
+            entityInitRequest.clientHandle,
             SystemMessage{"Failed to create entity: Invalid position"});
         return;
     }
@@ -121,7 +121,7 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
     if (!(world.addGraphicsComponents(newEntity,
                                       entityInitRequest.graphicState))) {
         network.clientEndpoint.send(
-            entityInitRequest.netID,
+            entityInitRequest.clientHandle,
             SystemMessage{"Failed to create entity: Invalid position"});
         return;
     }
@@ -136,7 +136,7 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
     std::string resultString{
         world.runEntityInitScript(newEntity, entityInitRequest.initScript)};
     if (!(resultString.empty())) {
-        network.clientEndpoint.send(entityInitRequest.netID,
+        network.clientEndpoint.send(entityInitRequest.clientHandle,
                                     SystemMessage{resultString});
     }
 }

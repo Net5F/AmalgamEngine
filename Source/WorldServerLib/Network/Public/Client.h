@@ -2,7 +2,6 @@
 
 #include "WorldClientConnection.h"
 #include "ConnectionHandle.h"
-#include "NetworkID.h"
 #include "DisconnectNotice.h"
 #include "BinaryBuffer.h"
 #include "Config.h"
@@ -52,12 +51,6 @@ public:
 
     void setHandle(ConnectionHandle inHandle);
     ConnectionHandle getHandle() const;
-
-    /**
-     * Returns this client's network ID.
-     * Note: This is the ID of the client's registry slot.
-     */
-    NetworkID getNetID() const;
 
     WorldClientConnection& getConnection();
 
@@ -186,7 +179,7 @@ private:
     //--------------------------------------------------------------------------
     std::shared_ptr<WorldClientConnection> connection;
 
-    /** Our registry handle. Our network ID is its slot ID. */
+    /** Our registry handle. */
     ConnectionHandle handle;
 
     /** If true, we've started disconnecting this client. */

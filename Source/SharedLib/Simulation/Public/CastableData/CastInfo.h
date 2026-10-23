@@ -2,7 +2,7 @@
 
 #include "Castable.h"
 #include "Item.h"
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 #include "Vector3.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
@@ -36,10 +36,10 @@ struct CastInfo {
         targetToolType that selects a position.*/
     Vector3 targetPosition{};
 
-    /** The network ID of the client performing the cast.
+    /** The handle of the client performing the cast.
         If non-null, this cast belongs to a client entity.
         Only filled by the server, not used by the client. */
-    NetworkID clientID{NULL_NETWORK_ID};
+    ConnectionHandle clientHandle{};
 };
 
 } // namespace AM

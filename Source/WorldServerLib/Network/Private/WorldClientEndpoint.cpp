@@ -32,7 +32,7 @@ WorldClientEndpoint::WorldClientEndpoint(
 , eventDispatcher{}
 , messageProcessor{inMessageProcessorContext}
 , maxClients{UserConfig::get().getMaxClients()}
-, clientRegistry(maxClients + NETWORK_ID_REUSE_BUFFER)
+, clientRegistry(maxClients)
 , acceptor(inIoContext,
            asio::ip::tcp::endpoint{asio::ip::tcp::v4(), Config::SERVER_PORT},
            std::bind_front(&WorldClientEndpoint::connectionFactory, this),
@@ -79,34 +79,34 @@ void WorldClientEndpoint::tick()
     }
 }
 
-void WorldClientEndpoint::sendBytes(NetworkID networkID,
+void WorldClientEndpoint::sendBytes(ConnectionHandle clientHandle,
                                     const BinaryBufferSharedPtr& message,
                                     Uint32 messageTick)
 {
-    if (!networkID || !message) {
+    if (!clientHandle || !message) {
         return;
     }
 
-    outbox.emplace_back(OutboxEntry{.netID{networkID},
+    outbox.emplace_back(OutboxEntry{.clientHandle{clientHandle},
                                     .message{message},
                                     .messageTick{messageTick}});
 }
 
-void WorldClientEndpoint::disconnect(NetworkID networkID,
+void WorldClientEndpoint::disconnect(ConnectionHandle clientHandle,
                                      DisconnectNotice::Reason reason)
 {
-    if (!networkID) {
+    if (!clientHandle) {
         return;
     }
 
     outbox.emplace_back(
-        OutboxEntry{.netID{networkID}, .disconnectReason{reason}});
+        OutboxEntry{.clientHandle{clientHandle}, .disconnectReason{reason}});
 }
 
 void WorldClientEndpoint::disconnectAll(DisconnectNotice::Reason reason)
 {
-    outbox.emplace_back(
-        OutboxEntry{.netID{NULL_NETWORK_ID}, .disconnectReason{reason}});
+    outbox.emplace_back(OutboxEntry{.clientHandle{NULL_CONNECTION_HANDLE},
+                                    .disconnectReason{reason}});
 }
 
 EventDispatcher& WorldClientEndpoint::getEventDispatcher()
@@ -174,7 +174,8 @@ void WorldClientEndpoint::onConnectionAccepted(
         return;
     }
     client->setHandle(*handle);
-    LOG_INFO("New client connected. Assigning netID: %u", client->getNetID());
+    LOG_INFO("New client connected. Assigning clientID: %u",
+             client->getHandle().id());
 
     // Successfully added. Register callbacks and start the handshake process.
     // Note: We don't notify the sim about this client until it authenticates
@@ -208,22 +209,23 @@ void WorldClientEndpoint::onConnectionDisconnected(
     }
 
     // If we didn't initiate this disconnect, the connection was lost.
-    NetworkID netID{client->getNetID()};
+    ConnectionHandle clientHandle{client->getHandle()};
     if (!(client->isDisconnecting())) {
         // Note: Timeouts are common, and the OS's message for them is long,
         //       so we print a short message instead.
         if (error == asio::error::timed_out) {
-            LOG_INFO("Client disconnected: Timeout. NetID: %u", netID);
+            LOG_INFO("Client disconnected: Timeout. ClientID: %u",
+                     clientHandle.id());
         }
         else {
-            LOG_INFO("Client disconnected: %s NetID: %u",
-                     error.message().c_str(), netID);
+            LOG_INFO("Client disconnected: %s ClientID: %u",
+                     error.message().c_str(), clientHandle.id());
         }
 
         // If the sim knows about this client, tell it.
         if (client->getAuthState() == Client::AuthState::Authenticated) {
             eventDispatcher.emplace<ClientConnectionEvent>(
-                ClientDisconnected{.clientID{netID}});
+                ClientDisconnected{.clientHandle{clientHandle}});
         }
     }
 
@@ -243,8 +245,8 @@ void WorldClientEndpoint::onMessageReceived(
                                       + message.payload.size());
 
     if (!(client->processAdjustmentIteration(message.adjustmentIteration))) {
-        LOG_INFO("Dropped client: Invalid adjustment iteration. NetID: %u",
-                 client->getNetID());
+        LOG_INFO("Dropped client: Invalid adjustment iteration. ClientID: %u",
+                 client->getHandle().id());
         client->getConnection().disconnect(
             asio::error::make_error_code(asio::error::invalid_argument));
         return;
@@ -264,9 +266,10 @@ void WorldClientEndpoint::onMessageReceived(
 void WorldClientEndpoint::processConnectionRequest(Client& client,
                                                    std::span<Uint8> payload)
 {
-    NetworkID netID{client.getNetID()};
+    ConnectionHandle clientHandle{client.getHandle()};
     if (client.getAuthState() != Client::AuthState::AwaitingRequest) {
-        LOG_INFO("Ignoring unexpected ConnectionRequest. NetID: %u", netID);
+        LOG_INFO("Ignoring unexpected ConnectionRequest. ClientID: %u",
+                 clientHandle.id());
         return;
     }
 
@@ -276,8 +279,8 @@ void WorldClientEndpoint::processConnectionRequest(Client& client,
     OPENSSL_cleanse(payload.data(), payload.size());
     if (!deserialized) {
         LOG_INFO("Rejected client: Failed to deserialize ConnectionRequest. "
-                 "NetID: %u",
-                 netID);
+                 "ClientID: %u",
+                 clientHandle.id());
         rejectClient(client, ConnectionResponse::InvalidTicket);
         return;
     }
@@ -304,11 +307,11 @@ void WorldClientEndpoint::onTicketResult(
         return;
     }
 
-    NetworkID netID{client->getNetID()};
+    ConnectionHandle clientHandle{client->getHandle()};
     if (client->getAuthState() != Client::AuthState::Validating) {
         LOG_ERROR("Received ticket result for client that isn't validating. "
-                  "NetID: %u",
-                  netID);
+                  "ClientID: %u",
+                  clientHandle.id());
         return;
     }
 
@@ -327,22 +330,24 @@ void WorldClientEndpoint::onTicketResult(
             client->getConnection().setMaxReadPayloadSize(
                 CLIENT_MAX_MESSAGE_SIZE - CLIENT_HEADER_SIZE
                 - MESSAGE_HEADER_SIZE);
-            LOG_INFO("Client authenticated. NetID: %u, AccountID: %lld", netID,
+            LOG_INFO("Client authenticated. ClientID: %u, AccountID: %lld",
+                     clientHandle.id(),
                      static_cast<long long>(response.accountID));
 
             // Notify the sim that a client was connected.
-            eventDispatcher.emplace<ClientConnectionEvent>(
-                ClientConnected{netID, response.accountID, response.username});
+            eventDispatcher.emplace<ClientConnectionEvent>(ClientConnected{
+                clientHandle, response.accountID, response.username});
             break;
         }
         case ConsumeServiceTicketResponse::InvalidTicket: {
-            LOG_INFO("Rejected client: Invalid ticket. NetID: %u", netID);
+            LOG_INFO("Rejected client: Invalid ticket. ClientID: %u",
+                     clientHandle.id());
             rejectClient(*client, ConnectionResponse::InvalidTicket);
             break;
         }
         default: {
-            LOG_INFO("Rejected client: Failed to validate ticket. NetID: %u",
-                     netID);
+            LOG_INFO("Rejected client: Failed to validate ticket. ClientID: %u",
+                     clientHandle.id());
             rejectClient(*client, ConnectionResponse::InternalError);
             break;
         }
@@ -369,8 +374,9 @@ void WorldClientEndpoint::disconnectAccountClients(Sint64 accountID)
                 && !(client->isDisconnecting())
                 && (client->getAccountID() == accountID)) {
                 LOG_INFO("Disconnecting client: Account logged in from "
-                         "another connection. NetID: %u, AccountID: %lld",
-                         client->getNetID(), static_cast<long long>(accountID));
+                         "another connection. ClientID: %u, AccountID: %lld",
+                         client->getHandle().id(),
+                         static_cast<long long>(accountID));
                 disconnectClient(*client, DisconnectNotice::LoggedInElsewhere);
             }
         });
@@ -383,7 +389,7 @@ void WorldClientEndpoint::processReceivedMessage(Client& client,
     // Process the message.
     // Note: messageTick will be > -1 if the message contained a tick number.
     Sint64 messageTick{messageProcessor.processReceivedMessage(
-        client.getNetID(), messageType, payload.data(), payload.size())};
+        client.getHandle(), messageType, payload.data(), payload.size())};
 
     // If the message carried a tick number, use it to calc a diff and give it
     // to the client.
@@ -391,8 +397,8 @@ void WorldClientEndpoint::processReceivedMessage(Client& client,
         Sint64 tickDiff{messageTick - static_cast<Sint64>(getCurrentTick())};
         if (!(client.recordTickDiff(tickDiff))) {
             LOG_INFO("Dropped client: tickDiff out of range. tickDiff: %lld, "
-                     "NetID: %u",
-                     static_cast<long long>(tickDiff), client.getNetID());
+                     "ClientID: %u",
+                     static_cast<long long>(tickDiff), client.getHandle().id());
             client.getConnection().disconnect(
                 asio::error::make_error_code(asio::error::invalid_argument));
         }
@@ -423,7 +429,8 @@ void WorldClientEndpoint::beginClosingClient(
     // If the sim knows about this client, tell it.
     if (client.getAuthState() == Client::AuthState::Authenticated) {
         eventDispatcher.emplace<ClientConnectionEvent>(
-            ClientDisconnected{.clientID{client.getNetID()}, .reason{reason}});
+            ClientDisconnected{.clientHandle{client.getHandle()},
+                               .reason{reason}});
     }
 }
 
@@ -435,7 +442,7 @@ void WorldClientEndpoint::flushOnIOThread(std::vector<OutboxEntry>& entries,
     // Give each client the messages and disconnects that were queued for it.
     for (OutboxEntry& entry : entries) {
         // If this is a disconnectAll(), apply it to every client.
-        if (!entry.message && !entry.netID) {
+        if (!entry.message && !entry.clientHandle) {
             clientRegistry.forEach([&](ConnectionHandle,
                                        const std::shared_ptr<Client>& client) {
                 if (client->isDisconnecting()) {
@@ -458,7 +465,7 @@ void WorldClientEndpoint::flushOnIOThread(std::vector<OutboxEntry>& entries,
         }
 
         // Note: The sim only knows about authenticated clients.
-        std::shared_ptr<Client> client{findClient(entry.netID)};
+        std::shared_ptr<Client> client{clientRegistry.find(entry.clientHandle)};
         if (!client
             || (client->getAuthState() != Client::AuthState::Authenticated)
             || client->isDisconnecting()) {
@@ -490,11 +497,6 @@ void WorldClientEndpoint::flushOnIOThread(std::vector<OutboxEntry>& entries,
         });
 
     NetworkStats::recordBytesSent(bytesSent);
-}
-
-std::shared_ptr<Client> WorldClientEndpoint::findClient(NetworkID networkID)
-{
-    return clientRegistry.find(clientRegistry.getHandle(networkID));
 }
 
 Uint32 WorldClientEndpoint::getCurrentTick()

@@ -144,7 +144,7 @@ void EngineLuaBindings::addEntityItemHandlerBindings()
         "getCurrentTime", &EngineLuaBindings::getCurrentTime, this);
     entityItemHandlerLua.luaState.set_function(
         "sendSystemMessage", [&](std::string_view message) {
-            sendSystemMessage(message, entityItemHandlerLua.clientID);
+            sendSystemMessage(message, entityItemHandlerLua.clientHandle);
         });
 }
 
@@ -216,7 +216,7 @@ void EngineLuaBindings::addDialogueBindings()
                                       &EngineLuaBindings::getCurrentTime, this);
     dialogueLua.luaState.set_function(
         "sendSystemMessage", [&](std::string_view message) {
-            sendSystemMessage(message, dialogueLua.clientID);
+            sendSystemMessage(message, dialogueLua.clientHandle);
         });
 }
 
@@ -691,9 +691,10 @@ Uint32 EngineLuaBindings::getCurrentTime()
 }
 
 void EngineLuaBindings::sendSystemMessage(std::string_view message,
-                                          NetworkID clientID)
+                                          ConnectionHandle clientHandle)
 {
-    network.clientEndpoint.send(clientID, SystemMessage{std::string{message}});
+    network.clientEndpoint.send(clientHandle,
+                                SystemMessage{std::string{message}});
 }
 
 } // namespace WorldServer

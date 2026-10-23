@@ -5,7 +5,7 @@
 #include "ItemInteractionType.h"
 #include "EntityInteractionType.h"
 #include "SpellType.h"
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 #include "entt/fwd.hpp"
 #include <SDL3/SDL_stdinc.h>
 #include <unordered_map>
@@ -173,7 +173,7 @@ public:
         /** (Optional) The client that requested this cast. If casterEntity is a
             client entity, you must fill this in. Otherwise it won't be
            replicated properly. */
-        NetworkID clientID{NULL_NETWORK_ID};
+        ConnectionHandle clientHandle{};
     };
 
     struct CastEntityInteractionParams {
@@ -191,7 +191,7 @@ public:
         /** (Optional) The client that requested this cast. If casterEntity is a
             client entity, you must fill this in. Otherwise it won't be
            replicated properly. */
-        NetworkID clientID{NULL_NETWORK_ID};
+        ConnectionHandle clientHandle{};
     };
 
     struct CastSpellParams {
@@ -210,7 +210,7 @@ public:
         /** (Optional) The client that requested this cast. If casterEntity is a
             client entity, you must fill this in. Otherwise it won't be
            replicated properly. */
-        NetworkID clientID{NULL_NETWORK_ID};
+        ConnectionHandle clientHandle{};
     };
 };
 

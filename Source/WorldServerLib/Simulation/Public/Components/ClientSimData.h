@@ -16,14 +16,14 @@ namespace WorldServer
  * so it's more expected to see.
  */
 struct ClientSimData {
-    /** The network ID associated with this client.
+    /** The handle of this client's connection.
         We track this here so the sim knows where to send messages related to
         the entity.
         We also use this to remove the entity from the sim when the Client
         disconnects.
         Note: While the client is logging out (disconnected, but the entity
-              hasn't been removed yet), this will be NULL_NETWORK_ID. */
-    NetworkID netID{0};
+              hasn't been removed yet), this will be NULL_CONNECTION_HANDLE. */
+    ConnectionHandle clientHandle{};
 
     /** The ID of the account that this client is logged in to. */
     Sint64 accountID{0};

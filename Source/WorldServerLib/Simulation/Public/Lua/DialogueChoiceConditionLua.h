@@ -25,8 +25,8 @@ struct DialogueChoiceConditionLua {
           "GLOBAL": A constant used to identify the global value store. */
     sol::state luaState{};
 
-    /** The network ID of the client that is controlling the dialogue. */
-    NetworkID clientID{0};
+    /** The handle of the client that is controlling the dialogue. */
+    ConnectionHandle clientHandle{};
 };
 
 } // namespace WorldServer

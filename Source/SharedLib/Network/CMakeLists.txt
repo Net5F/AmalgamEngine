@@ -9,7 +9,6 @@ target_sources(SharedLib
         Public/ConnectionRegistry.h
         Public/DispatchMessage.h
         Public/NetworkDefs.h
-        Public/NetworkID.h
         Public/SimpleConnection.h
         Public/TlsTransport.h
         Public/NetworkStats.h

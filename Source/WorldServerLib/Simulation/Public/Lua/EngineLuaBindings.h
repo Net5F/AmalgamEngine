@@ -3,7 +3,7 @@
 #include "ItemID.h"
 #include "EngineCollisionLayerType.h"
 #include "Dialogue.h"
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 #include "entt/fwd.hpp"
 #include <SDL3/SDL_stdinc.h>
 #include <string_view>
@@ -258,7 +258,8 @@ private:
     /**
      * Sends a system message to the client.
      */
-    void sendSystemMessage(std::string_view message, NetworkID clientID);
+    void sendSystemMessage(std::string_view message,
+                           ConnectionHandle clientHandle);
 
     EntityInitLua& entityInitLua;
     EntityItemHandlerLua& entityItemHandlerLua;

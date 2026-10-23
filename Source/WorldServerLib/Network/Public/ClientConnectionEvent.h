@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 #include "DisconnectNotice.h"
 #include <optional>
 #include <string>
@@ -15,7 +15,7 @@ namespace WorldServer
  */
 struct ClientConnected {
     /** The ID of the client that connected. */
-    NetworkID clientID{0};
+    ConnectionHandle clientHandle{};
 
     /** The ID of the account that the client authenticated as. */
     Sint64 accountID{0};
@@ -31,7 +31,7 @@ struct ClientConnected {
  */
 struct ClientDisconnected {
     /** The ID of the client that disconnected. */
-    NetworkID clientID{0};
+    ConnectionHandle clientHandle{};
 
     /** If we initiated the disconnect (see WorldClientEndpoint::disconnect()),
         this is the reason that was given. If empty, the connection was lost

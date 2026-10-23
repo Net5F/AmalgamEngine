@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 #include "sol/sol.hpp"
 
 namespace AM
@@ -26,8 +26,8 @@ struct EntityItemHandlerLua {
           "GLOBAL": A constant used to identify the global value store. */
     sol::state luaState{};
 
-    /** The network ID of the client that used the item. */
-    NetworkID clientID{0};
+    /** The handle of the client that used the item. */
+    ConnectionHandle clientHandle{};
 
     /** The item that's being used.
         Will always be non-nullptr while a script is running. */

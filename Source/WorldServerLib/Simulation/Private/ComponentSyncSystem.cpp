@@ -171,7 +171,7 @@ void ComponentSyncSystem::sendSelfUpdates()
             network.clientEndpoint.serialize(componentUpdate)};
 
         // Send the message.
-        network.clientEndpoint.sendBytes(client.netID, message,
+        network.clientEndpoint.sendBytes(client.clientHandle, message,
                                          componentUpdate.tickNum);
     }
 
@@ -262,7 +262,7 @@ void ComponentSyncSystem::sendInRangeUpdates()
         for (entt::entity entity : *entitiesInRange) {
             if (view.contains(entity)) {
                 const auto& client{view.get<ClientSimData>(entity)};
-                network.clientEndpoint.sendBytes(client.netID, message,
+                network.clientEndpoint.sendBytes(client.clientHandle, message,
                                                  componentUpdate.tickNum);
             }
         }

@@ -40,11 +40,6 @@ ConnectionHandle Client::getHandle() const
     return handle;
 }
 
-NetworkID Client::getNetID() const
-{
-    return static_cast<NetworkID>(handle.id());
-}
-
 WorldClientConnection& Client::getConnection()
 {
     return *connection;
@@ -153,8 +148,8 @@ std::size_t Client::sendQueuedMessages(WorldBatchFramer& framer,
         std::size_t messageSize{queuedMessage.message->size()};
         if (!WorldBatchFramer::canEverFit(messageSize)) {
             LOG_ERROR("Dropped a message that's too large to fit in a batch. "
-                      "Size: %u, NetID: %u",
-                      messageSize, getNetID());
+                      "Size: %u, ClientID: %u",
+                      messageSize, getHandle().id());
             continue;
         }
         if (!framer.hasRoomFor(messageSize)) {
@@ -278,8 +273,8 @@ Sint8 Client::calcAdjustment()
 
 void Client::printAdjustmentInfo([[maybe_unused]] int truncatedAverage)
 {
-    LOG_DEBUG("Calc'd adjustment. NetID: %u, adjustment: %d, iteration: %u",
-              getNetID(), (Config::TICKDIFF_TARGET - truncatedAverage),
+    LOG_DEBUG("Calc'd adjustment. ClientID: %u, adjustment: %d, iteration: %u",
+              getHandle().id(), (Config::TICKDIFF_TARGET - truncatedAverage),
               latestAdjIteration);
     LOG_DEBUG("truncatedAverage: %d, numFreshDiffs: %u. Values:",
               truncatedAverage, numFreshDiffs);

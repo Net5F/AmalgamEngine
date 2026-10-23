@@ -49,8 +49,8 @@ public:
             return std::nullopt;
         }
 
-        ConnectionHandle::ID id{static_cast<ConnectionHandle::ID>(
-            connectionIDPool.reserveID())};
+        ConnectionHandle::ID id{
+            static_cast<ConnectionHandle::ID>(connectionIDPool.reserveID())};
         Entry& entry{entries[id]};
         if (entry.connection) {
             LOG_ERROR("Reserved connection ID is already in use: %u",
@@ -75,28 +75,10 @@ public:
         }
 
         const Entry& entry{entries[handle.id()]};
-        if (!entry.connection
-            || (entry.generation != handle.generation())) {
+        if (!entry.connection || (entry.generation != handle.generation())) {
             return {};
         }
         return entry.connection;
-    }
-
-    /**
-     * If a connection occupies the given slot ID, returns its handle.
-     * Otherwise returns a null handle.
-     */
-    ConnectionHandle getHandle(ConnectionHandle::ID id) const
-    {
-        if ((id == 0) || (id >= entries.size())) {
-            return {};
-        }
-
-        const Entry& entry{entries[id]};
-        if (!entry.connection) {
-            return {};
-        }
-        return ConnectionHandle{id, entry.generation};
     }
 
     /**
@@ -135,13 +117,11 @@ public:
         }
 
         Entry& entry{entries[handle.id()]};
-        if (!entry.connection
-            || (entry.generation != handle.generation())) {
+        if (!entry.connection || (entry.generation != handle.generation())) {
             return false;
         }
 
-        std::shared_ptr<ConnectionType> connection{
-            std::move(entry.connection)};
+        std::shared_ptr<ConnectionType> connection{std::move(entry.connection)};
         entry.generation = nextGeneration(entry.generation);
         connectionIDPool.freeID(handle.id());
         --connectionCount;
@@ -207,10 +187,9 @@ private:
         if ((requestedCapacity == 0)
             || (requestedCapacity
                 > std::numeric_limits<ConnectionHandle::ID>::max())) {
-            LOG_INFO(
-                "Invalid connection registry capacity: %zu. Defaulting to "
-                "%zu.",
-                requestedCapacity, DEFAULT_CAPACITY);
+            LOG_INFO("Invalid connection registry capacity: %zu. Defaulting to "
+                     "%zu.",
+                     requestedCapacity, DEFAULT_CAPACITY);
             return DEFAULT_CAPACITY;
         }
         return requestedCapacity;

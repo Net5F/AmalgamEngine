@@ -35,9 +35,9 @@ void InputSystem::processInputMessages()
         // If we had to drop a request, handle it.
         if (result != SorterBase::ValidityResult::Valid) {
             LOG_INFO("Dropped message from %u. Tick: %u, received: %u",
-                     inputChangeRequest->netID, simulation.getCurrentTick(),
-                     inputChangeRequest->tickNum);
-            handleDroppedMessage(inputChangeRequest->netID);
+                     inputChangeRequest->clientHandle.id(),
+                     simulation.getCurrentTick(), inputChangeRequest->tickNum);
+            handleDroppedMessage(inputChangeRequest->clientHandle);
         }
 
         inputChangeRequestQueue.pop();
@@ -54,9 +54,9 @@ void InputSystem::processInputMessages()
         // If the input is from an earlier tick, drop it and continue.
         if (inputChangeRequest.tickNum < currentTick) {
             LOG_INFO("Dropped message from %u. Tick: %u, received: %u",
-                     inputChangeRequest.netID, currentTick,
+                     inputChangeRequest.clientHandle.id(), currentTick,
                      inputChangeRequest.tickNum);
-            handleDroppedMessage(inputChangeRequest.netID);
+            handleDroppedMessage(inputChangeRequest.clientHandle);
             inputChangeRequestQueue.pop();
             continue;
         }
@@ -67,7 +67,7 @@ void InputSystem::processInputMessages()
 
         // Update the client entity's inputs.
         entt::entity clientEntity{
-            world.getClientEntity(inputChangeRequest.netID)};
+            world.getClientEntity(inputChangeRequest.clientHandle)};
         if (clientEntity != entt::null) {
             // Update the entity's Input component.
             world.registry.replace<Input>(clientEntity,
@@ -83,10 +83,10 @@ void InputSystem::processInputMessages()
     inputChangeRequestSorter.advance();
 }
 
-void InputSystem::handleDroppedMessage(NetworkID clientID)
+void InputSystem::handleDroppedMessage(ConnectionHandle clientHandle)
 {
     // Find the entity ID of the client that sent this request.
-    entt::entity clientEntity{world.getClientEntity(clientID)};
+    entt::entity clientEntity{world.getClientEntity(clientHandle)};
     if (clientEntity == entt::null) {
         // The entity is gone, we don't need to process this drop.
         return;

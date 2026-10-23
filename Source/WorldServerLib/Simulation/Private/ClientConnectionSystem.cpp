@@ -97,18 +97,20 @@ void ClientConnectionSystem::processDisconnectEvent(
     const ClientDisconnected& clientDisconnected)
 {
     // Find the disconnected client's associated entity.
-    auto disconnectedEntityIt{world.netIDMap.find(clientDisconnected.clientID)};
-    if (disconnectedEntityIt == world.netIDMap.end()) {
-        LOG_ERROR("Failed to find entity with netID: %u while disconnecting.",
-                  clientDisconnected.clientID);
+    auto disconnectedEntityIt{
+        world.clientHandleMap.find(clientDisconnected.clientHandle)};
+    if (disconnectedEntityIt == world.clientHandleMap.end()) {
+        LOG_ERROR(
+            "Failed to find entity with clientID: %u while disconnecting.",
+            clientDisconnected.clientHandle.id());
         return;
     }
 
     // Detach the client from its entity.
     entt::entity entity{disconnectedEntityIt->second};
-    world.netIDMap.erase(disconnectedEntityIt);
+    world.clientHandleMap.erase(disconnectedEntityIt);
     ClientSimData& client{world.registry.get<ClientSimData>(entity)};
-    client.netID = NULL_NETWORK_ID;
+    client.clientHandle = NULL_CONNECTION_HANDLE;
     Sint64 accountID{client.accountID};
 
     // If the client was logging out, stop. The entity will linger as usual.
@@ -129,9 +131,9 @@ void ClientConnectionSystem::processDisconnectEvent(
     // Start lingering.
     removalTickMap[accountID]
         = simulation.getCurrentTick() + Config::LOGOUT_DELAY_TICKS;
-    LOG_INFO("Client disconnected, entity is lingering. netID: %u, "
+    LOG_INFO("Client disconnected, entity is lingering. clientID: %u, "
              "entityID: %u",
-             clientDisconnected.clientID, entity);
+             clientDisconnected.clientHandle.id(), entity);
 }
 
 entt::entity ClientConnectionSystem::createClientEntity(
@@ -150,7 +152,7 @@ entt::entity ClientConnectionSystem::createClientEntity(
     registry.emplace<Name>(newEntity, clientConnected.username);
     registry.emplace<Inventory>(newEntity);
 
-    registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
+    registry.emplace<ClientSimData>(newEntity, clientConnected.clientHandle,
                                     clientConnected.accountID);
 
     world.addMovementComponents(newEntity);
@@ -170,16 +172,16 @@ entt::entity ClientConnectionSystem::createClientEntity(
                 | CollisionLayerType::BlockCollision);
         });
 
-    // Add the new client entity to the network ID map.
-    world.netIDMap[clientConnected.clientID] = newEntity;
+    // Add the new client entity to the client handle map.
+    world.clientHandleMap[clientConnected.clientHandle] = newEntity;
 
-    LOG_INFO("Constructed client entity with netID: %u, accountID: %lld, "
+    LOG_INFO("Constructed client entity with clientID: %u, accountID: %lld, "
              "entityID: %u",
-             clientConnected.clientID,
+             clientConnected.clientHandle.id(),
              static_cast<long long>(clientConnected.accountID), newEntity);
 
     // Build and send the response.
-    sendConnectionResponse(clientConnected.clientID, newEntity);
+    sendConnectionResponse(clientConnected.clientHandle, newEntity);
 
     return newEntity;
 }
@@ -192,12 +194,14 @@ void ClientConnectionSystem::attachClientToEntity(
     // If the entity is still attached to a client, detach it.
     // Note: This shouldn't happen, since the Network disconnects an account's
     //       old client before connecting the new one.
-    NetworkID oldNetID{registry.get<ClientSimData>(entity).netID};
-    if (oldNetID != NULL_NETWORK_ID) {
+    ConnectionHandle oldClientHandle{
+        registry.get<ClientSimData>(entity).clientHandle};
+    if (oldClientHandle != NULL_CONNECTION_HANDLE) {
         LOG_ERROR("Account's entity is still attached to a client. "
-                  "accountID: %lld, old netID: %u",
-                  static_cast<long long>(clientConnected.accountID), oldNetID);
-        world.netIDMap.erase(oldNetID);
+                  "accountID: %lld, old clientID: %u",
+                  static_cast<long long>(clientConnected.accountID),
+                  oldClientHandle.id());
+        world.clientHandleMap.erase(oldClientHandle);
     }
 
     // Stop the entity from being removed.
@@ -207,25 +211,27 @@ void ClientConnectionSystem::attachClientToEntity(
     // list, and causes the systems that observe ClientSimData to send it its
     // initial state (inventory, self components, etc).
     registry.erase<ClientSimData>(entity);
-    registry.emplace<ClientSimData>(entity, clientConnected.clientID,
+    registry.emplace<ClientSimData>(entity, clientConnected.clientHandle,
                                     clientConnected.accountID);
 
-    world.netIDMap[clientConnected.clientID] = entity;
+    world.clientHandleMap[clientConnected.clientHandle] = entity;
 
-    LOG_INFO("Attached client to existing entity. netID: %u, accountID: %lld, "
-             "entityID: %u",
-             clientConnected.clientID,
-             static_cast<long long>(clientConnected.accountID), entity);
+    LOG_INFO(
+        "Attached client to existing entity. clientID: %u, accountID: %lld, "
+        "entityID: %u",
+        clientConnected.clientHandle.id(),
+        static_cast<long long>(clientConnected.accountID), entity);
 
     // Build and send the response.
-    sendConnectionResponse(clientConnected.clientID, entity);
+    sendConnectionResponse(clientConnected.clientHandle, entity);
 }
 
 void ClientConnectionSystem::processLogoutRequest(
     const WorldLogoutRequest& logoutRequest)
 {
     // Find the entity ID of the client that sent this request.
-    entt::entity clientEntity{world.getClientEntity(logoutRequest.netID)};
+    entt::entity clientEntity{
+        world.getClientEntity(logoutRequest.clientHandle)};
     if (clientEntity == entt::null) {
         // Client doesn't exist (may have disconnected), skip this request.
         return;
@@ -241,7 +247,7 @@ void ClientConnectionSystem::processLogoutRequest(
         // Entities can't log out while moving.
         if (entityIsMoving(clientEntity)) {
             network.clientEndpoint.send(
-                logoutRequest.netID,
+                logoutRequest.clientHandle,
                 WorldLogoutUpdate{WorldLogoutUpdate::Canceled});
             return;
         }
@@ -251,7 +257,7 @@ void ClientConnectionSystem::processLogoutRequest(
         logoutTickMap[accountID]
             = simulation.getCurrentTick() + Config::LOGOUT_DELAY_TICKS;
         network.clientEndpoint.send(
-            logoutRequest.netID,
+            logoutRequest.clientHandle,
             WorldLogoutUpdate{WorldLogoutUpdate::Started,
                               static_cast<float>(Config::LOGOUT_DELAY_S)});
     }
@@ -307,8 +313,9 @@ void ClientConnectionSystem::cancelLogout(Sint64 accountID, entt::entity entity)
 {
     logoutTickMap.erase(accountID);
 
-    NetworkID netID{world.registry.get<ClientSimData>(entity).netID};
-    network.clientEndpoint.send(netID,
+    ConnectionHandle clientHandle{
+        world.registry.get<ClientSimData>(entity).clientHandle};
+    network.clientEndpoint.send(clientHandle,
                                 WorldLogoutUpdate{WorldLogoutUpdate::Canceled});
 }
 
@@ -320,12 +327,13 @@ void ClientConnectionSystem::completeLogout(Sint64 accountID,
     // Tell the client that it's logged out, then disconnect it.
     // Note: When the disconnect event arrives, we'll remove the entity
     //       immediately (skipping the linger time).
-    NetworkID netID{world.registry.get<ClientSimData>(entity).netID};
+    ConnectionHandle clientHandle{
+        world.registry.get<ClientSimData>(entity).clientHandle};
     network.clientEndpoint.send(
-        netID, WorldLogoutUpdate{WorldLogoutUpdate::Completed});
-    network.clientEndpoint.disconnect(netID, DisconnectNotice::Logout);
-    LOG_INFO("Client logged out. netID: %u, accountID: %lld", netID,
-             static_cast<long long>(accountID));
+        clientHandle, WorldLogoutUpdate{WorldLogoutUpdate::Completed});
+    network.clientEndpoint.disconnect(clientHandle, DisconnectNotice::Logout);
+    LOG_INFO("Client logged out. clientID: %u, accountID: %lld",
+             clientHandle.id(), static_cast<long long>(accountID));
 }
 
 bool ClientConnectionSystem::entityIsMoving(entt::entity entity)
@@ -385,8 +393,8 @@ void ClientConnectionSystem::removeClientEntity(Sint64 accountID)
     accountEntityMap.erase(entityIt);
 }
 
-void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
-                                                    entt::entity newEntity)
+void ClientConnectionSystem::sendConnectionResponse(
+    ConnectionHandle clientHandle, entt::entity newEntity)
 {
     // Fill in the current tick and their entity's ID.
     ConnectionResponse connectionResponse{};
@@ -402,7 +410,7 @@ void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
     connectionResponse.mapZLengthChunks = mapChunkExtent.zLength;
 
     // Send the connection response message.
-    network.clientEndpoint.send(networkID, connectionResponse, currentTick);
+    network.clientEndpoint.send(clientHandle, connectionResponse, currentTick);
 }
 
 } // namespace WorldServer

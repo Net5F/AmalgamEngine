@@ -34,16 +34,17 @@ namespace AM
 namespace WorldServer
 {
 template<typename T>
-void dispatchWithNetID(NetworkID netID, std::span<Uint8> messageBuffer,
-                       EventDispatcher& dispatcher)
+void dispatchWithClientHandle(ConnectionHandle clientHandle,
+                              std::span<Uint8> messageBuffer,
+                              EventDispatcher& dispatcher)
 {
     // Deserialize the message.
     T message{};
     Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
                             message);
 
-    // Fill in the network ID that we assigned to this client.
-    message.netID = netID;
+    // Fill in the handle of the client that sent the message.
+    message.clientHandle = clientHandle;
 
     // Push the message into any subscribed queues.
     dispatcher.push<T>(message);
@@ -55,7 +56,7 @@ MessageProcessor::MessageProcessor(
 {
 }
 
-Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
+Sint64 MessageProcessor::processReceivedMessage(ConnectionHandle clientHandle,
                                                 Uint8 messageType,
                                                 Uint8* messageBuffer,
                                                 std::size_t messageSize)
@@ -74,8 +75,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             break;
         }
         case EngineMessageType::InputChangeRequest: {
-            messageTick = static_cast<Sint64>(
-                handleInputChangeRequest(netID, messageBuffer, messageSize));
+            messageTick = static_cast<Sint64>(handleInputChangeRequest(
+                clientHandle, messageBuffer, messageSize));
             break;
         }
         case EngineMessageType::EntityNameChangeRequest: {
@@ -89,13 +90,15 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             break;
         }
         case EngineMessageType::ChunkDataRequest: {
-            dispatchWithNetID<ChunkDataRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<ChunkDataRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::EntityInitRequest: {
-            dispatchWithNetID<EntityInitRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<EntityInitRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::EntityDeleteRequest: {
@@ -104,85 +107,100 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             break;
         }
         case EngineMessageType::EntityInitScriptRequest: {
-            dispatchWithNetID<EntityInitScriptRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<EntityInitScriptRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::ItemDataRequest: {
-            dispatchWithNetID<ItemDataRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<ItemDataRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::ItemInitRequest: {
-            dispatchWithNetID<ItemInitRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<ItemInitRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::ItemChangeRequest: {
-            dispatchWithNetID<ItemChangeRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<ItemChangeRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::ItemInitScriptRequest: {
-            dispatchWithNetID<ItemInitScriptRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<ItemInitScriptRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::CombineItemsRequest: {
-            dispatchWithNetID<CombineItemsRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<CombineItemsRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::UseItemOnEntityRequest: {
-            dispatchWithNetID<UseItemOnEntityRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<UseItemOnEntityRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::DialogueChoiceRequest: {
-            dispatchWithNetID<DialogueChoiceRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<DialogueChoiceRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::CastRequest: {
-            dispatchWithNetID<CastRequest>(netID, {messageBuffer, messageSize},
-                                           networkEventDispatcher);
+            dispatchWithClientHandle<CastRequest>(clientHandle,
+                                                  {messageBuffer, messageSize},
+                                                  networkEventDispatcher);
             break;
         }
         case EngineMessageType::WorldLogoutRequest: {
-            dispatchWithNetID<WorldLogoutRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<WorldLogoutRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {
-            dispatchWithNetID<TileAddLayer>(netID, {messageBuffer, messageSize},
-                                            networkEventDispatcher);
+            dispatchWithClientHandle<TileAddLayer>(clientHandle,
+                                                   {messageBuffer, messageSize},
+                                                   networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileRemoveLayer: {
-            dispatchWithNetID<TileRemoveLayer>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<TileRemoveLayer>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileClearLayers: {
-            dispatchWithNetID<TileClearLayers>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<TileClearLayers>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileExtentClearLayers: {
-            dispatchWithNetID<TileExtentClearLayers>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<TileExtentClearLayers>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         case EngineMessageType::InventoryOperation: {
-            dispatchWithNetID<InventoryOperation>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            dispatchWithClientHandle<InventoryOperation>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
             break;
         }
         default: {
             // If we don't have a handler for this message type, pass it to
             // the project.
             if (extension != nullptr) {
-                extension->processReceivedMessage(netID, messageType,
+                extension->processReceivedMessage(clientHandle, messageType,
                                                   messageBuffer, messageSize);
             }
             break;
@@ -208,7 +226,7 @@ Uint32 MessageProcessor::handleHeartbeat(Uint8* messageBuffer,
     return heartbeat.tickNum;
 }
 
-Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID,
+Uint32 MessageProcessor::handleInputChangeRequest(ConnectionHandle clientHandle,
                                                   Uint8* messageBuffer,
                                                   std::size_t messageSize)
 {
@@ -216,8 +234,8 @@ Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID,
     InputChangeRequest inputChangeRequest{};
     Deserialize::fromBuffer(messageBuffer, messageSize, inputChangeRequest);
 
-    // Fill in the network ID that we assigned to this client.
-    inputChangeRequest.netID = netID;
+    // Fill in the handle of the client that sent the message.
+    inputChangeRequest.clientHandle = clientHandle;
 
     // Push the message into any subscribed queues.
     networkEventDispatcher.push<InputChangeRequest>(inputChangeRequest);

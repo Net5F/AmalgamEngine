@@ -46,7 +46,7 @@ void ScriptDataSystem::sendEntityInitScript(
             world.registry.try_get<EntityInitScript>(entity)}) {
         LOG_INFO("Sending script: %s", initScript->script.c_str());
         network.clientEndpoint.send(
-            initScriptRequest.netID,
+            initScriptRequest.clientHandle,
             EntityInitScriptResponse{entity, *initScript});
     }
 }
@@ -57,7 +57,7 @@ void ScriptDataSystem::sendItemInitScript(
     // If the given item is valid, send its init script.
     if (const Item* item{itemData.getItem(initScriptRequest.itemID)}) {
         network.clientEndpoint.send(
-            initScriptRequest.netID,
+            initScriptRequest.clientHandle,
             ItemInitScriptResponse{
                 item->numericID, itemData.getItemInitScript(item->numericID)});
     }

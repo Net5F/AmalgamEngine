@@ -56,7 +56,7 @@ void CastSystem::sendCastCooldownInits()
         auto [client, castCooldown]
             = world.registry.get<ClientSimData, CastCooldown>(entity);
 
-        network.clientEndpoint.send(client.netID,
+        network.clientEndpoint.send(client.clientHandle,
                                     CastCooldownInit{castCooldown});
     }
 
@@ -121,7 +121,7 @@ void CastSystem::processCastRequests()
 void CastSystem::processCastRequest(const CastRequest& castRequest)
 {
     // Find the entity ID of the client that sent this request.
-    entt::entity clientEntity{world.getClientEntity(castRequest.netID)};
+    entt::entity clientEntity{world.getClientEntity(castRequest.clientHandle)};
     if (clientEntity == entt::null) {
         // Client doesn't exist (may have disconnected), skip this request.
         return;
@@ -133,18 +133,18 @@ void CastSystem::processCastRequest(const CastRequest& castRequest)
         result = world.castHelper.castItemInteraction(
             {*type, clientEntity, castRequest.slotIndex,
              castRequest.targetEntity, castRequest.targetPosition,
-             castRequest.netID});
+             castRequest.clientHandle});
     }
     else if (auto* type{
                  std::get_if<EntityInteractionType>(&castRequest.castableID)}) {
         result = world.castHelper.castEntityInteraction(
             {*type, clientEntity, castRequest.targetEntity,
-             castRequest.targetPosition, castRequest.netID});
+             castRequest.targetPosition, castRequest.clientHandle});
     }
     else if (auto* type{std::get_if<SpellType>(&castRequest.castableID)}) {
         result = world.castHelper.castSpell(
             {*type, clientEntity, castRequest.targetEntity,
-             castRequest.targetPosition, castRequest.netID});
+             castRequest.targetPosition, castRequest.clientHandle});
     }
     else {
         LOG_ERROR("Tried to cast Castable with invalid type.");
@@ -153,7 +153,8 @@ void CastSystem::processCastRequest(const CastRequest& castRequest)
     // If the cast failed, send the failure to the caster.
     if (result != CastFailureType::None) {
         network.clientEndpoint.send<CastFailed>(
-            castRequest.netID, {clientEntity, castRequest.castableID, result});
+            castRequest.clientHandle,
+            {clientEntity, castRequest.castableID, result});
     }
 }
 
@@ -306,7 +307,7 @@ void CastSystem::sendCastStarted(CastState& castState)
     for (entt::entity entity : *entitiesInRange) {
         if ((entity != castInfo.casterEntity) && view.contains(entity)) {
             const auto& client{view.get<ClientSimData>(entity)};
-            network.clientEndpoint.sendBytes(client.netID, message);
+            network.clientEndpoint.sendBytes(client.clientHandle, message);
         }
     }
 }
@@ -343,7 +344,7 @@ void CastSystem::sendCastFailed(CastState& castState,
     for (entt::entity entity : *entitiesInRange) {
         if ((entity != castInfo.casterEntity) && view.contains(entity)) {
             const auto& client{view.get<ClientSimData>(entity)};
-            network.clientEndpoint.sendBytes(client.netID, message);
+            network.clientEndpoint.sendBytes(client.clientHandle, message);
         }
     }
 }

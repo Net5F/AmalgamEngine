@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 
 namespace AM
 {
@@ -68,28 +68,22 @@ public:
     // modifications.
 
     /** @return true if the given extent is editable, else false. */
-    virtual bool isTileExtentEditable(NetworkID netID,
-                                      const TileExtent& tileExtent) const
-        = 0;
+    virtual bool isTileExtentEditable(ConnectionHandle clientHandle,
+                                      const TileExtent& tileExtent) const = 0;
     /** @return true if the given request is valid, else false. */
     virtual bool isEntityInitRequestValid(
-        const EntityInitRequest& entityInitRequest) const
-        = 0;
+        const EntityInitRequest& entityInitRequest) const = 0;
     virtual bool isEntityDeleteRequestValid(
-        const EntityDeleteRequest& entityDeleteRequest) const
-        = 0;
+        const EntityDeleteRequest& entityDeleteRequest) const = 0;
     virtual bool isEntityNameChangeRequestValid(
-        const EntityNameChangeRequest& nameChangeRequest) const
-        = 0;
+        const EntityNameChangeRequest& nameChangeRequest) const = 0;
     virtual bool isGraphicStateChangeRequestValid(
-        const GraphicStateChangeRequest& graphicStateChangeRequest) const
-        = 0;
+        const GraphicStateChangeRequest& graphicStateChangeRequest) const = 0;
     virtual bool
         isItemInitRequestValid(const ItemInitRequest& itemInitRequest) const
         = 0;
     virtual bool isItemChangeRequestValid(
-        const ItemChangeRequest& itemChangeRequest) const
-        = 0;
+        const ItemChangeRequest& itemChangeRequest) const = 0;
 };
 
 } // namespace WorldServer

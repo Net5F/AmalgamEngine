@@ -35,7 +35,7 @@ InventoryHelper::AddResult InventoryHelper::addItem(entt::entity entityToAddTo,
             InventoryOperation operation{InventoryAddItem{
                 entityToAddTo, itemID, count, item->maxStackSize,
                 itemData.getItemVersion(itemID)}};
-            network.clientEndpoint.send(client->netID, operation);
+            network.clientEndpoint.send(client->clientHandle, operation);
         }
 
         return AddResult::Success;
@@ -54,7 +54,8 @@ InventoryHelper::AddResult InventoryHelper::addItem(entt::entity entityToAddTo,
     }
 
     if (sendFailureMessage && client) {
-        network.clientEndpoint.send(client->netID, SystemMessage{message});
+        network.clientEndpoint.send(client->clientHandle,
+                                    SystemMessage{message});
     }
     return result;
 }
@@ -72,7 +73,7 @@ InventoryHelper::AddResult InventoryHelper::addItem(entt::entity entityToAddTo,
     auto* client{world.registry.try_get<ClientSimData>(entityToAddTo)};
     if (sendFailureMessage && client) {
         network.clientEndpoint.send(
-            client->netID,
+            client->clientHandle,
             SystemMessage{"Failed to add item: Item not found."});
     }
     return AddResult::ItemNotFound;
@@ -90,7 +91,7 @@ InventoryHelper::RemoveResult
         // Success. If the target is a client entity, update it.
         if (client) {
             InventoryOperation operation{InventoryRemoveItem{slotIndex, count}};
-            network.clientEndpoint.send(client->netID, operation);
+            network.clientEndpoint.send(client->clientHandle, operation);
         }
 
         return RemoveResult::Success;
@@ -109,7 +110,8 @@ InventoryHelper::RemoveResult
     }
 
     if (sendFailureMessage && client) {
-        network.clientEndpoint.send(client->netID, SystemMessage{message});
+        network.clientEndpoint.send(client->clientHandle,
+                                    SystemMessage{message});
     }
     return result;
 }
@@ -140,7 +142,8 @@ InventoryHelper::RemoveResult
                 if (client) {
                     InventoryOperation operation{
                         InventoryRemoveItem{i, amountToRemove}};
-                    network.clientEndpoint.send(client->netID, operation);
+                    network.clientEndpoint.send(client->clientHandle,
+                                                operation);
                 }
 
                 // If we've found enough copies, stop searching.
@@ -171,7 +174,8 @@ InventoryHelper::RemoveResult
     }
 
     if (sendFailureMessage && client) {
-        network.clientEndpoint.send(client->netID, SystemMessage{message});
+        network.clientEndpoint.send(client->clientHandle,
+                                    SystemMessage{message});
     }
     return result;
 }

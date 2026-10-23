@@ -6,7 +6,7 @@
 #include "ItemInitRequest.h"
 #include "ItemChangeRequest.h"
 #include "ItemDataRequest.h"
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 #include "QueuedEvents.h"
 
 namespace AM
@@ -61,7 +61,7 @@ private:
      * the combination), sends an appropriate response.
      */
     void combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
-                      NetworkID clientID);
+                      ConnectionHandle clientHandle);
 
     /**
      * Tries to use the item in the given player's inventory slot on the given
@@ -69,7 +69,7 @@ private:
      * appropriate response.
      */
     void useItemOnEntity(Uint8 sourceSlotIndex, entt::entity targetEntity,
-                         NetworkID clientID);
+                         ConnectionHandle clientHandle);
 
     /**
      * Creates a new item with the given data. If the ID is already taken,
@@ -95,21 +95,21 @@ private:
      * @return true if the script ran successfully, else false.
      *         If false, an appropriate error message will be sent.
      */
-    bool runItemInitScript(NetworkID clientID, const ItemInitScript& initScript,
-                           Item& item);
+    bool runItemInitScript(ConnectionHandle clientHandle,
+                           const ItemInitScript& initScript, Item& item);
 
     /**
      * Runs the given item handler script on the given target entity.
      *
      * If the script fails, an appropriate error message will be sent.
      *
-     * @param clientID The client that initiated this interaction.
+     * @param clientHandle The client that initiated this interaction.
      * @param clientEntity The client's entity.
      * @param targetEntity The entity that the item is being used on.
      * @param item The item that's being used.
      */
     void runEntityItemHandlerScript(
-        NetworkID clientID, entt::entity clientEntity,
+        ConnectionHandle clientHandle, entt::entity clientEntity,
         entt::entity targetEntity, const Item* item,
         const EntityItemHandlerScript& itemHandlerScript);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 #include "entt/fwd.hpp"
 #include <memory>
 
@@ -35,7 +35,7 @@ public:
      *
      * See class comment.
      *
-     * @param netID  The network ID of the client that the message came from.
+     * @param clientHandle The handle of the client that the message came from.
      * @param messageType  The type of the received message.
      * @param messageBuffer A buffer containing a serialized message, starting
      *                      at index 0.
@@ -44,8 +44,8 @@ public:
      * @return If the message corresponds to a particular simulation tick,
      *         returns that tick number. If not, returns -1.
      */
-    Sint64 processReceivedMessage(NetworkID netID, Uint8 messageType,
-                                  Uint8* messageBuffer,
+    Sint64 processReceivedMessage(ConnectionHandle clientHandle,
+                                  Uint8 messageType, Uint8* messageBuffer,
                                   std::size_t messageSize);
 
     /**
@@ -67,7 +67,8 @@ private:
      * Pushes InputChangeRequest event.
      * @return The tick number that the message contained.
      */
-    Uint32 handleInputChangeRequest(NetworkID netID, Uint8* messageBuffer,
+    Uint32 handleInputChangeRequest(ConnectionHandle clientHandle,
+                                    Uint8* messageBuffer,
                                     std::size_t messageSize);
     //-------------------------------------------------------------------------
 

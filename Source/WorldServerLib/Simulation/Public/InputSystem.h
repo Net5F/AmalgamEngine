@@ -36,9 +36,10 @@ private:
      * We default the client's inputs (so they don't run off a cliff) and set
      * a flag so the NetworkUpdateSystem knows that a drop occurred.
      *
-     * @param clientID  The ID of the client that we had to drop a message from.
+     * @param clientHandle  The ID of the client that we had to drop a message
+     * from.
      */
-    void handleDroppedMessage(NetworkID clientID);
+    void handleDroppedMessage(ConnectionHandle clientHandle);
 
     /** Used to get the current tick. */
     Simulation& simulation;

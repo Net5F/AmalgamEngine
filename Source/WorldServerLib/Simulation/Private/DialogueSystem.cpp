@@ -46,7 +46,7 @@ void DialogueSystem::processTalkInteraction(const CastInfo& castInfo)
         // Note: This can happen if the init script has an addTalkInteraction()
         //       but doesn't have any topic() declarations.
         network.clientEndpoint.send(
-            castInfo.clientID,
+            castInfo.clientHandle,
             SystemMessage{"Error: Tried to Talk to entity that has no "
                           "Dialogue component."});
         return;
@@ -59,34 +59,36 @@ void DialogueSystem::processTalkInteraction(const CastInfo& castInfo)
     DialogueResponse dialogueResponse{castInfo.targetEntity, 0};
     dialogueLua.luaState["self"] = castInfo.targetEntity;
     dialogueLua.luaState["target"] = castInfo.casterEntity;
-    dialogueLua.clientID = castInfo.clientID;
+    dialogueLua.clientHandle = castInfo.clientHandle;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
     std::size_t topicNavigationCount{0};
     TopicPair lastTopic{&(dialogue->topics[0]), 0};
     TopicPair nextTopic{
-        runTopic(*dialogue, dialogue->topics[0], castInfo.clientID)};
+        runTopic(*dialogue, dialogue->topics[0], castInfo.clientHandle)};
     while (nextTopic.topic && (topicNavigationCount < TOPIC_NAVIGATION_MAX)) {
         lastTopic = nextTopic;
-        nextTopic = runTopic(*dialogue, *(nextTopic.topic), castInfo.clientID);
+        nextTopic
+            = runTopic(*dialogue, *(nextTopic.topic), castInfo.clientHandle);
         topicNavigationCount++;
     }
 
     // Add the last topic's index and choices to the response.
     dialogueResponse.topicIndex = lastTopic.topicIndex;
     addChoicesToResponse(lastTopic.topic->choices, castInfo.casterEntity,
-                         castInfo.targetEntity, castInfo.clientID,
+                         castInfo.targetEntity, castInfo.clientHandle,
                          dialogueResponse);
 
     // Send the dialogue to the client.
-    network.clientEndpoint.send(castInfo.clientID, dialogueResponse);
+    network.clientEndpoint.send(castInfo.clientHandle, dialogueResponse);
 }
 
 void DialogueSystem::processDialogueChoice(
     const DialogueChoiceRequest& choiceRequest)
 {
     // Find the entity ID of the client that sent this request.
-    entt::entity clientEntity{world.getClientEntity(choiceRequest.netID)};
+    entt::entity clientEntity{
+        world.getClientEntity(choiceRequest.clientHandle)};
     if (clientEntity == entt::null) {
         // Client doesn't exist (may have disconnected), skip this request.
         return;
@@ -111,12 +113,12 @@ void DialogueSystem::processDialogueChoice(
     DialogueResponse dialogueResponse{choiceRequest.targetEntity, 0};
     dialogueLua.luaState["self"] = choiceRequest.targetEntity;
     dialogueLua.luaState["target"] = clientEntity;
-    dialogueLua.clientID = choiceRequest.netID;
+    dialogueLua.clientHandle = choiceRequest.clientHandle;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
     TopicPair nextTopic{runChoice(*dialogue, choice, choiceTopic.name,
                                   choiceRequest.choiceIndex,
-                                  choiceRequest.netID)};
+                                  choiceRequest.clientHandle)};
 
     // If the choice contained a valid setNextTopic(), run the next topic
     // script, following any setNextTopic and pushing dialogue events into the
@@ -125,8 +127,8 @@ void DialogueSystem::processDialogueChoice(
     TopicPair lastTopic{};
     while (nextTopic.topic && (topicNavigationCount < TOPIC_NAVIGATION_MAX)) {
         lastTopic = nextTopic;
-        nextTopic
-            = runTopic(*dialogue, *(nextTopic.topic), choiceRequest.netID);
+        nextTopic = runTopic(*dialogue, *(nextTopic.topic),
+                             choiceRequest.clientHandle);
         topicNavigationCount++;
     }
 
@@ -135,17 +137,19 @@ void DialogueSystem::processDialogueChoice(
     if (lastTopic.topic) {
         dialogueResponse.topicIndex = lastTopic.topicIndex;
         addChoicesToResponse(lastTopic.topic->choices, clientEntity,
-                             choiceRequest.targetEntity, choiceRequest.netID,
-                             dialogueResponse);
+                             choiceRequest.targetEntity,
+                             choiceRequest.clientHandle, dialogueResponse);
     }
 
     // Send the dialogue to the client.
-    network.clientEndpoint.send(choiceRequest.netID, dialogueResponse);
+    network.clientEndpoint.send(choiceRequest.clientHandle, dialogueResponse);
 }
 
-DialogueSystem::TopicPair DialogueSystem::runChoice(
-    const Dialogue& dialogue, const Dialogue::Choice& choice,
-    std::string_view choiceTopicName, Uint8 choiceIndex, NetworkID clientID)
+DialogueSystem::TopicPair
+    DialogueSystem::runChoice(const Dialogue& dialogue,
+                              const Dialogue::Choice& choice,
+                              std::string_view choiceTopicName,
+                              Uint8 choiceIndex, ConnectionHandle clientHandle)
 {
     // Run the choice's action script, pushing dialogue events into the
     // response.
@@ -162,7 +166,7 @@ DialogueSystem::TopicPair DialogueSystem::runChoice(
         workString.append(std::to_string(choiceIndex));
         workString.append(", error: ");
         workString.append(err.what());
-        network.clientEndpoint.send(clientID, SystemMessage{workString});
+        network.clientEndpoint.send(clientHandle, SystemMessage{workString});
         return {nullptr};
     }
 
@@ -180,16 +184,18 @@ DialogueSystem::TopicPair DialogueSystem::runChoice(
             workString.append("Invalid setNextTopic(). Topic name: \"");
             workString.append(dialogueLua.nextTopicName);
             workString.append("\".");
-            network.clientEndpoint.send(clientID, SystemMessage{workString});
+            network.clientEndpoint.send(clientHandle,
+                                        SystemMessage{workString});
         }
     }
 
     return {nullptr};
 }
 
-DialogueSystem::TopicPair DialogueSystem::runTopic(const Dialogue& dialogue,
-                                                   const Dialogue::Topic& topic,
-                                                   NetworkID clientID)
+DialogueSystem::TopicPair
+    DialogueSystem::runTopic(const Dialogue& dialogue,
+                             const Dialogue::Topic& topic,
+                             ConnectionHandle clientHandle)
 {
     // Run the topic script, pushing dialogue events into the response.
     dialogueLua.nextTopicName = "";
@@ -203,7 +209,7 @@ DialogueSystem::TopicPair DialogueSystem::runTopic(const Dialogue& dialogue,
         workString.append(topic.name);
         workString.append("\", error: ");
         workString.append(err.what());
-        network.clientEndpoint.send(clientID, SystemMessage{workString});
+        network.clientEndpoint.send(clientHandle, SystemMessage{workString});
         return {nullptr};
     }
 
@@ -221,7 +227,8 @@ DialogueSystem::TopicPair DialogueSystem::runTopic(const Dialogue& dialogue,
             workString.append("Invalid setNextTopic(). Topic name: \"");
             workString.append(dialogueLua.nextTopicName);
             workString.append("\".");
-            network.clientEndpoint.send(clientID, SystemMessage{workString});
+            network.clientEndpoint.send(clientHandle,
+                                        SystemMessage{workString});
         }
     }
 
@@ -240,7 +247,7 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
         // This can happen if the init script has an addTalkInteraction()
         // but doesn't have any topic() declarations.
         network.clientEndpoint.send(
-            choiceRequest.netID,
+            choiceRequest.clientHandle,
             SystemMessage{"Error: Tried to Talk to entity that has no "
                           "Dialogue component."});
         return nullptr;
@@ -251,7 +258,7 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
                         .choices.size())) {
         // This can happen if the entity is re-initialized while a client is
         // talking to it, and some topics or choices are removed.
-        network.clientEndpoint.send(choiceRequest.netID,
+        network.clientEndpoint.send(choiceRequest.clientHandle,
                                     SystemMessage{"Invalid dialogue request."});
         return nullptr;
     }
@@ -261,7 +268,7 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
     const Dialogue::Choice& choice{topic.choices[choiceRequest.choiceIndex]};
     if (!(choice.conditionScript.empty())
         && !runChoiceCondition(choice, clientEntity, choiceRequest.targetEntity,
-                               choiceRequest.netID, true)) {
+                               choiceRequest.clientHandle, true)) {
         return nullptr;
     }
 
@@ -271,7 +278,7 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
 bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
                                         entt::entity clientEntity,
                                         entt::entity targetEntity,
-                                        NetworkID clientID,
+                                        ConnectionHandle clientHandle,
                                         bool sendAccessErrorMessage)
 {
     // Append "r=" to the script so the result gets saved to a variable.
@@ -290,7 +297,7 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
         workString.clear();
         workString.append("Choice condition script error: ");
         workString.append(err.what());
-        network.clientEndpoint.send(clientID, SystemMessage{workString});
+        network.clientEndpoint.send(clientHandle, SystemMessage{workString});
         return false;
     }
 
@@ -299,8 +306,9 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
     if (!(conditionResult.is<bool>())) {
         // We always send this error, since it's a malformed script.
         network.clientEndpoint.send(
-            clientID, SystemMessage{"Error: Choice condition script did not "
-                                    "evaluate to bool type."});
+            clientHandle,
+            SystemMessage{"Error: Choice condition script did not "
+                          "evaluate to bool type."});
         return false;
     }
     else if (!(conditionResult.get<bool>())) {
@@ -308,8 +316,9 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
         // selects a choice that shouldn't have been sent to them).
         if (sendAccessErrorMessage) {
             network.clientEndpoint.send(
-                clientID, SystemMessage{"Error: Player entity does not have "
-                                        "access to selected choice."});
+                clientHandle,
+                SystemMessage{"Error: Player entity does not have "
+                              "access to selected choice."});
         }
         return false;
     }
@@ -319,14 +328,15 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
 
 void DialogueSystem::addChoicesToResponse(
     const std::vector<Dialogue::Choice>& choices, entt::entity clientEntity,
-    entt::entity targetEntity, NetworkID clientID, DialogueResponse& response)
+    entt::entity targetEntity, ConnectionHandle clientHandle,
+    DialogueResponse& response)
 {
     Uint8 index{0};
     for (const Dialogue::Choice& choice : choices) {
         // If the client entity can access this choice, add it to the response.
         if (choice.conditionScript.empty()
-            || runChoiceCondition(choice, clientEntity, targetEntity, clientID,
-                                  false)) {
+            || runChoiceCondition(choice, clientEntity, targetEntity,
+                                  clientHandle, false)) {
             response.choices.emplace_back(index, choice.displayText);
         }
 

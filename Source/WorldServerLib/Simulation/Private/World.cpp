@@ -44,7 +44,7 @@ World::World(const SimulationContext& inSimContext)
              inSimContext.castableData}
 , loadHelper{*this, inSimContext.simulation, inSimContext.itemData}
 , database{std::make_unique<Database>()}
-, netIDMap{}
+, clientHandleMap{}
 , graphicData{inSimContext.graphicData}
 , entityInitLua{inSimContext.simulation.getEntityInitLua()}
 , itemInitLua{inSimContext.simulation.getItemInitLua()}
@@ -84,11 +84,11 @@ World::World(const SimulationContext& inSimContext)
 
 World::~World() = default;
 
-entt::entity World::getClientEntity(NetworkID netID)
+entt::entity World::getClientEntity(ConnectionHandle clientHandle)
 {
-    // Find the entity ID associated with the given network ID.
-    auto it{netIDMap.find(netID)};
-    if (it == netIDMap.end()) {
+    // Find the entity ID associated with the given client handle.
+    auto it{clientHandleMap.find(clientHandle)};
+    if (it == clientHandleMap.end()) {
         // Client doesn't exist (may have disconnected).
         return entt::null;
     }
@@ -402,7 +402,7 @@ Position World::getGroupedSpawnPoint()
 void World::onEntityDestroyed(entt::entity entity)
 {
     // Note: Only ClientConnectionSystem should be destroying client entities,
-    //       so we don't handle netIDMap cleanup here.
+    //       so we don't handle clientHandleMap cleanup here.
 
     // Remove it from the locators.
     // Note: Client entities could easily be removed where we delete them, but

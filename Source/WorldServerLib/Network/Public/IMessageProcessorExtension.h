@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 #include <SDL3/SDL_stdinc.h>
 #include <cstddef>
 
@@ -28,16 +28,15 @@ public:
      * Called when a message is received that the engine doesn't have a handler
      * for.
      *
-     * @param netID  The network ID of the client that the message came from.
+     * @param clientHandle The handle of the client that the message came from.
      * @param messageType  The type of the received message.
      * @param messageBuffer A buffer containing a serialized message, starting
      *                      at index 0.
      * @param messageSize  The length in bytes of the message in messageBuffer.
      */
-    virtual void processReceivedMessage(NetworkID netID, Uint8 messageType,
-                                        Uint8* messageBuffer,
-                                        std::size_t messageSize)
-        = 0;
+    virtual void processReceivedMessage(ConnectionHandle clientHandle,
+                                        Uint8 messageType, Uint8* messageBuffer,
+                                        std::size_t messageSize) = 0;
 };
 
 } // namespace WorldServer

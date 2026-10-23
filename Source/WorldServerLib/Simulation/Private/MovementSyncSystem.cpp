@@ -91,7 +91,7 @@ void MovementSyncSystem::sendEntityUpdate(ClientSimData& client)
     movementUpdate.tickNum = simulation.getCurrentTick();
 
     // Send the message.
-    network.clientEndpoint.send(client.netID, movementUpdate,
+    network.clientEndpoint.send(client.clientHandle, movementUpdate,
                                 movementUpdate.tickNum);
 }
 

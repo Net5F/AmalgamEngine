@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 #include "ItemInitScript.h"
 #include "ItemID.h"
 #include <string>
@@ -36,13 +36,10 @@ struct ItemInitScriptResponse {
     //--------------------------------------------------------------------------
     // Local data
     //--------------------------------------------------------------------------
-    /**
-     * The network ID of the client that sent this message.
-     * Set by the server.
-     * No IDs are accepted from the client because we can't trust it,
-     * so we fill in the ID based on which socket the message came from.
-     */
-    NetworkID netID{0};
+    /** The handle of the client that sent this message.
+        Set by the server, based on which connection the message came
+        from (we can't trust the client to ID itself). */
+    ConnectionHandle clientHandle{};
 };
 
 template<typename S>

@@ -49,7 +49,7 @@ void ChunkStreamingSystem::sendChunkUpdate(
     }
 
     // Send the message.
-    network.clientEndpoint.send(chunkDataRequest.netID, chunkUpdate);
+    network.clientEndpoint.send(chunkDataRequest.clientHandle, chunkUpdate);
 }
 
 void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,

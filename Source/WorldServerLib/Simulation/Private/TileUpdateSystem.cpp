@@ -48,15 +48,15 @@ struct InRangeExtentGetter {
     }
 };
 
-/** Sends the given tile update to the currently set client netID. */
+/** Sends the given tile update to the currently set client clientHandle. */
 struct UpdateSender {
     Network& network;
-    NetworkID netID{};
+    ConnectionHandle clientHandle{};
 
     template<typename T>
     void operator()(const T& tileUpdate)
     {
-        network.clientEndpoint.send<T>(netID, tileUpdate);
+        network.clientEndpoint.send<T>(clientHandle, tileUpdate);
     }
 };
 
@@ -122,7 +122,7 @@ void TileUpdateSystem::sendTileUpdates()
         for (entt::entity entity : entitiesInRange) {
             if (world.registry.all_of<ClientSimData>(entity)) {
                 ClientSimData& client{clientView.get<ClientSimData>(entity)};
-                updateSender.netID = client.netID;
+                updateSender.clientHandle = client.clientHandle;
                 std::visit(updateSender, updateVariant);
             }
         }
@@ -140,7 +140,7 @@ void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
 {
     // If the project says the tile isn't editable, skip this request.
     if (!(extension->isTileExtentEditable(
-            addLayerRequest.netID,
+            addLayerRequest.clientHandle,
             {addLayerRequest.tilePosition.x, addLayerRequest.tilePosition.y,
              addLayerRequest.tilePosition.z, 1, 1, 1}))) {
         return;
@@ -174,7 +174,7 @@ void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
 {
     // If the project says the tile isn't editable, skip this request.
     if (!(extension->isTileExtentEditable(
-            remLayerRequest.netID,
+            remLayerRequest.clientHandle,
             {remLayerRequest.tilePosition.x, remLayerRequest.tilePosition.y,
              remLayerRequest.tilePosition.z, 1, 1, 1}))) {
         return;
@@ -206,7 +206,7 @@ void TileUpdateSystem::clearTileLayers(
     const TileClearLayers& clearLayersRequest)
 {
     // If the project says the tile isn't editable, skip this request.
-    if (!(extension->isTileExtentEditable(clearLayersRequest.netID,
+    if (!(extension->isTileExtentEditable(clearLayersRequest.clientHandle,
                                           {clearLayersRequest.tilePosition.x,
                                            clearLayersRequest.tilePosition.y,
                                            clearLayersRequest.tilePosition.z, 1,
@@ -223,7 +223,7 @@ void TileUpdateSystem::clearExtentLayers(
 {
     // If the project says the extent isn't editable, skip this request.
     if (!(extension->isTileExtentEditable(
-            clearExtentLayersRequest.netID,
+            clearExtentLayersRequest.clientHandle,
             clearExtentLayersRequest.tileExtent))) {
         return;
     }

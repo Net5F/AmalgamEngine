@@ -38,20 +38,20 @@ private:
     /**
      * If the request is valid, adds the item to the specified inventory.
      */
-    void processOperation(NetworkID clientID,
+    void processOperation(ConnectionHandle clientHandle,
                           const InventoryAddItem& inventoryAddItem);
 
     /**
      * Removes the specified item from the requester's inventory.
      */
-    void processOperation(NetworkID clientID,
+    void processOperation(ConnectionHandle clientHandle,
                           const InventoryRemoveItem& inventoryRemoveItem);
 
     /**
      * Moves the specified item to the specified slot in the requestor's
      * inventory.
      */
-    void processOperation(NetworkID clientID,
+    void processOperation(ConnectionHandle clientHandle,
                           const InventoryMoveItem& inventoryMoveItem);
 
     /** Used for accessing inventory data. */

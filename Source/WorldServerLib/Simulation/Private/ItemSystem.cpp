@@ -52,14 +52,14 @@ void ItemSystem::processUseItemInteractions()
     while (combineItemsRequestQueue.pop(combineItemsRequest)) {
         combineItems(combineItemsRequest.sourceSlotIndex,
                      combineItemsRequest.targetSlotIndex,
-                     combineItemsRequest.netID);
+                     combineItemsRequest.clientHandle);
     }
 
     UseItemOnEntityRequest useItemOnEntityRequest{};
     while (useItemOnEntityRequestQueue.pop(useItemOnEntityRequest)) {
         useItemOnEntity(useItemOnEntityRequest.sourceSlotIndex,
                         useItemOnEntityRequest.targetEntity,
-                        useItemOnEntityRequest.netID);
+                        useItemOnEntityRequest.clientHandle);
     }
 }
 
@@ -96,7 +96,7 @@ void ItemSystem::processItemUpdates()
                 if (it != updatedItems.end()) {
                     const Item& item{*(itemData.getItem(itemSlot.ID))};
                     network.clientEndpoint.send(
-                        client.netID,
+                        client.clientHandle,
                         ItemUpdate{item.displayName, item.stringID,
                                    item.numericID, item.iconID,
                                    item.maxStackSize,
@@ -133,15 +133,15 @@ void ItemSystem::examineItem(const CastInfo& castInfo)
     //       with the initial ItemUpdate. To save data, we send it when
     //       requested instead (we assume that people are rarely going to
     //       examine items, compared to how often we send ItemUpdates).
-    network.clientEndpoint.send(castInfo.clientID,
+    network.clientEndpoint.send(castInfo.clientHandle,
                                 SystemMessage{castInfo.item->description});
 }
 
 void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
-                              NetworkID clientID)
+                              ConnectionHandle clientHandle)
 {
     // Find the client's entity ID.
-    entt::entity clientEntity{world.getClientEntity(clientID)};
+    entt::entity clientEntity{world.getClientEntity(clientHandle)};
     if (clientEntity != entt::null) {
         // If the combination is successful, tell the client.
         auto& inventory{world.registry.get<Inventory>(clientEntity)};
@@ -153,25 +153,26 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
             ItemVersion resultItemVersion{
                 itemData.getItemVersion(resultItemID)};
             network.clientEndpoint.send(
-                clientID,
+                clientHandle,
                 CombineItems{sourceSlotIndex, targetSlotIndex, resultItemID,
                              item->maxStackSize, resultItemVersion});
             network.clientEndpoint.send(
-                clientID, SystemMessage{combination->description});
+                clientHandle, SystemMessage{combination->description});
         }
         else {
             // No combination for the item. Give the user feedback.
-            network.clientEndpoint.send(clientID,
+            network.clientEndpoint.send(clientHandle,
                                         SystemMessage{"Nothing happens."});
         }
     }
 }
 
 void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
-                                 entt::entity targetEntity, NetworkID clientID)
+                                 entt::entity targetEntity,
+                                 ConnectionHandle clientHandle)
 {
     // Find the client's entity ID.
-    entt::entity clientEntity{world.getClientEntity(clientID)};
+    entt::entity clientEntity{world.getClientEntity(clientHandle)};
     if (clientEntity != entt::null) {
         // If the slot is invalid or empty, do nothing.
         Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
@@ -187,12 +188,12 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
         if (const ItemHandler* itemHandler{
                 world.registry.try_get<ItemHandler>(targetEntity)};
             itemHandler && !(itemHandler->handlerScript.script.empty())) {
-            runEntityItemHandlerScript(clientID, clientEntity, targetEntity,
+            runEntityItemHandlerScript(clientHandle, clientEntity, targetEntity,
                                        item, itemHandler->handlerScript);
         }
         else {
             // No handler for the item. Give the user feedback.
-            network.clientEndpoint.send(clientID,
+            network.clientEndpoint.send(clientHandle,
                                         SystemMessage{"Nothing happens."});
         }
     }
@@ -216,7 +217,7 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 
     // If we found an error, send it to the requesting client.
     if (errorType != ItemError::NotSet) {
-        network.clientEndpoint.send(itemInitRequest.netID,
+        network.clientEndpoint.send(itemInitRequest.clientHandle,
                                     ItemError{itemInitRequest.displayName,
                                               itemInitRequest.stringID,
                                               NULL_ITEM_ID, errorType});
@@ -230,8 +231,8 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
     item.iconID = itemInitRequest.iconID;
 
     // Run the init script. If there was an error, return early.
-    if (!(runItemInitScript(itemInitRequest.netID, itemInitRequest.initScript,
-                            item))) {
+    if (!(runItemInitScript(itemInitRequest.clientHandle,
+                            itemInitRequest.initScript, item))) {
         return;
     }
 
@@ -242,7 +243,7 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 
     // Send the requester the new item's definition.
     network.clientEndpoint.send(
-        itemInitRequest.netID,
+        itemInitRequest.clientHandle,
         ItemUpdate{newItem->displayName, newItem->stringID, newItem->numericID,
                    newItem->iconID, newItem->maxStackSize,
                    newItem->supportedInteractions,
@@ -273,7 +274,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     // If we found an error, send it to the requesting client.
     if (errorType != ItemError::NotSet) {
         network.clientEndpoint.send(
-            itemChangeRequest.netID,
+            itemChangeRequest.clientHandle,
             ItemError{itemChangeRequest.displayName, itemChangeRequest.stringID,
                       itemChangeRequest.itemID, errorType});
         return;
@@ -287,7 +288,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     item.iconID = itemChangeRequest.iconID;
 
     // Run the init script. If there was an error, return early.
-    if (!(runItemInitScript(itemChangeRequest.netID,
+    if (!(runItemInitScript(itemChangeRequest.clientHandle,
                             itemChangeRequest.initScript, item))) {
         return;
     }
@@ -301,7 +302,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     // Note: If the requester owns the item, we'll end up double-sending
     //       them this update, which isn't a big deal.
     network.clientEndpoint.send(
-        itemChangeRequest.netID,
+        itemChangeRequest.clientHandle,
         ItemUpdate{updatedItem->displayName, updatedItem->stringID,
                    updatedItem->numericID, updatedItem->iconID,
                    updatedItem->maxStackSize,
@@ -318,7 +319,7 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
             if (const Item* item{itemData.getItem(itemID)}) {
                 itemWasFound = true;
                 network.clientEndpoint.send(
-                    itemDataRequest.netID,
+                    itemDataRequest.clientHandle,
                     ItemUpdate{item->displayName, item->stringID,
                                item->numericID, item->iconID,
                                item->maxStackSize, item->supportedInteractions,
@@ -343,12 +344,12 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
             },
             itemDataRequest.itemID);
         network.clientEndpoint.send(
-            itemDataRequest.netID,
+            itemDataRequest.clientHandle,
             ItemError{"", stringID, numericID, ItemError::StringIDNotFound});
     }
 }
 
-bool ItemSystem::runItemInitScript(NetworkID clientID,
+bool ItemSystem::runItemInitScript(ConnectionHandle clientHandle,
                                    const ItemInitScript& initScript, Item& item)
 {
     // Run the given init script.
@@ -358,9 +359,9 @@ bool ItemSystem::runItemInitScript(NetworkID clientID,
     // false.
     if (!(resultString.empty())) {
         network.clientEndpoint.send(
-            clientID, ItemError{item.displayName, "", item.numericID,
-                                ItemError::InitScriptFailure});
-        network.clientEndpoint.send(clientID, SystemMessage{resultString});
+            clientHandle, ItemError{item.displayName, "", item.numericID,
+                                    ItemError::InitScriptFailure});
+        network.clientEndpoint.send(clientHandle, SystemMessage{resultString});
         return false;
     }
 
@@ -368,11 +369,12 @@ bool ItemSystem::runItemInitScript(NetworkID clientID,
 }
 
 void ItemSystem::runEntityItemHandlerScript(
-    NetworkID clientID, entt::entity clientEntity, entt::entity targetEntity,
-    const Item* item, const EntityItemHandlerScript& itemHandlerScript)
+    ConnectionHandle clientHandle, entt::entity clientEntity,
+    entt::entity targetEntity, const Item* item,
+    const EntityItemHandlerScript& itemHandlerScript)
 {
     // Run the given handler script.
-    entityItemHandlerLua.clientID = clientID;
+    entityItemHandlerLua.clientHandle = clientHandle;
     entityItemHandlerLua.item = item;
     entityItemHandlerLua.luaState["self"] = targetEntity;
     entityItemHandlerLua.luaState["target"] = clientEntity;
@@ -384,7 +386,7 @@ void ItemSystem::runEntityItemHandlerScript(
     // user.
     if (!(result.valid())) {
         sol::error err = result;
-        network.clientEndpoint.send(clientID, SystemMessage{err.what()});
+        network.clientEndpoint.send(clientHandle, SystemMessage{err.what()});
     }
 }
 

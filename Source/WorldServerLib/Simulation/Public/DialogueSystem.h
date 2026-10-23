@@ -63,7 +63,7 @@ private:
      *         topic. Else, returns nullptr.
      */
     TopicPair runTopic(const Dialogue& dialogue, const Dialogue::Topic& topic,
-                       NetworkID clientID);
+                       ConnectionHandle clientHandle);
 
     /**
      * Processes a dialogue choice request, sending appropriate response
@@ -79,13 +79,14 @@ private:
     TopicPair runChoice(const Dialogue& dialogue,
                         const Dialogue::Choice& choice,
                         std::string_view choiceTopicName, Uint8 choiceIndex,
-                        NetworkID clientID);
+                        ConnectionHandle clientHandle);
 
     /**
      * Validates that the given request has valid data and that the choice's
      * condition is satisfied by the client entity.
      *
-     * @param clientEntity The entity associated with the request's netID.
+     * @param clientEntity The entity associated with the request's
+     * clientHandle.
      * @return If valid, returns the the target entity's Dialogue component.
      *         Else, returns nullptr and sends an appropriate error message.
      */
@@ -96,13 +97,14 @@ private:
     /**
      * Runs the given choice's condition script.
      * @return true if the script ran successfully and evaluated to true, else
-     *         false. If the script evaluated to false and 
-     *         sendAccessErrorMessage == true, sends an appropriate error 
+     *         false. If the script evaluated to false and
+     *         sendAccessErrorMessage == true, sends an appropriate error
      *         message.
      */
     bool runChoiceCondition(const Dialogue::Choice& choice,
                             entt::entity clientEntity,
-                            entt::entity targetEntity, NetworkID clientID,
+                            entt::entity targetEntity,
+                            ConnectionHandle clientHandle,
                             bool sendAccessErrorMessage);
 
     /**
@@ -112,7 +114,8 @@ private:
      */
     void addChoicesToResponse(const std::vector<Dialogue::Choice>& choices,
                               entt::entity clientEntity,
-                              entt::entity targetEntity, NetworkID clientID,
+                              entt::entity targetEntity,
+                              ConnectionHandle clientHandle,
                               DialogueResponse& response);
 
     /** Used for validating requests and fetching dialogue data. */

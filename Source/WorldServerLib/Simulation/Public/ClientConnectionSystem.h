@@ -112,13 +112,13 @@ private:
     void removeClientEntity(Sint64 accountID);
 
     /**
-     * Sends a connection response to the client with the given networkID.
+     * Sends a connection response to the given client.
      *
-     * @param networkID  The client's network ID to send the connection response
-     *                   to.
+     * @param clientHandle  The client to send the connection response to.
      * @param newEntity  The entity that was created for this client.
      */
-    void sendConnectionResponse(NetworkID networkID, entt::entity newEntity);
+    void sendConnectionResponse(ConnectionHandle clientHandle,
+                                entt::entity newEntity);
 
     /** Used to get the current tick. */
     Simulation& simulation;

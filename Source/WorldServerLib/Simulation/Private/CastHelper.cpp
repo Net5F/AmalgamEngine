@@ -72,7 +72,7 @@ CastFailureType
         params.casterEntity,
         CastState{.castInfo{castable, params.casterEntity, item,
                             params.targetEntity, params.targetPosition,
-                            params.clientID},
+                            params.clientHandle},
                   .endTick{0}});
 
     return CastFailureType::None;
@@ -114,7 +114,7 @@ CastFailureType
         params.casterEntity,
         CastState{.castInfo{castable, params.casterEntity, nullptr,
                             params.targetEntity, params.targetPosition,
-                            params.clientID},
+                            params.clientHandle},
                   .endTick{0}});
 
     return CastFailureType::None;
@@ -148,7 +148,7 @@ CastFailureType CastHelper::castSpell(const CastSpellParams& params)
         params.casterEntity,
         CastState{.castInfo{castable, params.casterEntity, nullptr,
                             params.targetEntity, params.targetPosition,
-                            params.clientID},
+                            params.clientHandle},
                   .endTick{0}});
 
     return CastFailureType::None;

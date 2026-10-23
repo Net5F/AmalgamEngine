@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TileMap.h"
-#include "NetworkID.h"
+#include "ConnectionHandle.h"
 #include "EntityLocator.h"
 #include "CollisionLocator.h"
 #include "EntityStoredValueID.h"
@@ -96,24 +96,25 @@ public:
         Kept as a pointer to speed up compilation. */
     std::unique_ptr<Database> database;
 
-    /** Maps network IDs to entity IDs.
+    /** Maps client handles to entity IDs.
         Used for interfacing with the Network.
-        Note: To go the other way (entt::entity -> NetworkID), use
+        Note: To go the other way (entt::entity -> ConnectionHandle), use
               ClientSimData. */
-    std::unordered_map<NetworkID, entt::entity> netIDMap;
+    std::unordered_map<ConnectionHandle, entt::entity> clientHandleMap;
 
     //-------------------------------------------------------------------------
     // Helper Functions
     //-------------------------------------------------------------------------
     /**
-     * Returns the entity associated with the given network ID, or entt::null
+     * Returns the entity associated with the given client handle, or entt::null
      * if the client doesn't exist.
      *
-     * Use this instead of directly using netIDMap.
+     * Use this instead of directly using clientHandleMap.
      *
-     * Note: To go the other way (entt::entity -> NetworkID), use ClientSimData.
+     * Note: To go the other way (entt::entity -> ConnectionHandle), use
+     * ClientSimData.
      */
-    entt::entity getClientEntity(NetworkID netID);
+    entt::entity getClientEntity(ConnectionHandle clientHandle);
 
     /**
      * Teleports the given entity to the given position.
