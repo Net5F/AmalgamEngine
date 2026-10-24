@@ -46,7 +46,7 @@ std::optional<std::string>
     int result{crypto_pwhash_str_alg(
         encodedHash.data(), password.data(),
         static_cast<unsigned long long>(password.size()),
-        crypto_pwhash_OPSLIMIT_MODERATE, crypto_pwhash_MEMLIMIT_MODERATE,
+        crypto_pwhash_OPSLIMIT_INTERACTIVE, crypto_pwhash_MEMLIMIT_INTERACTIVE,
         crypto_pwhash_ALG_ARGON2ID13)};
     if (result != 0) {
         // Usually means the requested memory couldn't be allocated.
