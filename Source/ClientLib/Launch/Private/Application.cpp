@@ -7,8 +7,6 @@
 #include "SDLHelpers.h"
 #include "Log.h"
 #include <SDL3/SDL.h>
-#include <algorithm>
-#include <chrono>
 #include <memory>
 
 namespace AM
@@ -69,15 +67,12 @@ Application::Application()
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
 , rendererCaller{std::bind_front(&Renderer::render, &renderer),
                  UserConfig::get().getFrameTimestepS(), "Renderer", true}
+, callerGroup{{&simCaller, &uiCaller, &networkCaller, &rendererCaller},
+              "Main loop"}
 , messageProcessorExtension{}
 , rendererExtension{}
 , simulationExtension{}
 , userInterfaceExtension{}
-, osLatenesses{}
-, callerLatenesses{}
-, iterationCount{0}
-, idleIterationCount{0}
-, lastTimingReportTime{}
 , eventHandlers{this, &renderer, &userInterface, &simulation}
 , exitRequested{false}
 {
@@ -124,16 +119,12 @@ void Application::start()
     network.start();
 
     // Prime the timers so they don't start at 0.
-    simCaller.initTimer();
-    uiCaller.initTimer();
-    networkCaller.initTimer();
-    rendererCaller.initTimer();
-    lastTimingReportTime = std::chrono::steady_clock::now();
+    callerGroup.initTimers();
 
     while (!exitRequested) {
-        recordIteration();
+        callerGroup.recordIteration();
         runIteration();
-        waitForNextCall();
+        callerGroup.waitForNextCall();
     }
 }
 
@@ -161,18 +152,6 @@ void Application::dispatchOSEvents()
                 break;
             }
         }
-    }
-}
-
-bool Application::enoughTimeTillNextCall(double minimumTime)
-{
-    if ((simCaller.getTimeTillNextCall() > minimumTime)
-        && (networkCaller.getTimeTillNextCall() > minimumTime)
-        && (rendererCaller.getTimeTillNextCall() > minimumTime)) {
-        return true;
-    }
-    else {
-        return false;
     }
 }
 
@@ -208,102 +187,9 @@ void Application::runIteration()
     rendererCaller.update();
 
     // If we have enough time, dispatch events.
-    if (enoughTimeTillNextCall(DISPATCH_MINIMUM_TIME_S)) {
+    if (callerGroup.enoughTimeTillNextCall(DISPATCH_MINIMUM_TIME_S)) {
         dispatchOSEvents();
     }
-}
-
-void Application::waitForNextCall()
-{
-    // If we have enough time, sleep until shortly before the next caller is
-    // due.
-    double timeTillNextCall{getMinTimeTillNextCall()};
-    if (timeTillNextCall > SPIN_TIME_S) {
-        double sleepTimeS{timeTillNextCall - SPIN_TIME_S};
-        auto sleepStartTime{std::chrono::steady_clock::now()};
-        SDL_DelayNS(static_cast<Uint64>(sleepTimeS * SDL_NS_PER_SECOND));
-        recordOsLateness(std::chrono::duration<double>(
-                             std::chrono::steady_clock::now() - sleepStartTime)
-                             .count()
-                         - sleepTimeS);
-    }
-
-    // Spin until the next caller is due.
-    while (getMinTimeTillNextCall() > 0) {
-        SDL_CPUPauseInstruction();
-    }
-}
-
-double Application::getMinTimeTillNextCall()
-{
-    return std::min({simCaller.getTimeTillNextCall(),
-                     uiCaller.getTimeTillNextCall(),
-                     networkCaller.getTimeTillNextCall(),
-                     rendererCaller.getTimeTillNextCall()});
-}
-
-void Application::recordOsLateness(double latenessS)
-{
-    osLatenesses.push_back(latenessS);
-}
-
-void Application::recordIteration()
-{
-    iterationCount++;
-
-    // If a caller is due, record how overdue it is. Otherwise, this iteration
-    // won't call anything.
-    double callerLatenessS{-getMinTimeTillNextCall()};
-    if (callerLatenessS >= 0) {
-        callerLatenesses.push_back(callerLatenessS);
-    }
-    else {
-        idleIterationCount++;
-    }
-
-    auto now{std::chrono::steady_clock::now()};
-    double elapsedS{
-        std::chrono::duration<double>(now - lastTimingReportTime).count()};
-    if (elapsedS >= TIMING_REPORT_INTERVAL_S) {
-        logTimingStats(elapsedS);
-        lastTimingReportTime = now;
-    }
-}
-
-void Application::logTimingStats(double elapsedS)
-{
-    std::sort(osLatenesses.begin(), osLatenesses.end());
-    std::sort(callerLatenesses.begin(), callerLatenesses.end());
-
-    LOG_INFO("Main loop: %u iterations (%.1f/s), %u idle. %zu OS waits, "
-             "lateness (ms): p50 %.3f, p90 %.3f, p99 %.3f, max %.3f. "
-             "Caller lateness (ms): p50 %.3f, p90 %.3f, p99 %.3f, max %.3f.",
-             iterationCount, (iterationCount / elapsedS), idleIterationCount,
-             osLatenesses.size(), getPercentile(osLatenesses, .5) * 1000,
-             getPercentile(osLatenesses, .9) * 1000,
-             getPercentile(osLatenesses, .99) * 1000,
-             getPercentile(osLatenesses, 1) * 1000,
-             getPercentile(callerLatenesses, .5) * 1000,
-             getPercentile(callerLatenesses, .9) * 1000,
-             getPercentile(callerLatenesses, .99) * 1000,
-             getPercentile(callerLatenesses, 1) * 1000);
-
-    iterationCount = 0;
-    idleIterationCount = 0;
-    osLatenesses.clear();
-    callerLatenesses.clear();
-}
-
-double Application::getPercentile(const std::vector<double>& sortedValues,
-                                  double percentile)
-{
-    if (sortedValues.empty()) {
-        return 0;
-    }
-
-    std::size_t index{static_cast<std::size_t>(
-        percentile * static_cast<double>(sortedValues.size() - 1))};
-    return sortedValues[index];
 }
 
 } // End namespace Client

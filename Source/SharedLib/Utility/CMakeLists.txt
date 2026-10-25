@@ -4,9 +4,11 @@ target_sources(SharedLib
         Private/ByteTools.cpp
         Private/IDPool.cpp
         Private/Log.cpp
+        Private/LoopTimingStats.cpp
         Private/Morton.cpp
         Private/Paths.cpp
         Private/PeriodicCaller.cpp
+        Private/PeriodicCallerGroup.cpp
         Private/SDL.cpp
         Private/SDLHelpers.cpp
         Private/SDLRenderer.cpp
@@ -26,9 +28,11 @@ target_sources(SharedLib
         Public/IDPool.h
         Public/OSEventHandler.h
         Public/Log.h
+        Public/LoopTimingStats.h
         Public/Morton.h
         Public/Paths.h
         Public/PeriodicCaller.h
+        Public/PeriodicCallerGroup.h
         Public/SDLHelpers.h
         Public/Serialize.h
         Public/SerializeBuffer.h

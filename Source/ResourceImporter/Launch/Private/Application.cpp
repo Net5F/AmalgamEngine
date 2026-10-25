@@ -27,6 +27,7 @@ Application::Application()
 , renderer{sdlRenderer.get(), userInterface}
 , rendererCaller{std::bind_front(&Renderer::render, &renderer),
                  Renderer::FRAME_TIMESTEP_S, "Renderer", true}
+, callerGroup{{&rendererCaller, &uiCaller}, "Main loop"}
 , eventHandlers{this, &userInterface, &renderer}
 , exitRequested{false}
 {
@@ -67,9 +68,11 @@ Application::~Application()
 void Application::start()
 {
     // Prime the timers so they don't start at 0.
-    rendererCaller.initTimer();
-    uiCaller.initTimer();
+    callerGroup.initTimers();
+
     while (!exitRequested) {
+        callerGroup.recordIteration();
+
         // Let the renderer render if it needs to.
         rendererCaller.update();
 
@@ -77,17 +80,11 @@ void Application::start()
         uiCaller.update();
 
         // If we have enough time, dispatch events.
-        if (enoughTimeTillNextCall(DISPATCH_MINIMUM_TIME_S)) {
+        if (callerGroup.enoughTimeTillNextCall(DISPATCH_MINIMUM_TIME_S)) {
             dispatchOSEvents();
         }
 
-        // If we have enough time, sleep.
-        if (enoughTimeTillNextCall(SLEEP_MINIMUM_TIME_S)) {
-            // We have enough time to sleep for a few ms.
-            // Note: We try to delay for 1ms because the OS will generally end
-            //       up delaying us for 1-3ms.
-            SDL_Delay(1);
-        }
+        callerGroup.waitForNextCall();
     }
 }
 
@@ -114,17 +111,6 @@ void Application::dispatchOSEvents()
                 break;
             }
         }
-    }
-}
-
-bool Application::enoughTimeTillNextCall(double minimumTime)
-{
-    if ((uiCaller.getTimeTillNextCall() > minimumTime)
-        && (rendererCaller.getTimeTillNextCall() > minimumTime)) {
-        return true;
-    }
-    else {
-        return false;
     }
 }
 

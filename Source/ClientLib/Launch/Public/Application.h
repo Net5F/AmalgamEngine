@@ -16,6 +16,7 @@
 #include "QueuedEvents.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
+#include "PeriodicCallerGroup.h"
 #include "MessageProcessorContext.h"
 #include "RendererContext.h"
 #include "SimulationContext.h"
@@ -32,7 +33,6 @@
 #include "SDL_Wrappers/SDLRenderer.h"
 
 #include <atomic>
-#include <chrono>
 #include <functional>
 #include <vector>
 
@@ -119,54 +119,11 @@ private:
         called. */
     static constexpr double DISPATCH_MINIMUM_TIME_S{.003};
 
-    /** How long before the next PeriodicCaller is due that we wake up and
-        start spinning. OS sleeps overshoot by a variable amount, so we wake
-        early and spin the rest of the way to get called on time.
-        Higher value == more accurate timing, but more CPU usage. */
-    static constexpr double SPIN_TIME_S{.002};
-
-    /** How often to log main loop timing stats. */
-    static constexpr double TIMING_REPORT_INTERVAL_S{5.0};
-
     /**
      * Calls each module's update function if it's due, and dispatches OS
      * events if there's enough time.
      */
     void runIteration();
-
-    /**
-     * Sleeps until shortly before the next PeriodicCaller is due, then spins
-     * until it's due.
-     */
-    void waitForNextCall();
-
-    /**
-     * Returns the soonest getTimeTillNextCall() across all PeriodicCallers.
-     */
-    double getMinTimeTillNextCall();
-
-    /**
-     * Records how much later than requested the OS returned from a wait.
-     */
-    void recordOsLateness(double latenessS);
-
-    /**
-     * Records how overdue the soonest PeriodicCaller is at the start of a loop
-     * iteration, and logs stats every TIMING_REPORT_INTERVAL_S.
-     */
-    void recordIteration();
-
-    /**
-     * Logs the timing stats recorded since the last report, then clears them.
-     */
-    void logTimingStats(double elapsedS);
-
-    /**
-     * Returns the value at the given percentile (0-1) of the given sorted
-     * vector.
-     */
-    double getPercentile(const std::vector<double>& sortedValues,
-                         double percentile);
 
     /**
      * Dispatches waiting events to the eventHandlers.
@@ -175,12 +132,6 @@ private:
      * stops.
      */
     void dispatchOSEvents();
-
-    /**
-     * Returns true if all PeriodicCallers have at least minimumTime left until
-     * their next call. Else, false.
-     */
-    bool enoughTimeTillNextCall(double minimumTime);
 
     /**
      * Used to filter events before they arrive in the SDL event queue.
@@ -258,6 +209,9 @@ private:
     /** Calls renderer.render() at our frame rate. */
     PeriodicCaller rendererCaller;
 
+    /** Manages the main loop's timing for the callers above. */
+    PeriodicCallerGroup callerGroup;
+
     //-------------------------------------------------------------------------
     // Module Extensions
     //-------------------------------------------------------------------------
@@ -275,24 +229,6 @@ private:
     //-------------------------------------------------------------------------
     // Additional, used during the loop
     //-------------------------------------------------------------------------
-    /** How much later (in seconds) than requested the OS returned from each
-        sleep, since the last stats report. */
-    std::vector<double> osLatenesses;
-
-    /** How overdue (in seconds) the soonest PeriodicCaller was at the start of
-        each iteration that had a caller due, since the last stats report. */
-    std::vector<double> callerLatenesses;
-
-    /** The number of loop iterations since the last stats report. */
-    unsigned int iterationCount;
-
-    /** The number of loop iterations since the last stats report that started
-        with no caller due. */
-    unsigned int idleIterationCount;
-
-    /** The time that we last logged timing stats. */
-    std::chrono::steady_clock::time_point lastTimingReportTime;
-
     /** An ordered vector of OS-event-handling objects. */
     std::vector<OSEventHandler*> eventHandlers;
 

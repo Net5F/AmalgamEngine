@@ -3,7 +3,6 @@
 #include "Log.h"
 
 #include "tracy/Tracy.hpp"
-#include <SDL3/SDL_timer.h>
 #include <functional>
 #include <string>
 #include <iostream>
@@ -32,6 +31,7 @@ Application::Application()
                 SharedConfig::SERVER_NETWORK_TICK_TIMESTEP_S, "Network", true}
 , simCaller{std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
+, callerGroup{{&simCaller, &networkCaller}, "Main loop"}
 , exitRequested{false}
 {
     // Initialize the global timer.
@@ -56,25 +56,18 @@ void Application::start()
     LOG_INFO("Starting main loop.");
 
     // Prime the timers so they don't start at 0.
-    simCaller.initTimer();
-    networkCaller.initTimer();
+    callerGroup.initTimers();
+
     while (!exitRequested) {
+        callerGroup.recordIteration();
+
         // Let the simulation process an iteration if it needs to.
         simCaller.update();
 
         // Send any queued messages, if necessary.
         networkCaller.update();
 
-        // See if we have enough time left to sleep.
-        double simTimeLeft{simCaller.getTimeTillNextCall()};
-        double networkTimeLeft{networkCaller.getTimeTillNextCall()};
-        if ((simTimeLeft > SLEEP_MINIMUM_TIME_S)
-            && (networkTimeLeft > SLEEP_MINIMUM_TIME_S)) {
-            // We have enough time to sleep for a few ms.
-            // Note: We try to delay for 1ms because the OS will generally end
-            //       up delaying us for 1-3ms.
-            SDL_Delay(1);
-        }
+        callerGroup.waitForNextCall();
     }
 }
 

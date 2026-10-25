@@ -4,6 +4,7 @@
 #include "UserInterface.h"
 #include "Renderer.h"
 #include "PeriodicCaller.h"
+#include "PeriodicCallerGroup.h"
 #include "DataModel.h"
 #include "AssetCache.h"
 
@@ -48,13 +49,6 @@ private:
         called. */
     static constexpr double DISPATCH_MINIMUM_TIME_S{.003};
 
-    /** The minimum "time to next call" required to trigger a main loop sleep.
-        We sleep for 1ms when possible to reduce our CPU usage. We can't trust
-        the scheduler to come back to us after exactly 1ms though, so we busy
-        wait if something needs to be called soon.
-        Higher value == more CPU usage. */
-    static constexpr double SLEEP_MINIMUM_TIME_S{.003};
-
     /**
      * Dispatches waiting events to the eventHandlers.
      * Events are propagated through the vector in order, starting at index 0.
@@ -62,12 +56,6 @@ private:
      * stops.
      */
     void dispatchOSEvents();
-
-    /**
-     * Returns true if all PeriodicCallers have at least minimumTime left until
-     * their next call. Else, false.
-     */
-    bool enoughTimeTillNextCall(double minimumTime);
 
     /**
      * Used to filter events before they arrive in the SDL event queue.
@@ -100,6 +88,9 @@ private:
     Renderer renderer;
     /** Calls renderer.render() at our frame rate. */
     PeriodicCaller rendererCaller;
+
+    /** Manages the main loop's timing for the callers above. */
+    PeriodicCallerGroup callerGroup;
 
     /** An ordered vector of event handlers. */
     std::vector<OSEventHandler*> eventHandlers;
