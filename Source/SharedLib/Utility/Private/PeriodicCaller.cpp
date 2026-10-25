@@ -1,6 +1,7 @@
 #include "PeriodicCaller.h"
 #include "Timer.h"
 #include "Log.h"
+#include <cmath>
 
 namespace AM
 {
@@ -28,9 +29,9 @@ PeriodicCaller::PeriodicCaller(std::function<void(double)> inGivenFunctTimestep,
 {
 }
 
-void PeriodicCaller::initTimer()
+void PeriodicCaller::initTimer(double startTime)
 {
-    nextCallTime = Timer::getGlobalTime() + timestepS;
+    nextCallTime = startTime + timestepS;
 }
 
 void PeriodicCaller::update()
@@ -65,9 +66,13 @@ void PeriodicCaller::update()
                 "frame. Update was delayed by: %.5fs.",
                 debugName.c_str(), delay);
 
-            // If we're skipping late steps, reset to a fresh state.
+            // If we're skipping late steps, skip to the first step after the
+            // current time. We stay on our timestep grid, so we stay in phase
+            // with any callers that share it.
             if (skipLateSteps) {
-                nextCallTime = currentTime + timestepS;
+                double stepsToSkip{
+                    std::floor((currentTime - nextCallTime) / timestepS) + 1};
+                nextCallTime += (stepsToSkip * timestepS);
                 break;
             }
         }

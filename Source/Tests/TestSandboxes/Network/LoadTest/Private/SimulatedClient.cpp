@@ -4,6 +4,7 @@
 #include "LoginRequest.h"
 #include "ServiceTicketRequest.h"
 #include "SharedConfig.h"
+#include "Timer.h"
 #include "Log.h"
 #include <functional>
 #include <string>
@@ -46,9 +47,10 @@ void SimulatedClient::connect()
     // Connect to WorldServer.
     worldSim.connect(worldTicket);
 
-    // Start the tick timer at the current time.
-    simCaller.initTimer();
-    networkCaller.initTimer();
+    // Start the tick timers at the current time, in phase with each other.
+    double startTime{Timer::getGlobalTime()};
+    simCaller.initTimer(startTime);
+    networkCaller.initTimer(startTime);
 
     isConnected = true;
 }

@@ -34,11 +34,14 @@ public:
                    bool inSkipLateSteps);
 
     /**
-     * Sets the next call to be one timestep from the current time.
-     * This is done in the constructor, but this function is useful if you'd
-     * like to get all of your callers relatively synchronized.
+     * Sets the next call to be one timestep from the given time, in
+     * Timer::getGlobalTime() seconds.
+     * This is done with the current time in the constructor, but this
+     * function is useful for restarting the timer. Giving multiple callers the
+     * same startTime puts them exactly in phase, so callers with compatible
+     * timesteps will be due at the same times.
      */
-    void initTimer();
+    void initTimer(double startTime);
 
     /**
      * Calls givenFunct for each time step that is due.

@@ -25,8 +25,11 @@ void PeriodicCallerGroup::enableTimingStats()
 
 void PeriodicCallerGroup::initTimers()
 {
+    // Start every caller from the same time, so callers with compatible
+    // timesteps are due at exactly the same times.
+    double startTime{Timer::getGlobalTime()};
     for (PeriodicCaller* caller : callers) {
-        caller->initTimer();
+        caller->initTimer(startTime);
     }
 
     timingStats.start();

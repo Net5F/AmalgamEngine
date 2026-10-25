@@ -35,8 +35,8 @@ public:
     void enableTimingStats();
 
     /**
-     * Initializes each caller's timer to the current time, so they start
-     * relatively synchronized.
+     * Initializes every caller's timer to the same current time, so callers
+     * with compatible timesteps are due at exactly the same times.
      */
     void initTimers();
 
