@@ -1,9 +1,9 @@
 #include "PeriodicCallerGroup.h"
 #include "PeriodicCaller.h"
+#include "Timer.h"
 #include <SDL3/SDL_atomic.h>
 #include <SDL3/SDL_timer.h>
 #include <algorithm>
-#include <chrono>
 #include <limits>
 
 namespace AM
@@ -46,14 +46,11 @@ void PeriodicCallerGroup::waitForNextCall()
     double timeTillNextCall{getMinTimeTillNextCall()};
     if (timeTillNextCall > SPIN_TIME_S) {
         double sleepTimeS{timeTillNextCall - SPIN_TIME_S};
-        auto sleepStartTime{std::chrono::steady_clock::now()};
+        double sleepStartTime{Timer::getGlobalTime()};
         SDL_DelayNS(static_cast<Uint64>(sleepTimeS * SDL_NS_PER_SECOND));
         if (timingStatsEnabled) {
-            timingStats.recordOsLateness(
-                std::chrono::duration<double>(std::chrono::steady_clock::now()
-                                              - sleepStartTime)
-                    .count()
-                - sleepTimeS);
+            timingStats.recordOsLateness(Timer::getGlobalTime() - sleepStartTime
+                                         - sleepTimeS);
         }
     }
 
@@ -65,13 +62,12 @@ void PeriodicCallerGroup::waitForNextCall()
 
 double PeriodicCallerGroup::getMinTimeTillNextCall()
 {
-    double minTimeTillNextCall{std::numeric_limits<double>::max()};
+    double minNextCallTime{std::numeric_limits<double>::max()};
     for (PeriodicCaller* caller : callers) {
-        minTimeTillNextCall
-            = std::min(minTimeTillNextCall, caller->getTimeTillNextCall());
+        minNextCallTime = std::min(minNextCallTime, caller->getNextCallTime());
     }
 
-    return minTimeTillNextCall;
+    return (minNextCallTime - Timer::getGlobalTime());
 }
 
 bool PeriodicCallerGroup::enoughTimeTillNextCall(double minimumTime)

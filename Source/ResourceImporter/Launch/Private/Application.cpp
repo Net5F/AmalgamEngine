@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "Paths.h"
 #include "SDLHelpers.h"
+#include "Timer.h"
 #include "Log.h"
 
 #include <SDL3/SDL.h>

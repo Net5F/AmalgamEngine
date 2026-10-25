@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "SharedConfig.h"
+#include "Timer.h"
 #include "Log.h"
 
 #include "tracy/Tracy.hpp"

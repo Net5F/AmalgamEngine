@@ -1,4 +1,5 @@
 #include "PeriodicCaller.h"
+#include "Timer.h"
 #include "Log.h"
 
 namespace AM
@@ -10,8 +11,7 @@ PeriodicCaller::PeriodicCaller(std::function<void(void)> inGivenFunctNoTimestep,
 , timestepS{inTimestepS}
 , debugName{inDebugName}
 , skipLateSteps{inSkipLateSteps}
-, timer{}
-, accumulatedTime{0.0}
+, nextCallTime{Timer::getGlobalTime() + inTimestepS}
 , delayedTimeS{-1}
 {
 }
@@ -23,25 +23,22 @@ PeriodicCaller::PeriodicCaller(std::function<void(double)> inGivenFunctTimestep,
 , timestepS{inTimestepS}
 , debugName{inDebugName}
 , skipLateSteps{inSkipLateSteps}
-, timer{}
-, accumulatedTime{0.0}
+, nextCallTime{Timer::getGlobalTime() + inTimestepS}
 , delayedTimeS{-1}
 {
 }
 
 void PeriodicCaller::initTimer()
 {
-    timer.reset();
+    nextCallTime = Timer::getGlobalTime() + timestepS;
 }
 
 void PeriodicCaller::update()
 {
-    // Accumulate the time passed since the last update().
-    accumulatedTime += timer.getTimeAndReset();
-
-    // Process as many time steps as have accumulated.
-    while (accumulatedTime >= timestepS) {
-        double updateStartTime{timer.getTime()};
+    // Process as many time steps as are due.
+    double currentTime{Timer::getGlobalTime()};
+    while (currentTime >= nextCallTime) {
+        double callStartTime{Timer::getGlobalTime()};
 
         // Call whichever function we were given on construction.
         if (givenFunctNoTimestep != nullptr) {
@@ -52,52 +49,51 @@ void PeriodicCaller::update()
         }
 
         // Check our execution time.
-        double executionTime{timer.getTime()};
-        if ((executionTime - updateStartTime) > timestepS) {
+        double executionTime{Timer::getGlobalTime() - callStartTime};
+        if (executionTime > timestepS) {
             LOG_INFO("%s overran its update timestep. executionTime: %.5fs",
                      debugName.c_str(), executionTime);
         }
 
-        // Deduct this time step from the accumulator and check for delays.
-        accumulatedTime -= timestepS;
-        if (accumulatedTime >= timestepS) {
+        // Move to the next time step and check for delays.
+        double delay{currentTime - nextCallTime};
+        nextCallTime += timestepS;
+        if (currentTime >= nextCallTime) {
             // Update was delayed for longer than timestepS.
             LOG_INFO(
                 "Detected a request for multiple %s update calls in the same "
                 "frame. Update was delayed by: %.5fs.",
-                debugName.c_str(), accumulatedTime);
+                debugName.c_str(), delay);
 
             // If we're skipping late steps, reset to a fresh state.
             if (skipLateSteps) {
-                accumulatedTime = 0;
+                nextCallTime = currentTime + timestepS;
                 break;
             }
         }
-        else if ((delayedTimeS > 0) && (accumulatedTime >= delayedTimeS)) {
+        else if ((delayedTimeS > 0) && (delay >= delayedTimeS)) {
             // Update was delayed for longer than delayedTimeS.
             LOG_INFO("%s update missed its ideal call time. Update was delayed "
                      "by %.5fs.",
-                     debugName.c_str(), accumulatedTime);
+                     debugName.c_str(), delay);
         }
     }
 }
 
+double PeriodicCaller::getNextCallTime()
+{
+    return nextCallTime;
+}
+
 double PeriodicCaller::getTimeTillNextCall()
 {
-    // Get the time since accumulatedTime was last updated.
-    double timeSinceLastCall{timer.getTime()};
-
-    // Return the amount of time until our next call.
-    return (timestepS - (accumulatedTime + timeSinceLastCall));
+    return (nextCallTime - Timer::getGlobalTime());
 }
 
 double PeriodicCaller::getProgress()
 {
-    // Get the time since accumulatedTime was last updated.
-    double timeSinceLastCall{timer.getTime()};
-
     // Return how far we are into this timestep.
-    return ((accumulatedTime + timeSinceLastCall) / timestepS);
+    return (1 - (getTimeTillNextCall() / timestepS));
 }
 
 void PeriodicCaller::reportDelays(double inDelayedTimeS)

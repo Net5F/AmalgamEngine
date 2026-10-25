@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Timer.h"
 #include <functional>
 #include <string>
 #include <string_view>
@@ -35,19 +34,25 @@ public:
                    bool inSkipLateSteps);
 
     /**
-     * Initializes the timer to the current time.
-     * The timer is initialized in the constructor, but this function is
-     * useful if you'd like to get all of your callers relatively synchronized.
+     * Sets the next call to be one timestep from the current time.
+     * This is done in the constructor, but this function is useful if you'd
+     * like to get all of your callers relatively synchronized.
      */
     void initTimer();
 
     /**
-     * Updates the accumulatedTime. If enough time has passed, calls givenFunct.
+     * Calls givenFunct for each time step that is due.
      * Note: We explicitly don't forward parameters because this function is
      *       going to be called a ton. Allowing parameters would lead to a
      *       potential performance gotcha if a parameter takes time to acquire.
      */
     void update();
+
+    /**
+     * Returns the time, in Timer::getGlobalTime() seconds, that givenFunct is
+     * next due to be called.
+     */
+    double getNextCallTime();
 
     /**
      * Returns how much time in seconds is left until the next call of
@@ -91,11 +96,9 @@ private:
      */
     const bool skipLateSteps;
 
-    /** Used to time when we should call givenFunct. */
-    Timer timer;
-
-    /** The accumulated time since we last called givenFunct. */
-    double accumulatedTime;
+    /** The time, in Timer::getGlobalTime() seconds, that givenFunct is next
+        due to be called. */
+    double nextCallTime;
 
     /** An unreasonable amount of time for the update to be late by.
         If <= 0, no delay reporting will occur. */
