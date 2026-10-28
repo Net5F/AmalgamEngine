@@ -12,7 +12,12 @@ namespace WorldServer
  * All of the project's component types that should be saved to the database
  * and loaded at startup.
  *
- * Format: <ComponentType, ID, VersionNumber>
+ * Format: <ComponentType, ID, VersionNumber, ClientPersistence>
+ *
+ * ClientPersistence controls where the component is saved when it's
+ * attached to a client entity (see PersistedComponentList.h). Account data
+ * follows the player to every world, World data stays on this world, and
+ * None data is rebuilt when the entity spawns.
  *
  * Rules:
  * Never reuse IDs. If you add a component, add it to the bottom of the list
@@ -26,7 +31,7 @@ namespace WorldServer
  * ComponentMigrationFunctions.h.
  */
 using ProjectPersistedComponentTypes = PersistedComponentList<
-    // PersistedComponentEntry<ProjectComponent, 1, 0>
+    // PersistedComponentEntry<ProjectComponent, 1, 0, ClientPersistence::Account>
 >;
 // clang-format on
 

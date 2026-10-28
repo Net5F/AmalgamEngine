@@ -59,6 +59,10 @@ struct CastCooldown {
      * accounted for the time between when they were last updated and when they
      * were saved.
      *
+     * Note: Time between saving and loading (e.g. while a player is logged
+     *       out) intentionally doesn't count. Cooldowns only progress while
+     *       the entity is in a world.
+     *
      * @param lastSavedTick The tick when the data was saved to the DB.
      * @param currentTick The current tick.
      */

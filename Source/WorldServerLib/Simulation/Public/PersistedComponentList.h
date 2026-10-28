@@ -12,11 +12,33 @@ namespace AM
 namespace WorldServer
 {
 
-template<typename ComponentT, Uint16 TypeIDValue, Uint16 VersionValue>
+/**
+ * Where a persisted component is saved when it's attached to a client entity.
+ *
+ * Non-client entities ignore this. All of their persisted components are
+ * saved to the world's database.
+ *
+ * Note: Changing a component's ClientPersistence is a data migration. Its
+ *       existing data will still be in the old location.
+ */
+enum class ClientPersistence {
+    /** Follows the account to every world. Saved to the account server. */
+    Account,
+    /** Stays on this world. Saved to the world's database, keyed by account
+        ID. Use this for data that references things in this world. */
+    World,
+    /** Not persisted for client entities. Rebuilt when the entity spawns. */
+    None
+};
+
+template<typename ComponentT, Uint16 TypeIDValue, Uint16 VersionValue,
+         ClientPersistence ClientPersistenceValue>
 struct PersistedComponentEntry {
     using Component = ComponentT;
     static constexpr Uint16 TYPE_ID{TypeIDValue};
     static constexpr Uint16 VERSION{VersionValue};
+    static constexpr ClientPersistence CLIENT_PERSISTENCE{
+        ClientPersistenceValue};
 };
 
 /**
