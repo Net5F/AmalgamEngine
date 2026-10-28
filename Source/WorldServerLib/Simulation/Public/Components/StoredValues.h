@@ -1,22 +1,20 @@
 #pragma once
 
-#include "EntityStoredValueID.h"
+#include "HashTools.h"
 #include "bitsery/ext/std_map.h"
+#include <SDL3/SDL_stdinc.h>
 #include <unordered_map>
+#include <string>
 #include <string_view>
 
 namespace AM
 {
 namespace WorldServer
 {
-class World;
-
 /**
  * A per-entity key-value store.
  *
- * Values are identified in scripts using their string ID (see World::
- * storedValueIDMap). We map string ID -> numeric ID for storage, to save
- * space and avoid allocations.
+ * Values are identified using their string ID.
  *
  * Global values are also supported (see World::globalStoredValueMap).
  */
@@ -25,12 +23,20 @@ struct StoredValues {
         component can hold. */
     static constexpr std::size_t MAX_STORED_VALUES{SDL_MAX_UINT16};
 
+    /** The max length of a stored value's string ID. */
+    static constexpr std::size_t MAX_STRING_ID_LENGTH{20};
+
     /**
      * Holds the entity's stored values.
      *
-     * Maps numeric ID -> value.
+     * Maps string ID -> value.
+     *
+     * string_hash and equal_to are added for heterogeneous access (lets us use
+     * string_views directly from Lua without allocating an intermediate
+     * std::string).
      */
-    std::unordered_map<EntityStoredValueID, Uint32> valueMap{};
+    std::unordered_map<std::string, Uint32, string_hash, std::equal_to<>>
+        valueMap{};
 
     /**
      * Adds a new value, or overwrites an existing value.
@@ -40,12 +46,14 @@ struct StoredValues {
      * Note: Stored values are often cast to different types, but their
      *       underlying type is always Uint32.
      *
-     * @param stringID The string ID of the value to add or overwrite.
+     * @param stringID The string ID of the value to add or overwrite. Must
+     *                 already be derived (see StringTools::deriveStringID()).
      * @param newValue The new value to use.
-     * @return True if the value was successfully set, else false (value with
-     *         the given ID doesn't exist and value limit is reached).
+     * @return True if the value was successfully set, else false (string ID is
+     *         too long, or value with the given ID doesn't exist and value
+     *         limit is reached).
      */
-    bool storeValue(std::string_view stringID, Uint32 newValue, World& world);
+    bool storeValue(std::string_view stringID, Uint32 newValue);
 
     /**
      * Gets a stored value.
@@ -53,11 +61,12 @@ struct StoredValues {
      * Note: Stored values are often cast to different types, but their
      *       underlying type is always Uint32.
      *
-     * @param stringID The string ID of the value to get.
+     * @param stringID The string ID of the value to get. Must already be
+     *                 derived (see StringTools::deriveStringID()).
      * @return The requested value. If not found, returns 0 (the default value
      *         that the value would have if it existed).
      */
-    Uint32 getStoredValue(std::string_view stringID, World& world);
+    Uint32 getStoredValue(std::string_view stringID) const;
 };
 
 template<typename S>
@@ -66,8 +75,8 @@ void serialize(S& serializer, StoredValues& storedValues)
     serializer.ext(
         storedValues.valueMap,
         bitsery::ext::StdMap{StoredValues::MAX_STORED_VALUES},
-        [](S& serializer, EntityStoredValueID& numericID, Uint32& value) {
-            serializer.value2b(numericID);
+        [](S& serializer, std::string& stringID, Uint32& value) {
+            serializer.text1b(stringID, StoredValues::MAX_STRING_ID_LENGTH);
             serializer.value4b(value);
         });
 }

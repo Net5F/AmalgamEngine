@@ -14,6 +14,7 @@
 #include "Inventory.h"
 #include "StoredValues.h"
 #include "SystemMessage.h"
+#include "StringTools.h"
 #include "ItemProperty.h"
 #include "sol/sol.hpp"
 #include <time.h>
@@ -42,6 +43,7 @@ EngineLuaBindings::EngineLuaBindings(
 , dialogueChoiceLua{std::make_unique<sol::state>()}
 , currentDialogueTopic{nullptr}
 , workString{}
+, workStringID{}
 {
     // Initialize the Lua environments.
     // Note: We only allow the base library, to avoid giving scripts unsafe
@@ -505,15 +507,19 @@ void EngineLuaBindings::storeUint(entt::entity entity,
                 "Failed to store value: Invalid entity ID."};
         }
 
+        // Derive string ID in case the user accidentally passed a display
+        // name.
+        StringTools::deriveStringID(stringID, workStringID);
+
         // Try to store the value.
         StoredValues& storedValues{
             world.registry.get_or_emplace<StoredValues>(entity)};
-        if (!(storedValues.storeValue(stringID, newValue, world))) {
+        if (!(storedValues.storeValue(workStringID, newValue))) {
             workString.clear();
             workString.append("Failed to store value \"");
             workString.append(stringID);
             workString.append(
-                "\": value doesn't exist and value limit is reached");
+                "\": string ID is too long or value limit is reached");
             throw std::runtime_error{workString};
         }
     }
@@ -592,7 +598,10 @@ Uint32 EngineLuaBindings::getStoredUint(entt::entity entity,
 
         // Try to get the value.
         if (auto* storedValues{world.registry.try_get<StoredValues>(entity)}) {
-            return storedValues->getStoredValue(stringID, world);
+            // Derive string ID in case the user accidentally passed a display
+            // name.
+            StringTools::deriveStringID(stringID, workStringID);
+            return storedValues->getStoredValue(workStringID);
         }
     }
     else {

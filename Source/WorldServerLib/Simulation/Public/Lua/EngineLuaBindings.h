@@ -283,6 +283,9 @@ private:
 
     /** A scratch buffer used while processing strings. */
     std::string workString;
+
+    /** A scratch buffer used while processing string IDs. */
+    std::string workStringID;
 };
 
 } // namespace WorldServer

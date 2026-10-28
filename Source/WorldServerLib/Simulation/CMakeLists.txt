@@ -45,8 +45,6 @@ target_sources(WorldServerLib
         Public/Database.h
         Public/DialogueSystem.h
         Public/EntityItemHandlerScript.h
-        Public/EntityStoredValueID.h
-        Public/EntityStoredValueIDMap.h
         Public/EnttGroups.h
         Public/EngineComponentMigrationFunctions.h
         Public/EventSorter.h

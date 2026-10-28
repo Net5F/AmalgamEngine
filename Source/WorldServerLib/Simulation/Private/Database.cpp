@@ -39,8 +39,6 @@ Database::Database()
 , insertItemQuery{nullptr}
 , deleteItemQuery{nullptr}
 , iterateItemsQuery{nullptr}
-, insertEntityStoredValueIDMapQuery{nullptr}
-, getEntityStoredValueIDMapQuery{nullptr}
 , insertGlobalStoredValueMapQuery{nullptr}
 , getGlobalStoredValueMapQuery{nullptr}
 {
@@ -78,11 +76,6 @@ Database::Database()
         database, "DELETE FROM items WHERE id=?");
     iterateItemsQuery = std::make_unique<SQLite::Statement>(
         backupDatabase, "SELECT * FROM items");
-
-    insertEntityStoredValueIDMapQuery = std::make_unique<SQLite::Statement>(
-        database, "UPDATE entity_stored_value_id_map SET serialized_map=(?)");
-    getEntityStoredValueIDMapQuery = std::make_unique<SQLite::Statement>(
-        backupDatabase, "SELECT * FROM entity_stored_value_id_map");
 
     insertGlobalStoredValueMapQuery = std::make_unique<SQLite::Statement>(
         database, "UPDATE global_stored_value_map SET serialized_map=(?)");
@@ -206,21 +199,6 @@ void Database::deleteItemData(ItemID itemID)
     }
 }
 
-void Database::saveEntityStoredValueIDMap(std::span<const Uint8> serializedMap)
-{
-    try {
-        insertEntityStoredValueIDMapQuery->bind(
-            1, serializedMap.data(), static_cast<int>(serializedMap.size()));
-
-        insertEntityStoredValueIDMapQuery->exec();
-
-        insertEntityStoredValueIDMapQuery->reset();
-    } catch (std::exception& e) {
-        LOG_ERROR("Failed to save entity stored value ID map data: %s",
-                  e.what());
-    }
-}
-
 void Database::saveGlobalStoredValueMap(std::span<const Uint8> serializedMap)
 {
     try {
@@ -289,20 +267,6 @@ void Database::initTables()
                     init_script      TEXT
                 ) STRICT
             )");
-        }
-
-        // Entity stored values, stored as a single serialized map.
-        if (!backupDatabase.tableExists("entity_stored_value_id_map")) {
-            backupDatabase.exec(R"(
-                CREATE TABLE entity_stored_value_id_map
-                (
-                    serialized_map BLOB
-                ) STRICT
-            )");
-            // Since we're only storing 1 value in this table, we init the row
-            // here so we can use UPDATEs later.
-            backupDatabase.exec(
-                "INSERT INTO entity_stored_value_id_map VALUES(X'')");
         }
 
         // Global stored values, stored as a single serialized map.

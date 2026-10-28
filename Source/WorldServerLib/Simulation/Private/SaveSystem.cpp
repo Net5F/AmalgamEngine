@@ -128,7 +128,7 @@ void SaveSystem::saveIfNecessary()
 
         saveNonClientEntities();
         saveItems();
-        saveStoredValues();
+        saveGlobalStoredValues();
         // TODO: Track changed tiles and save to the database.
         world.tileMap.save("TileMap.bin");
 
@@ -197,17 +197,8 @@ void SaveSystem::saveItems()
     updatedItems.clear();
 }
 
-void SaveSystem::saveStoredValues()
+void SaveSystem::saveGlobalStoredValues()
 {
-    // Serialize the entity stored value ID map.
-    workBuffer1.clear();
-    workBuffer1.resize(Serialize::measureSize(world.entityStoredValueIDMap));
-    Serialize::toBuffer(workBuffer1.data(), workBuffer1.size(),
-                        world.entityStoredValueIDMap);
-
-    // Queue the save query.
-    world.database->saveEntityStoredValueIDMap(workBuffer1);
-
     // Serialize the global stored value map.
     workBuffer1.clear();
     workBuffer1.resize(Serialize::measureSize(world.globalStoredValueMap));

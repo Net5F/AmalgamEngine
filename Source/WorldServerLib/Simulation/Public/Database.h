@@ -171,31 +171,6 @@ public:
     // Stored Values
     //-------------------------------------------------------------------------
     /**
-     * Adds or overwrites the entity stored value ID map entry.
-     *
-     * @param serializedMap A serialized World::entityStoredValueIDMap.
-     */
-    void saveEntityStoredValueIDMap(std::span<const Uint8> serializedMap);
-
-    /**
-     * Calls the given callback on the entity stored value ID map data entry.
-     *
-     * @param callback A callback of form void(std::span<const Uint8>) that
-     *                 expects a serialized EntityStoredValueIDMap.
-     */
-    template<typename Func>
-    void getEntityStoredValueIDMap(Func callback)
-    {
-        getEntityStoredValueIDMapQuery->executeStep();
-        SQLite::Column mapColumn{getEntityStoredValueIDMapQuery->getColumn(0)};
-        callback(std::span<const Uint8>{
-            static_cast<const Uint8*>(mapColumn.getBlob()),
-            static_cast<std::size_t>(mapColumn.getBytes())});
-
-        getEntityStoredValueIDMapQuery->reset();
-    }
-
-    /**
      * Adds or overwrites the global stored value map entry.
      *
      * @param serializedMap A serialized World::globalStoredValueMap.
@@ -267,8 +242,6 @@ protected:
     std::unique_ptr<SQLite::Statement> insertItemQuery;
     std::unique_ptr<SQLite::Statement> deleteItemQuery;
     std::unique_ptr<SQLite::Statement> iterateItemsQuery;
-    std::unique_ptr<SQLite::Statement> insertEntityStoredValueIDMapQuery;
-    std::unique_ptr<SQLite::Statement> getEntityStoredValueIDMapQuery;
     std::unique_ptr<SQLite::Statement> insertGlobalStoredValueMapQuery;
     std::unique_ptr<SQLite::Statement> getGlobalStoredValueMapQuery;
 };

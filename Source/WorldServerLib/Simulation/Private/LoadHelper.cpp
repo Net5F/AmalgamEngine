@@ -70,23 +70,8 @@ void LoadHelper::loadItems()
     world.database->iterateItems(std::move(loadItem));
 }
 
-void LoadHelper::loadStoredValues()
+void LoadHelper::loadGlobalStoredValues()
 {
-    // Load the entity stored value IDs.
-    auto loadEntityMap = [&](std::span<const Uint8> serializedMap) {
-        if (serializedMap.empty()) {
-            return;
-        }
-
-        if (!Deserialize::fromBuffer(serializedMap.data(), serializedMap.size(),
-                                     world.entityStoredValueIDMap)) {
-            LOG_ERROR("Failed to deserialize entity stored value ID map.");
-        }
-    };
-
-    world.database->getEntityStoredValueIDMap(std::move(loadEntityMap));
-
-    // Load the global stored values.
     auto loadGlobalMap = [&](std::span<const Uint8> serializedMap) {
         if (serializedMap.empty()) {
             return;

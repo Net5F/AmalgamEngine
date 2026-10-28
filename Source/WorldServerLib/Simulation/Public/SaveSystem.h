@@ -49,10 +49,9 @@ private:
     void saveItems();
 
     /**
-     * Saves World::storedValueIDMap and World::globalStoredValueMap to the
-     * in-memory database.
+     * Saves World::globalStoredValueMap to the in-memory database.
      */
-    void saveStoredValues();
+    void saveGlobalStoredValues();
 
     Simulation& simulation;
     World& world;

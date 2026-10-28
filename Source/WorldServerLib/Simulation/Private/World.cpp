@@ -37,7 +37,6 @@ World::World(const SimulationContext& inSimContext)
 , entityLocator{registry}
 , collisionLocator{}
 , tileMap{inSimContext.graphicData, collisionLocator}
-, entityStoredValueIDMap{}
 , globalStoredValueMap{}
 , inventoryHelper{*this, inSimContext.network, inSimContext.itemData}
 , castHelper{inSimContext.simulation, inSimContext.itemData,
@@ -48,7 +47,6 @@ World::World(const SimulationContext& inSimContext)
 , graphicData{inSimContext.graphicData}
 , entityInitLua{inSimContext.simulation.getEntityInitLua()}
 , itemInitLua{inSimContext.simulation.getItemInitLua()}
-, nextStoredValueID{NULL_ENTITY_STORED_VALUE_ID + 1}
 , workStringID{}
 , randomDevice{}
 , generator{randomDevice()}
@@ -263,31 +261,6 @@ std::string World::runItemInitScript(Item& item, std::string_view initScript)
     return returnString;
 }
 
-EntityStoredValueID World::getEntityStoredValueID(std::string_view stringID)
-{
-    // Derive string ID in case the user accidentally passed a display name.
-    StringTools::deriveStringID(stringID, workStringID);
-
-    // If the value already exists, return its numeric ID.
-    auto storedValueIDIt{entityStoredValueIDMap.find(workStringID)};
-    if (storedValueIDIt != entityStoredValueIDMap.end()) {
-        return storedValueIDIt->second;
-    }
-    else {
-        // Check if we've ran out of IDs.
-        if (nextStoredValueID == SDL_MAX_UINT16) {
-            return NULL_ENTITY_STORED_VALUE_ID;
-        }
-
-        // Flag doesn't exist, add it to the map.
-        EntityStoredValueID newFlagID{static_cast<Uint16>(nextStoredValueID)};
-        entityStoredValueIDMap.emplace(workStringID, newFlagID);
-        nextStoredValueID++;
-
-        return newFlagID;
-    }
-}
-
 void World::storeGlobalValue(std::string_view stringID, Uint32 newValue)
 {
     // Derive string ID in case the user accidentally passed a display name.
@@ -351,8 +324,8 @@ void World::load()
     // Load our saved item definitions.
     loadHelper.loadItems();
 
-    // Load our saved stored value data.
-    loadHelper.loadStoredValues();
+    // Load our saved global stored values.
+    loadHelper.loadGlobalStoredValues();
 }
 
 Position World::getGroupedSpawnPoint()

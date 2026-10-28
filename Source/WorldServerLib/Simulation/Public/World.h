@@ -4,8 +4,6 @@
 #include "ConnectionHandle.h"
 #include "EntityLocator.h"
 #include "CollisionLocator.h"
-#include "EntityStoredValueID.h"
-#include "EntityStoredValueIDMap.h"
 #include "GlobalStoredValueMap.h"
 #include "InventoryHelper.h"
 #include "CastHelper.h"
@@ -74,9 +72,6 @@ public:
 
     /** The tile map that makes up the world. */
     TileMap tileMap;
-
-    /** Maps entity stored value string IDs -> their associated numeric ID. */
-    EntityStoredValueIDMap entityStoredValueIDMap;
 
     /** Global key-value store.
         Note: Stored values are often cast to different types, but their
@@ -170,16 +165,6 @@ public:
     std::string runItemInitScript(Item& item, std::string_view initScript);
 
     /**
-     * Returns the numeric ID for the given entity stored value string ID.
-     * If stringID is not present in the map, adds it and generates the next
-     * numeric ID.
-     *
-     * @return If a flag with the given ID doesn't exist and the map is full,
-     *         returns null. Otherwise, returns the numeric ID.
-     */
-    EntityStoredValueID getEntityStoredValueID(std::string_view stringID);
-
-    /**
      * Adds a new value, or overwrites an existing value.
      *
      * If newValue == 0 (the default value), the value will be deleted.
@@ -235,10 +220,6 @@ private:
 
     /** Used to run item init scripts. */
     ItemInitLua& itemInitLua;
-
-    /** Tracks the next numeric entity stored value ID to use (typically 1
-       greater than the highest ID in entityStoredValueIDMap). */
-    Uint32 nextStoredValueID;
 
     /** A scratch buffer used while processing string IDs. */
     std::string workStringID;

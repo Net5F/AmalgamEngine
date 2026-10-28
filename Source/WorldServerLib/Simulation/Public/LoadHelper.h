@@ -32,9 +32,9 @@ public:
     void loadItems();
 
     /**
-     * Loads saved entity stored value IDs and global stored values.
+     * Loads saved global stored values.
      */
-    void loadStoredValues();
+    void loadGlobalStoredValues();
 
 private:
     struct SerializedComponent {
