@@ -151,4 +151,18 @@ public:
     void reduceItemCount(Uint8 slotIndex, Uint8 count);
 };
 
+template<typename S>
+void serialize(S& serializer, Inventory::ItemSlot& itemSlot)
+{
+    serializer.value2b(itemSlot.ID);
+    serializer.value1b(itemSlot.count);
+}
+
+template<typename S>
+void serialize(S& serializer, Inventory& inventory)
+{
+    serializer.value1b(inventory.size);
+    serializer.container(inventory.slots, Inventory::MAX_ITEMS);
+}
+
 } // namespace AM

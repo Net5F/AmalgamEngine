@@ -15,6 +15,7 @@
 #include "StoredValues.h"
 #include "CastCooldown.h"
 #include "StableID.h"
+#include "Inventory.h"
 
 namespace AM
 {
@@ -67,7 +68,8 @@ using EnginePersistedComponentTypes = PersistedComponentList<
     PersistedComponentEntry<EntityInitScript, 11, 0, ClientPersistence::None>,
     PersistedComponentEntry<StoredValues, 12, 0, ClientPersistence::Account>,
     PersistedComponentEntry<CastCooldown, 13, 0, ClientPersistence::Account>,
-    PersistedComponentEntry<StableID, 14, 0, ClientPersistence::None>>;
+    PersistedComponentEntry<StableID, 14, 0, ClientPersistence::None>,
+    PersistedComponentEntry<Inventory, 15, 0, ClientPersistence::Account>>;
 // clang-format on
 
 } // End namespace WorldServer
