@@ -203,6 +203,7 @@ void Simulation::tick()
 void Simulation::setExtension(ISimulationExtension* inExtension)
 {
     extension = inExtension;
+    clientConnectionSystem.setExtension(extension);
     nceLifetimeSystem.setExtension(extension);
     componentChangeSystem.setExtension(extension);
     tileUpdateSystem.setExtension(extension);

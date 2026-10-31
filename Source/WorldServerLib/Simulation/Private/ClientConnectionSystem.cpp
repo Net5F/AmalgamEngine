@@ -1,8 +1,13 @@
 #include "ClientConnectionSystem.h"
 #include "SimulationContext.h"
 #include "Simulation.h"
+#include "ISimulationExtension.h"
+#include "ClientEntityLoadInfo.h"
 #include "Network.h"
 #include "GraphicData.h"
+#include "Database.h"
+#include "EnginePersistedComponentTypes.h"
+#include "ProjectPersistedComponentTypes.h"
 #include "SharedConfig.h"
 #include "Config.h"
 #include "Serialize.h"
@@ -19,6 +24,7 @@
 #include "ClientSimData.h"
 #include "IsClientEntity.h"
 #include "GraphicState.h"
+#include "CollisionBitSets.h"
 #include "VariantTools.h"
 #include "Log.h"
 #include "tracy/Tracy.hpp"
@@ -33,12 +39,14 @@ ClientConnectionSystem::ClientConnectionSystem(
 , world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
 , graphicData{inSimContext.graphicData}
+, extension{nullptr}
 , clientConnectionEventQueue{network.clientEndpoint.getEventDispatcher()}
 , logoutRequestQueue{inSimContext.networkEventDispatcher}
 , castStartedObserver{}
 , accountEntityMap{}
 , removalTickMap{}
 , logoutTickMap{}
+, rejectedClients{}
 {
     castStartedObserver.bind(world.registry);
     castStartedObserver.on_construct<CastState>();
@@ -78,6 +86,11 @@ void ClientConnectionSystem::processConnectionEvents()
     removeExpiredEntities();
 }
 
+void ClientConnectionSystem::setExtension(ISimulationExtension* inExtension)
+{
+    extension = inExtension;
+}
+
 void ClientConnectionSystem::processConnectEvent(
     const ClientConnected& clientConnected)
 {
@@ -88,14 +101,21 @@ void ClientConnectionSystem::processConnectEvent(
         attachClientToEntity(clientConnected, entityIt->second);
     }
     else {
-        accountEntityMap[clientConnected.accountID]
-            = createClientEntity(clientConnected);
+        entt::entity newEntity{createClientEntity(clientConnected)};
+        if (newEntity != entt::null) {
+            accountEntityMap[clientConnected.accountID] = newEntity;
+        }
     }
 }
 
 void ClientConnectionSystem::processDisconnectEvent(
     const ClientDisconnected& clientDisconnected)
 {
+    // If we rejected this client, it has no entity. Nothing to do.
+    if (rejectedClients.erase(clientDisconnected.clientHandle)) {
+        return;
+    }
+
     // Find the disconnected client's associated entity.
     auto disconnectedEntityIt{
         world.clientHandleMap.find(clientDisconnected.clientHandle)};
@@ -140,37 +160,62 @@ entt::entity ClientConnectionSystem::createClientEntity(
     const ClientConnected& clientConnected)
 {
     entt::registry& registry{world.registry};
+    Sint64 accountID{clientConnected.accountID};
 
-    // Create the entity and construct its standard components.
-    // Note: Be careful with holding onto references here. If components
-    //       are added to the same group, the ref will be invalidated.
-    entt::entity newEntity{world.createEntity(world.getSpawnPoint())};
+    // Get the account's saved components.
+    // Note: If either fails, we reject the client instead of giving it fresh
+    //       data, since the next save would overwrite its real data.
+    SavedComponents accountComponents{};
+    SavedComponents worldComponents{};
+    GetSavedComponentsResult accountResult{getSavedComponents(
+        ClientPersistence::Account, accountID, accountComponents)};
+    GetSavedComponentsResult worldResult{getSavedComponents(
+        ClientPersistence::World, accountID, worldComponents)};
+    if ((accountResult == GetSavedComponentsResult::Error)
+        || (worldResult == GetSavedComponentsResult::Error)) {
+        LOG_ERROR("Failed to get saved data for accountID: %lld",
+                  static_cast<long long>(accountID));
+        rejectClient(clientConnected.clientHandle);
+        return entt::null;
+    }
 
-    // TODO: A lot of this should be changed to load the persisted data from
-    //       the account.
+    // Create the entity and load its saved components.
+    entt::entity newEntity{world.loadHelper.loadClientEntity(
+        accountID,
+        {accountComponents.engineComponents,
+         accountComponents.projectComponents},
+        {worldComponents.engineComponents, worldComponents.projectComponents})};
+    if (newEntity == entt::null) {
+        rejectClient(clientConnected.clientHandle);
+        return entt::null;
+    }
+
+    // Add defaults for any engine components that weren't loaded.
+    if (!addDefaultComponents(newEntity, clientConnected)) {
+        LOG_ERROR("Failed to add default components to client entity for "
+                  "accountID: %lld",
+                  static_cast<long long>(accountID));
+        registry.destroy(newEntity);
+        rejectClient(clientConnected.clientHandle);
+        return entt::null;
+    }
+
+    // Let the project add its defaults.
+    if (extension) {
+        extension->initClientEntity(
+            newEntity,
+            {.accountID{accountID},
+             .hadAccountData{accountResult
+                             == GetSavedComponentsResult::Success},
+             .hadWorldData{worldResult == GetSavedComponentsResult::Success}});
+    }
+
+    // Mark the entity as a client entity.
+    // Note: We do this last, so anything that reacts to these sees the
+    //       entity's loaded state.
     registry.emplace<IsClientEntity>(newEntity);
-    registry.emplace<Name>(newEntity, clientConnected.username);
-    registry.emplace<Inventory>(newEntity);
-
     registry.emplace<ClientSimData>(newEntity, clientConnected.clientHandle,
-                                    clientConnected.accountID);
-
-    world.addMovementComponents(newEntity);
-
-    const EntityGraphicSet& graphicSet{graphicData.getEntityGraphicSet(
-        SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET)};
-    GraphicState graphicState{graphicSet.numericID};
-    world.addGraphicsComponents(newEntity, graphicState);
-
-    // Set the default client entity collision.
-    registry.patch<CollisionBitSets>(
-        newEntity, [&](CollisionBitSets& collisionBitSets) {
-            collisionBitSets.setCollisionLayers(
-                CollisionLayerType::ClientEntity, newEntity, registry);
-            collisionBitSets.setCollisionMask(
-                CollisionLayerType::TerrainWall
-                | CollisionLayerType::BlockCollision);
-        });
+                                    accountID);
 
     // Add the new client entity to the client handle map.
     world.clientHandleMap[clientConnected.clientHandle] = newEntity;
@@ -411,6 +456,109 @@ void ClientConnectionSystem::sendConnectionResponse(
 
     // Send the connection response message.
     network.clientEndpoint.send(clientHandle, connectionResponse, currentTick);
+}
+
+bool ClientConnectionSystem::addDefaultComponents(
+    entt::entity entity, const ClientConnected& clientConnected)
+{
+    // Note: Be careful with holding onto references here. If components
+    //       are added to the same group, the ref will be invalidated.
+    entt::registry& registry{world.registry};
+
+    if (!registry.all_of<Name>(entity)) {
+        registry.emplace<Name>(entity, clientConnected.username);
+    }
+    if (!registry.all_of<Inventory>(entity)) {
+        registry.emplace<Inventory>(entity);
+    }
+    if (!registry.all_of<Input>(entity)) {
+        world.addMovementComponents(entity);
+    }
+    if (!registry.all_of<GraphicState>(entity)) {
+        const EntityGraphicSet& graphicSet{graphicData.getEntityGraphicSet(
+            SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET)};
+        GraphicState graphicState{graphicSet.numericID};
+        if (!world.addGraphicsComponents(entity, graphicState)) {
+            return false;
+        }
+    }
+
+    // Set the default client entity collision (unless it's persisted).
+    if constexpr (EnginePersistedComponentTypes::EntryFor<
+                      CollisionBitSets>::CLIENT_PERSISTENCE
+                  == ClientPersistence::None) {
+        registry.patch<CollisionBitSets>(
+            entity, [&](CollisionBitSets& collisionBitSets) {
+                collisionBitSets.setCollisionLayers(
+                    CollisionLayerType::ClientEntity, entity, registry);
+                collisionBitSets.setCollisionMask(
+                    CollisionLayerType::TerrainWall
+                    | CollisionLayerType::BlockCollision);
+            });
+    }
+
+    return true;
+}
+
+ClientConnectionSystem::GetSavedComponentsResult
+    ClientConnectionSystem::getSavedComponents(ClientPersistence persistence,
+                                               Sint64 accountID,
+                                               SavedComponents& savedComponents)
+{
+    // If no components use this persistence, there's nothing to get.
+    bool hasEntries{false};
+    if (persistence == ClientPersistence::Account) {
+        hasEntries = EnginePersistedComponentTypes::HAS_CLIENT_ENTRIES<
+                         ClientPersistence::Account>
+                     || ProjectPersistedComponentTypes::HAS_CLIENT_ENTRIES<
+                         ClientPersistence::Account>;
+    }
+    else if (persistence == ClientPersistence::World) {
+        hasEntries = EnginePersistedComponentTypes::HAS_CLIENT_ENTRIES<
+                         ClientPersistence::World>
+                     || ProjectPersistedComponentTypes::HAS_CLIENT_ENTRIES<
+                         ClientPersistence::World>;
+    }
+    if (!hasEntries) {
+        return GetSavedComponentsResult::NotFound;
+    }
+
+    // Copy the saved data out of the database.
+    auto copyComponents = [&](std::span<const Uint8> engineComponents,
+                              std::span<const Uint8> projectComponents) {
+        savedComponents.engineComponents.assign(engineComponents.begin(),
+                                                engineComponents.end());
+        savedComponents.projectComponents.assign(projectComponents.begin(),
+                                                 projectComponents.end());
+    };
+    switch (world.database->getClientEntityData(persistence, accountID,
+                                                std::move(copyComponents))) {
+        case Database::GetClientEntityDataResult::Success: {
+            return GetSavedComponentsResult::Success;
+        }
+        case Database::GetClientEntityDataResult::NotFound: {
+            return GetSavedComponentsResult::NotFound;
+        }
+        default: {
+            return GetSavedComponentsResult::Error;
+        }
+    }
+}
+
+void ClientConnectionSystem::rejectClient(ConnectionHandle clientHandle)
+{
+    // Tell the client that it failed to connect, then disconnect it.
+    // Note: The client stops waiting for a connection when it receives the
+    //       response, so the disconnect reason doesn't matter.
+    ConnectionResponse connectionResponse{};
+    connectionResponse.result = ConnectionResponse::InternalError;
+    network.clientEndpoint.send(clientHandle, connectionResponse,
+                                simulation.getCurrentTick());
+    network.clientEndpoint.disconnect(clientHandle, DisconnectNotice::Kicked);
+
+    // Ignore the disconnect event when it arrives, since there's no entity.
+    rejectedClients.insert(clientHandle);
+    LOG_INFO("Rejected client. clientID: %u", clientHandle.id());
 }
 
 } // namespace WorldServer

@@ -39,6 +39,7 @@ target_sources(WorldServerLib
         Public/ChunkStreamingSystem.h
         Public/ClientAOISystem.h
         Public/ClientConnectionSystem.h
+        Public/ClientEntityLoadInfo.h
         Public/ComponentMigration.h
         Public/ComponentChangeSystem.h
         Public/ComponentSyncSystem.h

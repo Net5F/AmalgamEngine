@@ -131,6 +131,9 @@ public:
     /**
      * Creates an entity with the given position.
      *
+     * If the position is outside of the tile map's bounds, logs a warning and
+     * doesn't create the entity.
+     *
      * @param entityHint (Optional) The entityID to use, if it's available.
      * @return The new entity's ID, or entt::null if a failure occurred
      *         (position outside of tile map bounds).
@@ -143,6 +146,9 @@ public:
      *
      * Since an entity's collision is based on its graphics, this also adds
      * the Collision component and adds the entity to the locator.
+     *
+     * If the graphic's collision would be outside of the tile map's bounds,
+     * logs a warning and doesn't add the components.
      *
      * @return true if successful, else false (the graphic's collision + entity
      *         position went outside of the tile map bounds).

@@ -42,7 +42,8 @@ World::World(const SimulationContext& inSimContext)
 , inventoryHelper{*this, inSimContext.network, inSimContext.itemData}
 , castHelper{inSimContext.simulation, inSimContext.itemData,
              inSimContext.castableData}
-, loadHelper{*this, inSimContext.simulation, inSimContext.itemData}
+, loadHelper{*this, inSimContext.simulation, inSimContext.itemData,
+             inSimContext.graphicData}
 , database{std::make_unique<Database>()}
 , clientHandleMap{}
 , stableIDMap{}
@@ -131,6 +132,17 @@ bool World::teleportEntity(entt::entity entity, const Vector3& newPosition)
 entt::entity World::createEntity(const Position& position,
                                  entt::entity entityHint)
 {
+    // If the position is outside of the tile map, fail.
+    // Note: The entity locator treats this as an error, but our callers may
+    //       be passing in bad data (e.g. from a script or a save), so we
+    //       check it here and fail safely.
+    if (!(tileMap.getTileExtent().contains(position))) {
+        LOG_INFO("Tried to create entity outside of the tile map. "
+                 "Position: (%.4f, %.4f, %.4f)",
+                 position.x, position.y, position.z);
+        return entt::null;
+    }
+
     // Create the new entity.
     entt::entity newEntity{entt::null};
     if (entityHint != entt::null) {
@@ -170,10 +182,22 @@ bool World::addGraphicsComponents(entt::entity entity,
         graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
     const BoundingBox& modelBounds{graphicSet.getCollisionModelBounds()};
     const Position& position{registry.get<Position>(entity)};
+    BoundingBox worldBounds{
+        Transforms::modelToWorldEntity(modelBounds, position)};
 
-    const Collision& collision{registry.emplace<Collision>(
-        entity, modelBounds,
-        Transforms::modelToWorldEntity(modelBounds, position))};
+    // If the collision would be outside of the tile map, fail.
+    // Note: The collision locator treats this as an error, but our callers
+    //       may be passing in bad data (e.g. from a script or a save), so we
+    //       check it here and fail safely.
+    if (!(tileMap.getTileExtent().contains(worldBounds))) {
+        LOG_INFO("Tried to add graphics components to entity %u, but "
+                 "its collision would be outside of the tile map.",
+                 entity);
+        return false;
+    }
+
+    const Collision& collision{
+        registry.emplace<Collision>(entity, modelBounds, worldBounds)};
     const CollisionBitSets& collisionBitSets{
         registry.emplace<CollisionBitSets>(entity, entity, registry)};
 

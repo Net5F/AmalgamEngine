@@ -2,6 +2,7 @@
 
 #include "ItemID.h"
 #include "IconID.h"
+#include "PersistedComponentList.h"
 #include "Log.h"
 #include "SQLiteCpp/SQLiteCpp.h"
 #include "entt/fwd.hpp"
@@ -31,9 +32,10 @@ class World;
  * in-memory database. Then, we use a separate thread to backup the in-memory
  * database to a file. See SaveSystem.h for more info.
  *
- * Note: Only client entity components with ClientPersistence::World are
- *       persisted here. ClientPersistence::Account components are persisted
- *       by the account server (see PersistedComponentList.h).
+ * Note: Client entity components with ClientPersistence::World are
+ *       persisted here. ClientPersistence::Account components will be
+ *       persisted by the account server, but are temporarily persisted
+ *       here too (see PersistedComponentList.h).
  */
 class Database
 {
@@ -127,12 +129,18 @@ public:
     //-------------------------------------------------------------------------
     // Client Entities
     //-------------------------------------------------------------------------
+    // Note: Each client entity has a table entry for each ClientPersistence
+    //       (except None). The Account entries are temporary: once the
+    //       account server persists them, they'll be removed from here.
+
     /**
-     * Adds or overwrites the given account's client entity table entry.
+     * Adds or overwrites the given account's client entity table entry for
+     * the given persistence.
      *
-     * Only the entity's ClientPersistence::World components should be saved
-     * here.
+     * Only the entity's components with the given ClientPersistence should be
+     * saved (see PersistedComponentList::ClientEntryTypes).
      *
+     * @param persistence Which entry to save. Must not be None.
      * @param accountID The account that the client entity belongs to.
      * @param serializedEngineComponents Ordered tagged engine component
      * records.
@@ -142,37 +150,44 @@ public:
      * See PERSISTED_COMPONENTS_VERSION comment for format info.
      */
     void saveClientEntityData(
-        Sint64 accountID, std::span<const Uint8> serializedEngineComponents,
+        ClientPersistence persistence, Sint64 accountID,
+        std::span<const Uint8> serializedEngineComponents,
         std::span<const Uint8> serializedProjectComponents);
 
     enum class GetClientEntityDataResult { Success, NotFound, DatabaseError };
     /**
-     * If the given account has a client entity table entry, calls the given
-     * callback on it.
+     * If the given account has a client entity table entry for the given
+     * persistence, calls the given callback on it.
      *
+     * @param persistence Which entry to get. Must not be None.
      * @param callback A callback of form void(std::span<const Uint8>,
      *                 std::span<const Uint8>) that expects ordered tagged
      *                 engine component records and ordered tagged project
      *                 component records.
-     * @return NotFound if the account has no entry in this world (e.g. it's
-     *         their first time joining it), DatabaseError if the query failed,
-     *         else Success.
+     * @return NotFound if the account has no entry (e.g. it's their first
+     *         time joining), DatabaseError if the query failed, else Success.
      *         Don't treat DatabaseError as NotFound. Doing so would give the
      *         account fresh data, which would overwrite its real data on the
      *         next save.
      */
     template<typename Func>
-    GetClientEntityDataResult getClientEntityData(Sint64 accountID,
+    GetClientEntityDataResult getClientEntityData(ClientPersistence persistence,
+                                                  Sint64 accountID,
                                                   Func callback)
     {
+        SQLite::Statement* query{getClientEntityQueryFor(persistence)};
+        if (!query) {
+            LOG_ERROR("Tried to get client entity data with an invalid "
+                      "persistence.");
+            return GetClientEntityDataResult::DatabaseError;
+        }
+
         GetClientEntityDataResult result{GetClientEntityDataResult::NotFound};
         try {
-            getClientEntityQuery->bind(1, accountID);
-            if (getClientEntityQuery->executeStep()) {
-                SQLite::Column engineComponentsColumn{
-                    getClientEntityQuery->getColumn(0)};
-                SQLite::Column projectComponentsColumn{
-                    getClientEntityQuery->getColumn(1)};
+            query->bind(1, accountID);
+            if (query->executeStep()) {
+                SQLite::Column engineComponentsColumn{query->getColumn(0)};
+                SQLite::Column projectComponentsColumn{query->getColumn(1)};
                 callback(
                     std::span<const Uint8>{
                         static_cast<const Uint8*>(
@@ -193,7 +208,7 @@ public:
 
         // Note: We use tryReset() since reset() re-throws a failed step's
         //       error.
-        getClientEntityQuery->tryReset();
+        query->tryReset();
         return result;
     }
 
@@ -292,6 +307,19 @@ protected:
      */
     void performBackup();
 
+    /**
+     * Returns the client entity insert query for the given persistence, or
+     * nullptr if it's None.
+     */
+    SQLite::Statement*
+        insertClientEntityQueryFor(ClientPersistence persistence);
+
+    /**
+     * Returns the client entity get query for the given persistence, or
+     * nullptr if it's None.
+     */
+    SQLite::Statement* getClientEntityQueryFor(ClientPersistence persistence);
+
     /** In-memory database. Used to gather our data so we can safely work
         with it in another thread. */
     SQLite::Database database;
@@ -317,8 +345,10 @@ protected:
     std::unique_ptr<SQLite::Statement> insertEntityQuery;
     std::unique_ptr<SQLite::Statement> deleteEntityQuery;
     std::unique_ptr<SQLite::Statement> iterateEntitiesQuery;
-    std::unique_ptr<SQLite::Statement> insertClientEntityQuery;
-    std::unique_ptr<SQLite::Statement> getClientEntityQuery;
+    std::unique_ptr<SQLite::Statement> insertWorldClientEntityQuery;
+    std::unique_ptr<SQLite::Statement> getWorldClientEntityQuery;
+    std::unique_ptr<SQLite::Statement> insertAccountClientEntityQuery;
+    std::unique_ptr<SQLite::Statement> getAccountClientEntityQuery;
     std::unique_ptr<SQLite::Statement> insertItemQuery;
     std::unique_ptr<SQLite::Statement> deleteItemQuery;
     std::unique_ptr<SQLite::Statement> iterateItemsQuery;

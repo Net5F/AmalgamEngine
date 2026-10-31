@@ -54,6 +54,9 @@ struct TileExtent : public DiscreteExtent<DiscreteImpl::TileTag> {
 
     /**
      * @return true if the given world point is within this extent.
+     *
+     * Note: A point exactly on this extent's max edge is outside, since it
+     *       belongs to the next tile (matches TilePosition(Vector3)).
      */
     bool contains(const Vector3& point) const;
 

@@ -17,6 +17,9 @@
 #include "CastCooldown.h"
 #include "SaveTimestamp.h"
 #include "PersistedComponentDefs.h"
+#include "GraphicData.h"
+#include "SharedConfig.h"
+#include "Transforms.h"
 #include "Deserialize.h"
 #include "ByteTools.h"
 #include "Log.h"
@@ -24,6 +27,7 @@
 #include "boost/mp11/algorithm.hpp"
 #include <algorithm>
 #include <functional>
+#include <optional>
 #include <span>
 #include <string_view>
 #include <type_traits>
@@ -36,10 +40,11 @@ namespace WorldServer
 {
 
 LoadHelper::LoadHelper(World& inWorld, Simulation& inSimulation,
-                       ItemData& inItemData)
+                       ItemData& inItemData, const GraphicData& inGraphicData)
 : world{inWorld}
 , simulation{inSimulation}
 , itemData{inItemData}
+, graphicData{inGraphicData}
 {
 }
 
@@ -86,6 +91,121 @@ void LoadHelper::loadGlobalStoredValues()
     world.database->getGlobalStoredValueMap(std::move(loadGlobalMap));
 }
 
+entt::entity LoadHelper::loadClientEntity(
+    Sint64 accountID, const SerializedClientComponents& accountComponents,
+    const SerializedClientComponents& worldComponents)
+{
+    using EngineTypes = EnginePersistedComponentTypes;
+    using ProjectTypes = ProjectPersistedComponentTypes;
+
+    // Build the lists of each component's position within the buffers.
+    // Note: The entity doesn't exist yet, so any errors here will be logged
+    //       with entt::null.
+    std::vector<SerializedComponent> accountEngineComponents{};
+    std::vector<SerializedComponent> accountProjectComponents{};
+    std::vector<SerializedComponent> worldEngineComponents{};
+    std::vector<SerializedComponent> worldProjectComponents{};
+    if (!parseComponents(accountComponents.engineComponents,
+                         accountEngineComponents, entt::null, "account engine")
+        || !parseComponents(accountComponents.projectComponents,
+                            accountProjectComponents, entt::null,
+                            "account project")
+        || !parseComponents(worldComponents.engineComponents,
+                            worldEngineComponents, entt::null, "world engine")
+        || !parseComponents(worldComponents.projectComponents,
+                            worldProjectComponents, entt::null,
+                            "world project")) {
+        LOG_ERROR("Failed to parse client entity data for accountID: %lld",
+                  static_cast<long long>(accountID));
+        return entt::null;
+    }
+
+    // If there's a saved Position and GraphicState, deserialize them.
+    // Note: We do this separately because we need them to pick the entity's
+    //       position before creating it.
+    std::optional<Position> savedPosition{};
+    std::optional<GraphicState> savedGraphicState{};
+    if (!getSavedClientComponent(accountEngineComponents, worldEngineComponents,
+                                 savedPosition)
+        || !getSavedClientComponent(accountEngineComponents,
+                                    worldEngineComponents, savedGraphicState)) {
+        LOG_ERROR("Failed to load client entity Position or GraphicState for "
+                  "accountID: %lld",
+                  static_cast<long long>(accountID));
+        return entt::null;
+    }
+
+    // If the entity's collision wouldn't be within the tile map at its saved
+    // position (e.g. the map shrunk), use the spawn point instead.
+    // Note: createEntity() fails safely if the position is outside of the
+    //       map, but the graphics (and collision) are added later while
+    //       loading components, where a failure would fail the whole load.
+    //       Checking the collision up front lets us fall back instead. It
+    //       also covers the position, since it's the collision's bottom
+    //       center.
+    // Note: If there's no saved GraphicState, the entity will be given the
+    //       default graphic set.
+    if (savedPosition) {
+        const EntityGraphicSet& graphicSet{
+            savedGraphicState ? graphicData.getEntityGraphicSet(
+                                    savedGraphicState->graphicSetID)
+                              : graphicData.getEntityGraphicSet(
+                                    SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET)};
+        BoundingBox worldBounds{Transforms::modelToWorldEntity(
+            graphicSet.getCollisionModelBounds(), *savedPosition)};
+        if (!(world.tileMap.getTileExtent().contains(worldBounds))) {
+            LOG_INFO("Entity wouldn't be within the tile map at its saved "
+                     "position, using spawn point. accountID: %lld",
+                     static_cast<long long>(accountID));
+            savedPosition.reset();
+        }
+    }
+
+    // Add the entity to the registry. If there's no saved position, use the
+    // spawn point.
+    entt::entity entity{world.createEntity(
+        savedPosition ? *savedPosition : world.getSpawnPoint())};
+    if (entity == entt::null) {
+        LOG_ERROR("Failed to create client entity for accountID: %lld",
+                  static_cast<long long>(accountID));
+        return entt::null;
+    }
+
+    // Load each set's persisted components into the registry.
+    using AccountEngineEntries
+        = EngineTypes::ClientEntryTypes<ClientPersistence::Account>;
+    using AccountProjectEntries
+        = ProjectTypes::ClientEntryTypes<ClientPersistence::Account>;
+    using WorldEngineEntries
+        = EngineTypes::ClientEntryTypes<ClientPersistence::World>;
+    using WorldProjectEntries
+        = ProjectTypes::ClientEntryTypes<ClientPersistence::World>;
+    bool loadSucceeded{loadEngineComponents<AccountEngineEntries>(
+                           entity, accountEngineComponents)
+                       && loadProjectComponents<AccountProjectEntries>(
+                           entity, accountProjectComponents)
+                       && loadEngineComponents<WorldEngineEntries>(
+                           entity, worldEngineComponents)
+                       && loadProjectComponents<WorldProjectEntries>(
+                           entity, worldProjectComponents)};
+    if (!loadSucceeded) {
+        LOG_ERROR("Failed to load client entity components for accountID: "
+                  "%lld",
+                  static_cast<long long>(accountID));
+        world.registry.destroy(entity);
+        return entt::null;
+    }
+
+    // Init any components with lazy-updated timers.
+    // Note: If there's no SaveTimestamp, the account had no saved data in its
+    //       set, so there are no timer components to init.
+    if (world.registry.all_of<SaveTimestamp>(entity)) {
+        initTimerComponents(entity);
+    }
+
+    return entity;
+}
+
 void LoadHelper::loadEntity(
     entt::entity entity, std::span<const Uint8> serializedEngineComponents,
     std::span<const Uint8> serializedProjectComponents)
@@ -110,21 +230,17 @@ void LoadHelper::loadEntity(
     //       use createEntity() to centralize logic and avoid bugs).
     using PositionEntry
         = EnginePersistedComponentTypes::EntryFor<Position>;
-    auto positionIt{std::lower_bound(
-        engineComponents.begin(), engineComponents.end(),
-        PositionEntry::TYPE_ID,
-        [](const SerializedComponent& component, Uint16 typeID) {
-            return component.typeID < typeID;
-        })};
-    if ((positionIt == engineComponents.end())
-        || (positionIt->typeID != PositionEntry::TYPE_ID)) {
+    const SerializedComponent* serializedPosition{
+        findComponent(engineComponents, PositionEntry::TYPE_ID)};
+    if (!serializedPosition) {
         LOG_ERROR("Tried to load entity %u with no Position.",
                   entity);
         return;
     }
 
     Position position{};
-    if (!deserializeComponent<PositionEntry>(entity, *positionIt, position)) {
+    if (!deserializeComponent<PositionEntry>(entity, *serializedPosition,
+                                             position)) {
         return;
     }
 
@@ -137,8 +253,11 @@ void LoadHelper::loadEntity(
     }
 
     // Load the entity's persisted components into the registry.
-    loadEngineComponents(newEntity, engineComponents);
-    loadProjectComponents(newEntity, projectComponents);
+    // Note: If a component fails to load, we skip it and keep the rest.
+    loadEngineComponents<EnginePersistedComponentTypes::EntryTypes>(
+        newEntity, engineComponents);
+    loadProjectComponents<ProjectPersistedComponentTypes::EntryTypes>(
+        newEntity, projectComponents);
 
     // Init any components with lazy-updated timers.
     initTimerComponents(newEntity);
@@ -194,11 +313,12 @@ bool LoadHelper::parseComponents(
     return true;
 }
 
-void LoadHelper::loadEngineComponents(
+template<typename EntryList>
+bool LoadHelper::loadEngineComponents(
     entt::entity entity,
     const std::vector<SerializedComponent>& serializedComponents)
 {
-    loadComponents<EnginePersistedComponentTypes>(
+    return loadComponents<EntryList>(
         entity, serializedComponents, [&](const auto& component) {
             using Component = std::decay_t<decltype(component)>;
             if constexpr (std::is_same_v<Component, Input>) {
@@ -223,6 +343,7 @@ void LoadHelper::loadEngineComponents(
                               "entity has no Collision "
                               "(addGraphicsComponents failed?)",
                               entity);
+                    return false;
                 }
             }
             else if constexpr (std::is_same_v<Component, GraphicState>) {
@@ -232,33 +353,39 @@ void LoadHelper::loadEngineComponents(
                     LOG_ERROR(
                         "Failed to load graphics components for entity: %u",
                         entity);
+                    return false;
                 }
             }
             else {
                 world.registry.emplace<Component>(entity, component);
             }
+
+            return true;
         });
 }
 
-void LoadHelper::loadProjectComponents(
+template<typename EntryList>
+bool LoadHelper::loadProjectComponents(
     entt::entity entity,
     const std::vector<SerializedComponent>& serializedComponents)
 {
-    loadComponents<ProjectPersistedComponentTypes>(
+    return loadComponents<EntryList>(
         entity, serializedComponents, [&](const auto& component) {
             using Component = std::decay_t<decltype(component)>;
             world.registry.emplace<Component>(entity, component);
+            return true;
         });
 }
 
-template<typename ComponentList, typename ComponentCallback>
-void LoadHelper::loadComponents(
+template<typename EntryList, typename ComponentCallback>
+bool LoadHelper::loadComponents(
     entt::entity entity,
     const std::vector<SerializedComponent>& serializedComponents,
     ComponentCallback&& componentCallback)
 {
+    bool allSucceeded{true};
     std::size_t serializedIndex{0};
-    boost::mp11::mp_for_each<typename ComponentList::EntryTypes>(
+    boost::mp11::mp_for_each<EntryList>(
         [&](auto entry) {
             using Entry = decltype(entry);
 
@@ -277,7 +404,7 @@ void LoadHelper::loadComponents(
             const SerializedComponent& serializedComponent{
                 serializedComponents[serializedIndex]};
             if (serializedComponent.typeID > Entry::TYPE_ID) {
-                // The entity doesn't have this component, continue to the 
+                // The entity doesn't have this component, continue to the
                 // next entry.
                 return;
             }
@@ -286,14 +413,17 @@ void LoadHelper::loadComponents(
             using Component = typename Entry::Component;
             if constexpr (!std::is_same_v<Component, Position>) {
                 Component component{};
-                if (deserializeComponent<Entry>(entity, serializedComponent,
-                                                component)) {
-                    componentCallback(component);
+                if (!deserializeComponent<Entry>(entity, serializedComponent,
+                                                 component)
+                    || !componentCallback(component)) {
+                    allSucceeded = false;
                 }
             }
 
             ++serializedIndex;
         });
+
+    return allSucceeded;
 }
 
 template<typename Entry>
@@ -372,6 +502,15 @@ bool LoadHelper::deserializeComponent(
 
 void LoadHelper::initTimerComponents(entt::entity entity)
 {
+    // Timer components are updated using SaveTimestamp, so client entities
+    // must save them in the same set (otherwise, a timer could be loaded with
+    // a SaveTimestamp from a different save).
+    using EngineTypes = EnginePersistedComponentTypes;
+    static_assert(
+        EngineTypes::EntryFor<CastCooldown>::CLIENT_PERSISTENCE
+            == EngineTypes::EntryFor<SaveTimestamp>::CLIENT_PERSISTENCE,
+        "CastCooldown must have the same ClientPersistence as SaveTimestamp.");
+
     const SaveTimestamp* saveTimestamp{
         world.registry.try_get<SaveTimestamp>(entity)};
     if (!saveTimestamp) {
@@ -384,6 +523,60 @@ void LoadHelper::initTimerComponents(entt::entity entity)
             world.registry.try_get<CastCooldown>(entity)}) {
         castCooldown->initAfterLoad(saveTimestamp->lastSavedTick,
                                     simulation.getCurrentTick());
+    }
+}
+
+const LoadHelper::SerializedComponent* LoadHelper::findComponent(
+    const std::vector<SerializedComponent>& serializedComponents,
+    Uint16 typeID) const
+{
+    // Note: serializedComponents is sorted by type ID (parseComponents()
+    //       enforces it).
+    auto componentIt{std::lower_bound(
+        serializedComponents.begin(), serializedComponents.end(), typeID,
+        [](const SerializedComponent& component, Uint16 typeID) {
+            return component.typeID < typeID;
+        })};
+    if ((componentIt == serializedComponents.end())
+        || (componentIt->typeID != typeID)) {
+        return nullptr;
+    }
+
+    return &(*componentIt);
+}
+
+template<typename Component>
+bool LoadHelper::getSavedClientComponent(
+    const std::vector<SerializedComponent>& accountEngineComponents,
+    const std::vector<SerializedComponent>& worldEngineComponents,
+    std::optional<Component>& component)
+{
+    using Entry = EnginePersistedComponentTypes::EntryFor<Component>;
+    if constexpr (Entry::CLIENT_PERSISTENCE == ClientPersistence::None) {
+        // Client entities don't save this component.
+        return true;
+    }
+    else {
+        const std::vector<SerializedComponent>& engineComponents{
+            (Entry::CLIENT_PERSISTENCE == ClientPersistence::Account)
+                ? accountEngineComponents
+                : worldEngineComponents};
+        const SerializedComponent* serializedComponent{
+            findComponent(engineComponents, Entry::TYPE_ID)};
+        if (!serializedComponent) {
+            return true;
+        }
+
+        // Note: The entity doesn't exist yet, so any errors will be logged
+        //       with entt::null.
+        component.emplace();
+        if (!deserializeComponent<Entry>(entt::null, *serializedComponent,
+                                         *component)) {
+            component.reset();
+            return false;
+        }
+
+        return true;
     }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ConnectionHandle.h"
+#include "entt/fwd.hpp"
 
 namespace AM
 {
@@ -15,6 +16,7 @@ struct ItemChangeRequest;
 
 namespace WorldServer
 {
+struct ClientEntityLoadInfo;
 
 /**
  * Defines an extension for the engine's WorldServer::Simulation class.
@@ -84,6 +86,21 @@ public:
         = 0;
     virtual bool isItemChangeRequestValid(
         const ItemChangeRequest& itemChangeRequest) const = 0;
+
+    /**
+     * Called when a client entity is added to the world, after its saved
+     * components are loaded and the engine's defaults are added.
+     *
+     * Use this to add defaults for any of your components that weren't
+     * loaded (check the registry), or to start a character creation flow.
+     *
+     * Note: This is called before the entity's IsClientEntity and
+     *       ClientSimData components are added.
+     * Note: This isn't called when a client takes over its account's
+     *       lingering entity, since that entity was already initialized.
+     */
+    virtual void initClientEntity(entt::entity entity,
+                                  const ClientEntityLoadInfo& loadInfo) = 0;
 };
 
 } // namespace WorldServer

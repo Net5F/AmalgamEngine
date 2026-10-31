@@ -7,6 +7,7 @@
 #include "SQLiteCpp/Backup.h"
 #include <sqlite3.h>
 #include <array>
+#include <string>
 
 #ifdef SQLITECPP_ENABLE_ASSERT_HANDLER
 namespace SQLite
@@ -36,8 +37,10 @@ Database::Database()
 , insertEntityQuery{nullptr}
 , deleteEntityQuery{nullptr}
 , iterateEntitiesQuery{nullptr}
-, insertClientEntityQuery{nullptr}
-, getClientEntityQuery{nullptr}
+, insertWorldClientEntityQuery{nullptr}
+, getWorldClientEntityQuery{nullptr}
+, insertAccountClientEntityQuery{nullptr}
+, getAccountClientEntityQuery{nullptr}
 , insertItemQuery{nullptr}
 , deleteItemQuery{nullptr}
 , iterateItemsQuery{nullptr}
@@ -68,18 +71,31 @@ Database::Database()
     iterateEntitiesQuery = std::make_unique<SQLite::Statement>(
         database, "SELECT * FROM entities");
 
-    insertClientEntityQuery = std::make_unique<SQLite::Statement>(database, R"(
-            INSERT INTO client_entities VALUES (?, ?, ?)
+    // Note: Our client entity tables share a schema, so they share queries.
+    auto makeInsertClientEntityQuery = [&](const std::string& tableName) {
+        return std::make_unique<SQLite::Statement>(
+            database, "INSERT INTO " + tableName + R"(
+            VALUES (?, ?, ?)
             ON CONFLICT(account_id) DO UPDATE SET
                 serialized_engine_components=
                     excluded.serialized_engine_components,
                 serialized_project_components=
                     excluded.serialized_project_components
         )");
-    getClientEntityQuery = std::make_unique<SQLite::Statement>(database, R"(
-            SELECT serialized_engine_components, serialized_project_components
-            FROM client_entities WHERE account_id=?
-        )");
+    };
+    auto makeGetClientEntityQuery = [&](const std::string& tableName) {
+        return std::make_unique<SQLite::Statement>(
+            database, "SELECT serialized_engine_components, "
+                      "serialized_project_components FROM "
+                          + tableName + " WHERE account_id=?");
+    };
+    insertWorldClientEntityQuery
+        = makeInsertClientEntityQuery("client_entities");
+    getWorldClientEntityQuery = makeGetClientEntityQuery("client_entities");
+    insertAccountClientEntityQuery
+        = makeInsertClientEntityQuery("account_client_entities");
+    getAccountClientEntityQuery
+        = makeGetClientEntityQuery("account_client_entities");
 
     insertItemQuery = std::make_unique<SQLite::Statement>(
         database, R"(
@@ -190,19 +206,25 @@ void Database::deleteEntityData(entt::entity entity)
 }
 
 void Database::saveClientEntityData(
-    Sint64 accountID, std::span<const Uint8> serializedEngineComponents,
+    ClientPersistence persistence, Sint64 accountID,
+    std::span<const Uint8> serializedEngineComponents,
     std::span<const Uint8> serializedProjectComponents)
 {
-    try {
-        insertClientEntityQuery->bind(1, accountID);
-        insertClientEntityQuery->bind(
-            2, serializedEngineComponents.data(),
-            static_cast<int>(serializedEngineComponents.size()));
-        insertClientEntityQuery->bind(
-            3, serializedProjectComponents.data(),
-            static_cast<int>(serializedProjectComponents.size()));
+    SQLite::Statement* query{insertClientEntityQueryFor(persistence)};
+    if (!query) {
+        LOG_ERROR("Tried to save client entity data with an invalid "
+                  "persistence.");
+        return;
+    }
 
-        insertClientEntityQuery->exec();
+    try {
+        query->bind(1, accountID);
+        query->bind(2, serializedEngineComponents.data(),
+                    static_cast<int>(serializedEngineComponents.size()));
+        query->bind(3, serializedProjectComponents.data(),
+                    static_cast<int>(serializedProjectComponents.size()));
+
+        query->exec();
     } catch (std::exception& e) {
         LOG_ERROR("Failed to save client entity data: %s", e.what());
     }
@@ -210,7 +232,7 @@ void Database::saveClientEntityData(
     // Note: We reset even on failure, so one failed save doesn't block the
     //       rest. We use tryReset() since reset() re-throws a failed step's
     //       error.
-    insertClientEntityQuery->tryReset();
+    query->tryReset();
 }
 
 void Database::saveItemData(ItemID itemID,
@@ -312,18 +334,24 @@ void Database::initTables()
             )");
         }
 
-        // Per-world client entity components, keyed by account ID.
-        if (!backupDatabase.tableExists("client_entities")) {
-            // Engine and project components use separate ID namespaces, so
-            // store their record lists in separate blobs.
-            backupDatabase.exec(R"(
-                CREATE TABLE client_entities
-                (
-                    account_id                     INTEGER PRIMARY KEY,
-                    serialized_engine_components  BLOB,
-                    serialized_project_components BLOB
-                ) STRICT
-            )");
+        // Client entity components, keyed by account ID.
+        // client_entities holds ClientPersistence::World components.
+        // account_client_entities temporarily holds ClientPersistence::Account
+        // components, until the account server persists them.
+        // Note: Engine and project components use separate ID namespaces, so
+        //       we store their record lists in separate blobs.
+        for (const char* tableName :
+             {"client_entities", "account_client_entities"}) {
+            if (!backupDatabase.tableExists(tableName)) {
+                backupDatabase.exec(std::string{"CREATE TABLE "} + tableName
+                                    + R"(
+                    (
+                        account_id                     INTEGER PRIMARY KEY,
+                        serialized_engine_components  BLOB,
+                        serialized_project_components BLOB
+                    ) STRICT
+                )");
+            }
         }
 
         // Items.
@@ -433,6 +461,38 @@ void Database::performBackup()
         }
 
         backupRequested = false;
+    }
+}
+
+SQLite::Statement*
+    Database::insertClientEntityQueryFor(ClientPersistence persistence)
+{
+    switch (persistence) {
+        case ClientPersistence::World: {
+            return insertWorldClientEntityQuery.get();
+        }
+        case ClientPersistence::Account: {
+            return insertAccountClientEntityQuery.get();
+        }
+        default: {
+            return nullptr;
+        }
+    }
+}
+
+SQLite::Statement*
+    Database::getClientEntityQueryFor(ClientPersistence persistence)
+{
+    switch (persistence) {
+        case ClientPersistence::World: {
+            return getWorldClientEntityQuery.get();
+        }
+        case ClientPersistence::Account: {
+            return getAccountClientEntityQuery.get();
+        }
+        default: {
+            return nullptr;
+        }
     }
 }
 

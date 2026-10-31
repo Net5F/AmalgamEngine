@@ -1,4 +1,5 @@
 #include "TileExtent.h"
+#include "TilePosition.h"
 #include "ChunkExtent.h"
 #include "CellExtent.h"
 #include "BoundingBox.h"
@@ -101,8 +102,10 @@ bool TileExtent::contains(const Cylinder& cylinder) const
 
 bool TileExtent::contains(const Vector3& worldPoint) const
 {
-    BoundingBox extentBox(*this);
-    return extentBox.contains(worldPoint);
+    // Note: We check the tile that the point falls in, rather than using an
+    //       inclusive bounds check, to match how points are rounded into
+    //       tiles and locator cells.
+    return contains(TilePosition(worldPoint));
 }
 
 void TileExtent::print() const
