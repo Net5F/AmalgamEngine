@@ -65,7 +65,7 @@ using EnginePersistedComponentTypes = PersistedComponentList<
     PersistedComponentEntry<ItemHandler, 9, 0, ClientPersistence::None>,
     PersistedComponentEntry<Dialogue, 10, 0, ClientPersistence::None>,
     PersistedComponentEntry<EntityInitScript, 11, 0, ClientPersistence::None>,
-    PersistedComponentEntry<StoredValues, 12, 0, ClientPersistence::World>,
+    PersistedComponentEntry<StoredValues, 12, 0, ClientPersistence::Account>,
     PersistedComponentEntry<CastCooldown, 13, 0, ClientPersistence::Account>,
     PersistedComponentEntry<StableID, 14, 0, ClientPersistence::None>>;
 // clang-format on

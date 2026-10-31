@@ -18,6 +18,17 @@ namespace WorldServer
  * Non-client entities ignore this. All of their persisted components are
  * saved to the world's database.
  *
+ * How to set up your component list, depending on the type of setup you want:
+ *   Single server:
+ *     Set everything to World (it's slightly more efficient to skip the 
+ *     AccountServer -> WorldServer messages).
+ *   Runescape-style (same character, multiple worlds):
+ *     Set everything to Account, unless you want particular components to be
+ *     per-world (e.g. player housing).
+ *   Original WoW-style (world-locked characters):
+ *     Set everything to World. Add logic so that if an account has no data in
+ *     that world, you take them through a character creation flow.
+ *
  * Note: Changing a component's ClientPersistence is a data migration. Its
  *       existing data will still be in the old location.
  */

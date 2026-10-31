@@ -75,6 +75,8 @@ public:
     TileMap tileMap;
 
     /** Global key-value store.
+        Note: "Global" means global to this world. Each world has its own map,
+              and values aren't shared between worlds.
         Note: Stored values are often cast to different types, but their
               underlying type is always Uint32. */
     GlobalStoredValueMap globalStoredValueMap;
