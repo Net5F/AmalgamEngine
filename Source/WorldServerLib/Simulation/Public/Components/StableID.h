@@ -9,9 +9,9 @@ namespace WorldServer
 /**
  * A world-unique ID that stays the same across server restarts.
  *
- * Entity IDs may change when an entity is re-initialized (e.g. edited in build
- * mode), so scripts that need to reference a specific NPC should give it a
- * stable ID and look it up using World::getEntityByStableID().
+ * Entity IDs may change when an entity is re-initialized, so scripts that need
+ * to reference a specific NPC should give it a stable ID and look it up using
+ * World::getEntityByStableID().
  *
  * Note: Don't add or modify this component directly. Use
  *       World::setStableID(), which enforces uniqueness and keeps

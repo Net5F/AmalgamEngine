@@ -9,6 +9,7 @@
 #include <string_view>
 #include <functional>
 #include <optional>
+#include <variant>
 
 namespace sol
 {
@@ -47,6 +48,19 @@ public:
                       Network& inNetwork);
 
 private:
+    /**
+     * The type of the GLOBAL Lua constant, which can be passed instead of an
+     * entity ID to use the global stored value store.
+     *
+     * Note: This is a distinct type (instead of a reserved entity ID), so that
+     *       a missing or invalid entity can never be mistaken for GLOBAL.
+     */
+    struct GlobalStore {
+    };
+
+    /** A stored value function's target: an entity, or GLOBAL. */
+    using StoreTarget = std::variant<entt::entity, GlobalStore>;
+
     void addEntityInitBindings();
     void addEntityItemHandlerBindings();
     void addItemInitBindings();
@@ -188,10 +202,6 @@ private:
     /**
      * Returns the entity with the given stable ID (see setStableID()).
      * @return The entity, or nil if no entity has the given ID.
-     *
-     * Note: We return nil instead of entt::null, since entt::null == GLOBAL
-     *       and would silently redirect stored value calls to the global
-     *       store.
      */
     std::optional<entt::entity> getEntityByStableID(std::string_view stableID);
 
@@ -204,27 +214,27 @@ private:
      *       on a value that was previously set as a bool, it will be
      *       overwritten without issue.
      *
-     * @param entity The entity to store the value to. If == entt::null, the
-     *               the value will be stored to the global store instead.
+     * @param target The entity to store the value to, or GLOBAL to use the
+     *               global store.
      * @param stringID The string ID of the value to add or overwrite.
      * @param newValue The new value to use.
      */
-    void storeUint(entt::entity entity, std::string_view stringID,
+    void storeUint(StoreTarget target, std::string_view stringID,
                    Uint32 newValue);
-    void storeBool(entt::entity entity, std::string_view stringID,
+    void storeBool(StoreTarget target, std::string_view stringID,
                    bool newValue);
-    void storeInt(entt::entity entity, std::string_view stringID, int newValue);
-    void storeFloat(entt::entity entity, std::string_view stringID,
+    void storeInt(StoreTarget target, std::string_view stringID, int newValue);
+    void storeFloat(StoreTarget target, std::string_view stringID,
                     float newValue);
     /** @param newValue A time in seconds, since 0 UTC (Jan 1, 1970). */
-    void storeTime(entt::entity entity, std::string_view stringID,
+    void storeTime(StoreTarget target, std::string_view stringID,
                    Uint32 newValue);
-    void storeBitSet(entt::entity entity, std::string_view stringID,
+    void storeBitSet(StoreTarget target, std::string_view stringID,
                      Uint32 newValue);
     /** @param bitToSet The bit to set, within the 32-bit stored value. Must be
                         within the range [0, 31]. */
-    void storeBit(entt::entity entity, std::string_view stringID,
-                  Uint8 bitToSet, bool newValue);
+    void storeBit(StoreTarget target, std::string_view stringID, Uint8 bitToSet,
+                  bool newValue);
 
     /**
      * Gets a stored value.
@@ -233,22 +243,22 @@ private:
      *       on a value that was previously set as a bool, it will be returned
      *       as an int without issue.
      *
-     * @param entity The entity to get the value from. If == entt::null, the
-     *               the value will be retrieved from the global store instead.
+     * @param target The entity to get the value from, or GLOBAL to use the
+     *               global store.
      * @param stringID The string ID of the value to get.
      * @return The requested value. If not found, returns 0 (the default value
      *         that the flag would have if it existed).
      */
-    Uint32 getStoredUint(entt::entity entity, std::string_view stringID);
-    bool getStoredBool(entt::entity entity, std::string_view stringID);
-    int getStoredInt(entt::entity entity, std::string_view stringID);
-    float getStoredFloat(entt::entity entity, std::string_view stringID);
+    Uint32 getStoredUint(StoreTarget target, std::string_view stringID);
+    bool getStoredBool(StoreTarget target, std::string_view stringID);
+    int getStoredInt(StoreTarget target, std::string_view stringID);
+    float getStoredFloat(StoreTarget target, std::string_view stringID);
     /** @return A time in seconds, since 0 UTC (Jan 1, 1970). */
-    Uint32 getStoredTime(entt::entity entity, std::string_view stringID);
-    Uint32 getStoredBitSet(entt::entity entity, std::string_view stringID);
+    Uint32 getStoredTime(StoreTarget target, std::string_view stringID);
+    Uint32 getStoredBitSet(StoreTarget target, std::string_view stringID);
     /** @param bitToGet The bit to get, within the 32-bit stored value. Must be
                         within the range [0, 31]. */
-    bool getStoredBit(entt::entity entity, std::string_view stringID,
+    bool getStoredBit(StoreTarget target, std::string_view stringID,
                       Uint8 bitToGet);
 
     /**

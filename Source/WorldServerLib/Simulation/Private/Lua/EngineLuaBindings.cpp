@@ -57,10 +57,9 @@ EngineLuaBindings::EngineLuaBindings(
     // Add the GLOBAL Lua constant to the non-init environments.
     // Note: GLOBAL can be used instead of an entity ID when setting stored
     //       values.
-    Uint32 nullEntityID{entt::to_integral(entt::entity{entt::null})};
-    entityItemHandlerLua.luaState["GLOBAL"] = nullEntityID;
-    dialogueLua.luaState["GLOBAL"] = nullEntityID;
-    dialogueChoiceConditionLua.luaState["GLOBAL"] = nullEntityID;
+    entityItemHandlerLua.luaState["GLOBAL"] = GlobalStore{};
+    dialogueLua.luaState["GLOBAL"] = GlobalStore{};
+    dialogueChoiceConditionLua.luaState["GLOBAL"] = GlobalStore{};
 
     // Add our bindings.
     addEntityInitBindings();
@@ -528,11 +527,12 @@ std::optional<entt::entity>
     return entity;
 }
 
-void EngineLuaBindings::storeUint(entt::entity entity,
-                                  std::string_view stringID, Uint32 newValue)
+void EngineLuaBindings::storeUint(StoreTarget target, std::string_view stringID,
+                                  Uint32 newValue)
 {
-    // If we were given a non-null entity, use its store.
-    if (entity != entt::null) {
+    // If we were given an entity, use its store.
+    if (std::holds_alternative<entt::entity>(target)) {
+        entt::entity entity{std::get<entt::entity>(target)};
         if (!(world.registry.valid(entity))) {
             throw std::runtime_error{
                 "Failed to store value: Invalid entity ID."};
@@ -555,24 +555,24 @@ void EngineLuaBindings::storeUint(entt::entity entity,
         }
     }
     else {
-        // We were given entt::null, use the global store.
+        // We were given GLOBAL, use the global store.
         world.storeGlobalValue(stringID, newValue);
     }
 }
 
-void EngineLuaBindings::storeBool(entt::entity entity,
-                                  std::string_view stringID, bool newValue)
+void EngineLuaBindings::storeBool(StoreTarget target, std::string_view stringID,
+                                  bool newValue)
 {
-    storeUint(entity, stringID, static_cast<Uint32>(newValue));
+    storeUint(target, stringID, static_cast<Uint32>(newValue));
 }
 
-void EngineLuaBindings::storeInt(entt::entity entity, std::string_view stringID,
+void EngineLuaBindings::storeInt(StoreTarget target, std::string_view stringID,
                                  int newValue)
 {
-    storeUint(entity, stringID, static_cast<Uint32>(newValue));
+    storeUint(target, stringID, static_cast<Uint32>(newValue));
 }
 
-void EngineLuaBindings::storeFloat(entt::entity entity,
+void EngineLuaBindings::storeFloat(StoreTarget target,
                                    std::string_view stringID, float newValue)
 {
     static_assert(sizeof(float) == 4, "float is expected to be 4 bytes.");
@@ -580,26 +580,26 @@ void EngineLuaBindings::storeFloat(entt::entity entity,
     // Copy the float's bytes to a Uint32 without converting.
     Uint32 newValueUint{};
     std::memcpy(&newValueUint, &newValue, 4);
-    storeUint(entity, stringID, newValueUint);
+    storeUint(target, stringID, newValueUint);
 }
 
-void EngineLuaBindings::storeTime(entt::entity entity,
-                                  std::string_view stringID, Uint32 newValue)
+void EngineLuaBindings::storeTime(StoreTarget target, std::string_view stringID,
+                                  Uint32 newValue)
 {
     // Note: Time is only a type to make scripts more readable. It's handled
     //       the same as Uint32.
-    storeUint(entity, stringID, newValue);
+    storeUint(target, stringID, newValue);
 }
 
-void EngineLuaBindings::storeBitSet(entt::entity entity,
+void EngineLuaBindings::storeBitSet(StoreTarget target,
                                     std::string_view stringID, Uint32 newValue)
 {
     // Note: BitSet is only a type to make scripts more readable. It's handled
     //       the same as Uint32.
-    storeUint(entity, stringID, newValue);
+    storeUint(target, stringID, newValue);
 }
 
-void EngineLuaBindings::storeBit(entt::entity entity, std::string_view stringID,
+void EngineLuaBindings::storeBit(StoreTarget target, std::string_view stringID,
                                  Uint8 bitToSet, bool newValue)
 {
     if (bitToSet > 31) {
@@ -609,19 +609,20 @@ void EngineLuaBindings::storeBit(entt::entity entity, std::string_view stringID,
 
     // This will give us either the current value if it already exists, or
     // 0 (a fresh bit set).
-    Uint32 bitSet{getStoredUint(entity, stringID)};
+    Uint32 bitSet{getStoredUint(target, stringID)};
 
     // Set the bit and store the new value.
     setBit(bitSet, bitToSet, newValue);
 
-    storeUint(entity, stringID, bitSet);
+    storeUint(target, stringID, bitSet);
 }
 
-Uint32 EngineLuaBindings::getStoredUint(entt::entity entity,
+Uint32 EngineLuaBindings::getStoredUint(StoreTarget target,
                                         std::string_view stringID)
 {
-    // If we were given a non-null entity, use its store.
-    if (entity != entt::null) {
+    // If we were given an entity, use its store.
+    if (std::holds_alternative<entt::entity>(target)) {
+        entt::entity entity{std::get<entt::entity>(target)};
         if (!(world.registry.valid(entity))) {
             throw std::runtime_error{
                 "Failed to get stored value: Invalid entity ID."};
@@ -636,53 +637,53 @@ Uint32 EngineLuaBindings::getStoredUint(entt::entity entity,
         }
     }
     else {
-        // We were given entt::null, use the global store.
+        // We were given GLOBAL, use the global store.
         return world.getStoredValue(stringID);
     }
 
     return 0;
 }
 
-bool EngineLuaBindings::getStoredBool(entt::entity entity,
+bool EngineLuaBindings::getStoredBool(StoreTarget target,
                                       std::string_view stringID)
 {
-    return static_cast<bool>(getStoredUint(entity, stringID));
+    return static_cast<bool>(getStoredUint(target, stringID));
 }
 
-int EngineLuaBindings::getStoredInt(entt::entity entity,
+int EngineLuaBindings::getStoredInt(StoreTarget target,
                                     std::string_view stringID)
 {
-    return static_cast<int>(getStoredUint(entity, stringID));
+    return static_cast<int>(getStoredUint(target, stringID));
 }
 
-float EngineLuaBindings::getStoredFloat(entt::entity entity,
+float EngineLuaBindings::getStoredFloat(StoreTarget target,
                                         std::string_view stringID)
 {
     // Copy the stored Uint32's bytes to a float without converting.
-    Uint32 storedValue{getStoredUint(entity, stringID)};
+    Uint32 storedValue{getStoredUint(target, stringID)};
     float storedValueFloat{};
     std::memcpy(&storedValueFloat, &storedValue, 4);
 
     return storedValueFloat;
 }
 
-Uint32 EngineLuaBindings::getStoredTime(entt::entity entity,
+Uint32 EngineLuaBindings::getStoredTime(StoreTarget target,
                                         std::string_view stringID)
 {
     // Note: Time is only a type to make scripts more readable. It's handled
     //       the same as Uint32.
-    return getStoredUint(entity, stringID);
+    return getStoredUint(target, stringID);
 }
 
-Uint32 EngineLuaBindings::getStoredBitSet(entt::entity entity,
+Uint32 EngineLuaBindings::getStoredBitSet(StoreTarget target,
                                           std::string_view stringID)
 {
     // Note: BitSet is only a type to make scripts more readable. It's handled
     //       the same as Uint32.
-    return getStoredUint(entity, stringID);
+    return getStoredUint(target, stringID);
 }
 
-bool EngineLuaBindings::getStoredBit(entt::entity entity,
+bool EngineLuaBindings::getStoredBit(StoreTarget target,
                                      std::string_view stringID, Uint8 bitToGet)
 {
     if (bitToGet > 31) {
@@ -692,7 +693,7 @@ bool EngineLuaBindings::getStoredBit(entt::entity entity,
 
     // This will give us either the current value if it already exists, or
     // 0 (a fresh bit set).
-    Uint32 storedValue{getStoredUint(entity, stringID)};
+    Uint32 storedValue{getStoredUint(target, stringID)};
 
     return getBit(storedValue, bitToGet);
 }

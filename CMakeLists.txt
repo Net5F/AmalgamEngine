@@ -149,6 +149,9 @@ option(SOL2_SYSTEM_INCLUDE "Sol2 as system include" OFF)
 option(SOL2_ENABLE_INSTALL "Enable installation of Sol2" OFF)
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/sol2/"
                  "${PROJECT_BINARY_DIR}/Libraries/sol2/")
+# SOL_SAFE_FUNCTION_CALLS: Check bound function arguments for type correctness,
+#                          so e.g. nil doesn't silently convert to an integer.
+target_compile_definitions(sol2 INTERFACE SOL_SAFE_FUNCTION_CALLS=1)
 
 # Configure SQLiteCpp.
 option(SQLITECPP_INCLUDE_SCRIPT "Include config & script files." OFF)
