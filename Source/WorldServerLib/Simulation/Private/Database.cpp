@@ -36,6 +36,8 @@ Database::Database()
 , insertEntityQuery{nullptr}
 , deleteEntityQuery{nullptr}
 , iterateEntitiesQuery{nullptr}
+, insertClientEntityQuery{nullptr}
+, getClientEntityQuery{nullptr}
 , insertItemQuery{nullptr}
 , deleteItemQuery{nullptr}
 , iterateItemsQuery{nullptr}
@@ -51,6 +53,8 @@ Database::Database()
 
     // Note: We build these queries after initTables() because they'll
     //       segfault if there's no DB with the expected fields.
+    // Note: All of our queries use the in-memory database. After this
+    //       point, the file database is only touched by the backup thread.
     insertEntityQuery = std::make_unique<SQLite::Statement>(database, R"(
             INSERT INTO entities VALUES (?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
@@ -62,7 +66,20 @@ Database::Database()
     deleteEntityQuery = std::make_unique<SQLite::Statement>(
         database, "DELETE FROM entities WHERE id=?");
     iterateEntitiesQuery = std::make_unique<SQLite::Statement>(
-        backupDatabase, "SELECT * FROM entities");
+        database, "SELECT * FROM entities");
+
+    insertClientEntityQuery = std::make_unique<SQLite::Statement>(database, R"(
+            INSERT INTO client_entities VALUES (?, ?, ?)
+            ON CONFLICT(account_id) DO UPDATE SET
+                serialized_engine_components=
+                    excluded.serialized_engine_components,
+                serialized_project_components=
+                    excluded.serialized_project_components
+        )");
+    getClientEntityQuery = std::make_unique<SQLite::Statement>(database, R"(
+            SELECT serialized_engine_components, serialized_project_components
+            FROM client_entities WHERE account_id=?
+        )");
 
     insertItemQuery = std::make_unique<SQLite::Statement>(
         database, R"(
@@ -75,12 +92,12 @@ Database::Database()
     deleteItemQuery = std::make_unique<SQLite::Statement>(
         database, "DELETE FROM items WHERE id=?");
     iterateItemsQuery = std::make_unique<SQLite::Statement>(
-        backupDatabase, "SELECT * FROM items");
+        database, "SELECT * FROM items");
 
     insertGlobalStoredValueMapQuery = std::make_unique<SQLite::Statement>(
         database, "UPDATE global_stored_value_map SET serialized_map=(?)");
     getGlobalStoredValueMapQuery = std::make_unique<SQLite::Statement>(
-        backupDatabase, "SELECT * FROM global_stored_value_map");
+        database, "SELECT * FROM global_stored_value_map");
 
     // Check for any out of date data.
     checkDataVersions();
@@ -146,11 +163,14 @@ void Database::saveEntityData(
             static_cast<int>(serializedProjectComponents.size()));
 
         insertEntityQuery->exec();
-
-        insertEntityQuery->reset();
     } catch (std::exception& e) {
         LOG_ERROR("Failed to save entity data: %s", e.what());
     }
+
+    // Note: We reset even on failure, so one failed save doesn't block the
+    //       rest. We use tryReset() since reset() re-throws a failed step's
+    //       error.
+    insertEntityQuery->tryReset();
 }
 
 void Database::deleteEntityData(entt::entity entity)
@@ -159,11 +179,38 @@ void Database::deleteEntityData(entt::entity entity)
         deleteEntityQuery->bind(1, static_cast<int>(entity));
 
         deleteEntityQuery->exec();
-
-        deleteEntityQuery->reset();
     } catch (std::exception& e) {
         LOG_ERROR("Failed to delete entity data: %s", e.what());
     }
+
+    // Note: We reset even on failure, so one failed delete doesn't block
+    //       the rest. We use tryReset() since reset() re-throws a failed
+    //       step's error.
+    deleteEntityQuery->tryReset();
+}
+
+void Database::saveClientEntityData(
+    Sint64 accountID, std::span<const Uint8> serializedEngineComponents,
+    std::span<const Uint8> serializedProjectComponents)
+{
+    try {
+        insertClientEntityQuery->bind(1, accountID);
+        insertClientEntityQuery->bind(
+            2, serializedEngineComponents.data(),
+            static_cast<int>(serializedEngineComponents.size()));
+        insertClientEntityQuery->bind(
+            3, serializedProjectComponents.data(),
+            static_cast<int>(serializedProjectComponents.size()));
+
+        insertClientEntityQuery->exec();
+    } catch (std::exception& e) {
+        LOG_ERROR("Failed to save client entity data: %s", e.what());
+    }
+
+    // Note: We reset even on failure, so one failed save doesn't block the
+    //       rest. We use tryReset() since reset() re-throws a failed step's
+    //       error.
+    insertClientEntityQuery->tryReset();
 }
 
 void Database::saveItemData(ItemID itemID,
@@ -179,11 +226,14 @@ void Database::saveItemData(ItemID itemID,
                               static_cast<int>(initScript.size()));
 
         insertItemQuery->exec();
-
-        insertItemQuery->reset();
     } catch (std::exception& e) {
         LOG_ERROR("Failed to save item data: %s", e.what());
     }
+
+    // Note: We reset even on failure, so one failed save doesn't block the
+    //       rest. We use tryReset() since reset() re-throws a failed step's
+    //       error.
+    insertItemQuery->tryReset();
 }
 
 void Database::deleteItemData(ItemID itemID)
@@ -192,11 +242,14 @@ void Database::deleteItemData(ItemID itemID)
         deleteItemQuery->bind(1, static_cast<int>(itemID));
 
         deleteItemQuery->exec();
-
-        deleteItemQuery->reset();
     } catch (std::exception& e) {
         LOG_ERROR("Failed to delete item data: %s", e.what());
     }
+
+    // Note: We reset even on failure, so one failed delete doesn't block
+    //       the rest. We use tryReset() since reset() re-throws a failed
+    //       step's error.
+    deleteItemQuery->tryReset();
 }
 
 void Database::saveGlobalStoredValueMap(std::span<const Uint8> serializedMap)
@@ -206,11 +259,14 @@ void Database::saveGlobalStoredValueMap(std::span<const Uint8> serializedMap)
             1, serializedMap.data(), static_cast<int>(serializedMap.size()));
 
         insertGlobalStoredValueMapQuery->exec();
-
-        insertGlobalStoredValueMapQuery->reset();
     } catch (std::exception& e) {
         LOG_ERROR("Failed to save global stored value map data: %s", e.what());
     }
+
+    // Note: We reset even on failure, so one failed save doesn't block the
+    //       rest. We use tryReset() since reset() re-throws a failed step's
+    //       error.
+    insertGlobalStoredValueMapQuery->tryReset();
 }
 
 void Database::initTables()
@@ -250,6 +306,20 @@ void Database::initTables()
                 CREATE TABLE entities
                 (
                     id                             INTEGER PRIMARY KEY,
+                    serialized_engine_components  BLOB,
+                    serialized_project_components BLOB
+                ) STRICT
+            )");
+        }
+
+        // Per-world client entity components, keyed by account ID.
+        if (!backupDatabase.tableExists("client_entities")) {
+            // Engine and project components use separate ID namespaces, so
+            // store their record lists in separate blobs.
+            backupDatabase.exec(R"(
+                CREATE TABLE client_entities
+                (
+                    account_id                     INTEGER PRIMARY KEY,
                     serialized_engine_components  BLOB,
                     serialized_project_components BLOB
                 ) STRICT

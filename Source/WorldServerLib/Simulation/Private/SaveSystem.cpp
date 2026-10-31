@@ -70,35 +70,38 @@ void serializeComponent(typename Entry::Component& component,
 }
 
 /**
- * Serializes each component from ComponentList that entity possesses.
+ * Serializes each component from EntryList that entity possesses.
  *
- * Note: ComponentList requires its entries to be ordered by ascending ID, so 
- *       the serialized records will also be ordered.
+ * @tparam EntryList A list of persisted component entries, e.g.
+ *                   EnginePersistedComponentTypes::EntryTypes or
+ *                   EnginePersistedComponentTypes::ClientEntryTypes<...>.
+ *
+ * Note: PersistedComponentList requires its entries to be ordered by ascending
+ *       ID, so the serialized records will also be ordered.
  */
-template<typename ComponentList>
+template<typename EntryList>
 void serializeComponents(entt::registry& registry, entt::entity entity,
                          BinaryBuffer& outputBuffer)
 {
     outputBuffer.clear();
-    boost::mp11::mp_for_each<typename ComponentList::EntryTypes>(
-        [&](auto entry) {
-            using Entry = decltype(entry);
-            using Component = typename Entry::Component;
+    boost::mp11::mp_for_each<EntryList>([&](auto entry) {
+        using Entry = decltype(entry);
+        using Component = typename Entry::Component;
 
-            if (!registry.all_of<Component>(entity)) {
-                return;
-            }
+        if (!registry.all_of<Component>(entity)) {
+            return;
+        }
 
-            if constexpr (std::is_empty_v<Component>) {
-                // Note: Can't registry.get() empty types.
-                Component component{};
-                serializeComponent<Entry>(component, outputBuffer);
-            }
-            else {
-                serializeComponent<Entry>(registry.get<Component>(entity),
-                                          outputBuffer);
-            }
-        });
+        if constexpr (std::is_empty_v<Component>) {
+            // Note: Can't registry.get() empty types.
+            Component component{};
+            serializeComponent<Entry>(component, outputBuffer);
+        }
+        else {
+            serializeComponent<Entry>(registry.get<Component>(entity),
+                                      outputBuffer);
+        }
+    });
 }
 
 SaveSystem::SaveSystem(const SimulationContext& inSimContext)
@@ -163,9 +166,9 @@ void SaveSystem::saveNonClientEntities()
         saveTimestamp.lastSavedTick = currentTick;
 
         // Save the entity's data.
-        serializeComponents<EnginePersistedComponentTypes>(
+        serializeComponents<EnginePersistedComponentTypes::EntryTypes>(
             world.registry, entity, workBuffer1);
-        serializeComponents<ProjectPersistedComponentTypes>(
+        serializeComponents<ProjectPersistedComponentTypes::EntryTypes>(
             world.registry, entity, workBuffer2);
 
         world.database->saveEntityData(entity, workBuffer1, workBuffer2);

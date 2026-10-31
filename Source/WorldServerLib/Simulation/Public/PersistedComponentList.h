@@ -73,6 +73,27 @@ struct PersistedComponentList {
     using EntryFor = boost::mp11::mp_at_c<
         EntryTypes, boost::mp11::mp_find<ComponentTypes, Component>::value>;
 
+private:
+    template<ClientPersistence Persistence>
+    struct HasClientPersistence {
+        template<typename Entry>
+        using fn = std::bool_constant<Entry::CLIENT_PERSISTENCE == Persistence>;
+    };
+
+public:
+    /** The entries that are saved to the given location when attached to a
+        client entity. Keeps EntryTypes' ascending ID order. */
+    template<ClientPersistence Persistence>
+    using ClientEntryTypes
+        = boost::mp11::mp_copy_if_q<EntryTypes,
+                                    HasClientPersistence<Persistence>>;
+
+    /** True if any entries are saved to the given location when attached to
+        a client entity. */
+    template<ClientPersistence Persistence>
+    static constexpr bool HAS_CLIENT_ENTRIES{
+        !boost::mp11::mp_empty<ClientEntryTypes<Persistence>>::value};
+
     static_assert(boost::mp11::mp_is_set<ComponentTypes>::value,
                   "A persisted component type was registered more than once.");
     static_assert(boost::mp11::mp_is_set<TypeIDs>::value,

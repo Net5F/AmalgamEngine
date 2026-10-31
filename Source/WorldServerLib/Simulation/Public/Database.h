@@ -2,6 +2,7 @@
 
 #include "ItemID.h"
 #include "IconID.h"
+#include "Log.h"
 #include "SQLiteCpp/SQLiteCpp.h"
 #include "entt/fwd.hpp"
 #include <SDL3/SDL_stdinc.h>
@@ -24,13 +25,15 @@ class World;
  * Interface for interacting with the database.
  *
  * We use the database to persist item definitions, non-client entity data,
- * and tile map data as blobs.
+ * per-world client entity data, and tile map data as blobs.
  *
  * To avoid blocking the main loop, we first copy all of our data into an
  * in-memory database. Then, we use a separate thread to backup the in-memory
  * database to a file. See SaveSystem.h for more info.
  *
- * Note: Client entity data is persisted in the account database, not here.
+ * Note: Only client entity components with ClientPersistence::World are
+ *       persisted here. ClientPersistence::Account components are persisted
+ *       by the account server (see PersistedComponentList.h).
  */
 class Database
 {
@@ -119,6 +122,79 @@ public:
                         projectComponentsColumn.getBytes())});
         }
         iterateEntitiesQuery->reset();
+    }
+
+    //-------------------------------------------------------------------------
+    // Client Entities
+    //-------------------------------------------------------------------------
+    /**
+     * Adds or overwrites the given account's client entity table entry.
+     *
+     * Only the entity's ClientPersistence::World components should be saved
+     * here.
+     *
+     * @param accountID The account that the client entity belongs to.
+     * @param serializedEngineComponents Ordered tagged engine component
+     * records.
+     * @param serializedProjectComponents Ordered tagged project component
+     * records.
+     *
+     * See PERSISTED_COMPONENTS_VERSION comment for format info.
+     */
+    void saveClientEntityData(
+        Sint64 accountID, std::span<const Uint8> serializedEngineComponents,
+        std::span<const Uint8> serializedProjectComponents);
+
+    enum class GetClientEntityDataResult { Success, NotFound, DatabaseError };
+    /**
+     * If the given account has a client entity table entry, calls the given
+     * callback on it.
+     *
+     * @param callback A callback of form void(std::span<const Uint8>,
+     *                 std::span<const Uint8>) that expects ordered tagged
+     *                 engine component records and ordered tagged project
+     *                 component records.
+     * @return NotFound if the account has no entry in this world (e.g. it's
+     *         their first time joining it), DatabaseError if the query failed,
+     *         else Success.
+     *         Don't treat DatabaseError as NotFound. Doing so would give the
+     *         account fresh data, which would overwrite its real data on the
+     *         next save.
+     */
+    template<typename Func>
+    GetClientEntityDataResult getClientEntityData(Sint64 accountID,
+                                                  Func callback)
+    {
+        GetClientEntityDataResult result{GetClientEntityDataResult::NotFound};
+        try {
+            getClientEntityQuery->bind(1, accountID);
+            if (getClientEntityQuery->executeStep()) {
+                SQLite::Column engineComponentsColumn{
+                    getClientEntityQuery->getColumn(0)};
+                SQLite::Column projectComponentsColumn{
+                    getClientEntityQuery->getColumn(1)};
+                callback(
+                    std::span<const Uint8>{
+                        static_cast<const Uint8*>(
+                            engineComponentsColumn.getBlob()),
+                        static_cast<std::size_t>(
+                            engineComponentsColumn.getBytes())},
+                    std::span<const Uint8>{
+                        static_cast<const Uint8*>(
+                            projectComponentsColumn.getBlob()),
+                        static_cast<std::size_t>(
+                            projectComponentsColumn.getBytes())});
+                result = GetClientEntityDataResult::Success;
+            }
+        } catch (std::exception& e) {
+            LOG_ERROR("Failed to get client entity data: %s", e.what());
+            result = GetClientEntityDataResult::DatabaseError;
+        }
+
+        // Note: We use tryReset() since reset() re-throws a failed step's
+        //       error.
+        getClientEntityQuery->tryReset();
+        return result;
     }
 
     //-------------------------------------------------------------------------
@@ -220,7 +296,9 @@ protected:
         with it in another thread. */
     SQLite::Database database;
 
-    /** File-backed database. Used to persist our data to a file. */
+    /** File-backed database. Used to persist our data to a file.
+        Note: After construction, this is only touched by the backup thread.
+              Read and write through the in-memory database instead. */
     SQLite::Database backupDatabase;
 
     /** Calls performBackup(). */
@@ -239,6 +317,8 @@ protected:
     std::unique_ptr<SQLite::Statement> insertEntityQuery;
     std::unique_ptr<SQLite::Statement> deleteEntityQuery;
     std::unique_ptr<SQLite::Statement> iterateEntitiesQuery;
+    std::unique_ptr<SQLite::Statement> insertClientEntityQuery;
+    std::unique_ptr<SQLite::Statement> getClientEntityQuery;
     std::unique_ptr<SQLite::Statement> insertItemQuery;
     std::unique_ptr<SQLite::Statement> deleteItemQuery;
     std::unique_ptr<SQLite::Statement> iterateItemsQuery;
