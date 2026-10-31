@@ -59,6 +59,8 @@ void DialogueSystem::processTalkInteraction(const CastInfo& castInfo)
     DialogueResponse dialogueResponse{castInfo.targetEntity, 0};
     dialogueLua.luaState["self"] = castInfo.targetEntity;
     dialogueLua.luaState["target"] = castInfo.casterEntity;
+    dialogueLua.selfEntity = castInfo.targetEntity;
+    dialogueLua.targetEntity = castInfo.casterEntity;
     dialogueLua.clientHandle = castInfo.clientHandle;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
@@ -113,6 +115,8 @@ void DialogueSystem::processDialogueChoice(
     DialogueResponse dialogueResponse{choiceRequest.targetEntity, 0};
     dialogueLua.luaState["self"] = choiceRequest.targetEntity;
     dialogueLua.luaState["target"] = clientEntity;
+    dialogueLua.selfEntity = choiceRequest.targetEntity;
+    dialogueLua.targetEntity = clientEntity;
     dialogueLua.clientHandle = choiceRequest.clientHandle;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
@@ -289,6 +293,9 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
     // Run the condition script.
     dialogueChoiceConditionLua.luaState["self"] = targetEntity;
     dialogueChoiceConditionLua.luaState["target"] = clientEntity;
+    dialogueChoiceConditionLua.selfEntity = targetEntity;
+    dialogueChoiceConditionLua.targetEntity = clientEntity;
+    dialogueChoiceConditionLua.clientHandle = clientHandle;
     auto scriptResult{dialogueChoiceConditionLua.luaState.script(
         workString, &sol::script_pass_on_error)};
 

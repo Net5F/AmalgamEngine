@@ -375,6 +375,8 @@ void ItemSystem::runEntityItemHandlerScript(
 {
     // Run the given handler script.
     entityItemHandlerLua.clientHandle = clientHandle;
+    entityItemHandlerLua.selfEntity = targetEntity;
+    entityItemHandlerLua.targetEntity = clientEntity;
     entityItemHandlerLua.item = item;
     entityItemHandlerLua.luaState["self"] = targetEntity;
     entityItemHandlerLua.luaState["target"] = clientEntity;

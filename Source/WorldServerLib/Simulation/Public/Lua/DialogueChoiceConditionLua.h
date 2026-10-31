@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ConnectionHandle.h"
 #include "sol/sol.hpp"
 #include "entt/fwd.hpp"
 
@@ -20,10 +21,19 @@ namespace WorldServer
 struct DialogueChoiceConditionLua {
     /** Lua environment for dialogue choice condition script processing.
         Global variables:
-          "user": The ID of the entity that is controlling the dialogue.
           "self": The ID of the entity that is delivering the dialogue.
-          "GLOBAL": A constant used to identify the global value store. */
+          "target": The ID of the entity that is controlling the dialogue.
+          "GLOBAL": A constant used to identify the global value store.
+
+        Note: Bound functions should use selfEntity and targetEntity instead
+              of reading the globals, since scripts may overwrite them. */
     sol::state luaState{};
+
+    /** The entity that is delivering the dialogue (the "self" global). */
+    entt::entity selfEntity{};
+
+    /** The entity that is controlling the dialogue (the "target" global). */
+    entt::entity targetEntity{};
 
     /** The handle of the client that is controlling the dialogue. */
     ConnectionHandle clientHandle{};

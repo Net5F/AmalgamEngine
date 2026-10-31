@@ -22,8 +22,17 @@ struct DialogueLua {
         Global variables:
           "self": The ID of the entity that is delivering the dialogue.
           "target": The ID of the entity that is controlling the dialogue.
-          "GLOBAL": A constant used to identify the global value store. */
+          "GLOBAL": A constant used to identify the global value store.
+
+        Note: Bound functions should use selfEntity and targetEntity instead
+              of reading the globals, since scripts may overwrite them. */
     sol::state luaState{};
+
+    /** The entity that is delivering the dialogue (the "self" global). */
+    entt::entity selfEntity{};
+
+    /** The entity that is controlling the dialogue (the "target" global). */
+    entt::entity targetEntity{};
 
     /** The handle of the client that is controlling the dialogue. */
     ConnectionHandle clientHandle{};
