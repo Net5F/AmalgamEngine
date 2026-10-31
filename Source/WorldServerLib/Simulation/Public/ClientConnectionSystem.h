@@ -36,6 +36,8 @@ class ISimulationExtension;
  * When the countdown finishes, the entity is removed immediately (it doesn't
  * linger), and the client is told to disconnect.
  *
+ * When a client entity is removed, its components are saved.
+ *
  * When a client connects and its account has no lingering entity, a new
  * entity is created and its saved components are loaded. If the saved data
  * fails to load, the client is rejected instead of being given fresh data
@@ -163,7 +165,7 @@ private:
     void removeExpiredEntities();
 
     /**
-     * Removes the given account's entity from the sim.
+     * Saves the given account's entity, then removes it from the sim.
      */
     void removeClientEntity(Sint64 accountID);
 

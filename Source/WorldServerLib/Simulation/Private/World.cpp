@@ -44,6 +44,7 @@ World::World(const SimulationContext& inSimContext)
              inSimContext.castableData}
 , loadHelper{*this, inSimContext.simulation, inSimContext.itemData,
              inSimContext.graphicData}
+, saveHelper{*this, inSimContext.simulation}
 , database{std::make_unique<Database>()}
 , clientHandleMap{}
 , stableIDMap{}

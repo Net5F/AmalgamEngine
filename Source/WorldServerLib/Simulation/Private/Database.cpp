@@ -244,8 +244,10 @@ void Database::saveItemData(ItemID itemID,
         insertItemQuery->bind(2, serializedItem.data(),
                               static_cast<int>(serializedItem.size()));
         insertItemQuery->bind(3, static_cast<int>(version));
-        insertItemQuery->bind(4, initScript.data(),
-                              static_cast<int>(initScript.size()));
+        // Note: We bind a string (instead of data + size) so it's stored as
+        //       TEXT. The data + size overload stores a BLOB, which our
+        //       STRICT table rejects.
+        insertItemQuery->bind(4, std::string{initScript});
 
         insertItemQuery->exec();
     } catch (std::exception& e) {

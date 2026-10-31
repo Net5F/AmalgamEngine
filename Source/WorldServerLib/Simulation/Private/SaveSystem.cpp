@@ -5,113 +5,21 @@
 #include "ItemData.h"
 #include "Config.h"
 #include "Database.h"
-#include "EnginePersistedComponentTypes.h"
-#include "ProjectPersistedComponentTypes.h"
-#include "PersistedComponentDefs.h"
-#include "ClientSimData.h"
-#include "SaveTimestamp.h"
 #include "Serialize.h"
-#include "ByteTools.h"
 #include "Log.h"
-#include "boost/mp11/algorithm.hpp"
-#include "entt/core/type_info.hpp"
-#include <limits>
-#include <type_traits>
+#include <algorithm>
 
 namespace AM
 {
 namespace WorldServer
 {
 
-/**
- * Appends Component to outputBuffer using the persisted component record
- * format.
- *
- * See PERSISTED_COMPONENTS_VERSION comment for format info.
- *
- * Note: This is a free function to reduce includes in the header.
- */
-template<typename Entry>
-void serializeComponent(typename Entry::Component& component,
-                        BinaryBuffer& outputBuffer)
-{
-    using Component = typename Entry::Component;
-    constexpr auto componentName{entt::type_name<Component>::value()};
-
-    std::size_t payloadSize{Serialize::measureSize(component)};
-    if (payloadSize > std::numeric_limits<Uint32>::max()) {
-        LOG_ERROR("Can't save component %.*s (ID: %u, version: %u): "
-                  "serialized size exceeds Uint32.",
-                  static_cast<int>(componentName.size()), componentName.data(),
-                  Entry::TYPE_ID, Entry::VERSION);
-        return;
-    }
-
-    const std::size_t recordOffset{outputBuffer.size()};
-    const std::size_t payloadOffset{recordOffset + COMPONENT_HEADER_SIZE};
-    outputBuffer.resize(payloadOffset + payloadSize);
-
-    Uint8* header{outputBuffer.data() + recordOffset};
-    ByteTools::write16(Entry::TYPE_ID, header + TYPE_ID_OFFSET);
-    ByteTools::write16(Entry::VERSION, header + VERSION_OFFSET);
-    ByteTools::write32(static_cast<Uint32>(payloadSize),
-                       header + PAYLOAD_SIZE_OFFSET);
-
-    std::size_t bytesWritten{
-        Serialize::toBuffer(outputBuffer.data(), outputBuffer.size(), component,
-                            payloadOffset)};
-    if (bytesWritten != payloadSize) {
-        outputBuffer.resize(recordOffset);
-        LOG_ERROR("Failed to save component %.*s (ID: %u, version: %u): "
-                  "measured size was %zu bytes, but serialization wrote %zu.",
-                  static_cast<int>(componentName.size()), componentName.data(),
-                  Entry::TYPE_ID, Entry::VERSION, payloadSize, bytesWritten);
-    }
-}
-
-/**
- * Serializes each component from EntryList that entity possesses.
- *
- * @tparam EntryList A list of persisted component entries, e.g.
- *                   EnginePersistedComponentTypes::EntryTypes or
- *                   EnginePersistedComponentTypes::ClientEntryTypes<...>.
- *
- * Note: PersistedComponentList requires its entries to be ordered by ascending
- *       ID, so the serialized records will also be ordered.
- */
-template<typename EntryList>
-void serializeComponents(entt::registry& registry, entt::entity entity,
-                         BinaryBuffer& outputBuffer)
-{
-    outputBuffer.clear();
-    boost::mp11::mp_for_each<EntryList>([&](auto entry) {
-        using Entry = decltype(entry);
-        using Component = typename Entry::Component;
-
-        if (!registry.all_of<Component>(entity)) {
-            return;
-        }
-
-        if constexpr (std::is_empty_v<Component>) {
-            // Note: Can't registry.get() empty types.
-            Component component{};
-            serializeComponent<Entry>(component, outputBuffer);
-        }
-        else {
-            serializeComponent<Entry>(registry.get<Component>(entity),
-                                      outputBuffer);
-        }
-    });
-}
-
 SaveSystem::SaveSystem(const SimulationContext& inSimContext)
-: simulation{inSimContext.simulation}
-, world{inSimContext.simulation.getWorld()}
+: world{inSimContext.simulation.getWorld()}
 , itemData{inSimContext.itemData}
 , updatedItems{}
 , saveTimer{}
-, workBuffer1{}
-, workBuffer2{}
+, workBuffer{}
 {
     // When an item is created or updated, add it to updatedItems.
     itemData.itemCreated.connect<&SaveSystem::itemUpdated>(this);
@@ -124,12 +32,13 @@ void SaveSystem::saveIfNecessary()
     // everything to the database.
     if ((saveTimer.getTime() >= Config::SAVE_PERIOD_S)
         && !(world.database->backupIsInProgress())) {
-        LOG_INFO("Saving entities, items, and map...");
+        LOG_INFO("Saving entities, client entities, items, and map...");
 
         // Save all of our data to the in-memory database.
         SQLite::Transaction transaction{world.database->startTransaction()};
 
-        saveNonClientEntities();
+        world.saveHelper.saveNonClientEntities();
+        world.saveHelper.saveClientEntities();
         saveItems();
         saveGlobalStoredValues();
         // TODO: Track changed tiles and save to the database.
@@ -149,32 +58,6 @@ void SaveSystem::itemUpdated(ItemID itemID)
     updatedItems.emplace_back(itemID);
 }
 
-void SaveSystem::saveNonClientEntities()
-{
-    // Note: If doing a full save ever starts taking too long, we can add
-    //       an observer that tracks changes to non-client entities and only
-    //       save those.
-
-    // Queue all of our entity save queries.
-    Uint32 currentTick{simulation.getCurrentTick()};
-    auto view{
-        world.registry.view<entt::entity>(entt::exclude_t<ClientSimData>{})};
-    for (entt::entity entity : view) {
-        // Update the entity's SaveTimestamp.
-        SaveTimestamp& saveTimestamp{
-            world.registry.get_or_emplace<SaveTimestamp>(entity)};
-        saveTimestamp.lastSavedTick = currentTick;
-
-        // Save the entity's data.
-        serializeComponents<EnginePersistedComponentTypes::EntryTypes>(
-            world.registry, entity, workBuffer1);
-        serializeComponents<ProjectPersistedComponentTypes::EntryTypes>(
-            world.registry, entity, workBuffer2);
-
-        world.database->saveEntityData(entity, workBuffer1, workBuffer2);
-    }
-}
-
 void SaveSystem::saveItems()
 {
     // Remove duplicates from the vector.
@@ -186,13 +69,12 @@ void SaveSystem::saveItems()
     for (ItemID itemID : updatedItems) {
         const Item* updatedItem{itemData.getItem(itemID)};
 
-        workBuffer1.clear();
-        workBuffer1.resize(Serialize::measureSize(*updatedItem));
-        Serialize::toBuffer(workBuffer1.data(), workBuffer1.size(),
-                            *updatedItem);
+        workBuffer.clear();
+        workBuffer.resize(Serialize::measureSize(*updatedItem));
+        Serialize::toBuffer(workBuffer.data(), workBuffer.size(), *updatedItem);
 
         world.database->saveItemData(
-            updatedItem->numericID, workBuffer1,
+            updatedItem->numericID, workBuffer,
             itemData.getItemVersion(updatedItem->numericID),
             itemData.getItemInitScript(updatedItem->numericID).script);
     }
@@ -203,13 +85,13 @@ void SaveSystem::saveItems()
 void SaveSystem::saveGlobalStoredValues()
 {
     // Serialize the global stored value map.
-    workBuffer1.clear();
-    workBuffer1.resize(Serialize::measureSize(world.globalStoredValueMap));
-    Serialize::toBuffer(workBuffer1.data(), workBuffer1.size(),
+    workBuffer.clear();
+    workBuffer.resize(Serialize::measureSize(world.globalStoredValueMap));
+    Serialize::toBuffer(workBuffer.data(), workBuffer.size(),
                         world.globalStoredValueMap);
 
     // Queue the save query.
-    world.database->saveGlobalStoredValueMap(workBuffer1);
+    world.database->saveGlobalStoredValueMap(workBuffer);
 }
 
 } // namespace WorldServer

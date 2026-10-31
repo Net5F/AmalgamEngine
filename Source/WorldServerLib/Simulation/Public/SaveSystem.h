@@ -10,7 +10,6 @@ namespace AM
 namespace WorldServer
 {
 struct SimulationContext;
-class Simulation;
 class World;
 class ItemData;
 
@@ -18,7 +17,11 @@ class ItemData;
  * Periodically saves the world's data:
  *   Tile map data is saved to TileMap.bin.
  *   Non-client entity data is saved to the database.
+ *   Client entity data is saved to the database, keyed by account ID.
  *   Item data is saved to the database.
+ *
+ * Note: Client entities are also saved when they're removed from the world
+ *       (see ClientConnectionSystem).
  */
 class SaveSystem
 {
@@ -39,11 +42,6 @@ private:
     void itemUpdated(ItemID itemID);
 
     /**
-     * Saves non-client entities to the in-memory database.
-     */
-    void saveNonClientEntities();
-
-    /**
      * Saves items to the in-memory database.
      */
     void saveItems();
@@ -53,7 +51,6 @@ private:
      */
     void saveGlobalStoredValues();
 
-    Simulation& simulation;
     World& world;
     ItemData& itemData;
 
@@ -64,9 +61,8 @@ private:
     /** Used to track how much time has passed since the last save. */
     Timer saveTimer;
 
-    /** Scratch buffers used while serializing data. */
-    BinaryBuffer workBuffer1;
-    BinaryBuffer workBuffer2;
+    /** Scratch buffer used while serializing data. */
+    BinaryBuffer workBuffer;
 };
 
 } // namespace WorldServer

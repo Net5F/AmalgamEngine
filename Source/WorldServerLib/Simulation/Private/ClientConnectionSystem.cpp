@@ -426,11 +426,13 @@ void ClientConnectionSystem::removeClientEntity(Sint64 accountID)
         return;
     }
 
-    // Destroy the entity (if something else hasn't already).
-    // Note: This will cause it to be removed from the entity locator,
+    // Save and destroy the entity (if something else hasn't already
+    // destroyed it).
+    // Note: Destroying will cause it to be removed from the entity locator,
     //       triggering ClientAOISystem to tell peers to delete it.
     entt::entity entity{entityIt->second};
     if (world.registry.valid(entity)) {
+        world.saveHelper.saveClientEntity(entity);
         world.registry.destroy(entity);
         LOG_INFO("Removed entity with entityID: %u", entity);
     }

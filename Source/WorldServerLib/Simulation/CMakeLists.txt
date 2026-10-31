@@ -19,6 +19,7 @@ target_sources(WorldServerLib
         Private/MovementSyncSystem.cpp
         Private/MovementSystem.cpp
         Private/NceLifetimeSystem.cpp
+        Private/SaveHelper.cpp
         Private/SaveSystem.cpp
         Private/ScriptDataSystem.cpp
         Private/Simulation.cpp
@@ -61,6 +62,7 @@ target_sources(WorldServerLib
         Public/NceLifetimeSystem.h
         Public/PersistedComponentList.h
         Public/PersistedComponentDefs.h
+        Public/SaveHelper.h
         Public/SaveSystem.h
         Public/ScriptDataSystem.h
         Public/Simulation.h

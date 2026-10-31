@@ -8,6 +8,7 @@
 #include "InventoryHelper.h"
 #include "CastHelper.h"
 #include "LoadHelper.h"
+#include "SaveHelper.h"
 #include "SpawnStrategy.h"
 #include "HashTools.h"
 #include "entt/entity/registry.hpp"
@@ -89,6 +90,9 @@ public:
 
     /** Helper class for loading persisted world state. */
     LoadHelper loadHelper;
+
+    /** Helper class for saving persisted entity state. */
+    SaveHelper saveHelper;
 
     /** The database for saving and loading world data.
         Kept as a pointer to speed up compilation. */
