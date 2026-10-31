@@ -8,6 +8,7 @@
 #include <SDL3/SDL_stdinc.h>
 #include <string_view>
 #include <functional>
+#include <optional>
 
 namespace sol
 {
@@ -76,6 +77,12 @@ private:
      */
     void topic(std::string_view topicName, std::string_view topicScript,
                std::string_view choiceScript);
+
+    /**
+     * Gives the entity a world-unique ID that persists across restarts.
+     * Use getEntityByStableID() to look the entity up by this ID.
+     */
+    void setStableID(std::string_view stableID);
 
     //-------------------------------------------------------------------------
     // Entity item handler
@@ -177,6 +184,16 @@ private:
      */
     std::size_t getItemCount(entt::entity entityToCount,
                              std::string_view itemID);
+
+    /**
+     * Returns the entity with the given stable ID (see setStableID()).
+     * @return The entity, or nil if no entity has the given ID.
+     *
+     * Note: We return nil instead of entt::null, since entt::null == GLOBAL
+     *       and would silently redirect stored value calls to the global
+     *       store.
+     */
+    std::optional<entt::entity> getEntityByStableID(std::string_view stableID);
 
     /**
      * Adds a new value, or overwrites an existing value.

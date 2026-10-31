@@ -19,6 +19,7 @@
 #include "Collision.h"
 #include "CollisionBitSets.h"
 #include "EntityInitScript.h"
+#include "StableID.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include "Config.h"
@@ -44,6 +45,7 @@ World::World(const SimulationContext& inSimContext)
 , loadHelper{*this, inSimContext.simulation, inSimContext.itemData}
 , database{std::make_unique<Database>()}
 , clientHandleMap{}
+, stableIDMap{}
 , graphicData{inSimContext.graphicData}
 , entityInitLua{inSimContext.simulation.getEntityInitLua()}
 , itemInitLua{inSimContext.simulation.getItemInitLua()}
@@ -78,6 +80,13 @@ World::World(const SimulationContext& inSimContext)
     // When an entity is destroyed, do any necessary cleanup.
     registry.on_destroy<entt::entity>().connect<&World::onEntityDestroyed>(
         this);
+
+    // Keep stableIDMap in sync with StableID components.
+    // Note: We use signals instead of updating the map in setStableID() so
+    //       that loaded components and destroyed entities are also handled.
+    registry.on_construct<StableID>().connect<&World::onStableIDConstructed>(
+        this);
+    registry.on_destroy<StableID>().connect<&World::onStableIDDestroyed>(this);
 }
 
 World::~World() = default;
@@ -281,6 +290,40 @@ void World::storeGlobalValue(std::string_view stringID, Uint32 newValue)
     globalStoredValueMap[workStringID] = newValue;
 }
 
+bool World::setStableID(entt::entity entity, std::string_view stableID)
+{
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stableID, workStringID);
+    if (workStringID.empty() || (workStringID.size() > StableID::MAX_LENGTH)) {
+        return false;
+    }
+
+    // If the ID is already in use, only succeed if this entity is the holder.
+    auto stableIDIt{stableIDMap.find(workStringID)};
+    if (stableIDIt != stableIDMap.end()) {
+        return (stableIDIt->second == entity);
+    }
+
+    // Replace the entity's ID (our signal handlers will update stableIDMap).
+    registry.remove<StableID>(entity);
+    registry.emplace<StableID>(entity, workStringID);
+
+    return true;
+}
+
+entt::entity World::getEntityByStableID(std::string_view stableID)
+{
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stableID, workStringID);
+
+    auto stableIDIt{stableIDMap.find(workStringID)};
+    if (stableIDIt == stableIDMap.end()) {
+        return entt::null;
+    }
+
+    return stableIDIt->second;
+}
+
 Uint32 World::getStoredValue(std::string_view stringID)
 {
     // Derive string ID in case the user accidentally passed a display name.
@@ -387,6 +430,35 @@ void World::onEntityDestroyed(entt::entity entity)
     // If the entity is in the database, delete it (does nothing if it isn't).
     // Note: This is to delete non-client entities, since they get persisted.
     database->deleteEntityData(entity);
+}
+
+void World::onStableIDConstructed(entt::entity entity)
+{
+    const StableID& stableID{registry.get<StableID>(entity)};
+    auto [stableIDIt, inserted]
+        = stableIDMap.try_emplace(stableID.value, entity);
+
+    // Note: setStableID() prevents duplicates, so this can only happen if
+    //       the component was added directly or bad data was loaded.
+    if (!inserted && (stableIDIt->second != entity)) {
+        LOG_ERROR("Entity %u was given stable ID \"%s\", but it's already in "
+                  "use by entity %u.",
+                  entity, stableID.value.c_str(), stableIDIt->second);
+    }
+}
+
+void World::onStableIDDestroyed(entt::entity entity)
+{
+    // Note: on_destroy is called before the component is removed, so it's
+    //       still accessible.
+    const StableID& stableID{registry.get<StableID>(entity)};
+
+    // Only erase the entry if this entity holds it (if a duplicate ID was
+    // rejected in onStableIDConstructed(), another entity may hold it).
+    auto stableIDIt{stableIDMap.find(stableID.value)};
+    if ((stableIDIt != stableIDMap.end()) && (stableIDIt->second == entity)) {
+        stableIDMap.erase(stableIDIt);
+    }
 }
 
 } // namespace WorldServer

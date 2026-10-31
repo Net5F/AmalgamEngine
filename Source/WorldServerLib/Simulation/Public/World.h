@@ -9,6 +9,7 @@
 #include "CastHelper.h"
 #include "LoadHelper.h"
 #include "SpawnStrategy.h"
+#include "HashTools.h"
 #include "entt/entity/registry.hpp"
 #include <unordered_map>
 #include <string_view>
@@ -96,6 +97,13 @@ public:
         Note: To go the other way (entt::entity -> ConnectionHandle), use
               ClientSimData. */
     std::unordered_map<ConnectionHandle, entt::entity> clientHandleMap;
+
+    /** Maps stable IDs to the entity that holds them.
+        Kept in sync with StableID components automatically.
+        Note: To go the other way (entt::entity -> stable ID), use StableID.
+        string_hash and equal_to are added for heterogeneous access. */
+    std::unordered_map<std::string, entt::entity, string_hash, std::equal_to<>>
+        stableIDMap;
 
     //-------------------------------------------------------------------------
     // Helper Functions
@@ -190,6 +198,27 @@ public:
     Uint32 getStoredValue(std::string_view stringID);
 
     /**
+     * Gives the entity the given stable ID, replacing any ID it already has.
+     *
+     * @param stableID The ID to set. Will be derived (see
+     *                 StringTools::deriveStringID()).
+     * @return true if successful, else false (ID is empty, too long, or
+     *         already in use by a different entity).
+     */
+    bool setStableID(entt::entity entity, std::string_view stableID);
+
+    /**
+     * Returns the entity with the given stable ID, or entt::null if no entity
+     * has it.
+     *
+     * Use this instead of directly using stableIDMap.
+     *
+     * @param stableID The ID to look up. Will be derived (see
+     *                 StringTools::deriveStringID()).
+     */
+    entt::entity getEntityByStableID(std::string_view stableID);
+
+    /**
      * Returns the spawn point position.
      * To configure, see WorldServer::Config.
      */
@@ -211,6 +240,16 @@ private:
      * Does any necessary cleanup to the given entity.
      */
     void onEntityDestroyed(entt::entity entity);
+
+    /**
+     * Adds the entity's new stable ID to stableIDMap.
+     */
+    void onStableIDConstructed(entt::entity entity);
+
+    /**
+     * Removes the entity's stable ID from stableIDMap.
+     */
+    void onStableIDDestroyed(entt::entity entity);
 
     /** Used to get graphics info. */
     const GraphicData& graphicData;

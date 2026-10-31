@@ -73,6 +73,7 @@ target_sources(WorldServerLib
         Public/Components/InRangeInitComponentList.h
         Public/Components/ItemHandler.h
         Public/Components/SaveTimestamp.h
+        Public/Components/StableID.h
         Public/Components/StoredValues.h
         Public/GraphicData/GraphicData.h
         Public/IconData/IconData.h

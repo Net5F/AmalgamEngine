@@ -91,6 +91,8 @@ void EngineLuaBindings::addEntityInitBindings()
         "setItemHandler", &EngineLuaBindings::setItemHandler, this);
     entityInitLua.luaState.set_function("topic", &EngineLuaBindings::topic,
                                         this);
+    entityInitLua.luaState.set_function("setStableID",
+                                        &EngineLuaBindings::setStableID, this);
 }
 
 void EngineLuaBindings::addEntityItemHandlerBindings()
@@ -110,6 +112,8 @@ void EngineLuaBindings::addEntityItemHandlerBindings()
         [&](entt::entity entityToCount, std::string_view itemID) {
             return getItemCount(entityToCount, itemID);
         });
+    entityItemHandlerLua.luaState.set_function(
+        "getEntityByStableID", &EngineLuaBindings::getEntityByStableID, this);
     entityItemHandlerLua.luaState.set_function(
         "storeUint", &EngineLuaBindings::storeUint, this);
     entityItemHandlerLua.luaState.set_function(
@@ -182,6 +186,8 @@ void EngineLuaBindings::addDialogueBindings()
         [&](entt::entity entityToCount, std::string_view itemID) {
             return getItemCount(entityToCount, itemID);
         });
+    dialogueLua.luaState.set_function(
+        "getEntityByStableID", &EngineLuaBindings::getEntityByStableID, this);
     dialogueLua.luaState.set_function("storeUint",
                                       &EngineLuaBindings::storeUint, this);
     dialogueLua.luaState.set_function("storeBool",
@@ -229,6 +235,8 @@ void EngineLuaBindings::addDialogueChoiceConditionBindings()
         [&](entt::entity entityToCount, std::string_view itemID) {
             return getItemCount(entityToCount, itemID);
         });
+    dialogueChoiceConditionLua.luaState.set_function(
+        "getEntityByStableID", &EngineLuaBindings::getEntityByStableID, this);
     dialogueChoiceConditionLua.luaState.set_function(
         "getStoredUint", &EngineLuaBindings::getStoredUint, this);
     dialogueChoiceConditionLua.luaState.set_function(
@@ -336,6 +344,18 @@ void EngineLuaBindings::topic(std::string_view topicName,
         workString.append(topicName);
         workString.append("\": ");
         workString.append(err.what());
+        throw std::runtime_error{workString};
+    }
+}
+
+void EngineLuaBindings::setStableID(std::string_view stableID)
+{
+    if (!(world.setStableID(entityInitLua.selfEntity, stableID))) {
+        workString.clear();
+        workString.append("Failed to set stable ID \"");
+        workString.append(stableID);
+        workString.append("\": ID is empty, too long, or already in use by "
+                          "another entity");
         throw std::runtime_error{workString};
     }
 }
@@ -495,6 +515,17 @@ std::size_t EngineLuaBindings::getItemCount(entt::entity entityToCount,
     // Inventory doesn't exist, so the entity has 0 count of the item by
     // default.
     return 0;
+}
+
+std::optional<entt::entity>
+    EngineLuaBindings::getEntityByStableID(std::string_view stableID)
+{
+    entt::entity entity{world.getEntityByStableID(stableID)};
+    if (entity == entt::null) {
+        return std::nullopt;
+    }
+
+    return entity;
 }
 
 void EngineLuaBindings::storeUint(entt::entity entity,
