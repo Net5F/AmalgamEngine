@@ -612,7 +612,7 @@ void EngineLuaBindings::storeBit(StoreTarget target, std::string_view stringID,
     Uint32 bitSet{getStoredUint(target, stringID)};
 
     // Set the bit and store the new value.
-    setBit(bitSet, bitToSet, newValue);
+    bitSet = setBit(bitSet, bitToSet, newValue);
 
     storeUint(target, stringID, bitSet);
 }
@@ -698,8 +698,7 @@ bool EngineLuaBindings::getStoredBit(StoreTarget target,
     return getBit(storedValue, bitToGet);
 }
 
-void EngineLuaBindings::setBit(std::reference_wrapper<Uint32> bitSet,
-                               Uint8 bitToSet, bool newValue)
+Uint32 EngineLuaBindings::setBit(Uint32 bitSet, Uint8 bitToSet, bool newValue)
 {
     if (bitToSet > 31) {
         throw std::runtime_error{
@@ -713,6 +712,8 @@ void EngineLuaBindings::setBit(std::reference_wrapper<Uint32> bitSet,
     else {
         bitSet &= ~mask;
     }
+
+    return bitSet;
 }
 
 bool EngineLuaBindings::getBit(Uint32 bitSet, Uint8 bitToGet)

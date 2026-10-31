@@ -7,7 +7,6 @@
 #include "entt/fwd.hpp"
 #include <SDL3/SDL_stdinc.h>
 #include <string_view>
-#include <functional>
 #include <optional>
 #include <variant>
 
@@ -263,12 +262,15 @@ private:
 
     /**
      * Sets a bit in a bit set to the given value.
-     * Note: We take bitSet as a Uint32, since Lua doesn't have a matching
-     *       concept and it's more efficient to
      *
+     * Note: Lua numbers are passed by value, so we return the modified bit
+     *       set instead of modifying it in place. Usage:
+     *       bitSet = setBit(bitSet, 3, true)
+     *
+     * @param bitToSet The bit to set. Must be within the range [0, 31].
+     * @return The given bit set, with the bit set to newValue.
      */
-    void setBit(std::reference_wrapper<Uint32> bitSet, Uint8 bitToSet,
-                bool newValue);
+    Uint32 setBit(Uint32 bitSet, Uint8 bitToSet, bool newValue);
 
     /**
      * Gets a bit from a bit set.
