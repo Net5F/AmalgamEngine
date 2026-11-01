@@ -39,9 +39,12 @@ class ISimulationExtension;
  * When a client entity is removed, its components are saved.
  *
  * When a client connects and its account has no lingering entity, a new
- * entity is created and its saved components are loaded. If the saved data
- * fails to load, the client is rejected instead of being given fresh data
- * (which would overwrite its real data on the next save).
+ * entity is created and its saved components are loaded. Its World components
+ * come from our database, and its Account components arrive with the
+ * ClientConnected event (or from AccountSaveQueue, if we have newer data that
+ * the account server hasn't confirmed saving yet). If the saved data fails to
+ * load, the client is rejected instead of being given fresh data (which would
+ * overwrite its real data on the next save).
  *
  * Note: If an account connects while it already has a connected client, the
  *       Network disconnects the old client before telling us about the new
@@ -62,7 +65,7 @@ public:
     void setExtension(ISimulationExtension* inExtension);
 
 private:
-    /** A client entity's saved components for a single ClientPersistence. */
+    /** A client entity's saved ClientPersistence::World components. */
     struct SavedComponents {
         /** Ordered tagged engine component records. */
         BinaryBuffer engineComponents{};
@@ -104,20 +107,16 @@ private:
                               const ClientConnected& clientConnected);
 
     /**
-     * Copies the given account's saved components for the given persistence
-     * into savedComponents.
+     * Copies the given account's saved ClientPersistence::World components
+     * from our database into savedComponents.
      *
-     * Note: Account components are temporarily saved in the world's database.
-     *       Once the account server persists them, they'll arrive with
-     *       ClientConnected instead.
-     *
-     * @return NotFound if the account has no saved data (or no components use
-     *         the given persistence), Error if the data couldn't be read, else
+     * @return NotFound if the account has no saved data in this world (or no
+     *         components use World), Error if the data couldn't be read, else
      *         Success.
      */
     GetSavedComponentsResult
-        getSavedComponents(ClientPersistence persistence, Sint64 accountID,
-                           SavedComponents& savedComponents);
+        getSavedWorldComponents(Sint64 accountID,
+                                SavedComponents& savedComponents);
 
     /**
      * Tells the given client that it failed to connect, and disconnects it.

@@ -17,6 +17,7 @@ namespace AM
 {
 struct ConsumeServiceTicketRequest;
 struct ServiceHeartbeat;
+struct SaveAccountDataRequest;
 
 namespace AccountServer
 {
@@ -28,6 +29,8 @@ class Database;
  * These messages are received from trusted services (world server, chat
  * server). AccountServiceEndpoint authenticates the services before any of
  * their messages reach this class.
+ *
+ * Only the world server may request or save AccountData.
  *
  * See ClientMessageProcessor for info on adding a message.
  */
@@ -66,6 +69,8 @@ private:
                        const ConsumeServiceTicketRequest& message);
     void handleMessage(ConnectionHandle handle, ServiceTicketAudience service,
                        const ServiceHeartbeat& message);
+    void handleMessage(ConnectionHandle handle, ServiceTicketAudience service,
+                       SaveAccountDataRequest& message);
 
     //-------------------------------------------------------------------------
     // Helpers
@@ -73,11 +78,20 @@ private:
     /**
      * Attempts to consume the given ticket. Only succeeds if the ticket was
      * issued for the given audience.
+     * If includeAccountData is true, also gets the account's AccountData.
      * Returns an appropriate response message.
      */
     ConsumeServiceTicketResponse consumeServiceTicket(
         ServiceTicketAudience audience,
-        const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket);
+        const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket,
+        bool includeAccountData);
+
+    /**
+     * If the given service is allowed to access AccountData, returns true.
+     * Otherwise, disconnects it and returns false.
+     */
+    bool checkAccountDataAccess(ConnectionHandle handle,
+                                ServiceTicketAudience service);
 
     template<typename Message>
     void handleMessage(ConnectionHandle handle, ServiceTicketAudience service,

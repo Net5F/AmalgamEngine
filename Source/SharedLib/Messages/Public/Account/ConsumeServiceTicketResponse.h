@@ -2,6 +2,7 @@
 
 #include "AccountDefs.h"
 #include "AccountServiceMessageType.h"
+#include "AccountData.h"
 #include <string>
 
 namespace AM
@@ -36,6 +37,14 @@ struct ConsumeServiceTicketResponse {
 
     /** If result == success, this is the account's username. */
     std::string username{};
+
+    /** If result == success and the request set includeAccountData, this is
+        true if the account has saved AccountData (i.e. it has played on some
+        world before). */
+    bool hasAccountData{false};
+
+    /** If hasAccountData, this is the account's saved data. */
+    AccountData accountData{};
 };
 
 template<typename S>
@@ -50,6 +59,8 @@ void serialize(S& serializer,
                       ConsumeServiceTicketResponse::ACCOUNT_STATUS_MAX);
     serializer.text1b(consumeServiceTicketResponse.username,
                       USERNAME_MAX_LENGTH);
+    serializer.value1b(consumeServiceTicketResponse.hasAccountData);
+    serializer.object(consumeServiceTicketResponse.accountData);
 }
 
 } // End namespace AM

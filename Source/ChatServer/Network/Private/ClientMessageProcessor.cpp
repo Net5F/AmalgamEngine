@@ -115,7 +115,7 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
     //       The client may have disconnected by the time it's called.
     session.state = ClientSession::State::ValidatingTicket;
     accountEndpoint.consumeServiceTicket(
-        message.ticket,
+        message.ticket, false,
         [this, handle](const ConsumeServiceTicketResponse& response) {
             handleTicketResponse(handle, response);
         });

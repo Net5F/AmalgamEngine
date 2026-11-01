@@ -9,6 +9,7 @@
 #include "CastHelper.h"
 #include "LoadHelper.h"
 #include "SaveHelper.h"
+#include "AccountSaveQueue.h"
 #include "SpawnStrategy.h"
 #include "HashTools.h"
 #include "entt/entity/registry.hpp"
@@ -93,6 +94,9 @@ public:
 
     /** Helper class for saving persisted entity state. */
     SaveHelper saveHelper;
+
+    /** Saves client entity AccountData to the account server. */
+    AccountSaveQueue accountSaveQueue;
 
     /** The database for saving and loading world data.
         Kept as a pointer to speed up compilation. */

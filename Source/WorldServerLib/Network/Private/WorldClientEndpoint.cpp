@@ -4,6 +4,7 @@
 #include "ConnectionRequest.h"
 #include "Shared/AccountServiceEndpoint.h"
 #include "IMessageProcessorExtension.h"
+#include "ClientPersistenceUsage.h"
 #include "Deserialize.h"
 #include "Config.h"
 #include "UserConfig.h"
@@ -286,9 +287,13 @@ void WorldClientEndpoint::processConnectionRequest(Client& client,
     }
 
     // Ask AccountServer to validate the ticket.
+    // Note: If any components use Account persistence, we also ask for the
+    //       account's saved data, so it arrives with the ticket result and
+    //       the sim can load the entity immediately.
     client.setAuthState(Client::AuthState::Validating);
     accountEndpoint.consumeServiceTicket(
         connectionRequest.ticket,
+        USES_CLIENT_PERSISTENCE<ClientPersistence::Account>,
         [this, handle = client.getHandle()](
             const ConsumeServiceTicketResponse& response) {
             onTicketResult(handle, response);
@@ -335,8 +340,12 @@ void WorldClientEndpoint::onTicketResult(
                      static_cast<long long>(response.accountID));
 
             // Notify the sim that a client was connected.
-            eventDispatcher.emplace<ClientConnectionEvent>(ClientConnected{
-                clientHandle, response.accountID, response.username});
+            eventDispatcher.emplace<ClientConnectionEvent>(
+                ClientConnected{.clientHandle{clientHandle},
+                                .accountID{response.accountID},
+                                .username{response.username},
+                                .hasAccountData{response.hasAccountData},
+                                .accountData{response.accountData}});
             break;
         }
         case ConsumeServiceTicketResponse::InvalidTicket: {

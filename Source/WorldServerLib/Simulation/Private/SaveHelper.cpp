@@ -4,6 +4,8 @@
 #include "Database.h"
 #include "EnginePersistedComponentTypes.h"
 #include "ProjectPersistedComponentTypes.h"
+#include "ClientPersistenceUsage.h"
+#include "AccountSaveQueue.h"
 #include "PersistedComponentDefs.h"
 #include "ClientSimData.h"
 #include "SaveTimestamp.h"
@@ -14,6 +16,7 @@
 #include "entt/core/type_info.hpp"
 #include <limits>
 #include <type_traits>
+#include <utility>
 
 namespace AM
 {
@@ -71,26 +74,45 @@ void SaveHelper::saveClientEntity(entt::entity entity)
 
     // Save the entity's data.
     Sint64 accountID{world.registry.get<ClientSimData>(entity).accountID};
-    saveClientComponents<ClientPersistence::Account>(entity, accountID);
-    saveClientComponents<ClientPersistence::World>(entity, accountID);
+    saveAccountComponents(entity, accountID);
+    saveWorldComponents(entity, accountID);
 }
 
-template<ClientPersistence Persistence>
-void SaveHelper::saveClientComponents(entt::entity entity, Sint64 accountID)
+void SaveHelper::saveAccountComponents(entt::entity entity, Sint64 accountID)
 {
-    using EngineTypes = EnginePersistedComponentTypes;
-    using ProjectTypes = ProjectPersistedComponentTypes;
+    constexpr ClientPersistence Persistence{ClientPersistence::Account};
 
     // If no components use this persistence, there's nothing to save.
-    if constexpr (EngineTypes::HAS_CLIENT_ENTRIES<Persistence>
-                  || ProjectTypes::HAS_CLIENT_ENTRIES<Persistence>) {
-        serializeComponents<EngineTypes::ClientEntryTypes<Persistence>>(
+    if constexpr (USES_CLIENT_PERSISTENCE<Persistence>) {
+        // Note: We serialize directly into the AccountData, since the queue
+        //       takes ownership of it.
+        AccountData accountData{};
+        serializeComponents<
+            EnginePersistedComponentTypes::ClientEntryTypes<Persistence>>(
+            entity, accountData.engineComponents);
+        serializeComponents<
+            ProjectPersistedComponentTypes::ClientEntryTypes<Persistence>>(
+            entity, accountData.projectComponents);
+
+        world.accountSaveQueue.queueSave(accountID, std::move(accountData));
+    }
+}
+
+void SaveHelper::saveWorldComponents(entt::entity entity, Sint64 accountID)
+{
+    constexpr ClientPersistence Persistence{ClientPersistence::World};
+
+    // If no components use this persistence, there's nothing to save.
+    if constexpr (USES_CLIENT_PERSISTENCE<Persistence>) {
+        serializeComponents<
+            EnginePersistedComponentTypes::ClientEntryTypes<Persistence>>(
             entity, workBuffer1);
-        serializeComponents<ProjectTypes::ClientEntryTypes<Persistence>>(
+        serializeComponents<
+            ProjectPersistedComponentTypes::ClientEntryTypes<Persistence>>(
             entity, workBuffer2);
 
-        world.database->saveClientEntityData(Persistence, accountID,
-                                             workBuffer1, workBuffer2);
+        world.database->saveClientEntityData(accountID, workBuffer1,
+                                             workBuffer2);
     }
 }
 

@@ -37,6 +37,8 @@ Database::Database(const std::string& databasePath)
 , revokeAllSessionsQuery{nullptr}
 , createServiceTicketQuery{nullptr}
 , consumeServiceTicketQuery{nullptr}
+, getAccountDataQuery{nullptr}
+, saveAccountDataQuery{nullptr}
 {
     // If any of our tables don't exist in Accounts.db, initialize them.
     initTables();
@@ -200,6 +202,31 @@ Database::Database(const std::string& databasePath)
                               = service_tickets.account_session_id
                 ),
                 consumed_at
+        )");
+
+    getAccountDataQuery = std::make_unique<SQLite::Statement>(database, R"(
+            SELECT serialized_engine_components, serialized_project_components
+            FROM characters
+            WHERE account_id = :account_id
+        )");
+
+    // Note: The SELECT only produces a row if the account exists, so saves
+    //       for unknown accounts change nothing.
+    saveAccountDataQuery = std::make_unique<SQLite::Statement>(database, R"(
+            INSERT INTO characters
+                (account_id, serialized_engine_components,
+                 serialized_project_components, created_at, updated_at)
+            SELECT
+                account_id, :engine_components, :project_components,
+                unixepoch(), unixepoch()
+            FROM accounts
+            WHERE account_id = :account_id
+            ON CONFLICT(account_id) DO UPDATE SET
+                serialized_engine_components
+                    = excluded.serialized_engine_components,
+                serialized_project_components
+                    = excluded.serialized_project_components,
+                updated_at = excluded.updated_at
         )");
 }
 
@@ -509,6 +536,70 @@ Database::ConsumedServiceTicketInfo
     }
 }
 
+Database::GetAccountDataResult
+    Database::getAccountData(Sint64 accountID, AccountData& outAccountData)
+{
+    std::scoped_lock lock{databaseMutex};
+
+    try {
+        getAccountDataQuery->bind(":account_id", accountID);
+
+        if (!(getAccountDataQuery->executeStep())) {
+            getAccountDataQuery->reset();
+            return GetAccountDataResult::NotFound;
+        }
+
+        auto copyBlob = [&](int columnIndex, std::vector<Uint8>& outBlob) {
+            SQLite::Column column{getAccountDataQuery->getColumn(columnIndex)};
+            const Uint8* data{static_cast<const Uint8*>(column.getBlob())};
+            outBlob.assign(data, data + column.getBytes());
+        };
+        copyBlob(0, outAccountData.engineComponents);
+        copyBlob(1, outAccountData.projectComponents);
+
+        getAccountDataQuery->reset();
+        return GetAccountDataResult::Success;
+    } catch (std::exception& e) {
+        getAccountDataQuery->tryReset();
+        LOG_ERROR("Failed to get account data: %s", e.what());
+        return GetAccountDataResult::DatabaseError;
+    }
+}
+
+Database::SaveAccountDataResult
+    Database::saveAccountData(Sint64 accountID, const AccountData& accountData)
+{
+    std::scoped_lock lock{databaseMutex};
+
+    // Note: Binding a null pointer stores NULL instead of an empty blob, so
+    //       empty vectors (whose data() may be null) bind a dummy pointer.
+    static constexpr Uint8 EMPTY_BLOB{0};
+    auto bindBlob = [&](const char* name, const std::vector<Uint8>& blob) {
+        saveAccountDataQuery->bind(name,
+                                   blob.empty() ? &EMPTY_BLOB : blob.data(),
+                                   static_cast<int>(blob.size()));
+    };
+
+    try {
+        saveAccountDataQuery->bind(":account_id", accountID);
+        bindBlob(":engine_components", accountData.engineComponents);
+        bindBlob(":project_components", accountData.projectComponents);
+
+        int changedRowCount{saveAccountDataQuery->exec()};
+        saveAccountDataQuery->reset();
+
+        if (changedRowCount == 0) {
+            return SaveAccountDataResult::AccountNotFound;
+        }
+
+        return SaveAccountDataResult::Success;
+    } catch (std::exception& e) {
+        saveAccountDataQuery->tryReset();
+        LOG_ERROR("Failed to save account data: %s", e.what());
+        return SaveAccountDataResult::DatabaseError;
+    }
+}
+
 void Database::initTables()
 {
     // The below commands define the schema for Accounts.db.
@@ -661,6 +752,28 @@ void Database::initTables()
 
                 CREATE INDEX service_tickets_expires_at_idx
                     ON service_tickets(expires_at);
+            )");
+        }
+
+        // Each account's character data (its client entity's
+        // ClientPersistence::Account components). The blobs are opaque to us,
+        // only the world server knows how to read them.
+        // Note: Engine and project components use separate ID namespaces, so
+        //       their record lists are stored in separate blobs.
+        if (!database.tableExists("characters")) {
+            database.exec(R"(
+                CREATE TABLE characters
+                (
+                    account_id                    INTEGER PRIMARY KEY
+                        REFERENCES accounts(account_id)
+                        ON DELETE CASCADE,
+
+                    serialized_engine_components  BLOB NOT NULL,
+                    serialized_project_components BLOB NOT NULL,
+
+                    created_at                    INTEGER NOT NULL,
+                    updated_at                    INTEGER NOT NULL
+                ) STRICT
             )");
         }
     } catch (std::exception& e) {

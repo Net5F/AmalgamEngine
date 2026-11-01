@@ -1,8 +1,10 @@
 #include "Shared/AccountServiceEndpoint.h"
 #include "ConsumeServiceTicketRequest.h"
+#include "SaveAccountDataRequest.h"
 #include "ServiceHeartbeat.h"
 #include "Deserialize.h"
 #include "Log.h"
+#include "VariantTools.h"
 #include "asio/error.hpp"
 #include "asio/ip/address.hpp"
 #include "asio/post.hpp"
@@ -79,53 +81,81 @@ void AccountServiceEndpoint::start()
 }
 
 void AccountServiceEndpoint::consumeServiceTicket(
-    const ServiceTicket& ticket, ConsumeServiceTicketCallback callback)
+    const ServiceTicket& ticket, bool includeAccountData,
+    ConsumeServiceTicketCallback callback)
 {
-    asio::post(ioContext,
-               [this, ticket, callback = std::move(callback)]() mutable {
-                   consumeServiceTicketOnIOThread(ticket, std::move(callback));
-               });
+    asio::post(ioContext, [this, ticket, includeAccountData,
+                           callback = std::move(callback)]() mutable {
+        consumeServiceTicketOnIOThread(ticket, includeAccountData,
+                                       std::move(callback));
+    });
+}
+
+void AccountServiceEndpoint::saveAccountData(Sint64 accountID,
+                                             AccountData accountData,
+                                             SaveAccountDataCallback callback)
+{
+    asio::post(ioContext, [this, accountID,
+                           accountData = std::move(accountData),
+                           callback = std::move(callback)]() mutable {
+        saveAccountDataOnIOThread(accountID, accountData, std::move(callback));
+    });
 }
 
 void AccountServiceEndpoint::consumeServiceTicketOnIOThread(
-    const ServiceTicket& ticket, ConsumeServiceTicketCallback callback)
+    const ServiceTicket& ticket, bool includeAccountData,
+    ConsumeServiceTicketCallback callback)
 {
     if (!callback) {
         LOG_INFO("Ignoring a service ticket request with no callback.");
         return;
     }
 
-    // If we aren't connected, fail immediately.
-    if (connectionState != ConnectionState::Connected) {
-        LOG_INFO("Failed to send an AccountServer request: Not connected.");
-        callback(ConsumeServiceTicketResponse{
-            .result{ConsumeServiceTicketResponse::InternalError}});
+    PendingCallback pendingCallback{std::move(callback)};
+    std::optional<Uint32> requestID{beginRequest(pendingCallback)};
+    if (!requestID) {
         return;
     }
 
-    // If we already have too many requests in flight, fail immediately.
-    if (pendingRequests.size() >= MAX_PENDING_REQUESTS) {
-        LOG_INFO("Failed to queue an AccountServer request: Too many pending "
-                 "requests.");
-        callback(ConsumeServiceTicketResponse{
-            .result{ConsumeServiceTicketResponse::InternalError}});
-        return;
-    }
-
-    // Frame the request.
-    const Uint32 requestID{nextRequestID++};
+    // Frame and send the request.
     BinaryBufferSharedPtr framedMessage{messageFramer.frameMessage(
-        ConsumeServiceTicketRequest{.requestID{requestID}, .ticket{ticket}})};
-    if (!framedMessage) {
-        callback(ConsumeServiceTicketResponse{
-            .requestID{requestID},
-            .result{ConsumeServiceTicketResponse::InternalError}});
+        ConsumeServiceTicketRequest{.requestID{*requestID},
+                                    .ticket{ticket},
+                                    .includeAccountData{includeAccountData}})};
+    sendRequest(*requestID, std::move(framedMessage));
+}
+
+void AccountServiceEndpoint::saveAccountDataOnIOThread(
+    Sint64 accountID, AccountData& accountData,
+    SaveAccountDataCallback callback)
+{
+    if (!callback) {
+        LOG_INFO("Ignoring an account data save request with no callback.");
         return;
     }
 
-    // Track the request so we can match it to its response, and send it.
-    pendingRequests.emplace(requestID, std::move(callback));
-    sendRequest(requestID, std::move(framedMessage));
+    // If the data is too large to serialize, fail immediately.
+    if (!(accountData.isWithinSizeLimits())) {
+        LOG_ERROR("Failed to save account data: Data exceeds size limit. "
+                  "AccountID: %lld",
+                  static_cast<long long>(accountID));
+        callback(SaveAccountDataResponse{
+            .result{SaveAccountDataResponse::InternalError}});
+        return;
+    }
+
+    PendingCallback pendingCallback{std::move(callback)};
+    std::optional<Uint32> requestID{beginRequest(pendingCallback)};
+    if (!requestID) {
+        return;
+    }
+
+    // Frame and send the request.
+    BinaryBufferSharedPtr framedMessage{messageFramer.frameMessage(
+        SaveAccountDataRequest{.requestID{*requestID},
+                               .accountID{accountID},
+                               .accountData{std::move(accountData)}})};
+    sendRequest(*requestID, std::move(framedMessage));
 }
 
 void AccountServiceEndpoint::connectOnIOThread()
@@ -280,13 +310,37 @@ void AccountServiceEndpoint::cancelTimer(asio::steady_timer& timer)
     }
 }
 
+std::optional<Uint32>
+    AccountServiceEndpoint::beginRequest(PendingCallback& callback)
+{
+    // If we aren't connected, fail immediately.
+    if (connectionState != ConnectionState::Connected) {
+        LOG_INFO("Failed to send an AccountServer request: Not connected.");
+        failCallback(0, callback);
+        return std::nullopt;
+    }
+
+    // If we already have too many requests in flight, fail immediately.
+    if (pendingRequests.size() >= MAX_PENDING_REQUESTS) {
+        LOG_INFO("Failed to queue an AccountServer request: Too many pending "
+                 "requests.");
+        failCallback(0, callback);
+        return std::nullopt;
+    }
+
+    // Track the request so we can match it to its response.
+    const Uint32 requestID{nextRequestID++};
+    pendingRequests.emplace(requestID, std::move(callback));
+    return requestID;
+}
+
 void AccountServiceEndpoint::sendRequest(Uint32 requestID,
                                          BinaryBufferSharedPtr framedMessage)
 {
     // Note: We hold a local reference, since a failed send will disconnect
     //       and reset our member.
     std::shared_ptr<Connection> activeConnection{connection};
-    if (!activeConnection
+    if (!framedMessage || !activeConnection
         || !activeConnection->sendFramed(std::move(framedMessage))) {
         LOG_INFO("Failed to send an AccountServer request.");
 
@@ -297,8 +351,54 @@ void AccountServiceEndpoint::sendRequest(Uint32 requestID,
     }
 }
 
-void AccountServiceEndpoint::completeRequest(
-    Uint32 requestID, const ConsumeServiceTicketResponse& response)
+template<typename Response>
+void AccountServiceEndpoint::completeRequest(Uint32 requestID,
+                                             const Response& response)
+{
+    auto requestIt{pendingRequests.find(requestID)};
+    if (requestIt == pendingRequests.end()) {
+        LOG_INFO("Received a response for an unknown AccountServer request: "
+                 "%u",
+                 requestID);
+        return;
+    }
+
+    // Note: We remove the request before calling the callback, in case the
+    //       callback causes more requests to be completed.
+    PendingCallback callback{std::move(requestIt->second)};
+    pendingRequests.erase(requestIt);
+
+    using Callback = std::function<void(const Response&)>;
+    if (Callback * typedCallback{std::get_if<Callback>(&callback)}) {
+        (*typedCallback)(response);
+    }
+    else {
+        LOG_INFO("Received a mismatched response type for AccountServer "
+                 "request: %u",
+                 requestID);
+        failCallback(requestID, callback);
+    }
+}
+
+void AccountServiceEndpoint::failCallback(Uint32 requestID,
+                                          PendingCallback& callback)
+{
+    std::visit(
+        VariantTools::Overload{
+            [&](ConsumeServiceTicketCallback& consumeCallback) {
+                consumeCallback(ConsumeServiceTicketResponse{
+                    .requestID{requestID},
+                    .result{ConsumeServiceTicketResponse::InternalError}});
+            },
+            [&](SaveAccountDataCallback& saveCallback) {
+                saveCallback(SaveAccountDataResponse{
+                    .requestID{requestID},
+                    .result{SaveAccountDataResponse::InternalError}});
+            }},
+        callback);
+}
+
+void AccountServiceEndpoint::failRequest(Uint32 requestID)
 {
     auto requestIt{pendingRequests.find(requestID)};
     if (requestIt == pendingRequests.end()) {
@@ -307,32 +407,22 @@ void AccountServiceEndpoint::completeRequest(
 
     // Note: We remove the request before calling the callback, in case the
     //       callback causes more requests to be completed.
-    ConsumeServiceTicketCallback callback{std::move(requestIt->second)};
+    PendingCallback callback{std::move(requestIt->second)};
     pendingRequests.erase(requestIt);
 
-    callback(response);
-}
-
-void AccountServiceEndpoint::failRequest(Uint32 requestID)
-{
-    completeRequest(requestID,
-                    ConsumeServiceTicketResponse{
-                        .requestID{requestID},
-                        .result{ConsumeServiceTicketResponse::InternalError}});
+    failCallback(requestID, callback);
 }
 
 void AccountServiceEndpoint::failAllRequests()
 {
     // Note: We move the requests into a local first, in case a callback
     //       causes the map to be modified.
-    std::unordered_map<Uint32, ConsumeServiceTicketCallback> failedRequests{
+    std::unordered_map<Uint32, PendingCallback> failedRequests{
         std::move(pendingRequests)};
     pendingRequests.clear();
 
     for (auto& [requestID, callback] : failedRequests) {
-        callback(ConsumeServiceTicketResponse{
-            .requestID{requestID},
-            .result{ConsumeServiceTicketResponse::InternalError}});
+        failCallback(requestID, callback);
     }
 }
 
@@ -428,16 +518,11 @@ void AccountServiceEndpoint::onMessageReceived(
 {
     switch (messageType) {
         case AccountServiceMessageType::ConsumeServiceTicketResponse: {
-            ConsumeServiceTicketResponse response{};
-            if (!Deserialize::fromBuffer(messageBuffer.data(),
-                                         messageBuffer.size(), response)) {
-                LOG_INFO("Failed to deserialize an AccountServer message.");
-                disconnectWithError(asio::error::make_error_code(
-                    asio::error::invalid_argument));
-                return;
-            }
-
-            handleMessage(response);
+            handleResponse<ConsumeServiceTicketResponse>(messageBuffer);
+            break;
+        }
+        case AccountServiceMessageType::SaveAccountDataResponse: {
+            handleResponse<SaveAccountDataResponse>(messageBuffer);
             break;
         }
         case AccountServiceMessageType::ServiceHeartbeatResponse: {
@@ -454,13 +539,16 @@ void AccountServiceEndpoint::onMessageReceived(
     }
 }
 
-void AccountServiceEndpoint::handleMessage(
-    const ConsumeServiceTicketResponse& response)
+template<typename Response>
+void AccountServiceEndpoint::handleResponse(
+    std::span<const Uint8> messageBuffer)
 {
-    if (!pendingRequests.contains(response.requestID)) {
-        LOG_INFO("Received a response for an unknown AccountServer request: "
-                 "%u",
-                 response.requestID);
+    Response response{};
+    if (!Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
+                                 response)) {
+        LOG_INFO("Failed to deserialize an AccountServer message.");
+        disconnectWithError(
+            asio::error::make_error_code(asio::error::invalid_argument));
         return;
     }
 

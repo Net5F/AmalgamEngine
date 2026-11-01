@@ -49,8 +49,8 @@ std::shared_ptr<AccountServiceEndpoint::Connection>
         .tlsTransportConfig{tlsTransportConfig},
         .partialReceiveTimeoutS{Config::PARTIAL_RECEIVE_TIMEOUT_S},
         .idleTimeoutS{Config::SERVICE_IDLE_TIMEOUT_S},
-        .maxReadPayloadSize{Config::MAX_READ_PAYLOAD_SIZE},
-        .maxWritePayloadSize{Config::MAX_WRITE_PAYLOAD_SIZE}};
+        .maxReadPayloadSize{Config::SERVICE_MAX_READ_PAYLOAD_SIZE},
+        .maxWritePayloadSize{Config::SERVICE_MAX_WRITE_PAYLOAD_SIZE}};
 
     return std::make_shared<Connection>(std::move(socket), sslContext,
                                         connectionConfig);

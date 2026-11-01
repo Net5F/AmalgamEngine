@@ -2,6 +2,7 @@
 
 #include "ConnectionHandle.h"
 #include "DisconnectNotice.h"
+#include "AccountData.h"
 #include <optional>
 #include <string>
 #include <variant>
@@ -22,6 +23,15 @@ struct ClientConnected {
 
     /** The username of the account that the client authenticated as. */
     std::string username{};
+
+    /** True if the account has saved AccountData (i.e. it has played on
+        some world before).
+        Always false if no components use ClientPersistence::Account. */
+    bool hasAccountData{false};
+
+    /** If hasAccountData, this is the account's saved data, as of when its
+        ticket was consumed. */
+    AccountData accountData{};
 };
 
 /**

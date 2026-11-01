@@ -17,7 +17,9 @@ class ItemData;
  * Periodically saves the world's data:
  *   Tile map data is saved to TileMap.bin.
  *   Non-client entity data is saved to the database.
- *   Client entity data is saved to the database, keyed by account ID.
+ *   Client entity ClientPersistence::World data is saved to the database,
+ *   keyed by account ID. ClientPersistence::Account data is queued to be
+ *   saved to the account server (see AccountSaveQueue).
  *   Item data is saved to the database.
  *
  * Note: Client entities are also saved when they're removed from the world

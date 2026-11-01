@@ -45,6 +45,8 @@ World::World(const SimulationContext& inSimContext)
 , loadHelper{*this, inSimContext.simulation, inSimContext.itemData,
              inSimContext.graphicData}
 , saveHelper{*this, inSimContext.simulation}
+, accountSaveQueue{inSimContext.networkEventDispatcher,
+                   inSimContext.network.accountEndpoint}
 , database{std::make_unique<Database>()}
 , clientHandleMap{}
 , stableIDMap{}

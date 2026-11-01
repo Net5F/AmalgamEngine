@@ -1,5 +1,6 @@
 target_sources(WorldServerLib
     PRIVATE
+        Private/AccountSaveQueue.cpp
         Private/AISystem.cpp
         Private/CastHelper.cpp
         Private/CastSystem.cpp
@@ -32,6 +33,7 @@ target_sources(WorldServerLib
         Private/Lua/EngineLuaBindings.cpp
         Private/TileMap/TileMap.cpp
     PUBLIC
+        Public/AccountSaveQueue.h
         Public/AILogic.h
         Public/AISystem.h
         Public/CastHelper.h
@@ -41,6 +43,7 @@ target_sources(WorldServerLib
         Public/ClientAOISystem.h
         Public/ClientConnectionSystem.h
         Public/ClientEntityLoadInfo.h
+        Public/ClientPersistenceUsage.h
         Public/ComponentMigration.h
         Public/ComponentChangeSystem.h
         Public/ComponentSyncSystem.h

@@ -16,7 +16,9 @@ class Simulation;
  * Helper class for saving persisted entity state.
  *
  * Note: Saves go to the in-memory database, which is only backed up to the
- *       file database periodically (see SaveSystem).
+ *       file database periodically (see SaveSystem). The exception is client
+ *       entity ClientPersistence::Account components, which are queued to be
+ *       saved to the account server (see AccountSaveQueue).
  */
 class SaveHelper
 {
@@ -29,14 +31,15 @@ public:
     void saveNonClientEntities();
 
     /**
-     * Saves all client entities (including lingering ones) to the in-memory
-     * database.
+     * Saves all client entities (including lingering ones).
      */
     void saveClientEntities();
 
     /**
-     * Saves the given client entity's persisted components to the in-memory
-     * database, split by ClientPersistence.
+     * Saves the given client entity's persisted components, split by
+     * ClientPersistence. World components are saved to the in-memory
+     * database, Account components are queued to be saved to the account
+     * server.
      *
      * Call this before removing a client entity from the world, so its latest
      * state is what gets loaded when it reconnects.
@@ -45,11 +48,17 @@ public:
 
 private:
     /**
-     * Saves the given client entity's components that use the given
-     * persistence. Does nothing if no components use it.
+     * Queues the given client entity's ClientPersistence::Account components
+     * to be saved to the account server. Does nothing if no components use
+     * Account.
      */
-    template<ClientPersistence Persistence>
-    void saveClientComponents(entt::entity entity, Sint64 accountID);
+    void saveAccountComponents(entt::entity entity, Sint64 accountID);
+
+    /**
+     * Saves the given client entity's ClientPersistence::World components to
+     * the in-memory database. Does nothing if no components use World.
+     */
+    void saveWorldComponents(entt::entity entity, Sint64 accountID);
 
     /**
      * Serializes each component from EntryList that entity possesses into

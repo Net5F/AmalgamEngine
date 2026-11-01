@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AccountDefs.h"
+#include "AccountData.h"
 #include "SQLiteCpp/SQLiteCpp.h"
 #include <SDL3/SDL_stdinc.h>
 #include <memory>
@@ -15,8 +16,8 @@ namespace AccountServer
 /**
  * Interface for interacting with the account database (Accounts.db).
  *
- * We use the database to persist accounts, account sessions, and service
- * tickets.
+ * We use the database to persist accounts, account sessions, service
+ * tickets, and characters (each account's AccountData).
  *
  * Secrets (recovery keys, session tokens, service tickets) are never stored
  * directly. Instead, we store their hashes (see CryptoHelpers::hashSecret()).
@@ -191,6 +192,38 @@ public:
         consumeServiceTicket(const std::string& tokenHash,
                              ServiceTicketAudience audience);
 
+    //-------------------------------------------------------------------------
+    // Characters
+    //-------------------------------------------------------------------------
+    enum class GetAccountDataResult { Success, NotFound, DatabaseError };
+    /**
+     * If the given account has saved AccountData, copies it into
+     * outAccountData.
+     *
+     * @return NotFound if the account has no saved data (e.g. it's never
+     *         joined a world), DatabaseError if the query failed, else
+     *         Success.
+     *         Don't treat DatabaseError as NotFound. Doing so would give the
+     *         account fresh data, which would overwrite its real data on the
+     *         next save.
+     */
+    GetAccountDataResult getAccountData(Sint64 accountID,
+                                        AccountData& outAccountData);
+
+    enum class SaveAccountDataResult {
+        Success,
+        AccountNotFound,
+        DatabaseError
+    };
+    /**
+     * Adds or overwrites the given account's AccountData.
+     *
+     * @return AccountNotFound if the account doesn't exist, DatabaseError if
+     *         the query failed, else Success.
+     */
+    SaveAccountDataResult saveAccountData(Sint64 accountID,
+                                          const AccountData& accountData);
+
 protected:
     /**
      * Creates our tables in Accounts.db, if they don't already exist.
@@ -215,6 +248,8 @@ protected:
     std::unique_ptr<SQLite::Statement> revokeAllSessionsQuery;
     std::unique_ptr<SQLite::Statement> createServiceTicketQuery;
     std::unique_ptr<SQLite::Statement> consumeServiceTicketQuery;
+    std::unique_ptr<SQLite::Statement> getAccountDataQuery;
+    std::unique_ptr<SQLite::Statement> saveAccountDataQuery;
 };
 
 } // End namespace AccountServer

@@ -64,12 +64,21 @@ public:
 
     /** The maximum amount of outgoing bytes we'll allow at once on a service
         connection. Larger than the client limit, since a service may send
-        bursts of requests on behalf of many users. */
-    static constexpr std::size_t SERVICE_MAX_QUEUED_WRITE_BYTES{64000};
+        bursts of requests on behalf of many users, and ticket responses may
+        carry AccountData. */
+    static constexpr std::size_t SERVICE_MAX_QUEUED_WRITE_BYTES{2'000'000};
 
     /** The maximum number of outgoing writes we'll allow at once on a service
         connection. */
     static constexpr std::size_t SERVICE_MAX_QUEUED_WRITES{1000};
+
+    /** The max size, in bytes, for an incoming service message payload.
+        Large enough to hold a message carrying AccountData. */
+    static constexpr std::size_t SERVICE_MAX_READ_PAYLOAD_SIZE{65535};
+
+    /** The max size, in bytes, for an outgoing service message payload.
+        Large enough to hold a message carrying AccountData. */
+    static constexpr std::size_t SERVICE_MAX_WRITE_PAYLOAD_SIZE{65535};
 
     //-------------------------------------------------------------------------
     // Account sessions

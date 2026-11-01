@@ -49,6 +49,7 @@ target_sources(SharedLib
         Public/World/WorldLogoutRequest.h
         Public/World/WorldLogoutUpdate.h
         Public/Account/AccountClientMessageType.h
+        Public/Account/AccountData.h
         Public/Account/AccountServiceMessageType.h
         Public/Account/ConsumeServiceTicketRequest.h
         Public/Account/ConsumeServiceTicketResponse.h
@@ -60,6 +61,8 @@ target_sources(SharedLib
         Public/Account/RecoverAccountResponse.h
         Public/Account/RegisterRequest.h
         Public/Account/RegisterResponse.h
+        Public/Account/SaveAccountDataRequest.h
+        Public/Account/SaveAccountDataResponse.h
         Public/Account/ServiceHeartbeat.h
         Public/Account/ServiceHeartbeatResponse.h
         Public/Account/ServiceTicketRequest.h

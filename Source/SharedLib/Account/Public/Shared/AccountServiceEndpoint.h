@@ -3,6 +3,8 @@
 #include "AccountDefs.h"
 #include "AccountServiceMessageType.h"
 #include "ConsumeServiceTicketResponse.h"
+#include "SaveAccountDataResponse.h"
+#include "AccountData.h"
 #include "SimpleConnection.h"
 #include "SimpleMessageFramer.h"
 #include "asio/io_context.hpp"
@@ -12,10 +14,13 @@
 #include <array>
 #include <cstddef>
 #include <functional>
+#include <limits>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 #include <unordered_map>
+#include <variant>
 
 namespace AM
 {
@@ -25,7 +30,8 @@ namespace AM
  * with AccountServer.
  *
  * Services use this connection to validate the tickets that clients present
- * to them when logging in.
+ * to them when logging in. The world server also uses it to save its client
+ * entities' AccountData.
  *
  * Peers are authenticated through mutual TLS: the given sslContext must
  * present our certificate, and must verify AccountServer's certificate
@@ -62,6 +68,18 @@ public:
         = std::function<void(const ConsumeServiceTicketResponse&)>;
 
     /**
+     * Called with AccountServer's response to a save request.
+     *
+     * If AccountServer couldn't be reached or the connection was lost
+     * before it responded, response.result will be InternalError.
+     *
+     * Note: This is called on the network IO thread. Callers should forward
+     *       the result to their own thread rather than doing work here.
+     */
+    using SaveAccountDataCallback
+        = std::function<void(const SaveAccountDataResponse&)>;
+
+    /**
      * @param inSSLContext Must present the service's certificate, and verify
      *                     AccountServer's certificate against its pin.
      * @param inServerIP AccountServer's IP address.
@@ -86,6 +104,9 @@ public:
      * The ticket is only accepted if it was issued for the service that owns
      * this client.
      *
+     * If includeAccountData is true, the response will include the account's
+     * saved AccountData. Only the world server may set it.
+     *
      * If we aren't currently connected to the account server, the request
      * fails immediately.
      *
@@ -93,10 +114,31 @@ public:
      * destroyed first.
      */
     void consumeServiceTicket(const ServiceTicket& ticket,
+                              bool includeAccountData,
                               ConsumeServiceTicketCallback callback);
+
+    /**
+     * Asks the account server to save the given account's AccountData,
+     * overwriting any existing data. Only the world server may call this.
+     *
+     * The data must be within its size limits (see
+     * AccountData::isWithinSizeLimits()), or the request fails immediately.
+     *
+     * If we aren't currently connected to the account server, the request
+     * fails immediately.
+     *
+     * The callback is always called exactly once, unless this endpoint is
+     * destroyed first.
+     */
+    void saveAccountData(Sint64 accountID, AccountData accountData,
+                         SaveAccountDataCallback callback);
 
 private:
     using Connection = SimpleConnection<AccountServiceMessageType>;
+
+    /** The callback of a request that's awaiting a response. */
+    using PendingCallback
+        = std::variant<ConsumeServiceTicketCallback, SaveAccountDataCallback>;
 
     enum class ConnectionState { Disconnected, Connecting, Connected };
 
@@ -115,15 +157,22 @@ private:
         disconnect. Doubles after each failed attempt, up to the max. */
     static constexpr double RECONNECT_MIN_DELAY_S{1};
     static constexpr double RECONNECT_MAX_DELAY_S{30};
-    static constexpr std::size_t MAX_QUEUED_WRITE_BYTES{64000};
+    /** Large enough to hold many in-flight AccountData saves. */
+    static constexpr std::size_t MAX_QUEUED_WRITE_BYTES{2'000'000};
     static constexpr std::size_t MAX_QUEUED_WRITES{1000};
-    static constexpr Uint16 MAX_READ_PAYLOAD_SIZE{500};
-    static constexpr Uint16 MAX_WRITE_PAYLOAD_SIZE{500};
+    /** Large enough to hold a message carrying AccountData. */
+    static constexpr Uint16 MAX_READ_PAYLOAD_SIZE{
+        std::numeric_limits<Uint16>::max()};
+    static constexpr Uint16 MAX_WRITE_PAYLOAD_SIZE{
+        std::numeric_limits<Uint16>::max()};
     /** The max number of requests that may be awaiting a response. */
     static constexpr std::size_t MAX_PENDING_REQUESTS{1000};
 
     void consumeServiceTicketOnIOThread(const ServiceTicket& ticket,
+                                        bool includeAccountData,
                                         ConsumeServiceTicketCallback callback);
+    void saveAccountDataOnIOThread(Sint64 accountID, AccountData& accountData,
+                                   SaveAccountDataCallback callback);
 
     /** Connection logic */
     void connectOnIOThread();
@@ -147,6 +196,13 @@ private:
     /** Cancels the given timer, logging any errors. */
     void cancelTimer(asio::steady_timer& timer);
 
+    /** Request logic */
+    /**
+     * If we're able to send a request, tracks the given callback and returns
+     * its request ID. Otherwise, fails the callback and returns null.
+     */
+    std::optional<Uint32> beginRequest(PendingCallback& callback);
+
     /**
      * Sends the given request. If the send fails, fails the request.
      */
@@ -155,9 +211,17 @@ private:
     /**
      * Calls the given request's callback with the given response, and
      * removes the request.
+     *
+     * If the request's callback doesn't match the response type, fails the
+     * request instead.
      */
-    void completeRequest(Uint32 requestID,
-                         const ConsumeServiceTicketResponse& response);
+    template<typename Response>
+    void completeRequest(Uint32 requestID, const Response& response);
+
+    /**
+     * Calls the given callback with an InternalError result.
+     */
+    void failCallback(Uint32 requestID, PendingCallback& callback);
 
     /**
      * Fails the given request with an InternalError result.
@@ -179,7 +243,11 @@ private:
     void onMessageReceived(AccountServiceMessageType messageType,
                            std::span<const Uint8> messageBuffer);
 
-    void handleMessage(const ConsumeServiceTicketResponse& response);
+    /**
+     * Deserializes a response of the given type and completes its request.
+     */
+    template<typename Response>
+    void handleResponse(std::span<const Uint8> messageBuffer);
 
     asio::io_context& ioContext;
     asio::ssl::context& sslContext;
@@ -201,7 +269,7 @@ private:
     SimpleMessageFramer<AccountServiceMessageType> messageFramer;
 
     /** Maps request IDs to the callback that's waiting on a response. */
-    std::unordered_map<Uint32, ConsumeServiceTicketCallback> pendingRequests;
+    std::unordered_map<Uint32, PendingCallback> pendingRequests;
 
     /** The ID to give the next request. */
     Uint32 nextRequestID;

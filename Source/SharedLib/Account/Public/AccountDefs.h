@@ -29,6 +29,12 @@ inline constexpr std::size_t SESSION_TOKEN_BYTES{32};
 /** Length of a service ticket in bytes. */
 inline constexpr std::size_t SERVICE_TICKET_BYTES{32};
 
+/** The max size of each AccountData blob (engine and project components), in
+    bytes.
+    Both blobs must fit in a single service message, whose payload size is
+    stored as a Uint16. */
+inline constexpr std::size_t ACCOUNT_DATA_BLOB_MAX_BYTES{30000};
+
 /** The service that a ticket authorizes the client to connect to. */
 enum class ServiceTicketAudience : Uint8 {
     WorldServer,

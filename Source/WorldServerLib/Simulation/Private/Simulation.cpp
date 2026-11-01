@@ -192,6 +192,9 @@ void Simulation::tick()
     // If any category of data is due for saving, save it.
     saveSystem.saveIfNecessary();
 
+    // Send any queued AccountData saves to the account server.
+    world.accountSaveQueue.processSaves();
+
     // Call the project's post-everything logic.
     extension->afterAll();
 

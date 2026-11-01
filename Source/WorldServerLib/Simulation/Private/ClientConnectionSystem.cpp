@@ -8,6 +8,8 @@
 #include "Database.h"
 #include "EnginePersistedComponentTypes.h"
 #include "ProjectPersistedComponentTypes.h"
+#include "ClientPersistenceUsage.h"
+#include "AccountSaveQueue.h"
 #include "SharedConfig.h"
 #include "Config.h"
 #include "Serialize.h"
@@ -162,17 +164,26 @@ entt::entity ClientConnectionSystem::createClientEntity(
     entt::registry& registry{world.registry};
     Sint64 accountID{clientConnected.accountID};
 
-    // Get the account's saved components.
-    // Note: If either fails, we reject the client instead of giving it fresh
+    // Get the account's saved Account components. If we have data that the
+    // account server hasn't confirmed saving yet (e.g. the account logged out
+    // and back in quickly), it's newer than what the account server sent, so
+    // we use it instead.
+    // Note: If nothing uses Account persistence, both of these are empty.
+    const AccountData* accountData{&(clientConnected.accountData)};
+    bool hadAccountData{clientConnected.hasAccountData};
+    if (const AccountData* unsavedData{
+            world.accountSaveQueue.getUnsavedData(accountID)}) {
+        accountData = unsavedData;
+        hadAccountData = true;
+    }
+
+    // Get the account's saved World components.
+    // Note: If this fails, we reject the client instead of giving it fresh
     //       data, since the next save would overwrite its real data.
-    SavedComponents accountComponents{};
     SavedComponents worldComponents{};
-    GetSavedComponentsResult accountResult{getSavedComponents(
-        ClientPersistence::Account, accountID, accountComponents)};
-    GetSavedComponentsResult worldResult{getSavedComponents(
-        ClientPersistence::World, accountID, worldComponents)};
-    if ((accountResult == GetSavedComponentsResult::Error)
-        || (worldResult == GetSavedComponentsResult::Error)) {
+    GetSavedComponentsResult worldResult{
+        getSavedWorldComponents(accountID, worldComponents)};
+    if (worldResult == GetSavedComponentsResult::Error) {
         LOG_ERROR("Failed to get saved data for accountID: %lld",
                   static_cast<long long>(accountID));
         rejectClient(clientConnected.clientHandle);
@@ -182,8 +193,7 @@ entt::entity ClientConnectionSystem::createClientEntity(
     // Create the entity and load its saved components.
     entt::entity newEntity{world.loadHelper.loadClientEntity(
         accountID,
-        {accountComponents.engineComponents,
-         accountComponents.projectComponents},
+        {accountData->engineComponents, accountData->projectComponents},
         {worldComponents.engineComponents, worldComponents.projectComponents})};
     if (newEntity == entt::null) {
         rejectClient(clientConnected.clientHandle);
@@ -205,8 +215,7 @@ entt::entity ClientConnectionSystem::createClientEntity(
         extension->initClientEntity(
             newEntity,
             {.accountID{accountID},
-             .hadAccountData{accountResult
-                             == GetSavedComponentsResult::Success},
+             .hadAccountData{hadAccountData},
              .hadWorldData{worldResult == GetSavedComponentsResult::Success}});
     }
 
@@ -503,25 +512,11 @@ bool ClientConnectionSystem::addDefaultComponents(
 }
 
 ClientConnectionSystem::GetSavedComponentsResult
-    ClientConnectionSystem::getSavedComponents(ClientPersistence persistence,
-                                               Sint64 accountID,
-                                               SavedComponents& savedComponents)
+    ClientConnectionSystem::getSavedWorldComponents(
+        Sint64 accountID, SavedComponents& savedComponents)
 {
-    // If no components use this persistence, there's nothing to get.
-    bool hasEntries{false};
-    if (persistence == ClientPersistence::Account) {
-        hasEntries = EnginePersistedComponentTypes::HAS_CLIENT_ENTRIES<
-                         ClientPersistence::Account>
-                     || ProjectPersistedComponentTypes::HAS_CLIENT_ENTRIES<
-                         ClientPersistence::Account>;
-    }
-    else if (persistence == ClientPersistence::World) {
-        hasEntries = EnginePersistedComponentTypes::HAS_CLIENT_ENTRIES<
-                         ClientPersistence::World>
-                     || ProjectPersistedComponentTypes::HAS_CLIENT_ENTRIES<
-                         ClientPersistence::World>;
-    }
-    if (!hasEntries) {
+    // If no components use World persistence, there's nothing to get.
+    if constexpr (!USES_CLIENT_PERSISTENCE<ClientPersistence::World>) {
         return GetSavedComponentsResult::NotFound;
     }
 
@@ -533,7 +528,7 @@ ClientConnectionSystem::GetSavedComponentsResult
         savedComponents.projectComponents.assign(projectComponents.begin(),
                                                  projectComponents.end());
     };
-    switch (world.database->getClientEntityData(persistence, accountID,
+    switch (world.database->getClientEntityData(accountID,
                                                 std::move(copyComponents))) {
         case Database::GetClientEntityDataResult::Success: {
             return GetSavedComponentsResult::Success;
