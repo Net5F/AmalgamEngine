@@ -33,6 +33,7 @@ Database::Database()
 , exitRequested{false}
 , backupMutex{}
 , backupCondVar{}
+, backupFinishedCondVar{}
 , backupRequested{false}
 , insertEntityQuery{nullptr}
 , deleteEntityQuery{nullptr}
@@ -109,11 +110,14 @@ Database::Database()
 
 Database::~Database()
 {
-    exitRequested = true;
-
+    // Tell the backup thread to exit.
+    // Note: If a backup is in progress, the thread finishes it first. We
+    //       don't start a new one, since our data may be partial if we're
+    //       exiting abnormally. A graceful shutdown backs up explicitly
+    //       before getting here (see SaveSystem::saveForShutdown()).
     {
         std::unique_lock lock{backupMutex};
-        backupRequested = true;
+        exitRequested = true;
     }
     backupCondVar.notify_one();
     backupThreadObj.join();
@@ -148,6 +152,13 @@ void Database::backupToFile()
 bool Database::backupIsInProgress()
 {
     return backupRequested.load();
+}
+
+void Database::waitForBackup()
+{
+    std::unique_lock lock{backupMutex};
+    backupFinishedCondVar.wait(lock,
+                               [this] { return !(backupRequested.load()); });
 }
 
 void Database::saveEntityData(
@@ -422,10 +433,16 @@ void Database::checkDataVersions()
 
 void Database::performBackup()
 {
-    while (!exitRequested) {
-        // Wait until this thread is signaled by backupToFile().
+    while (true) {
+        // Wait until this thread is signaled by backupToFile() or our
+        // destructor.
         std::unique_lock lock{backupMutex};
-        backupCondVar.wait(lock, [this] { return backupRequested.load(); });
+        backupCondVar.wait(lock, [this] {
+            return backupRequested.load() || exitRequested.load();
+        });
+        if (exitRequested) {
+            break;
+        }
 
         // Execute all backup steps at once.
         try {
@@ -436,6 +453,7 @@ void Database::performBackup()
         }
 
         backupRequested = false;
+        backupFinishedCondVar.notify_all();
     }
 }
 

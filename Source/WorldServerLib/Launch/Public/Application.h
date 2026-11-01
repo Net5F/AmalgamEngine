@@ -41,6 +41,11 @@ public:
     /**
      * Begins the application. Assumes control of the thread until the
      * application exits.
+     *
+     * The application exits when the process receives a termination signal
+     * (SIGINT e.g. Ctrl+C, SIGTERM, or SIGBREAK e.g. Ctrl+Break on Windows).
+     * Before exiting, it disconnects all clients and saves all world state
+     * (see shutdown()).
      */
     void start();
 
@@ -68,6 +73,21 @@ public:
     void registerSimulationExtension();
 
 private:
+    /**
+     * Requests that the main loop exit. Called when the process receives a
+     * termination signal.
+     *
+     * Note: This runs in a signal handler context, so it must only do
+     *       signal-safe things (like setting a lock-free atomic).
+     */
+    static void onTerminationSignal(int signal);
+
+    /**
+     * Disconnects all clients, then saves all world state and waits for it
+     * to be persisted.
+     */
+    void shutdown();
+
     //-------------------------------------------------------------------------
     // SDL Objects
     //-------------------------------------------------------------------------
@@ -123,8 +143,12 @@ private:
     //-------------------------------------------------------------------------
     // Additional, used during the loop
     //-------------------------------------------------------------------------
-    /** Flags when to end the application. */
-    std::atomic<bool> exitRequested;
+    /** Flags when to end the application.
+        Static, so our signal handler can set it. */
+    static inline std::atomic<bool> exitRequested{false};
+    static_assert(std::atomic<bool>::is_always_lock_free,
+                  "exitRequested must be lock-free to be set from a signal "
+                  "handler.");
 };
 
 template<typename T>

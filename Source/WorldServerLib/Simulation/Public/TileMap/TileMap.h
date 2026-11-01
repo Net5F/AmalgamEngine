@@ -34,11 +34,6 @@ public:
             CollisionLocator& inCollisionLocator);
 
     /**
-     * Attempts to save the current tile map state to TileMap.bin.
-     */
-    ~TileMap();
-
-    /**
      * Saves the map to a file with the given name, placed in the same
      * directory as the program binary.
      *

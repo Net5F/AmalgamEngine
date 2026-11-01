@@ -30,6 +30,10 @@ struct ClientEntityLoadInfo;
 class ISimulationExtension
 {
 public:
+    // Note: The engine owns extensions through a pointer to this interface,
+    //       so the destructor must be virtual.
+    virtual ~ISimulationExtension() = default;
+
     // Canonical constructor (derived class must implement):
     // SimulationExtension(const SimulationExDependencies& deps)
 

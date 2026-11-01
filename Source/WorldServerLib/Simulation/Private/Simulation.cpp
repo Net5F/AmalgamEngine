@@ -203,6 +203,17 @@ void Simulation::tick()
     FrameMark;
 }
 
+void Simulation::shutdown()
+{
+    // Save everything (including lingering client entities) and back it up.
+    // Note: This also queues each client entity's AccountData.
+    saveSystem.saveForShutdown();
+
+    // Wait for the AccountData saves (including any that were already
+    // queued, e.g. from recent logouts) to be confirmed.
+    world.accountSaveQueue.flush(SHUTDOWN_ACCOUNT_SAVE_TIMEOUT);
+}
+
 void Simulation::setExtension(ISimulationExtension* inExtension)
 {
     extension = inExtension;

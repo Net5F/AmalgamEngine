@@ -31,7 +31,8 @@ namespace WorldServer
  * account's saves in order, since the account server may process requests
  * out of order.
  *
- * Note: Unsaved data is lost if the world server exits before it's saved.
+ * When the server shuts down, flush() is used to wait for the remaining
+ * saves. If they can't be completed before its timeout, their data is lost.
  */
 class AccountSaveQueue
 {
@@ -64,6 +65,17 @@ public:
      */
     void processSaves();
 
+    /**
+     * Blocks while processing saves, until every queued save is confirmed or
+     * the given timeout passes (failed saves are retried as usual).
+     *
+     * Call this once when the server is shutting down, after the last saves
+     * are queued.
+     *
+     * @return The number of accounts whose data couldn't be saved.
+     */
+    std::size_t flush(std::chrono::seconds timeout);
+
 private:
     using Clock = std::chrono::steady_clock;
 
@@ -73,6 +85,9 @@ private:
     /** The max number of saves that we'll have in flight at once. Limits how
         much data we hand to the network at once. */
     static constexpr std::size_t MAX_IN_FLIGHT_SAVES{32};
+
+    /** How often flush() checks for save results. */
+    static constexpr std::chrono::milliseconds FLUSH_POLL_INTERVAL{10};
 
     struct PendingSave {
         /** The account's latest data. */

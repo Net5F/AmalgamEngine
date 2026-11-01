@@ -32,25 +32,45 @@ void SaveSystem::saveIfNecessary()
     // everything to the database.
     if ((saveTimer.getTime() >= Config::SAVE_PERIOD_S)
         && !(world.database->backupIsInProgress())) {
-        LOG_INFO("Saving entities, client entities, items, and map...");
-
-        // Save all of our data to the in-memory database.
-        SQLite::Transaction transaction{world.database->startTransaction()};
-
-        world.saveHelper.saveNonClientEntities();
-        world.saveHelper.saveClientEntities();
-        saveItems();
-        saveGlobalStoredValues();
-        // TODO: Track changed tiles and save to the database.
-        world.tileMap.save("TileMap.bin");
-
-        transaction.commit();
+        saveAll();
 
         // Backup the in-memory database to the file database.
         world.database->backupToFile();
 
         saveTimer.reset();
     }
+}
+
+void SaveSystem::saveForShutdown()
+{
+    // If a periodic backup is still running, wait for it. We can't start
+    // another until it finishes.
+    world.database->waitForBackup();
+
+    saveAll();
+
+    // Backup the in-memory database to the file database, and wait for it to
+    // finish.
+    LOG_INFO("Backing up database...");
+    world.database->backupToFile();
+    world.database->waitForBackup();
+}
+
+void SaveSystem::saveAll()
+{
+    LOG_INFO("Saving entities, client entities, items, and map...");
+
+    // Save all of our data to the in-memory database.
+    SQLite::Transaction transaction{world.database->startTransaction()};
+
+    world.saveHelper.saveNonClientEntities();
+    world.saveHelper.saveClientEntities();
+    saveItems();
+    saveGlobalStoredValues();
+    // TODO: Track changed tiles and save to the database.
+    world.tileMap.save("TileMap.bin");
+
+    transaction.commit();
 }
 
 void SaveSystem::itemUpdated(ItemID itemID)

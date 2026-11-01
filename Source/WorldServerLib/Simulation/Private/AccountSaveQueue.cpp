@@ -2,6 +2,7 @@
 #include "Shared/AccountServiceEndpoint.h"
 #include "Log.h"
 #include "tracy/Tracy.hpp"
+#include <thread>
 #include <utility>
 
 namespace AM
@@ -76,6 +77,35 @@ void AccountSaveQueue::processSaves()
             sendSave(accountID, pendingSave);
         }
     }
+}
+
+std::size_t AccountSaveQueue::flush(std::chrono::seconds timeout)
+{
+    if (pendingSaves.empty()) {
+        return 0;
+    }
+
+    LOG_INFO("Waiting for %zu account data saves to finish...",
+             pendingSaves.size());
+
+    Clock::time_point deadline{Clock::now() + timeout};
+    while (true) {
+        processSaves();
+        if (pendingSaves.empty() || (Clock::now() >= deadline)) {
+            break;
+        }
+
+        // Give the network thread time to receive responses.
+        std::this_thread::sleep_for(FLUSH_POLL_INTERVAL);
+    }
+
+    if (!(pendingSaves.empty())) {
+        LOG_ERROR("Timed out waiting for account data saves. %zu accounts' "
+                  "data was not saved.",
+                  pendingSaves.size());
+    }
+
+    return pendingSaves.size();
 }
 
 void AccountSaveQueue::processSaveResult(const SaveResult& saveResult)

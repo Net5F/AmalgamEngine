@@ -37,7 +37,22 @@ public:
      */
     void saveIfNecessary();
 
+    /**
+     * Saves all data and backs it up to the file database, blocking until the
+     * backup finishes.
+     *
+     * Call this once when the server is shutting down, after the last sim
+     * tick.
+     */
+    void saveForShutdown();
+
 private:
+    /**
+     * Saves all data to the in-memory database. Client entity Account data
+     * is queued to be saved to the account server.
+     */
+    void saveAll();
+
     /**
      * Adds the given item to updatedItems.
      */

@@ -67,6 +67,11 @@ public:
      */
     bool backupIsInProgress();
 
+    /**
+     * If a backup is in progress, blocks until it finishes.
+     */
+    void waitForBackup();
+
     //-------------------------------------------------------------------------
     // Entities
     //-------------------------------------------------------------------------
@@ -301,12 +306,16 @@ protected:
 
     /** Calls performBackup(). */
     std::thread backupThreadObj;
-    /** Turn false to signal that the database thread should end. */
+    /** Set to true to signal that the backup thread should end. */
     std::atomic<bool> exitRequested;
 
     /** Used for signaling the backup thread. */
     std::mutex backupMutex;
     std::condition_variable_any backupCondVar;
+    /** Used by the backup thread to signal that a backup finished.
+        Note: This is separate from backupCondVar, so a waiter can't consume
+              a notification that was meant for the backup thread. */
+    std::condition_variable_any backupFinishedCondVar;
     // Note: This doesn't need to be atomic to work with the condition variable,
     //       but it needs to be atomic to return it from backupIsInProgress().
     std::atomic<bool> backupRequested;

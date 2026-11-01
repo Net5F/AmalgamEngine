@@ -4,6 +4,7 @@
 #include "Log.h"
 
 #include "tracy/Tracy.hpp"
+#include <csignal>
 #include <functional>
 #include <string>
 #include <iostream>
@@ -33,7 +34,6 @@ Application::Application()
 , simCaller{std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
 , callerGroup{{&simCaller, &networkCaller}, "Main loop"}
-, exitRequested{false}
 {
     // Initialize the global timer.
     Timer::getGlobalTime();
@@ -50,6 +50,14 @@ void Application::start()
     if (!messageProcessorExtension || !simulationExtension) {
         LOG_FATAL("All extensions must be registered before calling start()");
     }
+
+    // Exit the main loop when the process receives a termination signal.
+    std::signal(SIGINT, &Application::onTerminationSignal);
+    std::signal(SIGTERM, &Application::onTerminationSignal);
+#ifdef SIGBREAK
+    // Windows-only: Ctrl+Break.
+    std::signal(SIGBREAK, &Application::onTerminationSignal);
+#endif
 
     // Start the asynchronous network thread.
     network.start();
@@ -70,6 +78,29 @@ void Application::start()
 
         callerGroup.waitForNextCall();
     }
+
+    shutdown();
+}
+
+void Application::onTerminationSignal(int)
+{
+    exitRequested = true;
+}
+
+void Application::shutdown()
+{
+    LOG_INFO("Shutting down...");
+
+    // Disconnect all clients and stop accepting new ones.
+    // Note: The sim won't tick again, so it won't process the disconnects.
+    //       Client entities (including lingering ones) are saved as they are.
+    network.clientEndpoint.disconnectAll(DisconnectNotice::ServerShutdown);
+    network.clientEndpoint.tick();
+
+    // Save all world state and wait for it to be persisted.
+    simulation.shutdown();
+
+    LOG_INFO("Shutdown complete.");
 }
 
 } // End namespace WorldServer

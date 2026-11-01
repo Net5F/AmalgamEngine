@@ -44,12 +44,6 @@ TileMap::TileMap(const GraphicData& inGraphicData,
              chunkExtent.xLength, chunkExtent.yLength, chunkExtent.zLength);
 }
 
-TileMap::~TileMap()
-{
-    // Save the map state to TileMap.bin.
-    save("TileMap.bin");
-}
-
 void TileMap::save(const std::string& fileName)
 {
     LOG_INFO("Saving map...");

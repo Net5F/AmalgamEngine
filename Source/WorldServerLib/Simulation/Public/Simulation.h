@@ -22,6 +22,7 @@
 #include "SaveSystem.h"
 #include <SDL3/SDL_stdinc.h>
 #include <atomic>
+#include <chrono>
 #include <memory>
 
 namespace AM
@@ -55,6 +56,10 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S{.001};
 
+    /** How long shutdown() will wait for AccountData saves to be confirmed
+        by the account server. Long enough for a couple of retries. */
+    static constexpr std::chrono::seconds SHUTDOWN_ACCOUNT_SAVE_TIMEOUT{15};
+
     Simulation(const SimulationContext& inSimContext);
 
     ~Simulation();
@@ -83,6 +88,15 @@ public:
      * the next sim iteration.
      */
     void tick();
+
+    /**
+     * Saves all world state, backs it up to the file database, and waits for
+     * client entity AccountData saves to finish (up to
+     * SHUTDOWN_ACCOUNT_SAVE_TIMEOUT).
+     *
+     * Call this once when the server is shutting down, after the last tick.
+     */
+    void shutdown();
 
     /**
      * See extension member comment.

@@ -21,6 +21,10 @@ namespace WorldServer
 class IMessageProcessorExtension
 {
 public:
+    // Note: The engine owns extensions through a pointer to this interface,
+    //       so the destructor must be virtual.
+    virtual ~IMessageProcessorExtension() = default;
+
     // Canonical constructor (derived class must implement):
     // MessageProcessorExtension(const MessageProcessorExDependencies& deps)
 
