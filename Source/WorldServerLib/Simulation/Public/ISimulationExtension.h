@@ -2,6 +2,7 @@
 
 #include "ConnectionHandle.h"
 #include "entt/fwd.hpp"
+#include <SDL3/SDL_stdinc.h>
 
 namespace AM
 {
@@ -91,6 +92,9 @@ public:
     virtual bool isItemChangeRequestValid(
         const ItemChangeRequest& itemChangeRequest) const = 0;
 
+    //-------------------------------------------------------------------------
+    // Simulation Event Hooks
+    //-------------------------------------------------------------------------
     /**
      * Called when a client entity is added to the world, after its saved
      * components are loaded and the engine's defaults are added.
@@ -102,9 +106,25 @@ public:
      *       ClientSimData components are added.
      * Note: This isn't called when a client takes over its account's
      *       lingering entity, since that entity was already initialized.
+     *       See onClientEntityReattached().
      */
-    virtual void initClientEntity(entt::entity entity,
-                                  const ClientEntityLoadInfo& loadInfo) = 0;
+    virtual void onClientEntityLoaded(entt::entity entity,
+                                      const ClientEntityLoadInfo& loadInfo) = 0;
+
+    /**
+     * Called when a client takes over its account's lingering entity (i.e. it
+     * reconnected before the entity was removed).
+     *
+     * The entity already went through onClientEntityLoaded() when it was
+     * first loaded, and its components reflect its current state, so don't
+     * re-add defaults here. Use this for things that should react to a
+     * reconnect, e.g. clearing an "away" state.
+     *
+     * Note: This is called after the entity's new ClientSimData is added, so
+     *       the new client handle is available.
+     */
+    virtual void onClientEntityReattached(entt::entity entity, Sint64 accountID)
+        = 0;
 };
 
 } // namespace WorldServer

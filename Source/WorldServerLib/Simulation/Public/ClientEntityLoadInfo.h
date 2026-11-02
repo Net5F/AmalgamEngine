@@ -9,7 +9,7 @@ namespace WorldServer
 
 /**
  * Info about a client entity that was just loaded, passed to
- * ISimulationExtension::initClientEntity().
+ * ISimulationExtension::onClientEntityLoaded().
  *
  * The flags tell you which situation the account is in:
  *   Neither: A brand new account.

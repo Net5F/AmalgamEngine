@@ -212,7 +212,7 @@ entt::entity ClientConnectionSystem::createClientEntity(
 
     // Let the project add its defaults.
     if (extension) {
-        extension->initClientEntity(
+        extension->onClientEntityLoaded(
             newEntity,
             {.accountID{accountID},
              .hadAccountData{hadAccountData},
@@ -269,6 +269,11 @@ void ClientConnectionSystem::attachClientToEntity(
                                     clientConnected.accountID);
 
     world.clientHandleMap[clientConnected.clientHandle] = entity;
+
+    // Let the project react to the reconnect.
+    if (extension) {
+        extension->onClientEntityReattached(entity, clientConnected.accountID);
+    }
 
     LOG_INFO(
         "Attached client to existing entity. clientID: %u, accountID: %lld, "
