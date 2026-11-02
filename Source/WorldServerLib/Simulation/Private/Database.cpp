@@ -7,6 +7,7 @@
 #include "SQLiteCpp/Backup.h"
 #include <sqlite3.h>
 #include <array>
+#include <stdexcept>
 #include <string>
 
 #ifdef SQLITECPP_ENABLE_ASSERT_HANDLER
@@ -35,6 +36,7 @@ Database::Database()
 , backupCondVar{}
 , backupFinishedCondVar{}
 , backupRequested{false}
+, backupSucceeded{true}
 , insertEntityQuery{nullptr}
 , deleteEntityQuery{nullptr}
 , iterateEntitiesQuery{nullptr}
@@ -161,6 +163,11 @@ void Database::waitForBackup()
                                [this] { return !(backupRequested.load()); });
 }
 
+bool Database::lastBackupSucceeded()
+{
+    return backupSucceeded.load();
+}
+
 void Database::saveEntityData(
     entt::entity entity, std::span<const Uint8> serializedEngineComponents,
     std::span<const Uint8> serializedProjectComponents)
@@ -201,11 +208,12 @@ void Database::deleteEntityData(entt::entity entity)
     deleteEntityQuery->tryReset();
 }
 
-void Database::saveClientEntityData(
+bool Database::saveClientEntityData(
     Sint64 accountID, std::span<const Uint8> serializedEngineComponents,
     std::span<const Uint8> serializedProjectComponents)
 {
     SQLite::Statement* query{insertClientEntityQuery.get()};
+    bool succeeded{true};
     try {
         query->bind(1, accountID);
         query->bind(2, serializedEngineComponents.data(),
@@ -215,19 +223,23 @@ void Database::saveClientEntityData(
 
         query->exec();
     } catch (std::exception& e) {
-        LOG_ERROR("Failed to save client entity data: %s", e.what());
+        LOG_ERROR("Failed to save client entity data for accountID %lld: %s",
+                  static_cast<long long>(accountID), e.what());
+        succeeded = false;
     }
 
     // Note: We reset even on failure, so one failed save doesn't block the
     //       rest. We use tryReset() since reset() re-throws a failed step's
     //       error.
     query->tryReset();
+    return succeeded;
 }
 
-void Database::saveItemData(ItemID itemID,
+bool Database::saveItemData(ItemID itemID,
                             std::span<const Uint8> serializedItem,
                             ItemVersion version, std::string_view initScript)
 {
+    bool succeeded{true};
     try {
         insertItemQuery->bind(1, static_cast<int>(itemID));
         insertItemQuery->bind(2, serializedItem.data(),
@@ -240,13 +252,16 @@ void Database::saveItemData(ItemID itemID,
 
         insertItemQuery->exec();
     } catch (std::exception& e) {
-        LOG_ERROR("Failed to save item data: %s", e.what());
+        LOG_ERROR("Failed to save item data for itemID %u: %s",
+                  static_cast<unsigned int>(itemID), e.what());
+        succeeded = false;
     }
 
     // Note: We reset even on failure, so one failed save doesn't block the
     //       rest. We use tryReset() since reset() re-throws a failed step's
     //       error.
     insertItemQuery->tryReset();
+    return succeeded;
 }
 
 void Database::deleteItemData(ItemID itemID)
@@ -446,10 +461,18 @@ void Database::performBackup()
 
         // Execute all backup steps at once.
         try {
+            // Note: executeStep() doesn't throw if the file database is busy
+            //       or locked (e.g. it's open in another program), so we
+            //       check that the backup actually finished.
             SQLite::Backup backup(backupDatabase, database);
-            backup.executeStep(-1);
+            int result{backup.executeStep(-1)};
+            if (result != SQLITE_DONE) {
+                throw std::runtime_error{sqlite3_errstr(result)};
+            }
+            backupSucceeded = true;
         } catch (std::exception& e) {
-            LOG_ERROR("Failed to save database to file: %s", e.what());
+            LOG_INFO("Failed to save database to file: %s", e.what());
+            backupSucceeded = false;
         }
 
         backupRequested = false;

@@ -6,7 +6,7 @@
 #include "WorldLogoutRequest.h"
 #include "EnttObserver.h"
 #include "PersistedComponentList.h"
-#include "BinaryBuffer.h"
+#include "SaveHelper.h"
 #include "entt/fwd.hpp"
 #include <unordered_map>
 #include <unordered_set>
@@ -65,14 +65,6 @@ public:
     void setExtension(ISimulationExtension* inExtension);
 
 private:
-    /** A client entity's saved ClientPersistence::World components. */
-    struct SavedComponents {
-        /** Ordered tagged engine component records. */
-        BinaryBuffer engineComponents{};
-        /** Ordered tagged project component records. */
-        BinaryBuffer projectComponents{};
-    };
-
     enum class GetSavedComponentsResult { Success, NotFound, Error };
 
     /**
@@ -108,7 +100,11 @@ private:
 
     /**
      * Copies the given account's saved ClientPersistence::World components
-     * from our database into savedComponents.
+     * into savedComponents.
+     *
+     * If we have data whose save failed (see
+     * SaveHelper::getUnsavedWorldData()), it's newer than what's in the
+     * database, so it's used instead.
      *
      * @return NotFound if the account has no saved data in this world (or no
      *         components use World), Error if the data couldn't be read, else
@@ -116,7 +112,7 @@ private:
      */
     GetSavedComponentsResult
         getSavedWorldComponents(Sint64 accountID,
-                                SavedComponents& savedComponents);
+                                SaveHelper::ClientWorldData& savedComponents);
 
     /**
      * Tells the given client that it failed to connect, and disconnects it.

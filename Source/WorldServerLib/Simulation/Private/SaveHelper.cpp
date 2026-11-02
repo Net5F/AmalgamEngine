@@ -27,6 +27,7 @@ SaveHelper::SaveHelper(World& inWorld, Simulation& inSimulation)
 , simulation{inSimulation}
 , workBuffer1{}
 , workBuffer2{}
+, failedWorldSaves{}
 {
 }
 
@@ -63,6 +64,10 @@ void SaveHelper::saveClientEntities()
     for (entt::entity entity : world.registry.view<ClientSimData>()) {
         saveClientEntity(entity);
     }
+
+    // Retry any saves that failed (including those of entities that have
+    // since been removed).
+    retryFailedWorldSaves();
 }
 
 void SaveHelper::saveClientEntity(entt::entity entity)
@@ -76,6 +81,17 @@ void SaveHelper::saveClientEntity(entt::entity entity)
     Sint64 accountID{world.registry.get<ClientSimData>(entity).accountID};
     saveAccountComponents(entity, accountID);
     saveWorldComponents(entity, accountID);
+}
+
+const SaveHelper::ClientWorldData*
+    SaveHelper::getUnsavedWorldData(Sint64 accountID) const
+{
+    auto saveIt{failedWorldSaves.find(accountID)};
+    if (saveIt == failedWorldSaves.end()) {
+        return nullptr;
+    }
+
+    return &(saveIt->second);
 }
 
 void SaveHelper::saveAccountComponents(entt::entity entity, Sint64 accountID)
@@ -111,8 +127,36 @@ void SaveHelper::saveWorldComponents(entt::entity entity, Sint64 accountID)
             ProjectPersistedComponentTypes::ClientEntryTypes<Persistence>>(
             entity, workBuffer2);
 
-        world.database->saveClientEntityData(accountID, workBuffer1,
-                                             workBuffer2);
+        // If the save succeeds, it replaces any data that previously failed.
+        // If it fails, keep the data so it isn't lost.
+        if (world.database->saveClientEntityData(accountID, workBuffer1,
+                                                 workBuffer2)) {
+            failedWorldSaves.erase(accountID);
+        }
+        else {
+            failedWorldSaves[accountID]
+                = ClientWorldData{workBuffer1, workBuffer2};
+        }
+    }
+}
+
+void SaveHelper::retryFailedWorldSaves()
+{
+    for (auto it = failedWorldSaves.begin(); it != failedWorldSaves.end();) {
+        const ClientWorldData& data{it->second};
+        if (world.database->saveClientEntityData(
+                it->first, data.engineComponents, data.projectComponents)) {
+            it = failedWorldSaves.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+
+    if (!(failedWorldSaves.empty())) {
+        LOG_ERROR("%zu client entities' World data failed to save. It will "
+                  "be retried, but will be lost if the server exits first.",
+                  failedWorldSaves.size());
     }
 }
 

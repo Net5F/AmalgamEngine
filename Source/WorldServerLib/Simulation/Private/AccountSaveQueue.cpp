@@ -100,9 +100,9 @@ std::size_t AccountSaveQueue::flush(std::chrono::seconds timeout)
     }
 
     if (!(pendingSaves.empty())) {
-        LOG_ERROR("Timed out waiting for account data saves. %zu accounts' "
-                  "data was not saved.",
-                  pendingSaves.size());
+        LOG_INFO("Timed out waiting for account data saves. %zu accounts' "
+                 "data was not saved.",
+                 pendingSaves.size());
     }
 
     return pendingSaves.size();

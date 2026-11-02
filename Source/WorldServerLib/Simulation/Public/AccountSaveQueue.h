@@ -33,6 +33,8 @@ namespace WorldServer
  *
  * When the server shuts down, flush() is used to wait for the remaining
  * saves. If they can't be completed before its timeout, their data is lost.
+ *
+ * Note: Client entity world data saving is handled directly in SaveHelper.
  */
 class AccountSaveQueue
 {
@@ -50,7 +52,8 @@ public:
 
     /**
      * Returns the given account's latest queued data, if the account server
-     * hasn't confirmed saving it yet.
+     * hasn't confirmed saving it yet. If there isn't a pending save for the
+     * given account, returns nullptr.
      *
      * When an account logs in, this data is newer than what the account
      * server sent us, so it should be used instead.

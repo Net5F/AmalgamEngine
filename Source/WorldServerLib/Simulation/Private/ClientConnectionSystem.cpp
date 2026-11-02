@@ -180,7 +180,7 @@ entt::entity ClientConnectionSystem::createClientEntity(
     // Get the account's saved World components.
     // Note: If this fails, we reject the client instead of giving it fresh
     //       data, since the next save would overwrite its real data.
-    SavedComponents worldComponents{};
+    SaveHelper::ClientWorldData worldComponents{};
     GetSavedComponentsResult worldResult{
         getSavedWorldComponents(accountID, worldComponents)};
     if (worldResult == GetSavedComponentsResult::Error) {
@@ -513,11 +513,18 @@ bool ClientConnectionSystem::addDefaultComponents(
 
 ClientConnectionSystem::GetSavedComponentsResult
     ClientConnectionSystem::getSavedWorldComponents(
-        Sint64 accountID, SavedComponents& savedComponents)
+        Sint64 accountID, SaveHelper::ClientWorldData& savedComponents)
 {
     // If no components use World persistence, there's nothing to get.
     if constexpr (!USES_CLIENT_PERSISTENCE<ClientPersistence::World>) {
         return GetSavedComponentsResult::NotFound;
+    }
+
+    // If this account's last save failed, use its unsaved data.
+    if (const SaveHelper::ClientWorldData* unsavedData{
+            world.saveHelper.getUnsavedWorldData(accountID)}) {
+        savedComponents = *unsavedData;
+        return GetSavedComponentsResult::Success;
     }
 
     // Copy the saved data out of the database.

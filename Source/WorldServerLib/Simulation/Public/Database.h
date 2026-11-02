@@ -72,6 +72,14 @@ public:
      */
     void waitForBackup();
 
+    /**
+     * @return true if the most recent backup succeeded (or no backup has
+     *         been performed yet), else false.
+     *         If a backup is in progress, this is the result of the one
+     *         before it.
+     */
+    bool lastBackupSucceeded();
+
     //-------------------------------------------------------------------------
     // Entities
     //-------------------------------------------------------------------------
@@ -145,8 +153,10 @@ public:
      * records.
      *
      * See PERSISTED_COMPONENTS_VERSION comment for format info.
+     *
+     * @return true if successful, else false.
      */
-    void saveClientEntityData(
+    bool saveClientEntityData(
         Sint64 accountID, std::span<const Uint8> serializedEngineComponents,
         std::span<const Uint8> serializedProjectComponents);
 
@@ -207,8 +217,9 @@ public:
      * Adds or overwrites an item table entry.
      *
      * @param itemID The item entry to update.
+     * @return true if successful, else false.
      */
-    void saveItemData(ItemID itemID, std::span<const Uint8> serializedItem,
+    bool saveItemData(ItemID itemID, std::span<const Uint8> serializedItem,
                       ItemVersion version, std::string_view initScript);
 
     /**
@@ -319,6 +330,8 @@ protected:
     // Note: This doesn't need to be atomic to work with the condition variable,
     //       but it needs to be atomic to return it from backupIsInProgress().
     std::atomic<bool> backupRequested;
+    /** The result of the most recent backup. Set by the backup thread. */
+    std::atomic<bool> backupSucceeded;
 
     // Pre-built queries
     std::unique_ptr<SQLite::Statement> insertEntityQuery;
