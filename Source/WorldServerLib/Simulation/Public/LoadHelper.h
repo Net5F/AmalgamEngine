@@ -26,6 +26,8 @@ public:
 
     /**
      * Loads saved non-client entities and adds them to the registry.
+     *
+     * If any entity fails to load, this is fatal (see loadEntity()).
      */
     void loadNonClientEntities();
 

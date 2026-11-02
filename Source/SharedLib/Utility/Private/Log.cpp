@@ -51,39 +51,17 @@ void Log::info(const char* expression, ...)
 
 void Log::error(const char* fileName, int line, const char* expression, ...)
 {
-    // If the app hasn't registered a tick count, default to 0.
-    Uint32 currentTick = 0;
-    if (currentTickPtr != nullptr) {
-        currentTick = *currentTickPtr;
-    }
-
-    // Get the va_list into arg.
     std::va_list arg;
     va_start(arg, expression);
+    printWithLocation("Error", fileName, line, expression, arg);
+    va_end(arg);
+}
 
-    // If enabled, write to file.
-    if (logFilePtr != nullptr) {
-        // Copy the va_list since it's undefined to use it twice.
-        std::va_list argCopy;
-        va_copy(argCopy, arg);
-
-        std::fprintf(logFilePtr,
-                     "Error at file: %s, line: %d, during tick: %u\n", fileName,
-                     line, currentTick);
-        std::vfprintf(logFilePtr, expression, argCopy);
-        std::fprintf(logFilePtr, "\n");
-        std::fflush(logFilePtr);
-
-        va_end(argCopy);
-    }
-
-    // Write to stdout.
-    std::printf("Error at file: %s, line: %d, during tick: %u\n", fileName,
-                line, currentTick);
-    std::vprintf(expression, arg);
-    std::printf("\n");
-    std::fflush(stdout);
-
+void Log::warn(const char* fileName, int line, const char* expression, ...)
+{
+    std::va_list arg;
+    va_start(arg, expression);
+    printWithLocation("Warning", fileName, line, expression, arg);
     va_end(arg);
 }
 
@@ -94,6 +72,38 @@ void Log::enableFileLogging(const std::string& fileName)
     if (logFilePtr == nullptr) {
         std::printf("Failed to open log file for writing.\n");
     }
+}
+
+void Log::printWithLocation(const char* label, const char* fileName, int line,
+                            const char* expression, std::va_list arg)
+{
+    // If the app hasn't registered a tick count, default to 0.
+    Uint32 currentTick = 0;
+    if (currentTickPtr != nullptr) {
+        currentTick = *currentTickPtr;
+    }
+
+    // If enabled, write to file.
+    if (logFilePtr != nullptr) {
+        // Copy the va_list since it's undefined to use it twice.
+        std::va_list argCopy;
+        va_copy(argCopy, arg);
+
+        std::fprintf(logFilePtr, "%s at file: %s, line: %d, during tick: %u\n",
+                     label, fileName, line, currentTick);
+        std::vfprintf(logFilePtr, expression, argCopy);
+        std::fprintf(logFilePtr, "\n");
+        std::fflush(logFilePtr);
+
+        va_end(argCopy);
+    }
+
+    // Write to stdout.
+    std::printf("%s at file: %s, line: %d, during tick: %u\n", label, fileName,
+                line, currentTick);
+    std::vprintf(expression, arg);
+    std::printf("\n");
+    std::fflush(stdout);
 }
 
 } // namespace AM

@@ -115,8 +115,8 @@ entt::entity LoadHelper::loadClientEntity(
         || !parseComponents(worldComponents.projectComponents,
                             worldProjectComponents, entt::null,
                             "world project")) {
-        LOG_ERROR("Failed to parse client entity data for accountID: %lld",
-                  static_cast<long long>(accountID));
+        LOG_WARN("Failed to parse client entity data for accountID: %lld",
+                 static_cast<long long>(accountID));
         return entt::null;
     }
 
@@ -129,9 +129,9 @@ entt::entity LoadHelper::loadClientEntity(
                                  savedPosition)
         || !getSavedClientComponent(accountEngineComponents,
                                     worldEngineComponents, savedGraphicState)) {
-        LOG_ERROR("Failed to load client entity Position or GraphicState for "
-                  "accountID: %lld",
-                  static_cast<long long>(accountID));
+        LOG_WARN("Failed to load client entity Position or GraphicState for "
+                 "accountID: %lld",
+                 static_cast<long long>(accountID));
         return entt::null;
     }
 
@@ -189,9 +189,9 @@ entt::entity LoadHelper::loadClientEntity(
                        && loadProjectComponents<WorldProjectEntries>(
                            entity, worldProjectComponents)};
     if (!loadSucceeded) {
-        LOG_ERROR("Failed to load client entity components for accountID: "
-                  "%lld",
-                  static_cast<long long>(accountID));
+        LOG_WARN("Failed to load client entity components for accountID: "
+                 "%lld",
+                 static_cast<long long>(accountID));
         world.registry.destroy(entity);
         return entt::null;
     }
@@ -210,38 +210,42 @@ void LoadHelper::loadEntity(
     entt::entity entity, std::span<const Uint8> serializedEngineComponents,
     std::span<const Uint8> serializedProjectComponents)
 {
+    // Note: Any failure to load this entity is fatal. Unlike client entities,
+    //       there's no way to recover (e.g. by rejecting the client), and if
+    //       we kept going, the next save would overwrite the entity's data
+    //       with whatever we managed to load. Failing at startup means
+    //       nothing has been saved yet, so the data can still be fixed.
+    // TODO: If we ever want the world to start despite bad entity data,
+    //       quarantine the entity's saved data (e.g. move it to a separate
+    //       table) instead of failing.
+
     // Build the lists of each component's position within the buffer.
-    // Note: These lists are expected to have been saved in sorted order by 
+    // Note: These lists are expected to have been saved in sorted order by
     //       type ID (the save path does this automatically).
     std::vector<SerializedComponent> engineComponents{};
     std::vector<SerializedComponent> projectComponents{};
     if (!parseComponents(serializedEngineComponents, engineComponents, entity,
-                         "engine")) {
-        return;
-    }
-    if (!parseComponents(serializedProjectComponents, projectComponents,
-                         entity, "project")) {
-        return;
+                         "engine")
+        || !parseComponents(serializedProjectComponents, projectComponents,
+                            entity, "project")) {
+        LOG_FATAL("Failed to parse saved data for entity %u.", entity);
     }
 
     // Find the Position component within the engine list and deserialize it.
     // Note: We do this separately because we know every entity has a
     //       Position, and we need it for createEntity() (and we want to
     //       use createEntity() to centralize logic and avoid bugs).
-    using PositionEntry
-        = EnginePersistedComponentTypes::EntryFor<Position>;
+    using PositionEntry = EnginePersistedComponentTypes::EntryFor<Position>;
     const SerializedComponent* serializedPosition{
         findComponent(engineComponents, PositionEntry::TYPE_ID)};
     if (!serializedPosition) {
-        LOG_ERROR("Tried to load entity %u with no Position.",
-                  entity);
-        return;
+        LOG_FATAL("Tried to load entity %u with no Position.", entity);
     }
 
     Position position{};
     if (!deserializeComponent<PositionEntry>(entity, *serializedPosition,
                                              position)) {
-        return;
+        LOG_FATAL("Failed to load Position for entity %u.", entity);
     }
 
     // Add the entity to the registry.
@@ -253,11 +257,17 @@ void LoadHelper::loadEntity(
     }
 
     // Load the entity's persisted components into the registry.
-    // Note: If a component fails to load, we skip it and keep the rest.
-    loadEngineComponents<EnginePersistedComponentTypes::EntryTypes>(
-        newEntity, engineComponents);
-    loadProjectComponents<ProjectPersistedComponentTypes::EntryTypes>(
-        newEntity, projectComponents);
+    // Note: We load both sets before failing, so every component that
+    //       failed gets logged.
+    bool engineSucceeded{
+        loadEngineComponents<EnginePersistedComponentTypes::EntryTypes>(
+            newEntity, engineComponents)};
+    bool projectSucceeded{
+        loadProjectComponents<ProjectPersistedComponentTypes::EntryTypes>(
+            newEntity, projectComponents)};
+    if (!engineSucceeded || !projectSucceeded) {
+        LOG_FATAL("Failed to load components for entity %u.", entity);
+    }
 
     // Init any components with lazy-updated timers.
     initTimerComponents(newEntity);
@@ -275,9 +285,9 @@ bool LoadHelper::parseComponents(
     while (readOffset < serializedComponents.size()) {
         std::size_t remainingSize{serializedComponents.size() - readOffset};
         if (remainingSize < COMPONENT_HEADER_SIZE) {
-            LOG_ERROR("Malformed %s component data for entity %u: "
-                      "%zu trailing bytes is too small for a component header.",
-                      componentSetName, entity, remainingSize);
+            LOG_WARN("Malformed %s component data for entity %u: "
+                     "%zu trailing bytes is too small for a component header.",
+                     componentSetName, entity, remainingSize);
             return false;
         }
 
@@ -289,18 +299,18 @@ bool LoadHelper::parseComponents(
 
         remainingSize = serializedComponents.size() - readOffset;
         if (payloadSize > remainingSize) {
-            LOG_ERROR("Malformed %s component data for entity %u: component "
-                      "ID %u declares a %u-byte payload, but only %zu bytes "
-                      "remain.",
-                      componentSetName, entity, typeID, payloadSize,
-                      remainingSize);
+            LOG_WARN("Malformed %s component data for entity %u: component "
+                     "ID %u declares a %u-byte payload, but only %zu bytes "
+                     "remain.",
+                     componentSetName, entity, typeID, payloadSize,
+                     remainingSize);
             return false;
         }
 
         if (!components.empty() && typeID <= components.back().typeID) {
-            LOG_ERROR("Malformed %s component data for entity %u: component "
-                      "IDs must be unique and ordered by ascending ID.",
-                      componentSetName, entity);
+            LOG_WARN("Malformed %s component data for entity %u: component "
+                     "IDs must be unique and ordered by ascending ID.",
+                     componentSetName, entity);
             return false;
         }
 
@@ -339,10 +349,10 @@ bool LoadHelper::loadEngineComponents(
                         entity, component);
                 }
                 else {
-                    LOG_ERROR("Can't load CollisionBitSets for entity %u: "
-                              "entity has no Collision "
-                              "(addGraphicsComponents failed?)",
-                              entity);
+                    LOG_WARN("Can't load CollisionBitSets for entity %u: "
+                             "entity has no Collision "
+                             "(addGraphicsComponents failed?)",
+                             entity);
                     return false;
                 }
             }
@@ -350,7 +360,7 @@ bool LoadHelper::loadEngineComponents(
                 // Note: We only persist GraphicState, but it implies the rest
                 //       of the graphics components.
                 if (!world.addGraphicsComponents(entity, component)) {
-                    LOG_ERROR(
+                    LOG_WARN(
                         "Failed to load graphics components for entity: %u",
                         entity);
                     return false;
@@ -435,11 +445,11 @@ bool LoadHelper::deserializeComponent(
     constexpr auto componentName{entt::type_name<Component>::value()};
 
     if (serializedComponent.version > Entry::VERSION) {
-        LOG_ERROR("Can't load component %.*s (ID: %u) for entity %u: "
-                  "serialized version %u is newer than current version %u.",
-                  static_cast<int>(componentName.size()), componentName.data(),
-                  serializedComponent.typeID, entity,
-                  serializedComponent.version, Entry::VERSION);
+        LOG_WARN("Can't load component %.*s (ID: %u) for entity %u: "
+                 "serialized version %u is newer than current version %u.",
+                 static_cast<int>(componentName.size()), componentName.data(),
+                 serializedComponent.typeID, entity,
+                 serializedComponent.version, Entry::VERSION);
         return false;
     }
 
@@ -453,35 +463,34 @@ bool LoadHelper::deserializeComponent(
                 return true;
             }
 
-            if (result
-                == ComponentMigrationResult::DeserializationFailed) {
-                LOG_ERROR("Failed to deserialize component %.*s (ID: %u) "
-                          "version %u while migrating it to version %u for "
-                          "entity %u.",
-                          static_cast<int>(componentName.size()),
-                          componentName.data(), serializedComponent.typeID,
-                          serializedComponent.version, Entry::VERSION, entity);
+            if (result == ComponentMigrationResult::DeserializationFailed) {
+                LOG_WARN("Failed to deserialize component %.*s (ID: %u) "
+                         "version %u while migrating it to version %u for "
+                         "entity %u.",
+                         static_cast<int>(componentName.size()),
+                         componentName.data(), serializedComponent.typeID,
+                         serializedComponent.version, Entry::VERSION, entity);
             }
             else if (result == ComponentMigrationResult::MigrationFailed) {
-                LOG_ERROR("Migration failed for component %.*s (ID: %u) from "
-                          "version %u to version %u for entity %u.",
-                          static_cast<int>(componentName.size()),
-                          componentName.data(), serializedComponent.typeID,
-                          serializedComponent.version, Entry::VERSION, entity);
+                LOG_WARN("Migration failed for component %.*s (ID: %u) from "
+                         "version %u to version %u for entity %u.",
+                         static_cast<int>(componentName.size()),
+                         componentName.data(), serializedComponent.typeID,
+                         serializedComponent.version, Entry::VERSION, entity);
             }
             else {
-                LOG_ERROR("No migration path for component %.*s (ID: %u) "
-                          "from version %u to version %u for entity %u.",
-                          static_cast<int>(componentName.size()),
-                          componentName.data(), serializedComponent.typeID,
-                          serializedComponent.version, Entry::VERSION, entity);
+                LOG_WARN("No migration path for component %.*s (ID: %u) "
+                         "from version %u to version %u for entity %u.",
+                         static_cast<int>(componentName.size()),
+                         componentName.data(), serializedComponent.typeID,
+                         serializedComponent.version, Entry::VERSION, entity);
             }
         }
         else {
-            LOG_ERROR("Can't migrate component %.*s (ID: %u) for entity %u: "
-                      "current component version is 0.",
-                      static_cast<int>(componentName.size()),
-                      componentName.data(), serializedComponent.typeID, entity);
+            LOG_WARN("Can't migrate component %.*s (ID: %u) for entity %u: "
+                     "current component version is 0.",
+                     static_cast<int>(componentName.size()),
+                     componentName.data(), serializedComponent.typeID, entity);
         }
         return false;
     }
@@ -489,11 +498,11 @@ bool LoadHelper::deserializeComponent(
     if (!Deserialize::fromBuffer(serializedComponent.payload.data(),
                                  serializedComponent.payload.size(),
                                  component)) {
-        LOG_ERROR("Failed to deserialize component %.*s (ID: %u, version: "
-                  "%u) for entity %u.",
-                  static_cast<int>(componentName.size()), componentName.data(),
-                  serializedComponent.typeID, serializedComponent.version,
-                  entity);
+        LOG_WARN("Failed to deserialize component %.*s (ID: %u, version: "
+                 "%u) for entity %u.",
+                 static_cast<int>(componentName.size()), componentName.data(),
+                 serializedComponent.typeID, serializedComponent.version,
+                 entity);
         return false;
     }
 
