@@ -127,6 +127,17 @@ void SaveHelper::saveWorldComponents(entt::entity entity, Sint64 accountID)
             ProjectPersistedComponentTypes::ClientEntryTypes<Persistence>>(
             entity, workBuffer2);
 
+        // If the data is too large, skip the save. Keep whatever data is
+        // already saved (and any failed save, since it was within the limit).
+        if ((workBuffer1.size() > CLIENT_WORLD_DATA_BLOB_MAX_BYTES)
+            || (workBuffer2.size() > CLIENT_WORLD_DATA_BLOB_MAX_BYTES)) {
+            LOG_ERROR("World data exceeds size limit, skipping save. "
+                      "AccountID: %lld, engine bytes: %zu, project bytes: %zu",
+                      static_cast<long long>(accountID), workBuffer1.size(),
+                      workBuffer2.size());
+            return;
+        }
+
         // If the save succeeds, it replaces any data that previously failed.
         // If it fails, keep the data so it isn't lost.
         if (world.database->saveClientEntityData(accountID, workBuffer1,

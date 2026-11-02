@@ -83,6 +83,8 @@ private:
      * the in-memory database. Does nothing if no components use World.
      *
      * If the save fails, adds the data to failedWorldSaves.
+     * If the data exceeds CLIENT_WORLD_DATA_BLOB_MAX_BYTES, skips the save,
+     * keeping whatever data was previously saved.
      */
     void saveWorldComponents(entt::entity entity, Sint64 accountID);
 
