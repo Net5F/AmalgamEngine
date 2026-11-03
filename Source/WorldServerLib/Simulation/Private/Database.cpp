@@ -302,7 +302,11 @@ void Database::initTables()
     // The below commands define the schema for World.db.
     // Note: We only need to init the file-backed database, since the in-memory
     //       database will copy it.
+    // Note: We init everything in a single transaction, so a failure (or a
+    //       crash) can't leave a table created without its seeded rows.
     try {
+        SQLite::Transaction transaction{backupDatabase};
+
         // Version numbers for all data in this database that needs to support
         // migration.
         if (!backupDatabase.tableExists("versions")) {
@@ -381,8 +385,10 @@ void Database::initTables()
             backupDatabase.exec(
                 "INSERT INTO global_stored_value_map VALUES(X'')");
         }
+
+        transaction.commit();
     } catch (std::exception& e) {
-        LOG_ERROR("Failed to init table: %s", e.what());
+        LOG_FATAL("Failed to init table: %s", e.what());
     }
 }
 

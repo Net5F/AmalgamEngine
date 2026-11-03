@@ -276,7 +276,11 @@ public:
     template<typename Func>
     void getGlobalStoredValueMap(Func callback)
     {
-        getGlobalStoredValueMapQuery->executeStep();
+        // Note: initTables() seeds this table's single row, so it should
+        //       only be missing if it was deleted manually.
+        if (!getGlobalStoredValueMapQuery->executeStep()) {
+            LOG_FATAL("global_stored_value_map row is missing in World.db.");
+        }
         SQLite::Column mapColumn{getGlobalStoredValueMapQuery->getColumn(0)};
         callback(std::span<const Uint8>{
             static_cast<const Uint8*>(mapColumn.getBlob()),
