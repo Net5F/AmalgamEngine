@@ -58,14 +58,18 @@ void LoadHelper::loadNonClientEntities()
 
 void LoadHelper::loadItems()
 {
+    // Note: Any failure to load an item is fatal. If we skipped it, its
+    //       numeric and string IDs would become free for new items (which
+    //       would overwrite its saved data), and anything referencing it
+    //       would dangle. Failing at startup means nothing has been saved
+    //       yet, so the data can still be fixed.
     auto loadItem = [&](ItemID itemID, std::span<const Uint8> serializedItem,
                         ItemVersion version, std::string_view initScript) {
         // Initialize the item's non-script-provided fields.
         Item item{.numericID = itemID};
         if (!Deserialize::fromBuffer(serializedItem.data(),
                                      serializedItem.size(), item)) {
-            LOG_ERROR("Item failed to deserialize: %u", itemID);
-            return;
+            LOG_FATAL("Item failed to deserialize: %u", itemID);
         }
 
         // Add the item to ItemData.
@@ -77,6 +81,9 @@ void LoadHelper::loadItems()
 
 void LoadHelper::loadGlobalStoredValues()
 {
+    // Note: Failing to load is fatal. The map is saved as a single blob on
+    //       every save, so if we kept going, the next save would overwrite
+    //       all of the global values.
     auto loadGlobalMap = [&](std::span<const Uint8> serializedMap) {
         if (serializedMap.empty()) {
             return;
@@ -84,7 +91,7 @@ void LoadHelper::loadGlobalStoredValues()
 
         if (!Deserialize::fromBuffer(serializedMap.data(), serializedMap.size(),
                                      world.globalStoredValueMap)) {
-            LOG_ERROR("Failed to deserialize global stored value map.");
+            LOG_FATAL("Failed to deserialize global stored value map.");
         }
     };
 

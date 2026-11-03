@@ -33,11 +33,17 @@ public:
 
     /**
      * Loads saved item definitions.
+     *
+     * If any item fails to load, this is fatal (a skipped item's IDs could be
+     * reused, overwriting its saved data).
      */
     void loadItems();
 
     /**
      * Loads saved global stored values.
+     *
+     * If the map fails to load, this is fatal (the next save would overwrite
+     * it).
      */
     void loadGlobalStoredValues();
 
