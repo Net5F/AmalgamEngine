@@ -27,6 +27,7 @@
 #include "Log.h"
 #include "AMAssert.h"
 #include "sol/sol.hpp"
+#include "fmt/format.h"
 
 namespace AM
 {
@@ -60,6 +61,8 @@ World::World(const SimulationContext& inSimContext)
                 Config::SPAWN_POINT_RANDOM_MAX_X}
 , yDistribution{Config::SPAWN_POINT_RANDOM_MIN_Y,
                 Config::SPAWN_POINT_RANDOM_MAX_Y}
+, stableIDGenerator{(static_cast<std::uint64_t>(randomDevice()) << 32)
+                    | randomDevice()}
 , groupX{}
 , groupY{}
 , columnIndex{0}
@@ -325,6 +328,11 @@ bool World::setStableID(entt::entity entity, std::string_view stableID)
         return false;
     }
 
+    // Reject the prefix that's reserved for assignUniqueStableID().
+    if (workStringID.starts_with(StableID::UNIQUE_PREFIX)) {
+        return false;
+    }
+
     // If the ID is already in use, only succeed if this entity is the holder.
     auto stableIDIt{stableIDMap.find(workStringID)};
     if (stableIDIt != stableIDMap.end()) {
@@ -336,6 +344,20 @@ bool World::setStableID(entt::entity entity, std::string_view stableID)
     registry.emplace<StableID>(entity, workStringID);
 
     return true;
+}
+
+const std::string& World::assignUniqueStableID(entt::entity entity)
+{
+    // Generate a random ID. Regenerate on the (astronomically unlikely)
+    // chance that it's already in use.
+    do {
+        workStringID = fmt::format("{}{:016x}", StableID::UNIQUE_PREFIX,
+                                   stableIDGenerator());
+    } while (stableIDMap.contains(workStringID));
+
+    // Replace the entity's ID (our signal handlers will update stableIDMap).
+    registry.remove<StableID>(entity);
+    return registry.emplace<StableID>(entity, workStringID).value;
 }
 
 entt::entity World::getEntityByStableID(std::string_view stableID)

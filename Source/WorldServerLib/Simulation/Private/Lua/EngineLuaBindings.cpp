@@ -13,6 +13,7 @@
 #include "ItemHandler.h"
 #include "Inventory.h"
 #include "StoredValues.h"
+#include "StableID.h"
 #include "SystemMessage.h"
 #include "StringTools.h"
 #include "ItemProperty.h"
@@ -353,8 +354,10 @@ void EngineLuaBindings::setStableID(std::string_view stableID)
         workString.clear();
         workString.append("Failed to set stable ID \"");
         workString.append(stableID);
-        workString.append("\": ID is empty, too long, or already in use by "
-                          "another entity");
+        workString.append("\": ID is empty, too long, uses the reserved "
+                          "prefix \"");
+        workString.append(StableID::UNIQUE_PREFIX);
+        workString.append("\", or is already in use by another entity");
         throw std::runtime_error{workString};
     }
 }

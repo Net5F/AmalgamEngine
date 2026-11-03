@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 namespace AM
 {
@@ -20,6 +21,11 @@ namespace WorldServer
 struct StableID {
     /** The max length of a stable ID. */
     static constexpr std::size_t MAX_LENGTH{50};
+
+    /** The prefix used by IDs from World::assignUniqueStableID().
+        World::setStableID() rejects IDs with this prefix, so generated IDs
+        can't collide with script-assigned IDs. */
+    static constexpr std::string_view UNIQUE_PREFIX{"_gen_"};
 
     /** The ID. Always a derived string ID (see
         StringTools::deriveStringID()). */

@@ -218,10 +218,24 @@ public:
      *
      * @param stableID The ID to set. Will be derived (see
      *                 StringTools::deriveStringID()).
-     * @return true if successful, else false (ID is empty, too long, or
-     *         already in use by a different entity).
+     * @return true if successful, else false (ID is empty, too long, uses
+     *         the reserved StableID::UNIQUE_PREFIX, or already in use by a
+     *         different entity).
      */
     bool setStableID(entt::entity entity, std::string_view stableID);
+
+    /**
+     * Gives the entity a newly generated, world-unique stable ID, replacing
+     * any ID it already has.
+     *
+     * IDs are StableID::UNIQUE_PREFIX followed by a random 64-bit value in
+     * hex. They're random instead of sequential so that IDs are never reused
+     * after a crash rolls back saved state (e.g. an offline player's
+     * OwnedMachines may still reference an ID whose entity was never saved).
+     *
+     * @return The generated ID.
+     */
+    const std::string& assignUniqueStableID(entt::entity entity);
 
     /**
      * Returns the entity with the given stable ID, or entt::null if no entity
@@ -284,6 +298,9 @@ private:
     std::mt19937 generator;
     std::uniform_real_distribution<float> xDistribution;
     std::uniform_real_distribution<float> yDistribution;
+
+    /** Used to generate unique stable IDs. */
+    std::mt19937_64 stableIDGenerator;
 
     // For grouped spawn points.
     float groupX;
