@@ -187,7 +187,7 @@ private:
         if ((requestedCapacity == 0)
             || (requestedCapacity
                 > std::numeric_limits<ConnectionHandle::ID>::max())) {
-            LOG_INFO("Invalid connection registry capacity: %zu. Defaulting to "
+            LOG_WARN("Invalid connection registry capacity: %zu. Defaulting to "
                      "%zu.",
                      requestedCapacity, DEFAULT_CAPACITY);
             return DEFAULT_CAPACITY;

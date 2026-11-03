@@ -34,7 +34,7 @@ void InputSystem::processInputMessages()
 
         // If we had to drop a request, handle it.
         if (result != SorterBase::ValidityResult::Valid) {
-            LOG_INFO("Dropped message from %u. Tick: %u, received: %u",
+            LOG_WARN("Dropped message from %u. Tick: %u, received: %u",
                      inputChangeRequest->clientHandle.id(),
                      simulation.getCurrentTick(), inputChangeRequest->tickNum);
             handleDroppedMessage(inputChangeRequest->clientHandle);
@@ -53,7 +53,7 @@ void InputSystem::processInputMessages()
 
         // If the input is from an earlier tick, drop it and continue.
         if (inputChangeRequest.tickNum < currentTick) {
-            LOG_INFO("Dropped message from %u. Tick: %u, received: %u",
+            LOG_WARN("Dropped message from %u. Tick: %u, received: %u",
                      inputChangeRequest.clientHandle.id(), currentTick,
                      inputChangeRequest.tickNum);
             handleDroppedMessage(inputChangeRequest.clientHandle);

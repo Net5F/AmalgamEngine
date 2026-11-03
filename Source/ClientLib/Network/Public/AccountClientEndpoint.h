@@ -137,7 +137,7 @@ void AccountClientEndpoint::sendOnIOThread(Message message)
 
     if (connectionState == ConnectionState::Connected) {
         if (!connection || !connection->sendFramed(std::move(framedMessage))) {
-            LOG_INFO("Failed to queue an AccountServer message.");
+            LOG_WARN("Failed to queue an AccountServer message.");
         }
         return;
     }
@@ -146,7 +146,7 @@ void AccountClientEndpoint::sendOnIOThread(Message message)
     if ((pendingMessages.size() >= MAX_QUEUED_WRITES)
         || (messageSize > MAX_QUEUED_WRITE_BYTES)
         || (pendingMessageBytes > (MAX_QUEUED_WRITE_BYTES - messageSize))) {
-        LOG_INFO("Failed to queue an AccountServer message.");
+        LOG_WARN("Failed to queue an AccountServer message.");
         return;
     }
 

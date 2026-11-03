@@ -205,7 +205,7 @@ private:
                DisconnectCallback inDisconnectCallback)
     {
         if (state != State::NotStarted) {
-            LOG_INFO("Connection cannot be started from its current state.");
+            LOG_ERROR("Connection cannot be started from its current state.");
             return;
         }
 
@@ -235,7 +235,7 @@ private:
     void handleHandshakeComplete()
     {
         if (state != State::Handshaking) {
-            LOG_INFO("Called handleHandshakeComplete while not handshaking.");
+            LOG_WARN("Called handleHandshakeComplete while not handshaking.");
             return;
         }
 
@@ -264,7 +264,7 @@ private:
         try {
             closeTimer.cancel();
         } catch (const asio::system_error& e) {
-            LOG_INFO("Failed to cancel close timer: %s",
+            LOG_WARN("Failed to cancel close timer: %s",
                      e.code().message().c_str());
         }
     }

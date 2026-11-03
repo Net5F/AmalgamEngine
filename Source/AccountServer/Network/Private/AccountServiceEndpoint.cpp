@@ -62,7 +62,7 @@ void AccountServiceEndpoint::onConnectionAccepted(
     // Try to add the connection to the registry.
     std::optional<ConnectionHandle> handle{connectionRegistry.add(connection)};
     if (!handle) {
-        LOG_INFO("Rejected service connection: Already at maximum "
+        LOG_WARN("Rejected service connection: Already at maximum "
                  "connections.");
         connection->close();
         return;
@@ -88,7 +88,7 @@ void AccountServiceEndpoint::onConnectionAccepted(
 
 void AccountServiceEndpoint::onAcceptorError(const asio::error_code& error)
 {
-    LOG_INFO("Account service acceptor error: %s", error.message().c_str());
+    LOG_WARN("Account service acceptor error: %s", error.message().c_str());
 }
 
 void AccountServiceEndpoint::onConnectionReady(ConnectionHandle handle,
@@ -111,7 +111,7 @@ void AccountServiceEndpoint::onConnectionReady(ConnectionHandle handle,
     ConnectionHandle& serviceHandle{
         serviceHandles[static_cast<std::size_t>(*service)]};
     if (serviceHandle) {
-        LOG_INFO("New %s connection replaced an existing one.", serviceName);
+        LOG_WARN("New %s connection replaced an existing one.", serviceName);
         ConnectionHandle oldHandle{serviceHandle};
         serviceHandle = NULL_CONNECTION_HANDLE;
         disconnect(oldHandle,

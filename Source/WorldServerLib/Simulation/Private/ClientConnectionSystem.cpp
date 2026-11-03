@@ -567,7 +567,7 @@ void ClientConnectionSystem::rejectClient(ConnectionHandle clientHandle)
 
     // Ignore the disconnect event when it arrives, since there's no entity.
     rejectedClients.insert(clientHandle);
-    LOG_INFO("Rejected client. clientID: %u", clientHandle.id());
+    LOG_WARN("Rejected client. clientID: %u", clientHandle.id());
 }
 
 } // namespace WorldServer

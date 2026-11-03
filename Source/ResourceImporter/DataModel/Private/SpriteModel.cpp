@@ -191,7 +191,7 @@ void SpriteModel::exportSpriteSheetImages()
         std::string filePath{spriteSheetsPath};
         filePath += "/" + spriteSheet.displayName + ".png";
         if (!(SDLHelpers::savePng(filePath, sdlRenderer, spriteSheetTexture))) {
-            LOG_INFO("Failed to generate image for sprite sheet: %s",
+            LOG_WARN("Failed to generate image for sprite sheet: %s",
                      spriteSheet.displayName.c_str());
         }
     }

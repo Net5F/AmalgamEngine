@@ -10,7 +10,7 @@ void Tile::addLayer(const TileOffset& tileOffset, TileLayer::Type layerType,
                     const GraphicSet& graphicSet, Uint8 graphicValue)
 {
     if (layers.size() == UINT8_MAX) {
-        LOG_INFO("Failed to add layer: limit reached.");
+        LOG_WARN("Failed to add layer: limit reached.");
         return;
     }
 

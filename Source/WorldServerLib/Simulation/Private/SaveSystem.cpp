@@ -75,14 +75,14 @@ void SaveSystem::saveForShutdown()
         }
 
         if (attempt < SHUTDOWN_BACKUP_ATTEMPTS) {
-            LOG_INFO("Database backup failed. Retrying in %.0fs.",
+            LOG_WARN("Database backup failed. Retrying in %.0fs.",
                      SHUTDOWN_BACKUP_RETRY_DELAY_S);
             std::this_thread::sleep_for(
                 std::chrono::duration<double>(SHUTDOWN_BACKUP_RETRY_DELAY_S));
         }
     }
 
-    LOG_INFO("Database backup failed %d times during shutdown. Data since "
+    LOG_WARN("Database backup failed %d times during shutdown. Data since "
              "the last successful backup was lost.",
              SHUTDOWN_BACKUP_ATTEMPTS);
 }
@@ -119,7 +119,7 @@ void SaveSystem::checkBackupResult()
     awaitingBackupResult = false;
 
     if (!(world.database->lastBackupSucceeded())) {
-        LOG_INFO("Database backup failed. Retrying in %.0fs. Data since the "
+        LOG_WARN("Database backup failed. Retrying in %.0fs. Data since the "
                  "last successful backup will be lost if the server exits "
                  "before a backup succeeds.",
                  BACKUP_RETRY_DELAY_S);

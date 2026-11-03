@@ -138,7 +138,8 @@ bool AccountSession::logout()
 bool AccountSession::requestServiceTicket(ServiceTicketAudience audience)
 {
     if (!isValidServiceTicketAudience(audience)) {
-        LOG_INFO("Tried to request a service ticket with an invalid audience.");
+        LOG_ERROR(
+            "Tried to request a service ticket with an invalid audience.");
         return false;
     }
 
@@ -184,7 +185,7 @@ void AccountSession::handleLoginResponse(LoginResponse& response)
     if (loginState != LoginState::LoggingIn) {
         OPENSSL_cleanse(response.sessionToken.data(),
                         response.sessionToken.size());
-        LOG_INFO("Received an unexpected login response.");
+        LOG_WARN("Received an unexpected login response.");
         return;
     }
 
@@ -207,7 +208,7 @@ void AccountSession::handleLoginResponse(LoginResponse& response)
 void AccountSession::handleRegisterResponse(RegisterResponse& response)
 {
     if (!registrationPending) {
-        LOG_INFO("Received an unexpected registration response.");
+        LOG_WARN("Received an unexpected registration response.");
         return;
     }
 
@@ -219,7 +220,7 @@ void AccountSession::handleRegisterResponse(RegisterResponse& response)
 void AccountSession::handleLogoutResponse(const LogoutResponse& response)
 {
     if (loginState != LoginState::LoggingOut) {
-        LOG_INFO("Received an unexpected logout response.");
+        LOG_WARN("Received an unexpected logout response.");
         return;
     }
 
@@ -240,7 +241,7 @@ void AccountSession::handleRecoverAccountResponse(
     if (!recoveryPending) {
         OPENSSL_cleanse(response.recoveryKey.data(),
                         response.recoveryKey.size());
-        LOG_INFO("Received an unexpected account recovery response.");
+        LOG_WARN("Received an unexpected account recovery response.");
         return;
     }
 
@@ -257,7 +258,7 @@ void AccountSession::handleServiceTicketResponse(
         || !serviceTicketRequestPending[static_cast<std::size_t>(
             response.audience)]) {
         OPENSSL_cleanse(response.ticket.data(), response.ticket.size());
-        LOG_INFO("Received an unexpected service-ticket response.");
+        LOG_WARN("Received an unexpected service-ticket response.");
         return;
     }
 

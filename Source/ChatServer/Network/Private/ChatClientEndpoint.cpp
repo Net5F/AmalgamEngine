@@ -81,7 +81,7 @@ void ChatClientEndpoint::onConnectionAccepted(
 
 void ChatClientEndpoint::onAcceptorError(const asio::error_code& error)
 {
-    LOG_INFO("Chat client acceptor error: %s", error.message().c_str());
+    LOG_WARN("Chat client acceptor error: %s", error.message().c_str());
 }
 
 void ChatClientEndpoint::onConnectionDisconnected(ConnectionHandle handle,

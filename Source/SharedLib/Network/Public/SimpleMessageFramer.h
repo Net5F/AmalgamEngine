@@ -47,7 +47,7 @@ public:
 
         std::size_t payloadSize{Serialize::measureSize(message)};
         if (payloadSize > maxPayloadSize) {
-            LOG_INFO("Encoded message exceeds payload limit.");
+            LOG_WARN("Encoded message exceeds payload limit.");
             return {};
         }
 
@@ -56,7 +56,7 @@ public:
         std::size_t serializedSize{Serialize::toBuffer(
             buffer->data(), buffer->size(), message, MESSAGE_HEADER_SIZE)};
         if (serializedSize != payloadSize) {
-            LOG_INFO("Measured and encoded message sizes do not match.");
+            LOG_ERROR("Measured and encoded message sizes do not match.");
             return {};
         }
 

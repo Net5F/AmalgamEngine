@@ -100,18 +100,18 @@ void ChatSession::handleConnectionEvent(const ChatConnectionEvent& event)
         }
         case ChatConnectionEvent::Type::Disconnected: {
             // We were connected, so start our backoff over.
-            LOG_INFO("Lost ChatServer connection.");
+            LOG_WARN("Lost ChatServer connection.");
             reconnectDelayS = MIN_RECONNECT_DELAY_S;
             scheduleReconnect();
             break;
         }
         case ChatConnectionEvent::Type::InvalidTicket: {
-            LOG_INFO("ChatServer rejected our ticket.");
+            LOG_WARN("ChatServer rejected our ticket.");
             scheduleReconnect();
             break;
         }
         case ChatConnectionEvent::Type::Rejected: {
-            LOG_INFO("ChatServer failed to validate our ticket.");
+            LOG_WARN("ChatServer failed to validate our ticket.");
             scheduleReconnect();
             break;
         }
@@ -143,7 +143,7 @@ void ChatSession::onServiceTicketReceived(const ServiceTicketResponse& response)
         }
         case ServiceTicketResponse::RateLimited:
         case ServiceTicketResponse::InternalError: {
-            LOG_INFO("Failed to get a ChatServer ticket.");
+            LOG_WARN("Failed to get a ChatServer ticket.");
             scheduleReconnect();
             break;
         }

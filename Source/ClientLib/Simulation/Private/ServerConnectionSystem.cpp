@@ -87,7 +87,7 @@ void ServerConnectionSystem::processConnectionEvents()
                 simEventDispatcher.trigger<SimulationStarted>();
             }
             else {
-                LOG_INFO("Server rejected connection. Result: %u",
+                LOG_WARN("Server rejected connection. Result: %u",
                          static_cast<unsigned int>(connectionResponse.result));
                 ConnectionError::Type errorType{
                     (connectionResponse.result
@@ -119,7 +119,7 @@ void ServerConnectionSystem::processConnectionEvents()
     DisconnectNotice disconnectNotice{};
     if (disconnectNoticeQueue.pop(disconnectNotice)
         && (disconnectNotice.reason != DisconnectNotice::Logout)) {
-        LOG_INFO("Server disconnected us. Reason: %u",
+        LOG_WARN("Server disconnected us. Reason: %u",
                  static_cast<unsigned int>(disconnectNotice.reason));
         disconnectFromServer(getConnectionErrorType(disconnectNotice.reason));
         return;

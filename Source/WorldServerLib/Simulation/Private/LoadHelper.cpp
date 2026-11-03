@@ -154,7 +154,7 @@ entt::entity LoadHelper::loadClientEntity(
         BoundingBox worldBounds{Transforms::modelToWorldEntity(
             graphicSet.getCollisionModelBounds(), *savedPosition)};
         if (!(world.tileMap.getTileExtent().contains(worldBounds))) {
-            LOG_INFO("Entity wouldn't be within the tile map at its saved "
+            LOG_WARN("Entity wouldn't be within the tile map at its saved "
                      "position, using spawn point. accountID: %lld",
                      static_cast<long long>(accountID));
             savedPosition.reset();

@@ -44,7 +44,7 @@ void ServiceMessageProcessor::processReceivedMessage(
             break;
         }
         default: {
-            LOG_INFO("Received unexpected service message type: %u",
+            LOG_WARN("Received unexpected service message type: %u",
                      static_cast<unsigned int>(messageType));
             disconnectCallback(handle, asio::error::make_error_code(
                                            asio::error::invalid_argument));

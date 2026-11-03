@@ -142,7 +142,7 @@ void SpriteSheetPropertiesWindow::onAddImagesButtonPressed()
     else if (result != NFD_CANCEL) {
         // The dialog operation didn't succeed and the user didn't simply press
         // cancel. Print the error.
-        LOG_INFO("Error: %s", NFD::GetError());
+        LOG_WARN("Error: %s", NFD::GetError());
     }
 }
 

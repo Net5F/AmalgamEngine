@@ -62,7 +62,7 @@ void ChatServiceEndpoint::onConnectionAccepted(
     // Try to add the connection to the registry.
     std::optional<ConnectionHandle> handle{connectionRegistry.add(connection)};
     if (!handle) {
-        LOG_INFO("Rejected service connection: Already at maximum "
+        LOG_WARN("Rejected service connection: Already at maximum "
                  "connections.");
         connection->close();
         return;
@@ -88,7 +88,7 @@ void ChatServiceEndpoint::onConnectionAccepted(
 
 void ChatServiceEndpoint::onAcceptorError(const asio::error_code& error)
 {
-    LOG_INFO("Chat service acceptor error: %s", error.message().c_str());
+    LOG_WARN("Chat service acceptor error: %s", error.message().c_str());
 }
 
 void ChatServiceEndpoint::onConnectionReady(ConnectionHandle handle)
@@ -96,7 +96,7 @@ void ChatServiceEndpoint::onConnectionReady(ConnectionHandle handle)
     // If there's an existing world server connection, it must be stale (we
     // only support 1 world server). Replace it.
     if (worldServerHandle) {
-        LOG_INFO("New WorldServer connection replaced an existing one.");
+        LOG_WARN("New WorldServer connection replaced an existing one.");
         ConnectionHandle oldHandle{worldServerHandle};
         worldServerHandle = NULL_CONNECTION_HANDLE;
         disconnect(oldHandle,

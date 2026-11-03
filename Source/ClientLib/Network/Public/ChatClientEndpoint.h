@@ -170,12 +170,12 @@ template<typename Message>
 void ChatClientEndpoint::sendOnIOThread(const Message& message)
 {
     if ((connectionState != ConnectionState::Authenticated) || !connection) {
-        LOG_INFO("Dropped a ChatServer message: Not authenticated.");
+        LOG_WARN("Dropped a ChatServer message: Not authenticated.");
         return;
     }
 
     if (!connection->send(message)) {
-        LOG_INFO("Failed to queue a ChatServer message.");
+        LOG_WARN("Failed to queue a ChatServer message.");
     }
 }
 

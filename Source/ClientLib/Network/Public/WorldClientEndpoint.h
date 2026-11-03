@@ -258,7 +258,7 @@ template<typename Message>
 void WorldClientEndpoint::send(const Message& message)
 {
     if (!connectionActive) {
-        LOG_INFO("Tried to send while server is disconnected.");
+        LOG_WARN("Tried to send while server is disconnected.");
         return;
     }
 

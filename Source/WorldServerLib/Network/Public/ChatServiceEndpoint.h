@@ -122,7 +122,7 @@ private:
         //       reconnect and the next update will resend everything.
         if (std::shared_ptr<Connection> activeConnection{connection}) {
             if (!(activeConnection->send(message))) {
-                LOG_INFO("Failed to send a ChatServer message.");
+                LOG_WARN("Failed to send a ChatServer message.");
             }
         }
     }

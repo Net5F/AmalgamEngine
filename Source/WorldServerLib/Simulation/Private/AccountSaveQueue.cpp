@@ -100,7 +100,7 @@ std::size_t AccountSaveQueue::flush(std::chrono::seconds timeout)
     }
 
     if (!(pendingSaves.empty())) {
-        LOG_INFO("Timed out waiting for account data saves. %zu accounts' "
+        LOG_WARN("Timed out waiting for account data saves. %zu accounts' "
                  "data was not saved.",
                  pendingSaves.size());
     }
@@ -142,7 +142,7 @@ void AccountSaveQueue::processSaveResult(const SaveResult& saveResult)
         }
         default: {
             // Keep the data and retry after a delay.
-            LOG_INFO("Failed to save account data, will retry. AccountID: "
+            LOG_WARN("Failed to save account data, will retry. AccountID: "
                      "%lld",
                      static_cast<long long>(saveResult.accountID));
             pendingSave.needsSend = true;

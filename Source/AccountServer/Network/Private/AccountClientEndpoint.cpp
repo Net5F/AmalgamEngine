@@ -82,7 +82,7 @@ void AccountClientEndpoint::onConnectionAccepted(
 
 void AccountClientEndpoint::onAcceptorError(const asio::error_code& error)
 {
-    LOG_INFO("Account client acceptor error: %s", error.message().c_str());
+    LOG_WARN("Account client acceptor error: %s", error.message().c_str());
 }
 
 void AccountClientEndpoint::onConnectionDisconnected(

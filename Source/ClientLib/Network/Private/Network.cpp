@@ -37,7 +37,7 @@ Network::~Network()
 void Network::start()
 {
     if (started) {
-        LOG_INFO("Attempted to start Client networking more than once.");
+        LOG_ERROR("Attempted to start Client networking more than once.");
         return;
     }
 

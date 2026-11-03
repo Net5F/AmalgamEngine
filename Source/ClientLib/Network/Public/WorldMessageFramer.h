@@ -53,7 +53,7 @@ BinaryBufferSharedPtr
     std::size_t totalMessageSize{CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE
                                  + payloadSize};
     if (totalMessageSize > CLIENT_MAX_MESSAGE_SIZE) {
-        LOG_INFO("Tried to send a too-large message. Size: %u, max: %u",
+        LOG_WARN("Tried to send a too-large message. Size: %u, max: %u",
                  totalMessageSize, CLIENT_MAX_MESSAGE_SIZE);
         return {};
     }
@@ -66,7 +66,7 @@ BinaryBufferSharedPtr
         Serialize::toBuffer(buffer->data(), buffer->size(), message,
                             (CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE))};
     if (serializedSize != payloadSize) {
-        LOG_INFO("Measured and encoded message sizes do not match.");
+        LOG_ERROR("Measured and encoded message sizes do not match.");
         return {};
     }
 

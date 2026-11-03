@@ -56,7 +56,7 @@ void WorldClientEndpoint::connect(
     const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket)
 {
     if (connectionActive) {
-        LOG_INFO("Attempted to connect while connected.");
+        LOG_WARN("Attempted to connect while connected.");
         return;
     }
 
@@ -244,7 +244,7 @@ void WorldClientEndpoint::handleConnectionFailure(Uint32 connectionID,
         return;
     }
 
-    LOG_INFO("WorldServer connection failed: %s", error.message().c_str());
+    LOG_WARN("WorldServer connection failed: %s", error.message().c_str());
     closeOnIOThread();
     networkEventDispatcher.emplace<ConnectionError>(
         ConnectionError::Type::Failed);
@@ -255,7 +255,7 @@ void WorldClientEndpoint::cancelTimer(asio::steady_timer& timer)
     try {
         timer.cancel();
     } catch (const asio::system_error& e) {
-        LOG_INFO("Failed to cancel WorldServer timer: %s",
+        LOG_WARN("Failed to cancel WorldServer timer: %s",
                  e.code().message().c_str());
     }
 }
@@ -376,7 +376,7 @@ void WorldClientEndpoint::sendOnIOThread(BinaryBufferSharedPtr message)
         return;
     }
     if ((connectionState != ConnectionState::Connected) || !connection) {
-        LOG_INFO("Dropped a WorldServer message: Not connected.");
+        LOG_WARN("Dropped a WorldServer message: Not connected.");
         return;
     }
 
@@ -389,7 +389,7 @@ void WorldClientEndpoint::sendOnIOThread(BinaryBufferSharedPtr message)
         NetworkStats::recordBytesSent(messageSize);
     }
     else {
-        LOG_INFO("Failed to queue a WorldServer message.");
+        LOG_WARN("Failed to queue a WorldServer message.");
     }
 }
 

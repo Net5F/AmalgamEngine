@@ -48,7 +48,7 @@ void AccountMessageProcessor::processReceivedMessage(
             break;
         }
         default: {
-            LOG_INFO("Received unexpected AccountServer message type: %u",
+            LOG_WARN("Received unexpected AccountServer message type: %u",
                      static_cast<unsigned int>(messageType));
             if (disconnectCallback) {
                 disconnectCallback(asio::error::make_error_code(
@@ -64,7 +64,7 @@ void AccountMessageProcessor::dispatchMessage(
     std::span<const Uint8> messageBuffer)
 {
     if (messageBuffer.empty()) {
-        LOG_INFO("Received an empty AccountServer message payload.");
+        LOG_WARN("Received an empty AccountServer message payload.");
         if (disconnectCallback) {
             disconnectCallback(
                 asio::error::make_error_code(asio::error::invalid_argument));

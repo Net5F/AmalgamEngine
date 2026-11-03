@@ -54,7 +54,7 @@ void ServiceMessageProcessor::processReceivedMessage(
             break;
         }
         default: {
-            LOG_INFO("Received unexpected service message type: %u",
+            LOG_WARN("Received unexpected service message type: %u",
                      static_cast<unsigned int>(messageType));
             disconnectCallback(handle, asio::error::make_error_code(
                                            asio::error::invalid_argument));
@@ -122,7 +122,7 @@ void ServiceMessageProcessor::handleMessage(ConnectionHandle handle,
                 break;
             }
             case Database::SaveAccountDataResult::AccountNotFound: {
-                LOG_INFO("Tried to save data for unknown account: %lld",
+                LOG_WARN("Tried to save data for unknown account: %lld",
                          static_cast<long long>(accountID));
                 response.result = SaveAccountDataResponse::InvalidAccount;
                 break;
@@ -204,7 +204,7 @@ bool ServiceMessageProcessor::checkAccountDataAccess(
     ConnectionHandle handle, ServiceTicketAudience service)
 {
     if (service != ServiceTicketAudience::WorldServer) {
-        LOG_INFO("Service tried to access account data: %s",
+        LOG_WARN("Service tried to access account data: %s",
                  getServiceTicketAudienceName(service));
         disconnectCallback(handle, asio::error::make_error_code(
                                        asio::error::invalid_argument));

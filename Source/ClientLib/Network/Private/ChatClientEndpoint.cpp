@@ -148,7 +148,7 @@ void ChatClientEndpoint::handleConnectionFailure(Uint32 connectionID,
         return;
     }
 
-    LOG_INFO("ChatServer connection failed: %s", error.message().c_str());
+    LOG_WARN("ChatServer connection failed: %s", error.message().c_str());
     closeOnIOThread();
     emitConnectionEvent(connectionID,
                         ChatConnectionEvent::Type::ConnectionFailed);
@@ -166,7 +166,7 @@ void ChatClientEndpoint::cancelTimer(asio::steady_timer& timer)
     try {
         timer.cancel();
     } catch (const asio::system_error& e) {
-        LOG_INFO("Failed to cancel ChatServer timer: %s",
+        LOG_WARN("Failed to cancel ChatServer timer: %s",
                  e.code().message().c_str());
     }
 }
@@ -188,7 +188,7 @@ void ChatClientEndpoint::startHeartbeatTimer(Uint32 connectionID)
                 startHeartbeatTimer(connectionID);
             });
     } catch (const asio::system_error& e) {
-        LOG_INFO("Failed to start ChatServer heartbeat timer: %s",
+        LOG_WARN("Failed to start ChatServer heartbeat timer: %s",
                  e.code().message().c_str());
         disconnectWithError(e.code());
     }
@@ -264,7 +264,7 @@ void ChatClientEndpoint::onConnectionReady(Uint32 connectionID)
     if (!framedRequest
         || !connection->sendFramed(
             ByteTools::makeWipedOnRelease(std::move(*framedRequest)))) {
-        LOG_INFO("Failed to queue ChatServer connection request.");
+        LOG_WARN("Failed to queue ChatServer connection request.");
     }
 }
 
@@ -300,7 +300,7 @@ void ChatClientEndpoint::onMessageReceived(ChatClientMessageType messageType,
         isResponse ? (connectionState == ConnectionState::Authenticating)
                    : (connectionState == ConnectionState::Authenticated)};
     if (!messageAllowed) {
-        LOG_INFO("Received ChatServer message in an invalid state. Type: %u",
+        LOG_WARN("Received ChatServer message in an invalid state. Type: %u",
                  static_cast<unsigned int>(messageType));
         disconnectWithError(
             asio::error::make_error_code(asio::error::invalid_argument));
@@ -351,7 +351,7 @@ void ChatClientEndpoint::onMessageReceived(ChatClientMessageType messageType,
             break;
         }
         default: {
-            LOG_INFO("Received unexpected ChatServer message type: %u",
+            LOG_WARN("Received unexpected ChatServer message type: %u",
                      static_cast<unsigned int>(messageType));
             disconnectWithError(
                 asio::error::make_error_code(asio::error::invalid_argument));
@@ -366,7 +366,7 @@ bool ChatClientEndpoint::deserialize(std::span<const Uint8> messageBuffer,
 {
     if (!Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
                                  message)) {
-        LOG_INFO("Failed to deserialize ChatServer message.");
+        LOG_WARN("Failed to deserialize ChatServer message.");
         disconnectWithError(
             asio::error::make_error_code(asio::error::invalid_argument));
         return false;

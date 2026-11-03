@@ -43,7 +43,7 @@ public:
         if (!result.second) {
             std::string errorString{getErrorString(result.first)};
 
-            LOG_INFO("%s", errorString.c_str());
+            LOG_WARN("%s", errorString.c_str());
             return false;
         }
         else {
@@ -80,7 +80,7 @@ public:
         if (!result.second) {
             std::string errorString{getErrorString(result.first)};
 
-            LOG_INFO("%s", errorString.c_str());
+            LOG_WARN("%s", errorString.c_str());
             return false;
         }
         else {

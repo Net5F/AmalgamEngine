@@ -38,7 +38,7 @@
 
 #define LOG_WARN(...)                                                          \
     do {                                                                       \
-        AM::Log::warn(__FILE__, __LINE__, __VA_ARGS__);                        \
+        AM::Log::warn(__VA_ARGS__);                                            \
     } while (false)
 
 #define LOG_FATAL(...)                                                         \
@@ -55,20 +55,19 @@ namespace AM
  * Our logging system has 5 levels:
  *   LOG_INFO: Print the given string in release and debug.
  *   LOG_DEBUG: Print the given string in debug.
- *   LOG_WARN: Print file name, line number, and the given string. Never
- *             aborts.
+ *   LOG_WARN: Print "Warning: " followed by the given string in release and
+ *             debug. Never aborts.
  *   LOG_ERROR: Print file name, line number, and the given string. In debug
  *              this will also std::abort().
  *   LOG_FATAL: Print file name, line number, and the given string. In debug
  *              and release this will also std::abort().
  *
- * Use LOG_INFO for general printing, LOG_DEBUG for debug info, LOG_WARN for
- * expected failures that are already handled (usually caused by bad data
- * rather than a code bug, e.g. a save that fails to load), LOG_ERROR for
- * recoverable errors (make sure you write appropriate recovery logic), and
- * LOG_FATAL for unrecoverable errors.
- * Generally, we'll start error cases as LOG_FATAL, then switch them to
- * LOG_ERROR if there's some expected failure that we can't yet fix.
+ * Use LOG_INFO for general info.
+ * Use LOG_DEBUG for info that you don't want to show to players.
+ * Use LOG_WARN for data errors (e.g. a save that fails to load).
+ * Use LOG_ERROR for code errors that are recoverable in Release (make sure you
+ * write appropriate recovery logic after the LOG_ERROR).
+ * Use LOG_FATAL for code errors that are unrecoverable.
  */
 class Log
 {
@@ -83,18 +82,17 @@ public:
     static void info(const char* expression, ...);
 
     /**
+     * Prints "Warning: " followed by the given info to stdout (and a file, if
+     * enableFileLogging() was called.), then flushes the buffer.
+     */
+    static void warn(const char* expression, ...);
+
+    /**
      * Prints the given info to stdout (and a file, if enableFileLogging() was
      * called.), then flushes the buffer.
      */
     static void error(const char* fileName, int line, const char* expression,
                       ...);
-
-    /**
-     * Prints the given warning to stdout (and a file, if enableFileLogging()
-     * was called.), then flushes the buffer.
-     */
-    static void warn(const char* fileName, int line, const char* expression,
-                     ...);
 
     /**
      * Opens a file with the given file name and enables file logging.
@@ -112,12 +110,16 @@ private:
     static std::atomic<bool> tickPtrIsRegistered;
 
     /**
-     * Prints "<label> at file: <fileName>, line: <line>, during tick: <tick>",
-     * followed by the given expression, to stdout (and a file, if enabled).
+     * Returns the registered tick, or 0 if none has been registered.
      */
-    static void printWithLocation(const char* label, const char* fileName,
-                                  int line, const char* expression,
-                                  std::va_list arg);
+    static Uint32 getCurrentTick();
+
+    /**
+     * Prints "Tick <tick>: <prefix>", followed by the given expression, to
+     * stdout (and a file, if enabled).
+     */
+    static void print(const char* prefix, const char* expression,
+                      std::va_list arg);
 };
 
 } /* End namespace AM */

@@ -143,7 +143,7 @@ entt::entity World::createEntity(const Position& position,
     //       be passing in bad data (e.g. from a script or a save), so we
     //       check it here and fail safely.
     if (!(tileMap.getTileExtent().contains(position))) {
-        LOG_INFO("Tried to create entity outside of the tile map. "
+        LOG_WARN("Tried to create entity outside of the tile map. "
                  "Position: (%.4f, %.4f, %.4f)",
                  position.x, position.y, position.z);
         return entt::null;
@@ -196,7 +196,7 @@ bool World::addGraphicsComponents(entt::entity entity,
     //       may be passing in bad data (e.g. from a script or a save), so we
     //       check it here and fail safely.
     if (!(tileMap.getTileExtent().contains(worldBounds))) {
-        LOG_INFO("Tried to add graphics components to entity %u, but "
+        LOG_WARN("Tried to add graphics components to entity %u, but "
                  "its collision would be outside of the tile map.",
                  entity);
         return false;

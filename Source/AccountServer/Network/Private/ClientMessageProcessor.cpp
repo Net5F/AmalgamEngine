@@ -82,7 +82,7 @@ void ClientMessageProcessor::processReceivedMessage(
             break;
         }
         default: {
-            LOG_INFO("Received unexpected client message type: %u",
+            LOG_WARN("Received unexpected client message type: %u",
                      static_cast<unsigned int>(messageType));
             disconnectCallback(handle, asio::error::make_error_code(
                                            asio::error::invalid_argument));
@@ -175,7 +175,7 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
     // Note: A real client will never send an invalid audience, so we treat it
     //       as a malformed message.
     if (!isValidServiceTicketAudience(message.audience)) {
-        LOG_INFO("Received service ticket request with invalid audience: %u",
+        LOG_WARN("Received service ticket request with invalid audience: %u",
                  static_cast<unsigned int>(message.audience));
         disconnectCallback(handle, asio::error::make_error_code(
                                        asio::error::invalid_argument));

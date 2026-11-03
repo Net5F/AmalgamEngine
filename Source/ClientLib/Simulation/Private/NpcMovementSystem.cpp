@@ -72,7 +72,7 @@ void NpcMovementSystem::updateNpcs()
 
     // If we wanted to process more ticks but ran out of data, log it.
     if (lastProcessedTick < desiredTick) {
-        LOG_INFO("Ran out of NPC data. lastProcessed: %u, desired: %u, "
+        LOG_WARN("Ran out of NPC data. lastProcessed: %u, desired: %u, "
                  "lastReceived: %u, queueSize: %u",
                  lastProcessedTick, desiredTick, lastReceivedTick,
                  npcMovementUpdateQueue.size());

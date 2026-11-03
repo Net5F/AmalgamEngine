@@ -65,7 +65,7 @@ bool SDLHelpers::savePng(const std::string& filePath, SDL_Renderer* renderer,
 void SDLHelpers::setWindowFullscreen(SDL_Window* window, Uint32 newMode)
 {
     if (!SDL_SetWindowFullscreen(window, newMode)) {
-        LOG_INFO("Failed to set fullscreen mode: %s", SDL_GetError());
+        LOG_WARN("Failed to set fullscreen mode: %s", SDL_GetError());
     }
 }
 

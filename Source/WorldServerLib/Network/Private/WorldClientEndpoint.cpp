@@ -135,7 +135,7 @@ std::shared_ptr<WorldClientConnection>
     asio::error_code error{};
     socket.set_option(asio::ip::tcp::no_delay{true}, error);
     if (error) {
-        LOG_INFO("Failed to configure client socket: %s",
+        LOG_WARN("Failed to configure client socket: %s",
                  error.message().c_str());
         return {};
     }
@@ -161,7 +161,7 @@ void WorldClientEndpoint::onConnectionAccepted(
     std::shared_ptr<WorldClientConnection> connection)
 {
     if (clientRegistry.size() >= maxClients) {
-        LOG_INFO("Rejected connection attempt: Already at maximum connected "
+        LOG_WARN("Rejected connection attempt: Already at maximum connected "
                  "clients.");
         connection->close();
         return;
@@ -198,7 +198,7 @@ void WorldClientEndpoint::onConnectionAccepted(
 
 void WorldClientEndpoint::onAcceptorError(const asio::error_code& error)
 {
-    LOG_INFO("World client acceptor error: %s", error.message().c_str());
+    LOG_WARN("World client acceptor error: %s", error.message().c_str());
 }
 
 void WorldClientEndpoint::onConnectionDisconnected(
@@ -246,7 +246,7 @@ void WorldClientEndpoint::onMessageReceived(
                                       + message.payload.size());
 
     if (!(client->processAdjustmentIteration(message.adjustmentIteration))) {
-        LOG_INFO("Dropped client: Invalid adjustment iteration. ClientID: %u",
+        LOG_WARN("Dropped client: Invalid adjustment iteration. ClientID: %u",
                  client->getHandle().id());
         client->getConnection().disconnect(
             asio::error::make_error_code(asio::error::invalid_argument));
@@ -269,7 +269,7 @@ void WorldClientEndpoint::processConnectionRequest(Client& client,
 {
     ConnectionHandle clientHandle{client.getHandle()};
     if (client.getAuthState() != Client::AuthState::AwaitingRequest) {
-        LOG_INFO("Ignoring unexpected ConnectionRequest. ClientID: %u",
+        LOG_WARN("Ignoring unexpected ConnectionRequest. ClientID: %u",
                  clientHandle.id());
         return;
     }
@@ -279,7 +279,7 @@ void WorldClientEndpoint::processConnectionRequest(Client& client,
                                               connectionRequest)};
     OPENSSL_cleanse(payload.data(), payload.size());
     if (!deserialized) {
-        LOG_INFO("Rejected client: Failed to deserialize ConnectionRequest. "
+        LOG_WARN("Rejected client: Failed to deserialize ConnectionRequest. "
                  "ClientID: %u",
                  clientHandle.id());
         rejectClient(client, ConnectionResponse::InvalidTicket);
@@ -349,13 +349,13 @@ void WorldClientEndpoint::onTicketResult(
             break;
         }
         case ConsumeServiceTicketResponse::InvalidTicket: {
-            LOG_INFO("Rejected client: Invalid ticket. ClientID: %u",
+            LOG_WARN("Rejected client: Invalid ticket. ClientID: %u",
                      clientHandle.id());
             rejectClient(*client, ConnectionResponse::InvalidTicket);
             break;
         }
         default: {
-            LOG_INFO("Rejected client: Failed to validate ticket. ClientID: %u",
+            LOG_WARN("Rejected client: Failed to validate ticket. ClientID: %u",
                      clientHandle.id());
             rejectClient(*client, ConnectionResponse::InternalError);
             break;
@@ -405,7 +405,7 @@ void WorldClientEndpoint::processReceivedMessage(Client& client,
     if (messageTick != -1) {
         Sint64 tickDiff{messageTick - static_cast<Sint64>(getCurrentTick())};
         if (!(client.recordTickDiff(tickDiff))) {
-            LOG_INFO("Dropped client: tickDiff out of range. tickDiff: %lld, "
+            LOG_WARN("Dropped client: tickDiff out of range. tickDiff: %lld, "
                      "ClientID: %u",
                      static_cast<long long>(tickDiff), client.getHandle().id());
             client.getConnection().disconnect(

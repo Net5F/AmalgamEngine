@@ -16,11 +16,23 @@ void Log::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
 
 void Log::info(const char* expression, ...)
 {
-    // If the app hasn't registered a tick count, default to 0.
-    Uint32 currentTick = 0;
-    if (tickPtrIsRegistered) {
-        currentTick = *currentTickPtr;
-    }
+    std::va_list arg;
+    va_start(arg, expression);
+    print("", expression, arg);
+    va_end(arg);
+}
+
+void Log::warn(const char* expression, ...)
+{
+    std::va_list arg;
+    va_start(arg, expression);
+    print("Warning: ", expression, arg);
+    va_end(arg);
+}
+
+void Log::error(const char* fileName, int line, const char* expression, ...)
+{
+    Uint32 currentTick{getCurrentTick()};
 
     // Get the va_list into arg.
     std::va_list arg;
@@ -32,7 +44,9 @@ void Log::info(const char* expression, ...)
         std::va_list argCopy;
         va_copy(argCopy, arg);
 
-        std::fprintf(logFilePtr, "Tick %u: ", currentTick);
+        std::fprintf(logFilePtr,
+                     "Error at file: %s, line: %d, during tick: %u\n",
+                     fileName, line, currentTick);
         std::vfprintf(logFilePtr, expression, argCopy);
         std::fprintf(logFilePtr, "\n");
         std::fflush(logFilePtr);
@@ -41,27 +55,12 @@ void Log::info(const char* expression, ...)
     }
 
     // Write to stdout.
-    std::printf("Tick %u: ", currentTick);
+    std::printf("Error at file: %s, line: %d, during tick: %u\n", fileName,
+                line, currentTick);
     std::vprintf(expression, arg);
     std::printf("\n");
     std::fflush(stdout);
 
-    va_end(arg);
-}
-
-void Log::error(const char* fileName, int line, const char* expression, ...)
-{
-    std::va_list arg;
-    va_start(arg, expression);
-    printWithLocation("Error", fileName, line, expression, arg);
-    va_end(arg);
-}
-
-void Log::warn(const char* fileName, int line, const char* expression, ...)
-{
-    std::va_list arg;
-    va_start(arg, expression);
-    printWithLocation("Warning", fileName, line, expression, arg);
     va_end(arg);
 }
 
@@ -74,14 +73,18 @@ void Log::enableFileLogging(const std::string& fileName)
     }
 }
 
-void Log::printWithLocation(const char* label, const char* fileName, int line,
-                            const char* expression, std::va_list arg)
+Uint32 Log::getCurrentTick()
 {
     // If the app hasn't registered a tick count, default to 0.
-    Uint32 currentTick = 0;
-    if (currentTickPtr != nullptr) {
-        currentTick = *currentTickPtr;
+    if (tickPtrIsRegistered) {
+        return *currentTickPtr;
     }
+    return 0;
+}
+
+void Log::print(const char* prefix, const char* expression, std::va_list arg)
+{
+    Uint32 currentTick{getCurrentTick()};
 
     // If enabled, write to file.
     if (logFilePtr != nullptr) {
@@ -89,8 +92,7 @@ void Log::printWithLocation(const char* label, const char* fileName, int line,
         std::va_list argCopy;
         va_copy(argCopy, arg);
 
-        std::fprintf(logFilePtr, "%s at file: %s, line: %d, during tick: %u\n",
-                     label, fileName, line, currentTick);
+        std::fprintf(logFilePtr, "Tick %u: %s", currentTick, prefix);
         std::vfprintf(logFilePtr, expression, argCopy);
         std::fprintf(logFilePtr, "\n");
         std::fflush(logFilePtr);
@@ -99,8 +101,7 @@ void Log::printWithLocation(const char* label, const char* fileName, int line,
     }
 
     // Write to stdout.
-    std::printf("%s at file: %s, line: %d, during tick: %u\n", label, fileName,
-                line, currentTick);
+    std::printf("Tick %u: %s", currentTick, prefix);
     std::vprintf(expression, arg);
     std::printf("\n");
     std::fflush(stdout);

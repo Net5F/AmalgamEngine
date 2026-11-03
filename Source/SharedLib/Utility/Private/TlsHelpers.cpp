@@ -22,7 +22,7 @@ std::optional<TlsHelpers::CertificatePin>
 {
     std::ifstream pinFile{pinPath, std::ios::binary};
     if (!pinFile.is_open()) {
-        LOG_INFO("Failed to open certificate pin '%s'.", pinPath.c_str());
+        LOG_WARN("Failed to open certificate pin '%s'.", pinPath.c_str());
         return {};
     }
 
@@ -39,7 +39,7 @@ std::optional<TlsHelpers::CertificatePin>
                             && (encodedPin.back() == '=')
                             && StringTools::isBase64(encodedPin)};
     if (!hasValidCharacters) {
-        LOG_INFO("Certificate pin '%s' is malformed. Expected "
+        LOG_WARN("Certificate pin '%s' is malformed. Expected "
                  "one padded base64-encoded SHA-256 pin.",
                  pinPath.c_str());
         return {};
@@ -52,7 +52,7 @@ std::optional<TlsHelpers::CertificatePin>
         static_cast<int>(encodedPin.size()))};
     // EVP_DecodeBlock includes bytes represented by base64 padding.
     if ((decodedLength < 1) || ((decodedLength - 1) != SHA256_BYTES)) {
-        LOG_INFO("Certificate pin '%s' is malformed. Expected "
+        LOG_WARN("Certificate pin '%s' is malformed. Expected "
                  "one padded base64-encoded SHA-256 pin.",
                  pinPath.c_str());
         return {};
@@ -67,14 +67,14 @@ std::optional<TlsHelpers::CertificatePin>
         EVP_EncodeBlock(canonicalPin.data(), certificatePin.data(),
                         static_cast<int>(certificatePin.size()))};
     if (canonicalLength != SHA256_BASE64_LENGTH) {
-        LOG_INFO("Failed to validate certificate pin '%s'.", pinPath.c_str());
+        LOG_WARN("Failed to validate certificate pin '%s'.", pinPath.c_str());
         return {};
     }
     std::string canonicalPinText{
         reinterpret_cast<const char*>(canonicalPin.data()),
         static_cast<std::size_t>(canonicalLength)};
     if (canonicalPinText != encodedPin) {
-        LOG_INFO("Certificate pin '%s' is malformed. Expected one padded "
+        LOG_WARN("Certificate pin '%s' is malformed. Expected one padded "
                  "base64-encoded SHA-256 pin.",
                  pinPath.c_str());
         return {};

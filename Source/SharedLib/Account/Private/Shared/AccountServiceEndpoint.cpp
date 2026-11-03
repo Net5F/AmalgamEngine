@@ -70,7 +70,7 @@ void AccountServiceEndpoint::start()
 {
     asio::post(ioContext, [this]() {
         if (started) {
-            LOG_INFO(
+            LOG_ERROR(
                 "Attempted to start AccountServiceEndpoint more than once.");
             return;
         }
@@ -107,7 +107,7 @@ void AccountServiceEndpoint::consumeServiceTicketOnIOThread(
     ConsumeServiceTicketCallback callback)
 {
     if (!callback) {
-        LOG_INFO("Ignoring a service ticket request with no callback.");
+        LOG_ERROR("Ignoring a service ticket request with no callback.");
         return;
     }
 
@@ -130,7 +130,7 @@ void AccountServiceEndpoint::saveAccountDataOnIOThread(
     SaveAccountDataCallback callback)
 {
     if (!callback) {
-        LOG_INFO("Ignoring an account data save request with no callback.");
+        LOG_ERROR("Ignoring an account data save request with no callback.");
         return;
     }
 
@@ -238,7 +238,7 @@ void AccountServiceEndpoint::handleConnectionFailure(
     connectingSocket.reset();
     connection.reset();
 
-    LOG_INFO("AccountServer connection failed: %s", error.message().c_str());
+    LOG_WARN("AccountServer connection failed: %s", error.message().c_str());
     failAllRequests();
     scheduleReconnect();
 }
@@ -305,7 +305,7 @@ void AccountServiceEndpoint::cancelTimer(asio::steady_timer& timer)
     try {
         timer.cancel();
     } catch (const asio::system_error& e) {
-        LOG_INFO("Failed to cancel AccountServer timer: %s",
+        LOG_WARN("Failed to cancel AccountServer timer: %s",
                  e.code().message().c_str());
     }
 }
@@ -315,14 +315,14 @@ std::optional<Uint32>
 {
     // If we aren't connected, fail immediately.
     if (connectionState != ConnectionState::Connected) {
-        LOG_INFO("Failed to send an AccountServer request: Not connected.");
+        LOG_WARN("Failed to send an AccountServer request: Not connected.");
         failCallback(0, callback);
         return std::nullopt;
     }
 
     // If we already have too many requests in flight, fail immediately.
     if (pendingRequests.size() >= MAX_PENDING_REQUESTS) {
-        LOG_INFO("Failed to queue an AccountServer request: Too many pending "
+        LOG_WARN("Failed to queue an AccountServer request: Too many pending "
                  "requests.");
         failCallback(0, callback);
         return std::nullopt;
@@ -342,7 +342,7 @@ void AccountServiceEndpoint::sendRequest(Uint32 requestID,
     std::shared_ptr<Connection> activeConnection{connection};
     if (!framedMessage || !activeConnection
         || !activeConnection->sendFramed(std::move(framedMessage))) {
-        LOG_INFO("Failed to send an AccountServer request.");
+        LOG_WARN("Failed to send an AccountServer request.");
 
         // Note: If the send failed because the write queue overflowed, the
         //       connection will have disconnected and already failed this
@@ -357,7 +357,7 @@ void AccountServiceEndpoint::completeRequest(Uint32 requestID,
 {
     auto requestIt{pendingRequests.find(requestID)};
     if (requestIt == pendingRequests.end()) {
-        LOG_INFO("Received a response for an unknown AccountServer request: "
+        LOG_WARN("Received a response for an unknown AccountServer request: "
                  "%u",
                  requestID);
         return;
@@ -373,7 +373,7 @@ void AccountServiceEndpoint::completeRequest(Uint32 requestID,
         (*typedCallback)(response);
     }
     else {
-        LOG_INFO("Received a mismatched response type for AccountServer "
+        LOG_WARN("Received a mismatched response type for AccountServer "
                  "request: %u",
                  requestID);
         failCallback(requestID, callback);
@@ -502,11 +502,11 @@ void AccountServiceEndpoint::onConnectionDisconnected(
     connectingSocket.reset();
 
     if (previousState == ConnectionState::Connecting) {
-        LOG_INFO("AccountServer connection failed: %s",
+        LOG_WARN("AccountServer connection failed: %s",
                  error.message().c_str());
     }
     else {
-        LOG_INFO("AccountServer disconnected: %s", error.message().c_str());
+        LOG_WARN("AccountServer disconnected: %s", error.message().c_str());
     }
 
     failAllRequests();
@@ -530,7 +530,7 @@ void AccountServiceEndpoint::onMessageReceived(
             break;
         }
         default: {
-            LOG_INFO("Received unexpected AccountServer message type: %u",
+            LOG_WARN("Received unexpected AccountServer message type: %u",
                      static_cast<unsigned int>(messageType));
             disconnectWithError(
                 asio::error::make_error_code(asio::error::invalid_argument));
@@ -546,7 +546,7 @@ void AccountServiceEndpoint::handleResponse(
     Response response{};
     if (!Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
                                  response)) {
-        LOG_INFO("Failed to deserialize an AccountServer message.");
+        LOG_WARN("Failed to deserialize an AccountServer message.");
         disconnectWithError(
             asio::error::make_error_code(asio::error::invalid_argument));
         return;

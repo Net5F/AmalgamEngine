@@ -50,7 +50,7 @@ void ChatServiceEndpoint::start()
 {
     asio::post(ioContext, [this]() {
         if (started) {
-            LOG_INFO("Attempted to start ChatServiceEndpoint more than once.");
+            LOG_ERROR("Attempted to start ChatServiceEndpoint more than once.");
             return;
         }
 
@@ -139,7 +139,7 @@ void ChatServiceEndpoint::handleConnectionFailure(std::size_t currentAttempt,
     connectingSocket.reset();
     connection.reset();
 
-    LOG_INFO("ChatServer connection failed: %s", error.message().c_str());
+    LOG_WARN("ChatServer connection failed: %s", error.message().c_str());
     scheduleReconnect();
 }
 
@@ -274,10 +274,10 @@ void ChatServiceEndpoint::onConnectionDisconnected(
     connectingSocket.reset();
 
     if (previousState == ConnectionState::Connecting) {
-        LOG_INFO("ChatServer connection failed: %s", error.message().c_str());
+        LOG_WARN("ChatServer connection failed: %s", error.message().c_str());
     }
     else {
-        LOG_INFO("ChatServer disconnected: %s", error.message().c_str());
+        LOG_WARN("ChatServer disconnected: %s", error.message().c_str());
     }
 
     scheduleReconnect();
@@ -292,7 +292,7 @@ void ChatServiceEndpoint::onMessageReceived(ChatServiceMessageType messageType,
             break;
         }
         default: {
-            LOG_INFO("Received unexpected ChatServer message type: %u",
+            LOG_WARN("Received unexpected ChatServer message type: %u",
                      static_cast<unsigned int>(messageType));
             disconnectWithError(
                 asio::error::make_error_code(asio::error::invalid_argument));
@@ -306,7 +306,7 @@ void ChatServiceEndpoint::cancelTimer(asio::steady_timer& timer)
     try {
         timer.cancel();
     } catch (const asio::system_error& e) {
-        LOG_INFO("Failed to cancel ChatServer timer: %s",
+        LOG_WARN("Failed to cancel ChatServer timer: %s",
                  e.code().message().c_str());
     }
 }

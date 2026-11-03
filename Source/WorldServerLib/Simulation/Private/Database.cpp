@@ -138,8 +138,8 @@ SQLite::Transaction Database::startTransaction(SQLite::TransactionBehavior behav
 void Database::backupToFile()
 {
     if (backupRequested) {
-        LOG_INFO("Tried to begin database backup while a backup was already "
-                 "underway.");
+        LOG_ERROR("Tried to begin database backup while a backup was already "
+                  "underway.");
         return;
     }
 
@@ -471,7 +471,7 @@ void Database::performBackup()
             }
             backupSucceeded = true;
         } catch (std::exception& e) {
-            LOG_INFO("Failed to save database to file: %s", e.what());
+            LOG_WARN("Failed to save database to file: %s", e.what());
             backupSucceeded = false;
         }
 

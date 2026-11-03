@@ -92,7 +92,7 @@ SDL_Texture* SpriteTools::generateSpriteSheetTexture(
         }
 
         if (!spriteTexture) {
-            LOG_INFO("Failed to load texture: %s", fullImagePath.c_str());
+            LOG_WARN("Failed to load texture: %s", fullImagePath.c_str());
             break;
         }
 
@@ -134,7 +134,7 @@ SDL_Texture*
 
     // Premultiply the alpha channel into the color channels.
     if (!SDL_PremultiplySurfaceAlpha(spriteSurface, true)) {
-        LOG_INFO("Error while premultiplying alpha: %s", SDL_GetError());
+        LOG_WARN("Error while premultiplying alpha: %s", SDL_GetError());
     }
 
     // Turn the surface into a texture and return it.

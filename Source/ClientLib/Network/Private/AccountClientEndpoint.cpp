@@ -135,7 +135,7 @@ void AccountClientEndpoint::handleConnectionFailure(
     connection.reset();
     clearPendingMessages();
 
-    LOG_INFO("AccountServer connection failed: %s", error.message().c_str());
+    LOG_WARN("AccountServer connection failed: %s", error.message().c_str());
     emitConnectionEvent(AccountConnectionEvent::Type::ConnectionFailed);
 }
 
@@ -151,7 +151,7 @@ void AccountClientEndpoint::cancelConnectionTimer()
     try {
         connectionTimer.cancel();
     } catch (const asio::system_error& e) {
-        LOG_INFO("Failed to cancel AccountServer connection timer: %s",
+        LOG_WARN("Failed to cancel AccountServer connection timer: %s",
                  e.code().message().c_str());
     }
 }
@@ -161,7 +161,7 @@ void AccountClientEndpoint::sendPendingMessages()
     while (!pendingMessages.empty()) {
         BinaryBufferSharedPtr message{pendingMessages.front()};
         if (!connection || !connection->sendFramed(std::move(message))) {
-            LOG_INFO("Failed to queue an AccountServer message.");
+            LOG_WARN("Failed to queue an AccountServer message.");
             return;
         }
 

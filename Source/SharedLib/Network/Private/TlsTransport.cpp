@@ -280,7 +280,7 @@ bool TlsTransport::cancelHandshakeTimer()
     try {
         handshakeTimer.cancel();
     } catch (const asio::system_error& e) {
-        LOG_INFO("Failed to cancel TLS handshake timer: %s",
+        LOG_WARN("Failed to cancel TLS handshake timer: %s",
                  e.code().message().c_str());
         return false;
     }

@@ -54,7 +54,7 @@ void ClientMessageProcessor::processReceivedMessage(
             ? (session.state == ClientSession::State::AwaitingTicket)
             : (session.state == ClientSession::State::Authenticated)};
     if (!messageAllowed) {
-        LOG_INFO("Received client message in an invalid state. Type: %u",
+        LOG_WARN("Received client message in an invalid state. Type: %u",
                  static_cast<unsigned int>(messageType));
         disconnectCallback(handle, asio::error::make_error_code(
                                        asio::error::invalid_argument));
@@ -77,7 +77,7 @@ void ClientMessageProcessor::processReceivedMessage(
             break;
         }
         default: {
-            LOG_INFO("Received unexpected client message type: %u",
+            LOG_WARN("Received unexpected client message type: %u",
                      static_cast<unsigned int>(messageType));
             disconnectCallback(handle, asio::error::make_error_code(
                                            asio::error::invalid_argument));
@@ -129,7 +129,7 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
     // Note: A correctly-behaving client will never send an invalid channel,
     //       so we treat it as a malformed message.
     if (!isValidChatChannel(message.channel)) {
-        LOG_INFO("Received chat message with invalid channel: %u",
+        LOG_WARN("Received chat message with invalid channel: %u",
                  static_cast<unsigned int>(message.channel));
         disconnectCallback(handle, asio::error::make_error_code(
                                        asio::error::invalid_argument));
@@ -207,7 +207,7 @@ void ClientMessageProcessor::handleTicketResponse(
             (response.result == ConsumeServiceTicketResponse::InvalidTicket)
                 ? ChatConnectionResponse::InvalidTicket
                 : ChatConnectionResponse::InternalError};
-        LOG_INFO("Rejected chat client: %s",
+        LOG_WARN("Rejected chat client: %s",
                  (result == ChatConnectionResponse::InvalidTicket)
                      ? "Invalid ticket."
                      : "Internal error.");
