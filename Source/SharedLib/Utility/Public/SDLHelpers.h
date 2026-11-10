@@ -86,7 +86,6 @@ public:
      */
     static void renderHexagon(SDL_Renderer* renderer, const SDL_FPoint& center,
                               float radius, const SDL_Color& color);
-
 };
 
 } // namespace AM

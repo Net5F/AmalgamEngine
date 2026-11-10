@@ -44,10 +44,10 @@ public:
 
     /**
      * Begins a transaction. While a transaction is ongoing, queries will be
-     * executed as normal, but they won't be permanent or visible to other 
+     * executed as normal, but they won't be permanent or visible to other
      * connections until object.commit() is called.
      *
-     * @return An RAII transaction object. If the object is destroyed without 
+     * @return An RAII transaction object. If the object is destroyed without
      * calling object.commit(), the transaction will be rolled back.
      */
     SQLite::Transaction startTransaction();
@@ -234,7 +234,7 @@ public:
      *
      * @param callback A callback of form void(ItemID, std::span<const Uint8>,
      *                 ItemVersion, std::string_view) that expects the item's
-     *                 ID, a serialized Item struct, and the item's version 
+     *                 ID, a serialized Item struct, and the item's version
      *                 and init script.
      */
     template<typename Func>

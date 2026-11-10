@@ -53,7 +53,7 @@ void PeriodicCaller::update()
         double executionTime{Timer::getGlobalTime() - callStartTime};
         if (executionTime > timestepS) {
             LOG_INFO("%s overran its update timestep. executionTime: %.5fs",
-                      debugName.c_str(), executionTime);
+                     debugName.c_str(), executionTime);
         }
 
         // Move to the next time step and check for delays.

@@ -95,13 +95,13 @@ private:
                     std::span<const Uint8> serializedProjectComponents);
 
     /**
-     * Parses the serializedComponents buffer, building up a list of each 
+     * Parses the serializedComponents buffer, building up a list of each
      * component's ID, version, and position within the buffer.
      */
-    bool parseComponents(
-        std::span<const Uint8> serializedComponents,
-        std::vector<SerializedComponent>& components, entt::entity entity,
-        const char* componentSetName) const;
+    bool parseComponents(std::span<const Uint8> serializedComponents,
+                         std::vector<SerializedComponent>& components,
+                         entt::entity entity,
+                         const char* componentSetName) const;
 
     /**
      * Loads all valid engine components in serializedComponents that exist in

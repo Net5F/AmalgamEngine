@@ -213,9 +213,9 @@ entt::entity LoadHelper::loadPlayerEntity(
     return entity;
 }
 
-void LoadHelper::loadEntity(
-    entt::entity entity, std::span<const Uint8> serializedEngineComponents,
-    std::span<const Uint8> serializedProjectComponents)
+void LoadHelper::loadEntity(entt::entity entity,
+                            std::span<const Uint8> serializedEngineComponents,
+                            std::span<const Uint8> serializedProjectComponents)
 {
     // Note: Any failure to load this entity is fatal. Unlike player entities,
     //       there's no way to recover (e.g. by rejecting the client), and if
@@ -280,10 +280,10 @@ void LoadHelper::loadEntity(
     initTimerComponents(newEntity);
 }
 
-bool LoadHelper::parseComponents(
-    std::span<const Uint8> serializedComponents,
-    std::vector<SerializedComponent>& components, entt::entity entity,
-    const char* componentSetName) const
+bool LoadHelper::parseComponents(std::span<const Uint8> serializedComponents,
+                                 std::vector<SerializedComponent>& components,
+                                 entt::entity entity,
+                                 const char* componentSetName) const
 {
     // Build the list of components for this entity.
     // Note: This only stores each component's type/version/payload, we aren't
@@ -402,43 +402,42 @@ bool LoadHelper::loadComponents(
 {
     bool allSucceeded{true};
     std::size_t serializedIndex{0};
-    boost::mp11::mp_for_each<EntryList>(
-        [&](auto entry) {
-            using Entry = decltype(entry);
+    boost::mp11::mp_for_each<EntryList>([&](auto entry) {
+        using Entry = decltype(entry);
 
-            // Skip serialized entries with unknown/deprecated IDs.
-            while ((serializedIndex < serializedComponents.size())
-                   && (serializedComponents[serializedIndex].typeID
-                       < Entry::TYPE_ID)) {
-                ++serializedIndex;
-            }
-
-            if (serializedIndex == serializedComponents.size()) {
-                // No more serialized components to process.
-                return;
-            }
-
-            const SerializedComponent& serializedComponent{
-                serializedComponents[serializedIndex]};
-            if (serializedComponent.typeID > Entry::TYPE_ID) {
-                // The entity doesn't have this component, continue to the
-                // next entry.
-                return;
-            }
-
-            // Note: We skip Position since it's handled elsewhere.
-            using Component = typename Entry::Component;
-            if constexpr (!std::is_same_v<Component, Position>) {
-                Component component{};
-                if (!deserializeComponent<Entry>(entity, serializedComponent,
-                                                 component)
-                    || !componentCallback(component)) {
-                    allSucceeded = false;
-                }
-            }
-
+        // Skip serialized entries with unknown/deprecated IDs.
+        while ((serializedIndex < serializedComponents.size())
+               && (serializedComponents[serializedIndex].typeID
+                   < Entry::TYPE_ID)) {
             ++serializedIndex;
-        });
+        }
+
+        if (serializedIndex == serializedComponents.size()) {
+            // No more serialized components to process.
+            return;
+        }
+
+        const SerializedComponent& serializedComponent{
+            serializedComponents[serializedIndex]};
+        if (serializedComponent.typeID > Entry::TYPE_ID) {
+            // The entity doesn't have this component, continue to the
+            // next entry.
+            return;
+        }
+
+        // Note: We skip Position since it's handled elsewhere.
+        using Component = typename Entry::Component;
+        if constexpr (!std::is_same_v<Component, Position>) {
+            Component component{};
+            if (!deserializeComponent<Entry>(entity, serializedComponent,
+                                             component)
+                || !componentCallback(component)) {
+                allSucceeded = false;
+            }
+        }
+
+        ++serializedIndex;
+    });
 
     return allSucceeded;
 }
@@ -535,8 +534,8 @@ void LoadHelper::initTimerComponents(entt::entity entity)
     }
 
     // Init CastCooldown, if present.
-    if (CastCooldown * castCooldown{
-            world.registry.try_get<CastCooldown>(entity)}) {
+    if (CastCooldown
+        * castCooldown{world.registry.try_get<CastCooldown>(entity)}) {
         castCooldown->initAfterLoad(saveTimestamp->lastSavedTick,
                                     simulation.getCurrentTick());
     }

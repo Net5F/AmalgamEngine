@@ -85,8 +85,7 @@ Database::Database()
             FROM player_entities WHERE account_id=?
         )");
 
-    insertItemQuery = std::make_unique<SQLite::Statement>(
-        database, R"(
+    insertItemQuery = std::make_unique<SQLite::Statement>(database, R"(
             INSERT INTO items VALUES (?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 serialized_item=excluded.serialized_item,
@@ -95,8 +94,8 @@ Database::Database()
         )");
     deleteItemQuery = std::make_unique<SQLite::Statement>(
         database, "DELETE FROM items WHERE id=?");
-    iterateItemsQuery = std::make_unique<SQLite::Statement>(
-        database, "SELECT * FROM items");
+    iterateItemsQuery
+        = std::make_unique<SQLite::Statement>(database, "SELECT * FROM items");
 
     insertGlobalStoredValueMapQuery = std::make_unique<SQLite::Statement>(
         database, "UPDATE global_stored_value_map SET serialized_map=(?)");
@@ -130,7 +129,8 @@ SQLite::Transaction Database::startTransaction()
     return SQLite::Transaction(database);
 }
 
-SQLite::Transaction Database::startTransaction(SQLite::TransactionBehavior behavior)
+SQLite::Transaction
+    Database::startTransaction(SQLite::TransactionBehavior behavior)
 {
     return SQLite::Transaction(database, behavior);
 }

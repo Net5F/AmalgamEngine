@@ -29,7 +29,7 @@ using InRangeUpdateComponentTypes
  * value for each type.
  *
  * These indices will change as the lists get modified, which is fine. We only
- * care that the client and server have matching lists, and that they don't 
+ * care that the client and server have matching lists, and that they don't
  * change at runtime.
  */
 using ReplicatedComponentTypes = boost::mp11::mp_unique<boost::mp11::mp_append<

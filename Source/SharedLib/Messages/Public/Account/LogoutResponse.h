@@ -14,11 +14,7 @@ struct LogoutResponse {
     static constexpr AccountClientMessageType MESSAGE_TYPE{
         AccountClientMessageType::LogoutResponse};
 
-    enum Result : Uint8 {
-        Success,
-        InvalidSession,
-        InternalError
-    };
+    enum Result : Uint8 { Success, InvalidSession, InternalError };
     Result result{Result::InternalError};
 };
 

@@ -67,8 +67,8 @@ public:
 
         std::optional<State> migrationState{};
         ComponentMigrationResult result{
-            deserializationFunctions()[serializedVersion](
-                serializedComponent, migrationState)};
+            deserializationFunctions()[serializedVersion](serializedComponent,
+                                                          migrationState)};
         if (result != ComponentMigrationResult::Success) {
             return result;
         }
@@ -78,8 +78,7 @@ public:
 
         for (Uint16 version{serializedVersion};
              static_cast<Uint16>(version + 1) < CurrentVersion; ++version) {
-            result = intermediateMigrationFunctions()[version](
-                *migrationState);
+            result = intermediateMigrationFunctions()[version](*migrationState);
             if (result != ComponentMigrationResult::Success) {
                 return result;
             }
@@ -107,16 +106,16 @@ private:
     template<std::size_t... Indices>
     static auto makeStateType(std::index_sequence<Indices...>)
         -> std::variant<OldComponent<static_cast<Uint16>(Indices)>...>;
-    using State =
-        decltype(makeStateType(std::make_index_sequence<VERSION_COUNT>{}));
+    using State
+        = decltype(makeStateType(std::make_index_sequence<VERSION_COUNT>{}));
 
     /** Function pointer types. Used to store generated deserialize and
         migration functions for each step in the migration. */
     using DeserializationFunction = ComponentMigrationResult (*)(
         std::span<const Uint8> serializedComponent,
         std::optional<State>& migrationState);
-    using IntermediateMigrationFunction =
-        ComponentMigrationResult (*)(State& migrationState);
+    using IntermediateMigrationFunction
+        = ComponentMigrationResult (*)(State& migrationState);
 
     // Validation helpers
     template<Uint16 BaseVersion>
@@ -135,12 +134,10 @@ private:
     template<std::size_t... Indices>
     static consteval bool hasAllMigrations(std::index_sequence<Indices...>)
     {
-        return (
-            hasMigration<static_cast<Uint16>(Indices)> && ...);
+        return (hasMigration<static_cast<Uint16>(Indices)> && ...);
     }
 
-    static_assert(hasAllMigrations(
-                      std::make_index_sequence<VERSION_COUNT>{}),
+    static_assert(hasAllMigrations(std::make_index_sequence<VERSION_COUNT>{}),
                   "Missing ComponentMigration specialization.");
 
     /**
@@ -171,7 +168,8 @@ private:
      * @post migrationState contains the next version's component type.
      */
     template<Uint16 BaseVersion>
-    static ComponentMigrationResult migrateIntermediateStep(State& migrationState)
+    static ComponentMigrationResult
+        migrateIntermediateStep(State& migrationState)
     {
         constexpr Uint16 nextVersion{static_cast<Uint16>(BaseVersion + 1)};
         static_assert(nextVersion < CurrentVersion);
@@ -194,9 +192,9 @@ private:
                 return ComponentMigrationResult::MigrationFailed;
             }
 
-            migrationState.template emplace<
-                static_cast<std::size_t>(nextVersion)>(
-                std::move(nextComponent));
+            migrationState
+                .template emplace<static_cast<std::size_t>(nextVersion)>(
+                    std::move(nextComponent));
             return ComponentMigrationResult::Success;
         }
         else {
@@ -211,8 +209,8 @@ private:
     /**
      * Migrates from the last old version into the current component.
      */
-    static ComponentMigrationResult migrateFinalStep(State& migrationState,
-                                                     Component& currentComponent)
+    static ComponentMigrationResult
+        migrateFinalStep(State& migrationState, Component& currentComponent)
     {
         constexpr Uint16 baseVersion{static_cast<Uint16>(CurrentVersion - 1)};
 
@@ -235,10 +233,10 @@ private:
             return ComponentMigrationResult::Success;
         }
         else {
-            static_assert(validMigration<Migration, ComponentAtBaseVersion,
-                                         Component>,
-                          "ComponentMigration::migrate() must accept the old "
-                          "and new component types and return bool.");
+            static_assert(
+                validMigration<Migration, ComponentAtBaseVersion, Component>,
+                "ComponentMigration::migrate() must accept the old "
+                "and new component types and return bool.");
             return ComponentMigrationResult::MigrationFailed;
         }
     }

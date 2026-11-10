@@ -16,12 +16,7 @@ struct ServiceTicketResponse {
     static constexpr AccountClientMessageType MESSAGE_TYPE{
         AccountClientMessageType::ServiceTicketResponse};
 
-    enum Result : Uint8 {
-        Success,
-        InvalidSession,
-        RateLimited,
-        InternalError
-    };
+    enum Result : Uint8 { Success, InvalidSession, RateLimited, InternalError };
     Result result{Result::InternalError};
 
     /** If result == success, this authorizes one connection attempt. */

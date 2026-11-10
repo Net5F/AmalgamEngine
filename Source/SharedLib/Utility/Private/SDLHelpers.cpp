@@ -147,5 +147,4 @@ void SDLHelpers::renderHexagon(SDL_Renderer* renderer, const SDL_FPoint& center,
                        static_cast<int>(indices.size()));
 }
 
-
 } // namespace AM

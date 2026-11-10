@@ -72,7 +72,7 @@ bool TlsTransport::handshake(HandshakeType type,
 
         stream.async_handshake(
             type, [self, successCallback = std::move(successCallback)](
-                const asio::error_code& error) mutable {
+                      const asio::error_code& error) mutable {
                 if (!self->cancelHandshakeTimer()) {
                     self->reportFailure(
                         asio::error::make_error_code(asio::error::fault));

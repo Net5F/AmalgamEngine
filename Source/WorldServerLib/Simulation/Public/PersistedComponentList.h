@@ -20,7 +20,7 @@ namespace WorldServer
  *
  * How to set up your component list, depending on the type of setup you want:
  *   Single server:
- *     Set everything to World (it's slightly more efficient to skip the 
+ *     Set everything to World (it's slightly more efficient to skip the
  *     AccountServer -> WorldServer messages).
  *   Runescape-style (same character, multiple worlds):
  *     Set everything to Account, unless you want particular components to be
@@ -63,8 +63,7 @@ struct PersistedComponentEntry {
 template<typename... Entries>
 struct PersistedComponentList {
     using EntryTypes = boost::mp11::mp_list<Entries...>;
-    using ComponentTypes
-        = boost::mp11::mp_list<typename Entries::Component...>;
+    using ComponentTypes = boost::mp11::mp_list<typename Entries::Component...>;
     using TypeIDs = boost::mp11::mp_list<
         std::integral_constant<Uint16, Entries::TYPE_ID>...>;
 

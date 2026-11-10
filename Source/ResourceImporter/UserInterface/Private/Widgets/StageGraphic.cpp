@@ -20,8 +20,8 @@ void StageGraphic::updateStage(const SDL_FRect& spriteTextureExtent,
                                const SDL_FPoint& stageOrigin,
                                const SDL_FPoint& actualSpriteImageOffset)
 {
-    // We need to update where the stage is on the screen for our generated 
-    // graphics. To do that, we must transform the stage's world positions to 
+    // We need to update where the stage is on the screen for our generated
+    // graphics. To do that, we must transform the stage's world positions to
     // screen points.
     std::array<SDL_FPoint, 4> screenPoints{};
 

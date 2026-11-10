@@ -19,7 +19,7 @@ namespace AM
 /**
  * Incoming message composer for our simple "type + size, no batching" protocol.
  *
- * Note: Since deserialization requires extra context, we defer it to the 
+ * Note: Since deserialization requires extra context, we defer it to the
  *       MessageProcessor classes.
  */
 template<typename MessageType>
@@ -46,7 +46,7 @@ public:
     /**
      * Returns the exact byte count that addBytes() expects next.
      *
-     * Used by the parent Connection to know how many bytes to wait for before 
+     * Used by the parent Connection to know how many bytes to wait for before
      * passing them to this composer.
      */
     std::size_t nextReadSize() const
@@ -64,7 +64,7 @@ public:
     struct ComposeResult {
         asio::error_code error{};
         bool frameComplete{false};
-        /** If frameComplete == true, this is the message that the frame 
+        /** If frameComplete == true, this is the message that the frame
             contained. */
         ComposedMessage message{};
     };
@@ -135,11 +135,11 @@ private:
     /** The next part of the message frame that we expect to read. */
     ReadState state;
 
-    /** If state==Payload, this is the type that we expect the next message to 
+    /** If state==Payload, this is the type that we expect the next message to
         be (based on the received header). */
     MessageType pendingType;
 
-    /** If state==Payload, this is the size that we expect the next payload to 
+    /** If state==Payload, this is the size that we expect the next payload to
         be (based on the received header). */
     std::size_t pendingPayloadSize;
 };

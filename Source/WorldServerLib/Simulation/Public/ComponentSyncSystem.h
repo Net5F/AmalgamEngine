@@ -15,10 +15,10 @@ class Network;
 class GraphicData;
 
 /**
- * This system is the backing logic for the observed component type lists, 
+ * This system is the backing logic for the observed component type lists,
  * e.g. EngineObserveBroadcastComponentTypes.h.
  *
- * When an observed component is updated, sends an update message to the 
+ * When an observed component is updated, sends an update message to the
  * appropriate clients.
  */
 class ComponentSyncSystem
@@ -37,17 +37,17 @@ private:
     void sendInRangeUpdates();
 
     /**
-     * Adds constructed or destroyed components from the given list to 
+     * Adds constructed or destroyed components from the given list to
      * componentUpdateMap.
      */
-    template <typename ComponentTypeList>
+    template<typename ComponentTypeList>
     void addConstructDestroyComponents(auto& constructObservers,
                                        auto& destroyObservers);
 
     /**
      * Adds updated components from the given list to * componentUpdateMap.
      */
-    template <typename ComponentTypeList>
+    template<typename ComponentTypeList>
     void addUpdateComponents(auto& updateObservers);
 
     /**

@@ -72,13 +72,13 @@ struct StoredValues {
 template<typename S>
 void serialize(S& serializer, StoredValues& storedValues)
 {
-    serializer.ext(
-        storedValues.valueMap,
-        bitsery::ext::StdMap{StoredValues::MAX_STORED_VALUES},
-        [](S& serializer, std::string& stringID, Uint32& value) {
-            serializer.text1b(stringID, StoredValues::MAX_STRING_ID_LENGTH);
-            serializer.value4b(value);
-        });
+    serializer.ext(storedValues.valueMap,
+                   bitsery::ext::StdMap{StoredValues::MAX_STORED_VALUES},
+                   [](S& serializer, std::string& stringID, Uint32& value) {
+                       serializer.text1b(stringID,
+                                         StoredValues::MAX_STRING_ID_LENGTH);
+                       serializer.value4b(value);
+                   });
 }
 
 } // namespace WorldServer

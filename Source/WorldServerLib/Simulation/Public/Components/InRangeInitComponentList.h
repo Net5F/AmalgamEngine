@@ -10,7 +10,7 @@ namespace WorldServer
 /**
  * Tracks which InRangeInit components this entity currently has attached to it.
  * See EngineReplicatedComponentTypes.h for more info on InRangeInit components.
- * 
+ *
  * Used by ClientAOISystem to fill EntityInit messages.
  *
  * Note: This component will be present on an entity regardless of whether it

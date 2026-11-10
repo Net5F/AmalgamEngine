@@ -38,8 +38,8 @@ void EntityMover::moveEntity(const MoveEntityParams& params)
     }
 
     // Update their velocity (and update other movement state).
-    MovementHelpers::updateMovement(
-        params.inputStates, params.movementMods, params.movement);
+    MovementHelpers::updateMovement(params.inputStates, params.movementMods,
+                                    params.movement);
 
     // Resolve any collisions with the surrounding bounding boxes.
     BoundingBox resolvedBounds{resolveCollisions(

@@ -75,20 +75,20 @@ void ServiceMessageProcessor::handleMessage(
     // Note: We use a DB worker so we don't hold up the network thread.
     // Note: The requesting service is the audience, so a service can only
     //       consume tickets that were issued for it.
-    asio::post(databasePool, [this, handle, requestID = message.requestID,
-                              service, ticket = message.ticket,
-                              includeAccountData
-                              = message.includeAccountData]() {
-        ConsumeServiceTicketResponse response{
-            consumeServiceTicket(service, ticket, includeAccountData)};
-        response.requestID = requestID;
+    asio::post(
+        databasePool, [this, handle, requestID = message.requestID, service,
+                       ticket = message.ticket,
+                       includeAccountData = message.includeAccountData]() {
+            ConsumeServiceTicketResponse response{
+                consumeServiceTicket(service, ticket, includeAccountData)};
+            response.requestID = requestID;
 
-        // Send the response (must be done on the network thread).
-        asio::post(
-            networkIoContext, [this, handle, response = std::move(response)]() {
+            // Send the response (must be done on the network thread).
+            asio::post(networkIoContext, [this, handle,
+                                          response = std::move(response)]() {
                 sendCallback(handle, messageFramer.frameMessage(response));
             });
-    });
+        });
 }
 
 void ServiceMessageProcessor::handleMessage(ConnectionHandle handle,

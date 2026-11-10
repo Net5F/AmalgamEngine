@@ -14,7 +14,7 @@ namespace WorldServer
  * The version number of the outer serialization format used for persisted
  * components.
  *
- * Our current format is a contiguous, ordered array of tagged component 
+ * Our current format is a contiguous, ordered array of tagged component
  * records. Each record looks like:
  *   [typeID][version][payloadSize][payload (serialized component data)]
  *

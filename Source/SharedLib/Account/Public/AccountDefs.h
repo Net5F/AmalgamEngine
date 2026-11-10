@@ -36,11 +36,7 @@ inline constexpr std::size_t SERVICE_TICKET_BYTES{32};
 inline constexpr std::size_t ACCOUNT_DATA_BLOB_MAX_BYTES{30000};
 
 /** The service that a ticket authorizes the client to connect to. */
-enum class ServiceTicketAudience : Uint8 {
-    WorldServer,
-    ChatServer,
-    Count
-};
+enum class ServiceTicketAudience : Uint8 { WorldServer, ChatServer, Count };
 
 /**
  * Returns true if the given audience is a real audience value.

@@ -169,8 +169,7 @@ void CollisionLocator::RaycastStrategyIntersectFirst::intersectObjectsInCell(
                         // If this is the earliest hit, track it.
                         if (intersectReturn.tMin < firstHitInfo.hitT) {
                             collisionLocator.terrainCollisionVolumes[1]
-                                .collisionVolume
-                                = collisionVolume;
+                                .collisionVolume = collisionVolume;
                             firstHitInfo.hitT = intersectReturn.tMin;
                             firstHitInfo.collisionInfo = &(
                                 collisionLocator.terrainCollisionVolumes[1]);

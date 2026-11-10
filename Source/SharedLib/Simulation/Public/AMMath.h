@@ -43,17 +43,17 @@ public:
 
     /**
      * Returns true if the given values are approximately equal.
-     * 
-     * Uses WORLD_EPSILON as a tolerance threshold, making this useful for 
+     *
+     * Uses WORLD_EPSILON as a tolerance threshold, making this useful for
      * values that represent positions within the world map.
      */
     static bool isEqualApproxWorld(float a, float b);
 
     /**
      * Returns true if the given values are approximately equal.
-     * 
-     * Uses GENERIC_EPSILON as a tolerance threshold. If you're doing math on 
-     * values the represent positions within the world map, consider using 
+     *
+     * Uses GENERIC_EPSILON as a tolerance threshold. If you're doing math on
+     * values the represent positions within the world map, consider using
      * isEqualApproxWorld instead.
      */
     static bool isEqualApproxGeneric(float a, float b);
@@ -70,10 +70,10 @@ public:
     /**
      * Smoothly maps x in range [edge0, edge1] to an equivalent value in range
      * [0, 1].
-     * 
+     *
      * Values outside [edge0, edge1] are clamped to [0, 1].
      *
-     * Uses a smooth curve with shallow slope near the edges and a steeper 
+     * Uses a smooth curve with shallow slope near the edges and a steeper
      * slope through the middle.
      *
      * Note: This normally steps from smaller values to larger values. To step

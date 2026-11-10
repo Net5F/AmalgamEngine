@@ -32,8 +32,7 @@ public:
      * for.
      */
     virtual void processReceivedMessage(Uint8 messageType, Uint8* messageBuffer,
-                                        std::size_t messageSize)
-        = 0;
+                                        std::size_t messageSize) = 0;
 };
 
 } // namespace Client

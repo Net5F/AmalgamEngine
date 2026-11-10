@@ -20,7 +20,7 @@ namespace WorldServer
  *    EnginePersistedComponentTypes.h.
  *
  * When loading, migration chaining happens automatically (e.g. v0 -> v1 -> v2).
- * In migrate(), newComponent is the output of the migration step (either the 
+ * In migrate(), newComponent is the output of the migration step (either the
  * new final component, or the next component in the migration chain).
  */
 

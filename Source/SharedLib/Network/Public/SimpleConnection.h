@@ -37,7 +37,7 @@ public:
 
     struct ClassConfig {
         TlsTransport::ClassConfig tlsTransportConfig{};
-        /** How long after receiving the start of a message to wait for the 
+        /** How long after receiving the start of a message to wait for the
             rest. */
         double partialReceiveTimeoutS{10};
         /** How long to allow a connection to be idle. */
@@ -62,8 +62,7 @@ public:
     {
         std::size_t maxWriteFrameSize{MESSAGE_HEADER_SIZE
                                       + config.maxWritePayloadSize};
-        if (config.tlsTransportConfig.maxQueuedWriteBytes
-            < maxWriteFrameSize) {
+        if (config.tlsTransportConfig.maxQueuedWriteBytes < maxWriteFrameSize) {
             LOG_FATAL("TLS write queue byte limit is smaller than the max "
                       "write frame size.");
         }
@@ -150,8 +149,8 @@ private:
                     asio::buffer(readBuffer.data(), 1),
                     [self](std::size_t) { self->handleFrameStarted(); })) {
                 cancelReceiveTimer();
-                disconnect(asio::error::make_error_code(
-                    asio::error::not_connected));
+                disconnect(
+                    asio::error::make_error_code(asio::error::not_connected));
             }
             return;
         }
@@ -233,8 +232,8 @@ private:
         // A message was completed. Pass it to the registered callback.
         const auto& message{composeResult.message};
         if (!messageCallback) {
-            disconnect(asio::error::make_error_code(
-                asio::error::invalid_argument));
+            disconnect(
+                asio::error::make_error_code(asio::error::invalid_argument));
             return;
         }
         messageCallback(message.type, message.payload);
@@ -271,8 +270,8 @@ private:
                 }
 
                 // Timer expired, disconnect with timeout.
-                self->disconnect(asio::error::make_error_code(
-                    asio::error::timed_out));
+                self->disconnect(
+                    asio::error::make_error_code(asio::error::timed_out));
             });
         } catch (const asio::system_error& e) {
             disconnect(e.code());
@@ -301,7 +300,7 @@ private:
     double partialReceiveTimeoutS;
     double idleTimeoutS;
 
-    /** The timer we use to detect when clients are fully idle, or when they 
+    /** The timer we use to detect when clients are fully idle, or when they
         have sent a partial message but aren't completing it quickly enough. */
     asio::steady_timer receiveTimer;
 
@@ -310,7 +309,8 @@ private:
 
     BinaryBuffer readBuffer;
 
-    // Note: We don't expect this to throw. It's up to the caller to ensure that.
+    // Note: We don't expect this to throw. It's up to the caller to ensure
+    // that.
     MessageCallback messageCallback;
 
     bool frameInProgress;
