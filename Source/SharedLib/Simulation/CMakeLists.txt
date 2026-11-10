@@ -78,7 +78,7 @@ target_sources(SharedLib
         Public/Components/Input.h
         Public/Components/Interaction.h
         Public/Components/Inventory.h
-        Public/Components/IsClientEntity.h
+        Public/Components/IsPlayerEntity.h
         Public/Components/Movement.h
         Public/Components/MovementModifiers.h
         Public/Components/Name.h

@@ -12,9 +12,9 @@ target_sources(ClientLib
         Private/GraphicSystem.cpp
         Private/InventorySystem.cpp
         Private/ItemSystem.cpp
-        Private/NpcMovementSystem.cpp
-        Private/PlayerInputSystem.cpp
-        Private/PlayerMovementSystem.cpp
+        Private/ReplicatedMovementSystem.cpp
+        Private/LocalPlayerInputSystem.cpp
+        Private/LocalPlayerMovementSystem.cpp
         Private/ReplicationTickOffset.cpp
         Private/ServerConnectionSystem.cpp
         Private/Simulation.cpp
@@ -40,9 +40,9 @@ target_sources(ClientLib
         Public/InventorySystem.h
         Public/ISimulationExtension.h
         Public/ItemSystem.h
-        Public/NpcMovementSystem.h
-        Public/PlayerInputSystem.h
-        Public/PlayerMovementSystem.h
+        Public/ReplicatedMovementSystem.h
+        Public/LocalPlayerInputSystem.h
+        Public/LocalPlayerMovementSystem.h
         Public/ReplicationTickOffset.h
         Public/ServerConnectionSystem.h
         Public/Simulation.h

@@ -25,11 +25,11 @@ public:
                const GraphicData& inGraphicData);
 
     /**
-     * Loads saved non-client entities and adds them to the registry.
+     * Loads saved non-player entities and adds them to the registry.
      *
      * If any entity fails to load, this is fatal (see loadEntity()).
      */
-    void loadNonClientEntities();
+    void loadNonPlayerEntities();
 
     /**
      * Loads saved item definitions.
@@ -48,10 +48,10 @@ public:
     void loadGlobalStoredValues();
 
     /**
-     * A client entity's saved components for a single ClientPersistence.
+     * A player entity's saved components for a single PlayerPersistence.
      * Both spans are empty if the account had no saved data.
      */
-    struct SerializedClientComponents {
+    struct SerializedPlayerComponents {
         /** Ordered tagged engine component records. */
         std::span<const Uint8> engineComponents{};
         /** Ordered tagged project component records. */
@@ -59,7 +59,7 @@ public:
     };
 
     /**
-     * Creates a client entity and loads its saved components onto it.
+     * Creates a player entity and loads its saved components onto it.
      *
      * Each set of saved components only has its matching components loaded
      * (e.g. if a component was changed from World to Account, its old World
@@ -79,9 +79,9 @@ public:
      * @return The new entity, or entt::null if loading failed.
      */
     entt::entity
-        loadClientEntity(Sint64 accountID,
-                         const SerializedClientComponents& accountComponents,
-                         const SerializedClientComponents& worldComponents);
+        loadPlayerEntity(Sint64 accountID,
+                         const SerializedPlayerComponents& accountComponents,
+                         const SerializedPlayerComponents& worldComponents);
 
 private:
     struct SerializedComponent {
@@ -136,7 +136,7 @@ private:
      * If a serialized component fails to deserialize, errors in Debug. In
      * Release, skips the component and proceeds.
      * If a component's ID isn't in EntryList, it's assumed to be deprecated
-     * (or to belong to a different ClientPersistence) and is skipped.
+     * (or to belong to a different PlayerPersistence) and is skipped.
      *
      * @param componentCallback A function of the form
      * bool(const auto& component) that expects the deserialized component,
@@ -178,14 +178,14 @@ private:
         Uint16 typeID) const;
 
     /**
-     * If the given engine component was saved in its ClientPersistence's set,
+     * If the given engine component was saved in its PlayerPersistence's set,
      * deserializes it into component.
      *
      * @return false if the component failed to deserialize, else true (even
      *         if it wasn't saved).
      */
     template<typename Component>
-    bool getSavedClientComponent(
+    bool getSavedPlayerComponent(
         const std::vector<SerializedComponent>& accountEngineComponents,
         const std::vector<SerializedComponent>& worldEngineComponents,
         std::optional<Component>& component);

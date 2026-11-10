@@ -18,7 +18,7 @@ struct CastInfo {
     const Castable* castable{nullptr};
 
     /** The ID of the entity performing the cast.
-        May or may not be a client entity. */
+        May or may not be a player entity. */
     entt::entity casterEntity{entt::null};
 
     /** If this is an ItemInteraction cast, this is the item that's being
@@ -37,7 +37,7 @@ struct CastInfo {
     Vector3 targetPosition{};
 
     /** The handle of the client performing the cast.
-        If non-null, this cast belongs to a client entity.
+        If non-null, this cast belongs to a player entity.
         Only filled by the server, not used by the client. */
     ConnectionHandle clientHandle{};
 };

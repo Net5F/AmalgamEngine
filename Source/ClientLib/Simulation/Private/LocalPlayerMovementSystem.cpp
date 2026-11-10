@@ -1,4 +1,4 @@
-#include "PlayerMovementSystem.h"
+#include "LocalPlayerMovementSystem.h"
 #include "SimulationContext.h"
 #include "Simulation.h"
 #include "MovementHelpers.h"
@@ -24,30 +24,31 @@ namespace AM
 {
 namespace Client
 {
-PlayerMovementSystem::PlayerMovementSystem(
+LocalPlayerMovementSystem::LocalPlayerMovementSystem(
     const SimulationContext& inSimContext)
 : simulation{inSimContext.simulation}
 , world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
 , entityMover{world.registry, world.tileMap, world.entityLocator,
               world.collisionLocator}
-, playerMovementUpdateQueue{inSimContext.networkEventDispatcher}
+, localPlayerMovementUpdateQueue{inSimContext.networkEventDispatcher}
 {
 }
 
-void PlayerMovementSystem::processMovement()
+void LocalPlayerMovementSystem::processMovement()
 {
     // Save the old position.
     auto [position, previousPosition]
-        = world.registry.get<Position, PreviousPosition>(world.playerEntity);
+        = world.registry.get<Position, PreviousPosition>(
+            world.localPlayerEntity);
     previousPosition = position;
 
     // If we're online, process any updates from the server.
     if (!Config::RUN_OFFLINE) {
-        // Apply any player entity updates from the server.
-        // If an update is applied, the player entity's actual components will
+        // Apply any local player updates from the server.
+        // If an update is applied, the local player's actual components will
         // be moved back in time to match the update's state.
-        Uint32 lastUpdateTick{processPlayerUpdates()};
+        Uint32 lastUpdateTick{processLocalPlayerUpdates()};
 
         // If we received updates, replay the inputs that came after them.
         if (lastUpdateTick != 0) {
@@ -61,26 +62,26 @@ void PlayerMovementSystem::processMovement()
         }
     }
 
-    // Process the player entity's movement for this tick.
-    Input& input{world.registry.get<Input>(world.playerEntity)};
-    movePlayerEntity(input.inputStates);
+    // Process the local player's movement for this tick.
+    Input& input{world.registry.get<Input>(world.localPlayerEntity)};
+    moveLocalPlayer(input.inputStates);
 
     // Signal the updated components to any observers.
     emitUpdateSignals();
 }
 
-Uint32 PlayerMovementSystem::processPlayerUpdates()
+Uint32 LocalPlayerMovementSystem::processLocalPlayerUpdates()
 {
     entt::registry& registry{world.registry};
     auto [input, position, previousPosition, movement, rotation, collision,
           inputHistory]
         = registry.get<Input, Position, PreviousPosition, Movement, Rotation,
-                       Collision, InputHistory>(world.playerEntity);
+                       Collision, InputHistory>(world.localPlayerEntity);
 
     /* Process any messages for us from the server. */
     PlayerMovementUpdate movementUpdate{};
     Uint32 lastUpdateTick{0};
-    while (playerMovementUpdateQueue.pop(movementUpdate)) {
+    while (localPlayerMovementUpdateQueue.pop(movementUpdate)) {
         // Check that the update's tick is in the past.
         Uint32 updateTick{movementUpdate.tickNum};
         Uint32 currentTick{simulation.getCurrentTick()};
@@ -122,12 +123,13 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
     return lastUpdateTick;
 }
 
-void PlayerMovementSystem::replayInputs(Uint32 lastUpdateTick)
+void LocalPlayerMovementSystem::replayInputs(Uint32 lastUpdateTick)
 {
     // Replay all inputs newer than lastUpdateTick, except the current
     // tick's input.
     Uint32 currentTick{simulation.getCurrentTick()};
-    auto& inputHistory{world.registry.get<InputHistory>(world.playerEntity)};
+    auto& inputHistory{
+        world.registry.get<InputHistory>(world.localPlayerEntity)};
     for (Uint32 tickToProcess{lastUpdateTick + 1}; tickToProcess < currentTick;
          ++tickToProcess) {
         // Check that the diff is valid.
@@ -135,20 +137,22 @@ void PlayerMovementSystem::replayInputs(Uint32 lastUpdateTick)
         checkTickDiffValidity(tickDiff);
 
         // Replay the input state and move the entity.
-        movePlayerEntity(inputHistory.inputHistory[tickDiff]);
+        moveLocalPlayer(inputHistory.inputHistory[tickDiff]);
     }
 }
 
-void PlayerMovementSystem::movePlayerEntity(const Input::StateArr& inputStates)
+void LocalPlayerMovementSystem::moveLocalPlayer(
+    const Input::StateArr& inputStates)
 {
     auto [position, previousPosition, movement, movementMods, rotation,
           collision, collisionBitSets]
         = world.registry
               .get<Position, PreviousPosition, Movement, MovementModifiers,
-                   Rotation, Collision, CollisionBitSets>(world.playerEntity);
+                   Rotation, Collision, CollisionBitSets>(
+                  world.localPlayerEntity);
 
     // Move the entity.
-    entityMover.moveEntity({.entity{world.playerEntity},
+    entityMover.moveEntity({.entity{world.localPlayerEntity},
                             .inputStates{inputStates},
                             .position{position},
                             .previousPosition{previousPosition},
@@ -160,16 +164,17 @@ void PlayerMovementSystem::movePlayerEntity(const Input::StateArr& inputStates)
                             .deltaSeconds{SharedConfig::SIM_TICK_TIMESTEP_S}});
 }
 
-void PlayerMovementSystem::emitUpdateSignals()
+void LocalPlayerMovementSystem::emitUpdateSignals()
 {
     // Emit update signals to any observers.
-    world.registry.patch<Position>(world.playerEntity, [](auto&) {});
+    world.registry.patch<Position>(world.localPlayerEntity, [](auto&) {});
 }
 
-void PlayerMovementSystem::printMismatchInfo(Uint32 lastUpdateTick)
+void LocalPlayerMovementSystem::printMismatchInfo(Uint32 lastUpdateTick)
 {
     auto [position, previousPosition]
-        = world.registry.get<Position, PreviousPosition>(world.playerEntity);
+        = world.registry.get<Position, PreviousPosition>(
+            world.localPlayerEntity);
 
     LOG_INFO("Predicted position mismatched after replay: (%.6f, "
              "%.6f, %.6f) -> (%.6f, %.6f, %.6f)",
@@ -178,7 +183,7 @@ void PlayerMovementSystem::printMismatchInfo(Uint32 lastUpdateTick)
     LOG_INFO("lastUpdateTick: %u", lastUpdateTick);
 }
 
-void PlayerMovementSystem::checkReceivedTickValidity(
+void LocalPlayerMovementSystem::checkReceivedTickValidity(
     [[maybe_unused]] Uint32 updateTick, [[maybe_unused]] Uint32 currentTick)
 {
     AM_ASSERT((updateTick <= currentTick),
@@ -187,12 +192,12 @@ void PlayerMovementSystem::checkReceivedTickValidity(
               updateTick, currentTick);
 }
 
-bool PlayerMovementSystem::checkTickDiffValidity(Uint32 tickDiff)
+bool LocalPlayerMovementSystem::checkTickDiffValidity(Uint32 tickDiff)
 {
     // The history includes the current tick, so we only have LENGTH - 1
     // worth of previous data to use (i.e. it's 0-indexed).
     if (tickDiff > (InputHistory::LENGTH - 1)) {
-        LOG_ERROR("Too few items in the player input history. "
+        LOG_ERROR("Too few items in the local player input history. "
                   "Increase the length or reduce lag. tickDiff: %u, "
                   "historyLength: %u",
                   tickDiff, InputHistory::LENGTH);

@@ -77,7 +77,7 @@ void EngineLuaBindings::addEntityInitBindings()
         "setCollisionLayers", &EngineLuaBindings::setCollisionLayers, this);
     entityInitLua.luaState.set_function(
         "setCollisionMask", &EngineLuaBindings::setCollisionMask, this);
-    // Note: TerrainWall, ClientEntity, NonClientEntity are handled
+    // Note: TerrainWall, PlayerEntity, NonPlayerEntity are handled
     //       automatically.
     //       Object is only useful in setCollisionMask
     entityInitLua.luaState["CLT_OBJECT"] = CollisionLayerType::Object;

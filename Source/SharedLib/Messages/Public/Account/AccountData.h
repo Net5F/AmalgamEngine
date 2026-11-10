@@ -8,7 +8,7 @@ namespace AM
 {
 
 /**
- * A client entity's ClientPersistence::Account components, as persisted by
+ * A player entity's PlayerPersistence::Account components, as persisted by
  * the account server.
  *
  * The account server treats these as opaque blobs. Only the world server

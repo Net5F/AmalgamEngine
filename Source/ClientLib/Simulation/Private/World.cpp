@@ -14,7 +14,7 @@ namespace Client
 World::World(const SimulationContext& inSimContext)
 : registry{}
 , avRegistry{}
-, playerEntity{entt::null}
+, localPlayerEntity{entt::null}
 , entityLocator{registry}
 , collisionLocator{}
 , tileMap{inSimContext.graphicData, collisionLocator}

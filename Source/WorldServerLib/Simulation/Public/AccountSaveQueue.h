@@ -17,10 +17,10 @@ namespace WorldServer
 {
 
 /**
- * Saves client entities' AccountData (their ClientPersistence::Account
+ * Saves player entities' AccountData (their PlayerPersistence::Account
  * components) to the account server.
  *
- * Saves are queued by SaveHelper, both periodically and when a client entity
+ * Saves are queued by SaveHelper, both periodically and when a player entity
  * is removed. Each account's latest data is held here until the account
  * server confirms that it was saved. If the account server can't be reached
  * or the save fails, we keep the data and retry after a delay, so it isn't
@@ -34,7 +34,7 @@ namespace WorldServer
  * When the server shuts down, flush() is used to wait for the remaining
  * saves. If they can't be completed before its timeout, their data is lost.
  *
- * Note: Client entity world data saving is handled directly in SaveHelper.
+ * Note: Player entity world data saving is handled directly in SaveHelper.
  */
 class AccountSaveQueue
 {

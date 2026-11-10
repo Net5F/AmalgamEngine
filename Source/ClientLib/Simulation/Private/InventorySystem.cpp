@@ -40,13 +40,13 @@ void InventorySystem::processInventoryUpdates()
 
 void InventorySystem::initInventory(const InventoryInit& inventoryInit)
 {
-    // Initialize the player's inventory with the given items.
+    // Initialize the local player's inventory with the given items.
     world.registry.patch<Inventory>(
-        world.playerEntity, [&](Inventory& inventory) {
+        world.localPlayerEntity, [&](Inventory& inventory) {
             // Init the inventory's size.
             inventory.resize(inventoryInit.size);
 
-            // Add all the given items to the player's inventory.
+            // Add all the given items to the local player's inventory.
             std::vector<ItemID> itemsToRequest{};
             for (std::size_t i{0}; i < inventoryInit.slots.size(); ++i) {
                 const InventoryInit::ItemSlot& itemSlot{inventoryInit.slots[i]};
@@ -80,7 +80,7 @@ void InventorySystem::processOperation(const InventoryAddItem& inventoryAddItem)
 {
     // Try to add the item.
     world.registry.patch<Inventory>(
-        world.playerEntity, [&](Inventory& inventory) {
+        world.localPlayerEntity, [&](Inventory& inventory) {
             ItemID itemID{inventoryAddItem.itemID};
             if (inventory.addItem(itemID, inventoryAddItem.count,
                                   inventoryAddItem.maxStackSize)) {
@@ -100,7 +100,7 @@ void InventorySystem::processOperation(
 {
     // Try to delete the item.
     world.registry.patch<Inventory>(
-        world.playerEntity, [&](Inventory& inventory) {
+        world.localPlayerEntity, [&](Inventory& inventory) {
             inventory.removeItem(inventoryRemoveItem.slotIndex,
                                  inventoryRemoveItem.count);
         });
@@ -111,7 +111,7 @@ void InventorySystem::processOperation(
 {
     // Try to move the item(s).
     world.registry.patch<Inventory>(
-        world.playerEntity, [&](Inventory& inventory) {
+        world.localPlayerEntity, [&](Inventory& inventory) {
             inventory.moveItem(inventoryMoveItem.sourceSlotIndex,
                                inventoryMoveItem.destSlotIndex);
         });

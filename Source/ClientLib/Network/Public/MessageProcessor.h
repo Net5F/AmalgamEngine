@@ -79,10 +79,9 @@ private:
         subscribed queues. */
     EventDispatcher& networkEventDispatcher;
 
-    /** The entity that this client is controlling. Used when we receive client
-        entity updates, to tell if they contain data relevant to the player
-        entity. */
-    entt::entity playerEntity;
+    /** The local player's entity. Used when we receive movement updates, to
+        tell if they contain data relevant to the local player. */
+    entt::entity localPlayerEntity;
 
     /** The latest tick that we've received a message or confirmation for. */
     std::atomic<Uint32> lastReceivedTick;

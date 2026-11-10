@@ -46,9 +46,9 @@ private:
                            const EntityInit::EntityData& entityData);
 
     /**
-     * Handles any processing that's specific to the player entity.
+     * Handles any processing that's specific to the local player.
      */
-    void finishPlayerEntity();
+    void finishLocalPlayer();
 
     /** Used to get the current tick number. */
     Simulation& simulation;
@@ -58,8 +58,8 @@ private:
     GraphicData& graphicData;
 
     /** We pop messages off entityInitQueue and push them into here, so
-        we can find and immediately process any messages for the player
-        entity. */
+        we can find and immediately process any messages for the local player.
+        */
     std::queue<EntityInit> entityInitSecondaryQueue;
 
     EventQueue<EntityInit> entityInitQueue;

@@ -21,8 +21,8 @@ struct EngineCollisionLayerType {
         TerrainWall = 1 << 0,
         /** Object tile layers. */
         Object = 1 << 1,
-        ClientEntity = 1 << 2,
-        NonClientEntity = 1 << 3,
+        PlayerEntity = 1 << 2,
+        NonPlayerEntity = 1 << 3,
         /** Entities that can be collided with. */
         BlockCollision = 1 << 4,
         /** Entities that block Line-of-Sight raycasts. */

@@ -60,7 +60,7 @@ public:
     std::vector<Sint64>& getPlayers(const Cylinder& cylinder);
 
 private:
-    /** Maps account IDs -> the position of that account's client entity.
+    /** Maps account IDs -> the position of that account's player entity.
         Only contains players that are in the world. */
     std::unordered_map<Sint64, Position> playerPositions;
 

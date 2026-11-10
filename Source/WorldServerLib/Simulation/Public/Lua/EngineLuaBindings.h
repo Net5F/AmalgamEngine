@@ -184,7 +184,7 @@ private:
                  Uint8 count);
 
     /**
-     * Attempts to remove the given item from the client entity's inventory.
+     * Attempts to remove the given item from the player entity's inventory.
      * @return true if the item was successfully removed, else false (inventory
      *         didn't contain the item).
      */

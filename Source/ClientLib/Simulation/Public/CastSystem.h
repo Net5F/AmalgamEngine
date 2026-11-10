@@ -51,7 +51,7 @@ private:
     void handleCastFailed(const CastFailed& castFailed);
 
     /**
-     * Initializes the player entity's CastCooldown component to the given
+     * Initializes the local player's CastCooldown component to the given
      * state.
      */
     void handleCastCooldownInit(const CastCooldownInit& castCooldownInit);

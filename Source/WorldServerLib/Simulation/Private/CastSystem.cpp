@@ -121,8 +121,8 @@ void CastSystem::processCastRequests()
 void CastSystem::processCastRequest(const CastRequest& castRequest)
 {
     // Find the entity ID of the client that sent this request.
-    entt::entity clientEntity{world.getClientEntity(castRequest.clientHandle)};
-    if (clientEntity == entt::null) {
+    entt::entity playerEntity{world.getPlayerEntity(castRequest.clientHandle)};
+    if (playerEntity == entt::null) {
         // Client doesn't exist (may have disconnected), skip this request.
         return;
     }
@@ -131,19 +131,19 @@ void CastSystem::processCastRequest(const CastRequest& castRequest)
     CastFailureType result{CastFailureType::None};
     if (auto* type{std::get_if<ItemInteractionType>(&castRequest.castableID)}) {
         result = world.castHelper.castItemInteraction(
-            {*type, clientEntity, castRequest.slotIndex,
+            {*type, playerEntity, castRequest.slotIndex,
              castRequest.targetEntity, castRequest.targetPosition,
              castRequest.clientHandle});
     }
     else if (auto* type{
                  std::get_if<EntityInteractionType>(&castRequest.castableID)}) {
         result = world.castHelper.castEntityInteraction(
-            {*type, clientEntity, castRequest.targetEntity,
+            {*type, playerEntity, castRequest.targetEntity,
              castRequest.targetPosition, castRequest.clientHandle});
     }
     else if (auto* type{std::get_if<SpellType>(&castRequest.castableID)}) {
         result = world.castHelper.castSpell(
-            {*type, clientEntity, castRequest.targetEntity,
+            {*type, playerEntity, castRequest.targetEntity,
              castRequest.targetPosition, castRequest.clientHandle});
     }
     else {
@@ -154,7 +154,7 @@ void CastSystem::processCastRequest(const CastRequest& castRequest)
     if (result != CastFailureType::None) {
         network.clientEndpoint.send<CastFailed>(
             castRequest.clientHandle,
-            {clientEntity, castRequest.castableID, result});
+            {playerEntity, castRequest.castableID, result});
     }
 }
 

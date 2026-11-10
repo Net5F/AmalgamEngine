@@ -24,8 +24,9 @@ struct UseItemOnEntityRequest {
     //--------------------------------------------------------------------------
     // Note: We don't include a tick number in our interaction requests, because
     //       there isn't anything that a client would want to sync the
-    //       interaction with. NPC state is in the past, and the client entity's
-    //       predicted state (e.g. position) wouldn't be useful to sync to.
+    //       interaction with. Replicated entity state is in the past, and
+    //       the local player's predicted state (e.g. position) wouldn't be
+    //       useful to sync to.
 
     /** The inventory slot of the item that is being used. */
     Uint8 sourceSlotIndex{0};

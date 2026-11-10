@@ -134,7 +134,7 @@ public:
     //-------------------------------------------------------------------------
     // Chat
     //-------------------------------------------------------------------------
-    /** How often we send client entity positions to the chat server, in
+    /** How often we send player entity positions to the chat server, in
         seconds.
         The chat server uses these positions to route local chat, so a client
         whose entity moves may briefly hear (or miss) messages based on where

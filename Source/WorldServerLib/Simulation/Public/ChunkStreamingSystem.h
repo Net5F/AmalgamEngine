@@ -24,7 +24,7 @@ class Network;
  * A client may require chunks to be sent when it logs in, moves into a new
  * chunk, or teleports.
  *
- * Note: We have no validation to see if client entities are in range of the
+ * Note: We have no validation to see if player entities are in range of the
  *       requested chunks. Maybe add that once we get a permissions system.
  */
 class ChunkStreamingSystem

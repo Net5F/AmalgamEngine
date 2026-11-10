@@ -3,7 +3,7 @@
 #include "World.h"
 #include "EngineLuaBindings.h"
 #include "ClientConnectionSystem.h"
-#include "NceLifetimeSystem.h"
+#include "NonPlayerEntityLifetimeSystem.h"
 #include "ComponentChangeSystem.h"
 #include "TileUpdateSystem.h"
 #include "InputSystem.h"
@@ -91,7 +91,7 @@ public:
 
     /**
      * Saves all world state, backs it up to the file database, and waits for
-     * client entity AccountData saves to finish (up to
+     * player entity AccountData saves to finish (up to
      * SHUTDOWN_ACCOUNT_SAVE_TIMEOUT).
      *
      * Call this once when the server is shutting down, after the last tick.
@@ -143,7 +143,7 @@ private:
     // Systems
     //-------------------------------------------------------------------------
     ClientConnectionSystem clientConnectionSystem;
-    NceLifetimeSystem nceLifetimeSystem;
+    NonPlayerEntityLifetimeSystem nonPlayerEntityLifetimeSystem;
     ComponentChangeSystem componentChangeSystem;
     TileUpdateSystem tileUpdateSystem;
     InputSystem inputSystem;

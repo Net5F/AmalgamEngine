@@ -16,7 +16,7 @@ namespace AM
 struct InventoryAddItem {
     /** The entity to add the item to.
         When sent by the server, this can be ignored and assumed to be the
-        client entity (clients are only sent updates for their own inventory).
+        local player (clients are only sent updates for their own inventory).
      */
     entt::entity entity{entt::null};
 

@@ -40,8 +40,8 @@ Database::Database()
 , insertEntityQuery{nullptr}
 , deleteEntityQuery{nullptr}
 , iterateEntitiesQuery{nullptr}
-, insertClientEntityQuery{nullptr}
-, getClientEntityQuery{nullptr}
+, insertPlayerEntityQuery{nullptr}
+, getPlayerEntityQuery{nullptr}
 , insertItemQuery{nullptr}
 , deleteItemQuery{nullptr}
 , iterateItemsQuery{nullptr}
@@ -72,17 +72,17 @@ Database::Database()
     iterateEntitiesQuery = std::make_unique<SQLite::Statement>(
         database, "SELECT * FROM entities");
 
-    insertClientEntityQuery = std::make_unique<SQLite::Statement>(database, R"(
-            INSERT INTO client_entities VALUES (?, ?, ?)
+    insertPlayerEntityQuery = std::make_unique<SQLite::Statement>(database, R"(
+            INSERT INTO player_entities VALUES (?, ?, ?)
             ON CONFLICT(account_id) DO UPDATE SET
                 serialized_engine_components=
                     excluded.serialized_engine_components,
                 serialized_project_components=
                     excluded.serialized_project_components
         )");
-    getClientEntityQuery = std::make_unique<SQLite::Statement>(database, R"(
+    getPlayerEntityQuery = std::make_unique<SQLite::Statement>(database, R"(
             SELECT serialized_engine_components, serialized_project_components
-            FROM client_entities WHERE account_id=?
+            FROM player_entities WHERE account_id=?
         )");
 
     insertItemQuery = std::make_unique<SQLite::Statement>(
@@ -208,11 +208,11 @@ void Database::deleteEntityData(entt::entity entity)
     deleteEntityQuery->tryReset();
 }
 
-bool Database::saveClientEntityData(
+bool Database::savePlayerEntityData(
     Sint64 accountID, std::span<const Uint8> serializedEngineComponents,
     std::span<const Uint8> serializedProjectComponents)
 {
-    SQLite::Statement* query{insertClientEntityQuery.get()};
+    SQLite::Statement* query{insertPlayerEntityQuery.get()};
     bool succeeded{true};
     try {
         query->bind(1, accountID);
@@ -223,7 +223,7 @@ bool Database::saveClientEntityData(
 
         query->exec();
     } catch (std::exception& e) {
-        LOG_ERROR("Failed to save client entity data for accountID %lld: %s",
+        LOG_ERROR("Failed to save player entity data for accountID %lld: %s",
                   static_cast<long long>(accountID), e.what());
         succeeded = false;
     }
@@ -344,13 +344,13 @@ void Database::initTables()
             )");
         }
 
-        // Per-world client entity components (ClientPersistence::World),
+        // Per-world player entity components (PlayerPersistence::World),
         // keyed by account ID.
         // Note: Engine and project components use separate ID namespaces, so
         //       we store their record lists in separate blobs.
-        if (!backupDatabase.tableExists("client_entities")) {
+        if (!backupDatabase.tableExists("player_entities")) {
             backupDatabase.exec(R"(
-                CREATE TABLE client_entities
+                CREATE TABLE player_entities
                 (
                     account_id                     INTEGER PRIMARY KEY,
                     serialized_engine_components  BLOB,

@@ -83,16 +83,16 @@ private:
 
     /**
      * Validates that the given request has valid data and that the choice's
-     * condition is satisfied by the client entity.
+     * condition is satisfied by the player entity.
      *
-     * @param clientEntity The entity associated with the request's
+     * @param playerEntity The entity associated with the request's
      * clientHandle.
      * @return If valid, returns the the target entity's Dialogue component.
      *         Else, returns nullptr and sends an appropriate error message.
      */
     const Dialogue*
         validateChoiceRequest(const DialogueChoiceRequest& choiceRequest,
-                              entt::entity clientEntity);
+                              entt::entity playerEntity);
 
     /**
      * Runs the given choice's condition script.
@@ -102,18 +102,18 @@ private:
      *         message.
      */
     bool runChoiceCondition(const Dialogue::Choice& choice,
-                            entt::entity clientEntity,
+                            entt::entity playerEntity,
                             entt::entity targetEntity,
                             ConnectionHandle clientHandle,
                             bool sendAccessErrorMessage);
 
     /**
      * Iterates the given choices, checking their conditions against
-     * clientEntity and targetEntity and adding them to the given response if
+     * playerEntity and targetEntity and adding them to the given response if
      * they pass.
      */
     void addChoicesToResponse(const std::vector<Dialogue::Choice>& choices,
-                              entt::entity clientEntity,
+                              entt::entity playerEntity,
                               entt::entity targetEntity,
                               ConnectionHandle clientHandle,
                               DialogueResponse& response);

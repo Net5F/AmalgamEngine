@@ -23,9 +23,9 @@ class ISimulationExtension;
 class ChunkUpdateSystem;
 class TileUpdateSystem;
 class EntityLifetimeSystem;
-class PlayerInputSystem;
-class PlayerMovementSystem;
-class NpcMovementSystem;
+class LocalPlayerInputSystem;
+class LocalPlayerMovementSystem;
+class ReplicatedMovementSystem;
 class ItemSystem;
 class InventorySystem;
 class CastSystem;
@@ -64,7 +64,7 @@ public:
      * Our current tick aims to be some amount ahead of the server, so that
      * our messages will arrive before their intended tick is processed.
      *
-     * Note: This is used for predicted state (such as player movement).
+     * Note: This is used for predicted state (such as local player movement).
      */
     Uint32 getCurrentTick() const;
 
@@ -75,7 +75,8 @@ public:
      * we can smoothly replicate the received server state without network
      * inconsistencies causing choppiness.
      *
-     * Note: This is used for non-predicted state (such as NPC movement).
+     * Note: This is used for non-predicted state (such as replicated entity
+     *       movement).
      */
     Uint32 getReplicationTick() const;
 
@@ -142,9 +143,9 @@ private:
     std::unique_ptr<ChunkUpdateSystem> chunkUpdateSystem;
     std::unique_ptr<TileUpdateSystem> tileUpdateSystem;
     std::unique_ptr<EntityLifetimeSystem> entityLifetimeSystem;
-    std::unique_ptr<PlayerInputSystem> playerInputSystem;
-    std::unique_ptr<PlayerMovementSystem> playerMovementSystem;
-    std::unique_ptr<NpcMovementSystem> npcMovementSystem;
+    std::unique_ptr<LocalPlayerInputSystem> localPlayerInputSystem;
+    std::unique_ptr<LocalPlayerMovementSystem> localPlayerMovementSystem;
+    std::unique_ptr<ReplicatedMovementSystem> replicatedMovementSystem;
     std::unique_ptr<ItemSystem> itemSystem;
     std::unique_ptr<InventorySystem> inventorySystem;
     std::unique_ptr<CastSystem> castSystem;

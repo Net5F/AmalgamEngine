@@ -8,7 +8,7 @@
 #include "Collision.h"
 #include "Input.h"
 #include "ClientSimData.h"
-#include "IsClientEntity.h"
+#include "IsPlayerEntity.h"
 #include "ISimulationExtension.h"
 #include "Transforms.h"
 #include "Log.h"

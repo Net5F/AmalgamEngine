@@ -140,11 +140,11 @@ void ItemSystem::examineItem(const CastInfo& castInfo)
 void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
                               ConnectionHandle clientHandle)
 {
-    // Find the client's entity ID.
-    entt::entity clientEntity{world.getClientEntity(clientHandle)};
-    if (clientEntity != entt::null) {
+    // Find the client's player entity ID.
+    entt::entity playerEntity{world.getPlayerEntity(clientHandle)};
+    if (playerEntity != entt::null) {
         // If the combination is successful, tell the client.
-        auto& inventory{world.registry.get<Inventory>(clientEntity)};
+        auto& inventory{world.registry.get<Inventory>(playerEntity)};
         const ItemCombination* combination{
             inventory.combineItems(sourceSlotIndex, targetSlotIndex, itemData)};
         if (combination) {
@@ -171,11 +171,11 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
                                  entt::entity targetEntity,
                                  ConnectionHandle clientHandle)
 {
-    // Find the client's entity ID.
-    entt::entity clientEntity{world.getClientEntity(clientHandle)};
-    if (clientEntity != entt::null) {
+    // Find the client's player entity ID.
+    entt::entity playerEntity{world.getPlayerEntity(clientHandle)};
+    if (playerEntity != entt::null) {
         // If the slot is invalid or empty, do nothing.
-        Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
+        Inventory& inventory{world.registry.get<Inventory>(playerEntity)};
         ItemID sourceItemID{inventory.slots[sourceSlotIndex].ID};
         if (!sourceItemID) {
             return;
@@ -188,7 +188,7 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
         if (const ItemHandler* itemHandler{
                 world.registry.try_get<ItemHandler>(targetEntity)};
             itemHandler && !(itemHandler->handlerScript.script.empty())) {
-            runEntityItemHandlerScript(clientHandle, clientEntity, targetEntity,
+            runEntityItemHandlerScript(clientHandle, playerEntity, targetEntity,
                                        item, itemHandler->handlerScript);
         }
         else {
@@ -369,17 +369,17 @@ bool ItemSystem::runItemInitScript(ConnectionHandle clientHandle,
 }
 
 void ItemSystem::runEntityItemHandlerScript(
-    ConnectionHandle clientHandle, entt::entity clientEntity,
+    ConnectionHandle clientHandle, entt::entity playerEntity,
     entt::entity targetEntity, const Item* item,
     const EntityItemHandlerScript& itemHandlerScript)
 {
     // Run the given handler script.
     entityItemHandlerLua.clientHandle = clientHandle;
     entityItemHandlerLua.selfEntity = targetEntity;
-    entityItemHandlerLua.targetEntity = clientEntity;
+    entityItemHandlerLua.targetEntity = playerEntity;
     entityItemHandlerLua.item = item;
     entityItemHandlerLua.luaState["self"] = targetEntity;
-    entityItemHandlerLua.luaState["target"] = clientEntity;
+    entityItemHandlerLua.luaState["target"] = playerEntity;
     entityItemHandlerLua.luaState["itemID"] = item->stringID;
     auto result{entityItemHandlerLua.luaState.script(
         itemHandlerScript.script, &sol::script_pass_on_error)};

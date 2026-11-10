@@ -4,7 +4,7 @@
 #include "ConnectionRequest.h"
 #include "Shared/AccountServiceEndpoint.h"
 #include "IMessageProcessorExtension.h"
-#include "ClientPersistenceUsage.h"
+#include "PlayerPersistenceUsage.h"
 #include "Deserialize.h"
 #include "Config.h"
 #include "UserConfig.h"
@@ -293,7 +293,7 @@ void WorldClientEndpoint::processConnectionRequest(Client& client,
     client.setAuthState(Client::AuthState::Validating);
     accountEndpoint.consumeServiceTicket(
         connectionRequest.ticket,
-        USES_CLIENT_PERSISTENCE<ClientPersistence::Account>,
+        USES_PLAYER_PERSISTENCE<PlayerPersistence::Account>,
         [this, handle = client.getHandle()](
             const ConsumeServiceTicketResponse& response) {
             onTicketResult(handle, response);

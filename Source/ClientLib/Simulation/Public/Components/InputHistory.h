@@ -9,10 +9,10 @@ namespace AM
 namespace Client
 {
 /**
- * Stores a history of inputs that have been applied to the player entity.
+ * Stores a history of inputs that have been applied to the local player.
  *
- * Only used for the player entity. You can use this component to distinguish
- * between player and non-player entities.
+ * Only used for the local player. You can use this component to distinguish
+ * between the local player and replicated entities.
  */
 struct InputHistory {
 public:

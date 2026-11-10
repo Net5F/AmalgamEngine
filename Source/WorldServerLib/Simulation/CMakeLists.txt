@@ -19,7 +19,7 @@ target_sources(WorldServerLib
         Private/LoadHelper.cpp
         Private/MovementSyncSystem.cpp
         Private/MovementSystem.cpp
-        Private/NceLifetimeSystem.cpp
+        Private/NonPlayerEntityLifetimeSystem.cpp
         Private/SaveHelper.cpp
         Private/SaveSystem.cpp
         Private/ScriptDataSystem.cpp
@@ -42,8 +42,8 @@ target_sources(WorldServerLib
         Public/ChunkStreamingSystem.h
         Public/ClientAOISystem.h
         Public/ClientConnectionSystem.h
-        Public/ClientEntityLoadInfo.h
-        Public/ClientPersistenceUsage.h
+        Public/PlayerEntityLoadInfo.h
+        Public/PlayerPersistenceUsage.h
         Public/ComponentMigration.h
         Public/ComponentChangeSystem.h
         Public/ComponentSyncSystem.h
@@ -62,7 +62,7 @@ target_sources(WorldServerLib
         Public/LoadHelper.h
         Public/MovementSyncSystem.h
         Public/MovementSystem.h
-        Public/NceLifetimeSystem.h
+        Public/NonPlayerEntityLifetimeSystem.h
         Public/PersistedComponentList.h
         Public/PersistedComponentDefs.h
         Public/SaveHelper.h

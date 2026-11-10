@@ -8,7 +8,7 @@ namespace AM
 {
 
 /**
- * Sent by the world server to save a client entity's AccountData.
+ * Sent by the world server to save a player entity's AccountData.
  *
  * Sent periodically while the entity is in the world, and once more when it's
  * removed.

@@ -15,18 +15,18 @@ class Network;
 struct ClientSimData;
 
 /**
- * Maintains each client entity's list of peers that are within their area of
+ * Maintains each player entity's list of peers that are within their area of
  * interest.
  *
- * When a peer enters a client entity's AOI, this system will update the lists
+ * When a peer enters a player entity's AOI, this system will update the lists
  * appropriately and send an EntityInit message to the client.
  *
- * When a peer leaves a client entity's AOI, this system will update the lists
+ * When a peer leaves a player entity's AOI, this system will update the lists
  * appropriately and send an EntityDelete message to the client.
  *
  * Note: The AOI lists also must be updated when an entity disconnects. Since
  *       it's easiest to do this while the entity is still alive, and
- *       ClientConnectionSystem maintains the lifetime of client entities, it's
+ *       ClientConnectionSystem maintains the lifetime of player entities, it's
  *       handled there.
  * Note: We split "init" logic (handled here) from "update" logic (handled in
  *       other systems). This is because updates sometimes require more context,
@@ -41,7 +41,7 @@ public:
     ClientAOISystem(const SimulationContext& inSimContext);
 
     /**
-     * Updates the peersInAOI list in any client entities that have recently
+     * Updates the peersInAOI list in any player entities that have recently
      * moved.
      *
      * If entities have entered/left a list, updates peer lists and sends

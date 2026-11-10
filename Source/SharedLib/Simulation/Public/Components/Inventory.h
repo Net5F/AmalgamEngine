@@ -13,7 +13,7 @@ struct ItemCombination;
 /**
  * Represents an entity's inventory of items.
  *
- * All client entities have an inventory. Non-client entities may or may not
+ * All player entities have an inventory. Non-player entities may or may not
  * have one.
  *
  * Note: This isn't auto-replicated, because it's only relevant to the server,

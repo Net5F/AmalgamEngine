@@ -17,10 +17,10 @@ struct CollisionLayerType {
         // typed enum).
         TerrainWall = static_cast<Uint8>(EngineCollisionLayerType::TerrainWall),
         Object = static_cast<Uint8>(EngineCollisionLayerType::Object),
-        ClientEntity
-        = static_cast<Uint8>(EngineCollisionLayerType::ClientEntity),
-        NonClientEntity
-        = static_cast<Uint8>(EngineCollisionLayerType::NonClientEntity),
+        PlayerEntity
+        = static_cast<Uint8>(EngineCollisionLayerType::PlayerEntity),
+        NonPlayerEntity
+        = static_cast<Uint8>(EngineCollisionLayerType::NonPlayerEntity),
         BlockCollision
         = static_cast<Uint8>(EngineCollisionLayerType::BlockCollision),
         BlockLoS = static_cast<Uint8>(EngineCollisionLayerType::BlockLoS),

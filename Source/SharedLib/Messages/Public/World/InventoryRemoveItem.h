@@ -12,7 +12,7 @@ namespace AM
  * the server to tell a client that an item was removed.
  *
  * Note: This is currently only used for player inventories. If we reuse it for
- *       NPC inventories, we can add an entity ID field.
+ *       non-player inventories, we can add an entity ID field.
  */
 struct InventoryRemoveItem {
     /** The inventory slot to remove the item from. */

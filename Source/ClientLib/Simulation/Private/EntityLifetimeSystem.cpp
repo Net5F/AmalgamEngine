@@ -81,16 +81,16 @@ void EntityLifetimeSystem::processEntityDeletes(Uint32 desiredTick)
 
 void EntityLifetimeSystem::processEntityInits(Uint32 desiredTick)
 {
-    // Immediately process any player entity messages, push the rest into a
+    // Immediately process any local player messages, push the rest into a
     // secondary queue.
     {
         EntityInit entityInit{};
         while (entityInitQueue.pop(entityInit)) {
-            // If the player entity is present, process it and erase it from
+            // If the local player is present, process it and erase it from
             // the message.
             for (auto it{entityInit.entityData.begin()};
                  it != entityInit.entityData.end();) {
-                if (it->entity == world.playerEntity) {
+                if (it->entity == world.localPlayerEntity) {
                     processEntityData(entityInit.tickNum, *it);
                     it = entityInit.entityData.erase(it);
                 }
@@ -99,7 +99,8 @@ void EntityLifetimeSystem::processEntityInits(Uint32 desiredTick)
                 }
             }
 
-            // If there are NPC entities remaining in the message, push it.
+            // If there are replicated entities remaining in the message, push
+            // it.
             if (entityInit.entityData.size() > 0) {
                 entityInitSecondaryQueue.push(entityInit);
             }
@@ -197,10 +198,10 @@ void EntityLifetimeSystem::processEntityData(
                                              graphicDirection);
     }
 
-    // If this is the player entity, add any client components specific to it.
-    if (newEntity == world.playerEntity) {
-        finishPlayerEntity();
-        LOG_INFO("Player entity added: %u. Message tick: %u", newEntity,
+    // If this is the local player, add any client components specific to it.
+    if (newEntity == world.localPlayerEntity) {
+        finishLocalPlayer();
+        LOG_INFO("Local player added: %u. Message tick: %u", newEntity,
                  tickNum);
     }
     else {
@@ -208,25 +209,25 @@ void EntityLifetimeSystem::processEntityData(
     }
 }
 
-void EntityLifetimeSystem::finishPlayerEntity()
+void EntityLifetimeSystem::finishLocalPlayer()
 {
     entt::registry& registry{world.registry};
-    entt::entity playerEntity{world.playerEntity};
+    entt::entity localPlayerEntity{world.localPlayerEntity};
 
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};
-    const Position& position{registry.get<Position>(playerEntity)};
+    const Position& position{registry.get<Position>(localPlayerEntity)};
     registry.emplace<Camera>(
-        playerEntity, Camera::CenterOnEntity, position,
+        localPlayerEntity, Camera::CenterOnEntity, position,
         PreviousPosition{position}, BoundingBox{},
         SDLHelpers::rectToFRect(userConfig.getWindowSize()),
         Config::ZOOM_LEVELS[Config::DEFAULT_ZOOM_LEVEL_INDEX]);
 
-    registry.emplace<Inventory>(playerEntity);
-    registry.emplace<InputHistory>(playerEntity);
+    registry.emplace<Inventory>(localPlayerEntity);
+    registry.emplace<InputHistory>(localPlayerEntity);
 
     // Flag that we need to request all map data.
-    registry.emplace<NeedsAdjacentChunks>(playerEntity);
+    registry.emplace<NeedsAdjacentChunks>(localPlayerEntity);
 }
 
 } // End namespace Client

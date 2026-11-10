@@ -1,4 +1,4 @@
-#include "NpcMovementSystem.h"
+#include "ReplicatedMovementSystem.h"
 #include "SimulationContext.h"
 #include "Simulation.h"
 #include "World.h"
@@ -18,21 +18,22 @@ namespace AM
 {
 namespace Client
 {
-NpcMovementSystem::NpcMovementSystem(const SimulationContext& inSimContext)
+ReplicatedMovementSystem::ReplicatedMovementSystem(
+    const SimulationContext& inSimContext)
 : simulation{inSimContext.simulation}
 , world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
 , entityMover{world.registry, world.tileMap, world.entityLocator,
               world.collisionLocator}
-, npcMovementUpdateQueue{inSimContext.networkEventDispatcher}
+, movementUpdateQueue{inSimContext.networkEventDispatcher}
 , lastProcessedTick{0}
 {
 }
 
-void NpcMovementSystem::updateNpcs()
+void ReplicatedMovementSystem::updateReplicatedEntities()
 {
     if (Config::RUN_OFFLINE) {
-        // No need to process NPCs if we're running offline.
+        // No need to process replicated entities if we're running offline.
         return;
     }
 
@@ -46,21 +47,21 @@ void NpcMovementSystem::updateNpcs()
     Uint32 lastReceivedTick{network.worldEndpoint.getLastReceivedTick()};
     while ((lastProcessedTick < desiredTick)
            && (lastProcessedTick < lastReceivedTick)) {
-        // Move all NPCs as if their inputs didn't change.
-        moveAllNpcs();
+        // Move all replicated entities as if their inputs didn't change.
+        moveAllReplicatedEntities();
 
         // If there's an update message waiting.
-        std::shared_ptr<const MovementUpdate>* npcMovementUpdate{
-            npcMovementUpdateQueue.peek()};
-        if ((npcMovementUpdate != nullptr)) {
-            Uint32 messageTick{(*npcMovementUpdate)->tickNum};
+        std::shared_ptr<const MovementUpdate>* movementUpdate{
+            movementUpdateQueue.peek()};
+        if ((movementUpdate != nullptr)) {
+            Uint32 messageTick{(*movementUpdate)->tickNum};
             AM_ASSERT((messageTick >= (lastProcessedTick + 1)),
-                      "Processed NPC movement out of order.");
+                      "Processed replicated entity movement out of order.");
 
             // If the update is for this tick, apply it.
             if (messageTick == (lastProcessedTick + 1)) {
-                applyUpdateMessage(*(npcMovementUpdate->get()));
-                npcMovementUpdateQueue.pop();
+                applyUpdateMessage(*(movementUpdate->get()));
+                movementUpdateQueue.pop();
             }
         }
 
@@ -72,14 +73,15 @@ void NpcMovementSystem::updateNpcs()
 
     // If we wanted to process more ticks but ran out of data, log it.
     if (lastProcessedTick < desiredTick) {
-        LOG_WARN("Ran out of NPC data. lastProcessed: %u, desired: %u, "
+        LOG_WARN("Ran out of replicated movement data. lastProcessed: %u, "
+                 "desired: %u, "
                  "lastReceived: %u, queueSize: %u",
                  lastProcessedTick, desiredTick, lastReceivedTick,
-                 npcMovementUpdateQueue.size());
+                 movementUpdateQueue.size());
     }
 }
 
-void NpcMovementSystem::initLastProcessedTick()
+void ReplicatedMovementSystem::initLastProcessedTick()
 {
     // Since we aren't ran until a server connection is established, the sim's
     // currentTick is set to what the server gave us in ConnectionResponse.
@@ -88,7 +90,7 @@ void NpcMovementSystem::initLastProcessedTick()
     lastProcessedTick = simulation.getReplicationTick() - 1;
 }
 
-void NpcMovementSystem::moveAllNpcs()
+void ReplicatedMovementSystem::moveAllReplicatedEntities()
 {
     auto movementGroup{EnttGroups::getMovementGroup(world.registry)};
     for (auto [entity, input, position, previousPosition, movement,
@@ -112,15 +114,14 @@ void NpcMovementSystem::moveAllNpcs()
     }
 }
 
-void NpcMovementSystem::applyUpdateMessage(
-    const MovementUpdate& npcMovementUpdate)
+void ReplicatedMovementSystem::applyUpdateMessage(
+    const MovementUpdate& movementUpdate)
 {
     entt::registry& registry{world.registry};
     auto movementGroup{EnttGroups::getMovementGroup(registry)};
 
     // Apply each updated entity's new state.
-    for (const MovementState& movementState :
-         npcMovementUpdate.movementStates) {
+    for (const MovementState& movementState : movementUpdate.movementStates) {
         // Check that the entity exists.
         // TODO: There's possibly an issue here if we receive a MovementUpdate
         //       while the sim happens to be at this system, and the update's
@@ -130,7 +131,7 @@ void NpcMovementSystem::applyUpdateMessage(
         if (!(registry.valid(entity))) {
             LOG_FATAL(
                 "Received update for invalid entity: %u. Message tick: %u",
-                entity, npcMovementUpdate.tickNum);
+                entity, movementUpdate.tickNum);
         }
 
         // Get the entity's components.
@@ -157,7 +158,7 @@ void NpcMovementSystem::applyUpdateMessage(
     }
 }
 
-void NpcMovementSystem::emitUpdateSignals()
+void ReplicatedMovementSystem::emitUpdateSignals()
 {
     // Emit update signals to any observers.
     auto view{world.registry.view<Position, PreviousPosition>()};

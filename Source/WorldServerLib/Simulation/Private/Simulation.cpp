@@ -43,7 +43,7 @@ Simulation::Simulation(const SimulationContext& inSimContext)
                     network}
 , extension{nullptr}
 , clientConnectionSystem{inSimContext}
-, nceLifetimeSystem{inSimContext}
+, nonPlayerEntityLifetimeSystem{inSimContext}
 , componentChangeSystem{inSimContext}
 , tileUpdateSystem{inSimContext}
 , inputSystem{inSimContext}
@@ -117,8 +117,8 @@ void Simulation::tick()
     // Process client connections and disconnections.
     clientConnectionSystem.processConnectionEvents();
 
-    // Process requests to create or destroy non-client-controlled entities.
-    nceLifetimeSystem.processUpdateRequests();
+    // Process requests to create or destroy non-player entities.
+    nonPlayerEntityLifetimeSystem.processUpdateRequests();
 
     // Process requests to change components.
     componentChangeSystem.processChangeRequests();
@@ -160,7 +160,7 @@ void Simulation::tick()
     // Call the project's post-sim-update logic.
     extension->afterSimUpdate();
 
-    // Update each client entity's "entities in my AOI" list and send Init/
+    // Update each player entity's "entities in my AOI" list and send Init/
     // Delete messages.
     clientAOISystem.updateAOILists();
 
@@ -185,7 +185,7 @@ void Simulation::tick()
     // Respond to script data requests.
     scriptDataSystem.sendScripts();
 
-    // Tell the chat server where client entities are, for routing local
+    // Tell the chat server where player entities are, for routing local
     // chat.
     chatPositionSyncSystem.sendPositionUpdates();
 
@@ -205,8 +205,8 @@ void Simulation::tick()
 
 void Simulation::shutdown()
 {
-    // Save everything (including lingering client entities) and back it up.
-    // Note: This also queues each client entity's AccountData.
+    // Save everything (including lingering player entities) and back it up.
+    // Note: This also queues each player entity's AccountData.
     saveSystem.saveForShutdown();
 
     // Wait for the AccountData saves (including any that were already
@@ -218,7 +218,7 @@ void Simulation::setExtension(ISimulationExtension* inExtension)
 {
     extension = inExtension;
     clientConnectionSystem.setExtension(extension);
-    nceLifetimeSystem.setExtension(extension);
+    nonPlayerEntityLifetimeSystem.setExtension(extension);
     componentChangeSystem.setExtension(extension);
     tileUpdateSystem.setExtension(extension);
     itemSystem.setExtension(extension);

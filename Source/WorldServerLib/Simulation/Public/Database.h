@@ -24,15 +24,15 @@ class World;
 /**
  * Interface for interacting with the database.
  *
- * We use the database to persist item definitions, non-client entity data,
- * per-world client entity data, and tile map data as blobs.
+ * We use the database to persist item definitions, non-player entity data,
+ * per-world player entity data, and tile map data as blobs.
  *
  * To avoid blocking the main loop, we first copy all of our data into an
  * in-memory database. Then, we use a separate thread to backup the in-memory
  * database to a file. See SaveSystem.h for more info.
  *
- * Note: Only client entity components with ClientPersistence::World are
- *       persisted here. ClientPersistence::Account components are persisted
+ * Note: Only player entity components with PlayerPersistence::World are
+ *       persisted here. PlayerPersistence::Account components are persisted
  *       by the account server (see PersistedComponentList.h).
  */
 class Database
@@ -138,15 +138,15 @@ public:
     }
 
     //-------------------------------------------------------------------------
-    // Client Entities
+    // Player Entities
     //-------------------------------------------------------------------------
     /**
-     * Adds or overwrites the given account's client entity table entry.
+     * Adds or overwrites the given account's player entity table entry.
      *
-     * Only the entity's ClientPersistence::World components should be saved
+     * Only the entity's PlayerPersistence::World components should be saved
      * here.
      *
-     * @param accountID The account that the client entity belongs to.
+     * @param accountID The account that the player entity belongs to.
      * @param serializedEngineComponents Ordered tagged engine component
      * records.
      * @param serializedProjectComponents Ordered tagged project component
@@ -156,13 +156,13 @@ public:
      *
      * @return true if successful, else false.
      */
-    bool saveClientEntityData(
+    bool savePlayerEntityData(
         Sint64 accountID, std::span<const Uint8> serializedEngineComponents,
         std::span<const Uint8> serializedProjectComponents);
 
-    enum class GetClientEntityDataResult { Success, NotFound, DatabaseError };
+    enum class GetPlayerEntityDataResult { Success, NotFound, DatabaseError };
     /**
-     * If the given account has a client entity table entry, calls the given
+     * If the given account has a player entity table entry, calls the given
      * callback on it.
      *
      * @param callback A callback of form void(std::span<const Uint8>,
@@ -176,11 +176,11 @@ public:
      * save.
      */
     template<typename Func>
-    GetClientEntityDataResult getClientEntityData(Sint64 accountID,
+    GetPlayerEntityDataResult getPlayerEntityData(Sint64 accountID,
                                                   Func callback)
     {
-        SQLite::Statement* query{getClientEntityQuery.get()};
-        GetClientEntityDataResult result{GetClientEntityDataResult::NotFound};
+        SQLite::Statement* query{getPlayerEntityQuery.get()};
+        GetPlayerEntityDataResult result{GetPlayerEntityDataResult::NotFound};
         try {
             query->bind(1, accountID);
             if (query->executeStep()) {
@@ -197,11 +197,11 @@ public:
                             projectComponentsColumn.getBlob()),
                         static_cast<std::size_t>(
                             projectComponentsColumn.getBytes())});
-                result = GetClientEntityDataResult::Success;
+                result = GetPlayerEntityDataResult::Success;
             }
         } catch (std::exception& e) {
-            LOG_ERROR("Failed to get client entity data: %s", e.what());
-            result = GetClientEntityDataResult::DatabaseError;
+            LOG_ERROR("Failed to get player entity data: %s", e.what());
+            result = GetPlayerEntityDataResult::DatabaseError;
         }
 
         // Note: We use tryReset() since reset() re-throws a failed step's
@@ -341,8 +341,8 @@ protected:
     std::unique_ptr<SQLite::Statement> insertEntityQuery;
     std::unique_ptr<SQLite::Statement> deleteEntityQuery;
     std::unique_ptr<SQLite::Statement> iterateEntitiesQuery;
-    std::unique_ptr<SQLite::Statement> insertClientEntityQuery;
-    std::unique_ptr<SQLite::Statement> getClientEntityQuery;
+    std::unique_ptr<SQLite::Statement> insertPlayerEntityQuery;
+    std::unique_ptr<SQLite::Statement> getPlayerEntityQuery;
     std::unique_ptr<SQLite::Statement> insertItemQuery;
     std::unique_ptr<SQLite::Statement> deleteItemQuery;
     std::unique_ptr<SQLite::Statement> iterateItemsQuery;

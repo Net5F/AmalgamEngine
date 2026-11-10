@@ -29,7 +29,7 @@ struct PlayerPositionsUpdate {
         /** The ID of the player's account. */
         Sint64 accountID{0};
 
-        /** The position of the account's client entity, in world
+        /** The position of the account's player entity, in world
             units. */
         Vector3 position{};
     };

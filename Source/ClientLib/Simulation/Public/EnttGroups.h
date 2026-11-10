@@ -34,8 +34,8 @@ class EnttGroups
 {
 public:
     /**
-     * Returns the movement group, a group used for NPC movement and entity
-     * sprite sorting.
+     * Returns the movement group, a group used for replicated entity movement
+     * and entity sprite sorting.
      */
     static auto getMovementGroup(entt::registry& registry)
     {

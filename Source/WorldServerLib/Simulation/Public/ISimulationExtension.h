@@ -17,7 +17,7 @@ struct ItemChangeRequest;
 
 namespace WorldServer
 {
-struct ClientEntityLoadInfo;
+struct PlayerEntityLoadInfo;
 
 /**
  * Defines an extension for the engine's WorldServer::Simulation class.
@@ -47,7 +47,7 @@ public:
     virtual void beforeAll() = 0;
 
     /**
-     * Called after the tile map is updated and client entities are
+     * Called after the tile map is updated and player entities are
      * added/removed.
      */
     virtual void afterMapAndConnectionUpdates() = 0;
@@ -96,26 +96,26 @@ public:
     // Simulation Event Hooks
     //-------------------------------------------------------------------------
     /**
-     * Called when a client entity is added to the world, after its saved
+     * Called when a player entity is added to the world, after its saved
      * components are loaded and the engine's defaults are added.
      *
      * Use this to add defaults for any of your components that weren't
      * loaded (check the registry), or to start a character creation flow.
      *
-     * Note: This is called before the entity's IsClientEntity and
+     * Note: This is called before the entity's IsPlayerEntity and
      *       ClientSimData components are added.
      * Note: This isn't called when a client takes over its account's
      *       lingering entity, since that entity was already initialized.
-     *       See onClientEntityReattached().
+     *       See onPlayerEntityReattached().
      */
-    virtual void onClientEntityLoaded(entt::entity entity,
-                                      const ClientEntityLoadInfo& loadInfo) = 0;
+    virtual void onPlayerEntityLoaded(entt::entity entity,
+                                      const PlayerEntityLoadInfo& loadInfo) = 0;
 
     /**
      * Called when a client takes over its account's lingering entity (i.e. it
      * reconnected before the entity was removed).
      *
-     * The entity already went through onClientEntityLoaded() when it was
+     * The entity already went through onPlayerEntityLoaded() when it was
      * first loaded, and its components reflect its current state, so don't
      * re-add defaults here. Use this for things that should react to a
      * reconnect, e.g. clearing an "away" state.
@@ -123,7 +123,7 @@ public:
      * Note: This is called after the entity's new ClientSimData is added, so
      *       the new client handle is available.
      */
-    virtual void onClientEntityReattached(entt::entity entity, Sint64 accountID)
+    virtual void onPlayerEntityReattached(entt::entity entity, Sint64 accountID)
         = 0;
 };
 

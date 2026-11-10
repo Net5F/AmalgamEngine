@@ -28,22 +28,22 @@ public:
 
 private:
     /**
-     * Sets the player's inventory to the given state.
+     * Sets the local player's inventory to the given state.
      */
     void initInventory(const InventoryInit& inventoryInit);
 
     /**
-     * Adds the item to the player's inventory.
+     * Adds the item to the local player's inventory.
      */
     void processOperation(const InventoryAddItem& inventoryAddItem);
 
     /**
-     * Removes the specified item from the player's inventory.
+     * Removes the specified item from the local player's inventory.
      */
     void processOperation(const InventoryRemoveItem& inventoryRemoveItem);
 
     /**
-     * Moves the specified item to the specified slot in the player's
+     * Moves the specified item to the specified slot in the local player's
      * inventory.
      */
     void processOperation(const InventoryMoveItem& inventoryMoveItem);

@@ -77,12 +77,12 @@ private:
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,
-     * and constructs the player.
+     * and constructs the local player.
      */
     void initSimState(ConnectionResponse& connectionResponse);
 
     /**
-     * Fills in player data as if we connected to the server.
+     * Fills in local player data as if we connected to the server.
      */
     void initMockSimState();
 

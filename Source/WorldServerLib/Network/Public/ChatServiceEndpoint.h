@@ -26,7 +26,7 @@ namespace WorldServer
 /**
  * Used to communicate with ChatServer.
  *
- * We use this connection to tell the chat server where client entities are,
+ * We use this connection to tell the chat server where player entities are,
  * so it can route local chat.
  *
  * Peers are authenticated through mutual TLS: the given sslContext must
@@ -100,8 +100,8 @@ private:
         disconnect. Doubles after each failed attempt, up to the max. */
     static constexpr double RECONNECT_MIN_DELAY_S{1};
     static constexpr double RECONNECT_MAX_DELAY_S{30};
-    /** Every client entity's position is sent at once. This fits ~50 full
-        PlayerPositionsUpdates (~50,000 client entities). */
+    /** Every player entity's position is sent at once. This fits ~50 full
+        PlayerPositionsUpdates (~50,000 player entities). */
     static constexpr std::size_t MAX_QUEUED_WRITE_BYTES{1000000};
     static constexpr std::size_t MAX_QUEUED_WRITES{1000};
     static constexpr Uint16 MAX_READ_PAYLOAD_SIZE{500};

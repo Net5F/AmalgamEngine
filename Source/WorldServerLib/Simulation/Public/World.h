@@ -95,7 +95,7 @@ public:
     /** Helper class for saving persisted entity state. */
     SaveHelper saveHelper;
 
-    /** Saves client entity AccountData to the account server. */
+    /** Saves player entity AccountData to the account server. */
     AccountSaveQueue accountSaveQueue;
 
     /** The database for saving and loading world data.
@@ -127,7 +127,7 @@ public:
      * Note: To go the other way (entt::entity -> ConnectionHandle), use
      * ClientSimData.
      */
-    entt::entity getClientEntity(ConnectionHandle clientHandle);
+    entt::entity getPlayerEntity(ConnectionHandle clientHandle);
 
     /**
      * Teleports the given entity to the given position.

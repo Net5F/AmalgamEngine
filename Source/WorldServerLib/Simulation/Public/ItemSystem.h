@@ -104,12 +104,12 @@ private:
      * If the script fails, an appropriate error message will be sent.
      *
      * @param clientHandle The client that initiated this interaction.
-     * @param clientEntity The client's entity.
+     * @param playerEntity The client's player entity.
      * @param targetEntity The entity that the item is being used on.
      * @param item The item that's being used.
      */
     void runEntityItemHandlerScript(
-        ConnectionHandle clientHandle, entt::entity clientEntity,
+        ConnectionHandle clientHandle, entt::entity playerEntity,
         entt::entity targetEntity, const Item* item,
         const EntityItemHandlerScript& itemHandlerScript);
 

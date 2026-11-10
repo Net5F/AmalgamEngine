@@ -47,7 +47,7 @@ public:
     entt::basic_registry<AVEntityID> avRegistry;
 
     /** The entity that this client is controlling. */
-    entt::entity playerEntity;
+    entt::entity localPlayerEntity;
 
     /** Spatial partitioning grid for efficiently locating entities by
         position. */

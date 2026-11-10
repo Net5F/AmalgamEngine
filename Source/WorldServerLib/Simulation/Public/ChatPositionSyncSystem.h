@@ -14,14 +14,14 @@ class World;
 class Network;
 
 /**
- * Tells the chat server where client entities are, so it can route local
+ * Tells the chat server where player entities are, so it can route local
  * chat.
  *
  * Every Config::CHAT_POSITION_UPDATE_INTERVAL_S, sends the account IDs of any
- * client entities that were removed, followed by the position of every client
+ * player entities that were removed, followed by the position of every player
  * entity.
  *
- * A client entity is considered to be in the world for as long as it exists.
+ * A player entity is considered to be in the world for as long as it exists.
  * This includes the time that it lingers after its client disconnects.
  *
  * Note: We send every position, instead of only the ones that changed. This
@@ -37,25 +37,25 @@ public:
     ~ChatPositionSyncSystem();
 
     /**
-     * If an update is due, sends client entity positions to the chat server.
+     * If an update is due, sends player entity positions to the chat server.
      */
     void sendPositionUpdates();
 
 private:
     /**
-     * Records the destroyed client entity's account as having left the world.
+     * Records the destroyed player entity's account as having left the world.
      */
     void onClientSimDataDestroyed(entt::registry& registry,
                                   entt::entity entity);
 
     /**
-     * Sends the account IDs of any client entities that were removed since
+     * Sends the account IDs of any player entities that were removed since
      * our last update.
      */
     void sendPlayersLeftWorld();
 
     /**
-     * Sends the position of every client entity.
+     * Sends the position of every player entity.
      */
     void sendPlayerPositions();
 
@@ -66,7 +66,7 @@ private:
     /** Used to send messages to the chat server. */
     Network& network;
 
-    /** The account IDs of client entities that were removed since our last
+    /** The account IDs of player entities that were removed since our last
         update.
         Note: When a client takes over a lingering entity, its ClientSimData
               is re-constructed, so the account will show up here even though

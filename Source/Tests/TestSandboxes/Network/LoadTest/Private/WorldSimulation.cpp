@@ -17,7 +17,7 @@ WorldSimulation::WorldSimulation(Client::WorldClientEndpoint& inWorldEndpoint,
 : worldEndpoint{inWorldEndpoint}
 , connectionResponseQueue{networkEventDispatcher}
 , connectionErrorQueue{networkEventDispatcher}
-, clientEntity{entt::null}
+, localPlayerEntity{entt::null}
 , currentTick{0}
 , inputsPerSecond{inInputsPerSecond}
 , ticksTillInput{0}
@@ -43,9 +43,9 @@ void WorldSimulation::connect(
     }
 
     // Get our info from the connection response.
-    clientEntity = connectionResponse.entity;
-    LOG_INFO("Received connection response. ID: %u, tick: %u", clientEntity,
-             connectionResponse.tickNum);
+    localPlayerEntity = connectionResponse.entity;
+    LOG_INFO("Received connection response. ID: %u, tick: %u",
+             localPlayerEntity, connectionResponse.tickNum);
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.

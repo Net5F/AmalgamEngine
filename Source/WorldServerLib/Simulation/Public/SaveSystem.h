@@ -16,9 +16,9 @@ class ItemData;
 /**
  * Periodically saves the world's data:
  *   Tile map data is saved to TileMap.bin.
- *   Non-client entity data is saved to the database.
- *   Client entity ClientPersistence::World data is saved to the database,
- *   keyed by account ID. ClientPersistence::Account data is queued to be
+ *   Non-player entity data is saved to the database.
+ *   Player entity PlayerPersistence::World data is saved to the database,
+ *   keyed by account ID. PlayerPersistence::Account data is queued to be
  *   saved to the account server (see AccountSaveQueue).
  *   Item data is saved to the database.
  *
@@ -27,7 +27,7 @@ class ItemData;
  * waiting for the next save period). Items that fail to save are retried on
  * the next save.
  *
- * Note: Client entities are also saved when they're removed from the world
+ * Note: Player entities are also saved when they're removed from the world
  *       (see ClientConnectionSystem).
  */
 class SaveSystem
@@ -64,7 +64,7 @@ private:
     static constexpr double SHUTDOWN_BACKUP_RETRY_DELAY_S{1};
 
     /**
-     * Saves all data to the in-memory database. Client entity Account data
+     * Saves all data to the in-memory database. Player entity Account data
      * is queued to be saved to the account server.
      */
     void saveAll();

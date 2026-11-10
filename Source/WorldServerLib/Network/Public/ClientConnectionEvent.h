@@ -26,7 +26,7 @@ struct ClientConnected {
 
     /** True if the account has saved AccountData (i.e. it has played on
         some world before).
-        Always false if no components use ClientPersistence::Account. */
+        Always false if no components use PlayerPersistence::Account. */
     bool hasAccountData{false};
 
     /** If hasAccountData, this is the account's saved data, as of when its

@@ -106,7 +106,7 @@ void ClientAOISystem::updateAOILists()
 {
     ZoneScoped;
 
-    // Update every client entity's AOI list.
+    // Update every player entity's AOI list.
     auto view{world.registry.view<ClientSimData, Position>()};
     for (auto [entity, client, position] : view.each()) {
         // Clear our lists.

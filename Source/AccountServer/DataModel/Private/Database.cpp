@@ -755,8 +755,8 @@ void Database::initTables()
             )");
         }
 
-        // Each account's character data (its client entity's
-        // ClientPersistence::Account components). The blobs are opaque to us,
+        // Each account's character data (its player entity's
+        // PlayerPersistence::Account components). The blobs are opaque to us,
         // only the world server knows how to read them.
         // Note: Engine and project components use separate ID namespaces, so
         //       their record lists are stored in separate blobs.

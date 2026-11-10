@@ -17,7 +17,7 @@
 #include "Rotation.h"
 #include "ClientGraphicState.h"
 #include "GraphicState.h"
-#include "IsClientEntity.h"
+#include "IsPlayerEntity.h"
 #include "UserConfig.h"
 #include "Camera.h"
 #include "SDLHelpers.h"
@@ -71,7 +71,7 @@ void ServerConnectionSystem::processConnectionEvents()
 
             if (Config::RUN_OFFLINE) {
                 // No need to connect if we're running offline. Just mock up
-                // the player data.
+                // the local player data.
                 initMockSimState();
                 return;
             }
@@ -211,23 +211,23 @@ void ServerConnectionSystem::initSimState(
     // The server will adjust us after the first message anyway.
     currentTick = connectionResponse.tickNum + Config::INITIAL_TICK_OFFSET;
 
-    // Save the player entity ID so we can treat it differently.
-    world.playerEntity = connectionResponse.entity;
+    // Save the local player's entity ID so we can treat it differently.
+    world.localPlayerEntity = connectionResponse.entity;
 }
 
 void ServerConnectionSystem::initMockSimState()
 {
-    // Create the player entity.
+    // Create the local player.
     entt::registry& registry{world.registry};
     entt::entity newEntity{registry.create()};
 
-    // Save the player entity ID for convenience.
-    world.playerEntity = newEntity;
+    // Save the local player's entity ID for convenience.
+    world.localPlayerEntity = newEntity;
 
-    // Set up the player's sim components.
+    // Set up the local player's sim components.
     // Note: Be careful with holding onto references here. If components
     //       are added to the same group, the ref will be invalidated.
-    registry.emplace<IsClientEntity>(newEntity);
+    registry.emplace<IsPlayerEntity>(newEntity);
     registry.emplace<Name>(newEntity,
                            std::to_string(static_cast<Uint32>(newEntity)));
     registry.emplace<Inventory>(newEntity);
@@ -274,7 +274,7 @@ void ServerConnectionSystem::initMockSimState()
 void ServerConnectionSystem::clearSimState()
 {
     world.registry.clear();
-    world.playerEntity = entt::null;
+    world.localPlayerEntity = entt::null;
     world.tileMap.clear();
 
     // The current tick needs to be set back to 0 so the Network knows to stop

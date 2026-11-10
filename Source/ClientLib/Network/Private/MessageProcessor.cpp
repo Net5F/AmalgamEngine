@@ -40,7 +40,7 @@ namespace Client
 MessageProcessor::MessageProcessor(
     const MessageProcessorContext& inMessageProcessorContext)
 : networkEventDispatcher{inMessageProcessorContext.networkEventDispatcher}
-, playerEntity{entt::null}
+, localPlayerEntity{entt::null}
 , lastReceivedTick{0}
 , extension{nullptr}
 {
@@ -215,7 +215,7 @@ void MessageProcessor::handleConnectionResponse(Uint8* messageBuffer,
 
     // Save our player entity so we can determine which update messages are for
     // the player.
-    playerEntity = connectionResponse.entity;
+    localPlayerEntity = connectionResponse.entity;
 
     // Initialize lastReceivedTick.
     lastReceivedTick = connectionResponse.tickNum;
@@ -245,7 +245,7 @@ void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer,
     std::vector<MovementState>& movementStates{movementUpdate->movementStates};
     for (auto it = movementStates.begin(); it != movementStates.end(); ++it) {
         MovementState& movementState{*it};
-        if (movementState.entity == playerEntity) {
+        if (movementState.entity == localPlayerEntity) {
             PlayerMovementUpdate playerMovementUpdate{
                 {movementState.entity, movementState.input,
                  movementState.position, movementState.movement},
@@ -257,7 +257,7 @@ void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer,
         }
     }
 
-    // If there are NPC entities remaining in the message, push it.
+    // If there are replicated entities remaining in the message, push it.
     if (movementStates.size() > 0) {
         networkEventDispatcher.push<std::shared_ptr<const MovementUpdate>>(
             movementUpdate);

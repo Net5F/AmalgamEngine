@@ -170,7 +170,7 @@ try {
     std::jthread ioThread{[&ioContext]() { ioContext.run(); }};
 
     // Construct the clients.
-    LOG_INFO("Client entities will move at %u inputs per second.",
+    LOG_INFO("Player entities will move at %u inputs per second.",
              inputsPerSecond);
     std::vector<std::unique_ptr<SimulatedClient>> clients(numClients);
     for (std::size_t i{0}; i < clients.size(); ++i) {

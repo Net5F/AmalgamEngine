@@ -1,4 +1,4 @@
-#include "NceLifetimeSystem.h"
+#include "NonPlayerEntityLifetimeSystem.h"
 #include "SimulationContext.h"
 #include "Simulation.h"
 #include "Database.h"
@@ -6,7 +6,7 @@
 #include "Name.h"
 #include "Position.h"
 #include "EntityInitScript.h"
-#include "IsClientEntity.h"
+#include "IsPlayerEntity.h"
 #include "Collision.h"
 #include "SystemMessage.h"
 #include "ISimulationExtension.h"
@@ -17,7 +17,8 @@ namespace AM
 namespace WorldServer
 {
 
-NceLifetimeSystem::NceLifetimeSystem(const SimulationContext& inSimContext)
+NonPlayerEntityLifetimeSystem::NonPlayerEntityLifetimeSystem(
+    const SimulationContext& inSimContext)
 : world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
 , extension{nullptr}
@@ -27,7 +28,7 @@ NceLifetimeSystem::NceLifetimeSystem(const SimulationContext& inSimContext)
 {
 }
 
-void NceLifetimeSystem::processUpdateRequests()
+void NonPlayerEntityLifetimeSystem::processUpdateRequests()
 {
     // Process any entities that are waiting for re-initialization.
     while (!(entityReInitQueue.empty())) {
@@ -49,12 +50,13 @@ void NceLifetimeSystem::processUpdateRequests()
     }
 }
 
-void NceLifetimeSystem::setExtension(ISimulationExtension* inExtension)
+void NonPlayerEntityLifetimeSystem::setExtension(
+    ISimulationExtension* inExtension)
 {
     extension = inExtension;
 }
 
-void NceLifetimeSystem::handleInitRequest(
+void NonPlayerEntityLifetimeSystem::handleInitRequest(
     const EntityInitRequest& entityInitRequest)
 {
     // If the project says the request isn't valid, do nothing.
@@ -65,9 +67,9 @@ void NceLifetimeSystem::handleInitRequest(
     // If the message contains a valid entity ID, re-initialize the given
     // entity.
     if (world.registry.valid(entityInitRequest.entity)) {
-        // If the requested entity is a client entity, do nothing (we don't
-        // allow clients to re-init client entities).
-        if (world.registry.all_of<IsClientEntity>(entityInitRequest.entity)) {
+        // If the requested entity is a player entity, do nothing (we don't
+        // allow clients to re-init player entities).
+        if (world.registry.all_of<IsPlayerEntity>(entityInitRequest.entity)) {
             return;
         }
 
@@ -88,13 +90,13 @@ void NceLifetimeSystem::handleInitRequest(
     }
 }
 
-void NceLifetimeSystem::handleDeleteRequest(
+void NonPlayerEntityLifetimeSystem::handleDeleteRequest(
     const EntityDeleteRequest& entityDeleteRequest)
 {
     // If the entity isn't valid or is a client, skip it.
     entt::entity entity{entityDeleteRequest.entity};
     if (!(world.registry.valid(entity))
-        || world.registry.all_of<IsClientEntity>(entity)) {
+        || world.registry.all_of<IsPlayerEntity>(entity)) {
         return;
     }
     // If the project says the request isn't valid, skip it.
@@ -105,7 +107,8 @@ void NceLifetimeSystem::handleDeleteRequest(
     world.registry.destroy(entity);
 }
 
-void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
+void NonPlayerEntityLifetimeSystem::createEntity(
+    const EntityInitRequest& entityInitRequest)
 {
     // Try to create the entity.
     entt::entity newEntity{world.createEntity(entityInitRequest.position,

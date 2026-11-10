@@ -30,7 +30,7 @@ InventoryHelper::AddResult InventoryHelper::addItem(entt::entity entityToAddTo,
     auto& inventory{world.registry.get_or_emplace<Inventory>(entityToAddTo)};
     auto* client{world.registry.try_get<ClientSimData>(entityToAddTo)};
     if (item && inventory.addItem(itemID, count, item->maxStackSize)) {
-        // Success. If the target is a client entity, update it.
+        // Success. If the target is a player entity, update it.
         if (client) {
             InventoryOperation operation{InventoryAddItem{
                 entityToAddTo, itemID, count, item->maxStackSize,
@@ -88,7 +88,7 @@ InventoryHelper::RemoveResult
     auto* inventory{world.registry.try_get<Inventory>(entityToRemoveFrom)};
     auto* client{world.registry.try_get<ClientSimData>(entityToRemoveFrom)};
     if (inventory && inventory->removeItem(slotIndex, count)) {
-        // Success. If the target is a client entity, update it.
+        // Success. If the target is a player entity, update it.
         if (client) {
             InventoryOperation operation{InventoryRemoveItem{slotIndex, count}};
             network.clientEndpoint.send(client->clientHandle, operation);
@@ -138,7 +138,7 @@ InventoryHelper::RemoveResult
                     static_cast<Uint8>(remainingCount), 0, slot.count)};
                 inventory->removeItem(i, amountToRemove);
 
-                // If the target is a client entity, send an update.
+                // If the target is a player entity, send an update.
                 if (client) {
                     InventoryOperation operation{
                         InventoryRemoveItem{i, amountToRemove}};

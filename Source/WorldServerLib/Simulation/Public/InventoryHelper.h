@@ -54,10 +54,10 @@ public:
      * Adds the given item to the first available slot in the given entity's
      * inventory.
      *
-     * If entityToAddTo is a client entity, sends an update message.
+     * If entityToAddTo is a player entity, sends an update message.
      *
      * @param sendFailureMessage If true and result != Success, a message will
-     *                           be sent to entityToAddTo (if its a client
+     *                           be sent to entityToAddTo (if its a player
      *                           entity) to communicate the failure.
      */
     AddResult addItem(entt::entity entityToAddTo, ItemID itemID, Uint8 count,
@@ -67,7 +67,7 @@ public:
      * Overload for string IDs.
      *
      * @param sendFailureMessage If true and result != Success, a message will
-     *                           be sent to entityToAddTo (if its a client
+     *                           be sent to entityToAddTo (if its a player
      *                           entity) to communicate the failure.
      */
     AddResult addItem(entt::entity entityToAddTo, std::string_view itemID,
@@ -76,10 +76,10 @@ public:
     /**
      * Removes the item in the given slot in the given entity's inventory.
      *
-     * If entityToRemoveFrom is a client entity, sends an update message.
+     * If entityToRemoveFrom is a player entity, sends an update message.
      *
      * @param sendFailureMessage If true and result != Success, a message will
-     *                           be sent to entityToRemoveFrom (if its a client
+     *                           be sent to entityToRemoveFrom (if its a player
      *                           entity) to communicate the failure.
      */
     RemoveResult removeItem(entt::entity entityToRemoveFrom, Uint8 slotIndex,
@@ -92,10 +92,10 @@ public:
      *
      * If the inventory doesn't have enough items, does nothing.
      *
-     * If entityToRemoveFrom is a client entity, sends an update message.
+     * If entityToRemoveFrom is a player entity, sends an update message.
      *
      * @param sendFailureMessage If true and result != Success, a message will
-     *                           be sent to entityToRemoveFrom (if its a client
+     *                           be sent to entityToRemoveFrom (if its a player
      *                           entity) to communicate the failure.
      */
     RemoveResult removeItem(entt::entity entityToRemoveFrom,

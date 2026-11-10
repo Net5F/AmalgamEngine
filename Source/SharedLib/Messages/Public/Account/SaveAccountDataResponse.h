@@ -7,7 +7,7 @@ namespace AM
 {
 
 /**
- * Sent by AccountServer after attempting to save a client entity's
+ * Sent by AccountServer after attempting to save a player entity's
  * AccountData.
  */
 struct SaveAccountDataResponse {

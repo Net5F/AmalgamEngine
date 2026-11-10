@@ -30,7 +30,7 @@ inline constexpr std::size_t PAYLOAD_SIZE_OFFSET{4};
 inline constexpr std::size_t COMPONENT_HEADER_SIZE{8};
 
 /**
- * The max size of each of a client entity's ClientPersistence::World blobs
+ * The max size of each of a player entity's PlayerPersistence::World blobs
  * (engine and project components), in bytes.
  *
  * World blobs are saved to this world's database, so nothing forces a limit.
@@ -38,7 +38,7 @@ inline constexpr std::size_t COMPONENT_HEADER_SIZE{8};
  * World to Account persistence without exceeding it. It also catches
  * components that grow without bound.
  *
- * Note: Non-client entities aren't limited, since they never move to Account
+ * Note: Non-player entities aren't limited, since they never move to Account
  *       persistence.
  */
 inline constexpr std::size_t CLIENT_WORLD_DATA_BLOB_MAX_BYTES{

@@ -63,7 +63,7 @@ void ItemSystem::processItemUpdates()
     CombineItems combineItems{};
     while (combineItemsQueue.pop(combineItems)) {
         world.registry.patch<Inventory>(
-            world.playerEntity, [&](Inventory& inventory) {
+            world.localPlayerEntity, [&](Inventory& inventory) {
                 inventory.combineItems(combineItems.sourceSlotIndex,
                                        combineItems.targetSlotIndex,
                                        combineItems.resultItemID,

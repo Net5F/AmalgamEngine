@@ -24,7 +24,7 @@ ChatPositionSyncSystem::ChatPositionSyncSystem(
 , leftAccountIDs{}
 , nextUpdateTick{0}
 {
-    // When a client entity is destroyed, record that it left the world.
+    // When a player entity is destroyed, record that it left the world.
     world.registry.on_destroy<ClientSimData>()
         .connect<&ChatPositionSyncSystem::onClientSimDataDestroyed>(this);
 }
@@ -74,7 +74,7 @@ void ChatPositionSyncSystem::sendPlayersLeftWorld()
 
 void ChatPositionSyncSystem::sendPlayerPositions()
 {
-    // Gather every client entity's position, sending a message whenever one
+    // Gather every player entity's position, sending a message whenever one
     // fills up.
     auto view{world.registry.view<ClientSimData, Position>()};
     PlayerPositionsUpdate positionsUpdate{};

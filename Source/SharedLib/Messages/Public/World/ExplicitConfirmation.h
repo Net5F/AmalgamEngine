@@ -10,7 +10,7 @@ namespace AM
  *
  * Sent from Server -> Client when a tick passes with no entity movement
  * updates. The client needs these confirmations before it can progress
- * NPC movement forward.
+ * replicated entity movement forward.
  */
 struct ExplicitConfirmation {
     // The EngineMessageType enum value that this message corresponds to.

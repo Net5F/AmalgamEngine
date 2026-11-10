@@ -8,7 +8,7 @@
 #include "Movement.h"
 #include "Rotation.h"
 #include "Collision.h"
-#include "IsClientEntity.h"
+#include "IsPlayerEntity.h"
 #include "MovementHelpers.h"
 #include "Transforms.h"
 #include "AMMath.h"

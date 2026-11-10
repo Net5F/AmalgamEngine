@@ -70,7 +70,7 @@ private:
     EventQueue<Client::ConnectionError> connectionErrorQueue;
 
     /** The entity ID that we were given by the server. */
-    entt::entity clientEntity;
+    entt::entity localPlayerEntity;
 
     /**
      * The number of the tick that we're currently on.

@@ -65,12 +65,12 @@ void InputSystem::processInputMessages()
             break;
         }
 
-        // Update the client entity's inputs.
-        entt::entity clientEntity{
-            world.getClientEntity(inputChangeRequest.clientHandle)};
-        if (clientEntity != entt::null) {
+        // Update the player entity's inputs.
+        entt::entity playerEntity{
+            world.getPlayerEntity(inputChangeRequest.clientHandle)};
+        if (playerEntity != entt::null) {
             // Update the entity's Input component.
-            world.registry.replace<Input>(clientEntity,
+            world.registry.replace<Input>(playerEntity,
                                           inputChangeRequest.input);
         }
         else {
@@ -86,19 +86,19 @@ void InputSystem::processInputMessages()
 void InputSystem::handleDroppedMessage(ConnectionHandle clientHandle)
 {
     // Find the entity ID of the client that sent this request.
-    entt::entity clientEntity{world.getClientEntity(clientHandle)};
-    if (clientEntity == entt::null) {
+    entt::entity playerEntity{world.getPlayerEntity(clientHandle)};
+    if (playerEntity == entt::null) {
         // The entity is gone, we don't need to process this drop.
         return;
     }
 
     entt::registry& registry{world.registry};
-    Input& entityInput{registry.get<Input>(clientEntity)};
+    Input& entityInput{registry.get<Input>(playerEntity)};
 
     // Default the entity's inputs so they don't run off a cliff.
     Input defaultInput{};
     if (entityInput.inputStates != defaultInput.inputStates) {
-        registry.replace<Input>(clientEntity, defaultInput);
+        registry.replace<Input>(playerEntity, defaultInput);
     }
 }
 

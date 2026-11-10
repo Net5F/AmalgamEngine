@@ -13,9 +13,9 @@ namespace WorldServer
 {
 
 /**
- * Where a persisted component is saved when it's attached to a client entity.
+ * Where a persisted component is saved when it's attached to a player entity.
  *
- * Non-client entities ignore this. All of their persisted components are
+ * Non-player entities ignore this. All of their persisted components are
  * saved to the world's database.
  *
  * How to set up your component list, depending on the type of setup you want:
@@ -29,27 +29,27 @@ namespace WorldServer
  *     Set everything to World. Add logic so that if an account has no data in
  *     that world, you take them through a character creation flow.
  *
- * Note: Changing a component's ClientPersistence is a data migration. Its
+ * Note: Changing a component's PlayerPersistence is a data migration. Its
  *       existing data will still be in the old location.
  */
-enum class ClientPersistence {
+enum class PlayerPersistence {
     /** Follows the account to every world. Saved to the account server. */
     Account,
     /** Stays on this world. Saved to the world's database, keyed by account
         ID. Use this for data that references things in this world. */
     World,
-    /** Not persisted for client entities. Rebuilt when the entity spawns. */
+    /** Not persisted for player entities. Rebuilt when the entity spawns. */
     None
 };
 
 template<typename ComponentT, Uint16 TypeIDValue, Uint16 VersionValue,
-         ClientPersistence ClientPersistenceValue>
+         PlayerPersistence PlayerPersistenceValue>
 struct PersistedComponentEntry {
     using Component = ComponentT;
     static constexpr Uint16 TYPE_ID{TypeIDValue};
     static constexpr Uint16 VERSION{VersionValue};
-    static constexpr ClientPersistence CLIENT_PERSISTENCE{
-        ClientPersistenceValue};
+    static constexpr PlayerPersistence PLAYER_PERSISTENCE{
+        PlayerPersistenceValue};
 };
 
 /**
@@ -74,25 +74,25 @@ struct PersistedComponentList {
         EntryTypes, boost::mp11::mp_find<ComponentTypes, Component>::value>;
 
 private:
-    template<ClientPersistence Persistence>
-    struct HasClientPersistence {
+    template<PlayerPersistence Persistence>
+    struct HasPlayerPersistence {
         template<typename Entry>
-        using fn = std::bool_constant<Entry::CLIENT_PERSISTENCE == Persistence>;
+        using fn = std::bool_constant<Entry::PLAYER_PERSISTENCE == Persistence>;
     };
 
 public:
     /** The entries that are saved to the given location when attached to a
-        client entity. Keeps EntryTypes' ascending ID order. */
-    template<ClientPersistence Persistence>
-    using ClientEntryTypes
+        player entity. Keeps EntryTypes' ascending ID order. */
+    template<PlayerPersistence Persistence>
+    using PlayerEntryTypes
         = boost::mp11::mp_copy_if_q<EntryTypes,
-                                    HasClientPersistence<Persistence>>;
+                                    HasPlayerPersistence<Persistence>>;
 
     /** True if any entries are saved to the given location when attached to
-        a client entity. */
-    template<ClientPersistence Persistence>
-    static constexpr bool HAS_CLIENT_ENTRIES{
-        !boost::mp11::mp_empty<ClientEntryTypes<Persistence>>::value};
+        a player entity. */
+    template<PlayerPersistence Persistence>
+    static constexpr bool HAS_PLAYER_ENTRIES{
+        !boost::mp11::mp_empty<PlayerEntryTypes<Persistence>>::value};
 
     static_assert(boost::mp11::mp_is_set<ComponentTypes>::value,
                   "A persisted component type was registered more than once.");

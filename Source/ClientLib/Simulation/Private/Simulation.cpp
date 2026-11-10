@@ -8,9 +8,9 @@
 #include "ChunkUpdateSystem.h"
 #include "TileUpdateSystem.h"
 #include "EntityLifetimeSystem.h"
-#include "PlayerInputSystem.h"
-#include "PlayerMovementSystem.h"
-#include "NpcMovementSystem.h"
+#include "LocalPlayerInputSystem.h"
+#include "LocalPlayerMovementSystem.h"
+#include "ReplicatedMovementSystem.h"
 #include "ItemSystem.h"
 #include "InventorySystem.h"
 #include "CastSystem.h"
@@ -112,7 +112,7 @@ void Simulation::tick()
         if (adjustment != 0) {
             targetTick += adjustment;
 
-            // Make sure NPC replication takes the adjustment into account.
+            // Make sure replication takes the adjustment into account.
             replicationTickOffset.applyAdjustment(adjustment);
         }
     }
@@ -141,16 +141,16 @@ void Simulation::tick()
         // server.
         // Note: Mouse and momentary inputs are processed through our OS event
         //       handling, prior to this tick.
-        playerInputSystem->processHeldInputs();
+        localPlayerInputSystem->processHeldInputs();
 
-        // Push the new input state into the player's history.
-        playerInputSystem->addCurrentInputsToHistory();
+        // Push the new input state into the local player's history.
+        localPlayerInputSystem->addCurrentInputsToHistory();
 
-        // Process player movement.
-        playerMovementSystem->processMovement();
+        // Process local player movement.
+        localPlayerMovementSystem->processMovement();
 
-        // Process NPC movement.
-        npcMovementSystem->updateNpcs();
+        // Process replicated entity movement.
+        replicatedMovementSystem->updateReplicatedEntities();
 
         // Process any waiting item definition updates.
         itemSystem->processItemUpdates();
@@ -193,7 +193,7 @@ bool Simulation::handleOSEvent(SDL_Event& event)
         }
         default: {
             // Default to assuming it's a momentary input.
-            playerInputSystem->processMomentaryInput(event);
+            localPlayerInputSystem->processMomentaryInput(event);
             return true;
         }
     }
@@ -216,9 +216,12 @@ void Simulation::initializeSystems()
     chunkUpdateSystem = std::make_unique<ChunkUpdateSystem>(simContext);
     tileUpdateSystem = std::make_unique<TileUpdateSystem>(simContext);
     entityLifetimeSystem = std::make_unique<EntityLifetimeSystem>(simContext);
-    playerInputSystem = std::make_unique<PlayerInputSystem>(simContext);
-    playerMovementSystem = std::make_unique<PlayerMovementSystem>(simContext);
-    npcMovementSystem = std::make_unique<NpcMovementSystem>(simContext);
+    localPlayerInputSystem
+        = std::make_unique<LocalPlayerInputSystem>(simContext);
+    localPlayerMovementSystem
+        = std::make_unique<LocalPlayerMovementSystem>(simContext);
+    replicatedMovementSystem
+        = std::make_unique<ReplicatedMovementSystem>(simContext);
     itemSystem = std::make_unique<ItemSystem>(simContext);
     inventorySystem = std::make_unique<InventorySystem>(simContext);
     castSystem = std::make_unique<CastSystem>(simContext);

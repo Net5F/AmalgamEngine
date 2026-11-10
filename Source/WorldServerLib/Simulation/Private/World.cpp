@@ -98,7 +98,7 @@ World::World(const SimulationContext& inSimContext)
 
 World::~World() = default;
 
-entt::entity World::getClientEntity(ConnectionHandle clientHandle)
+entt::entity World::getPlayerEntity(ConnectionHandle clientHandle)
 {
     // Find the entity ID associated with the given client handle.
     auto it{clientHandleMap.find(clientHandle)};
@@ -410,8 +410,8 @@ Position World::getSpawnPoint()
 
 void World::load()
 {
-    // Load our saved non-client entities.
-    loadHelper.loadNonClientEntities();
+    // Load our saved non-player entities.
+    loadHelper.loadNonPlayerEntities();
 
     // Load our saved item definitions.
     loadHelper.loadItems();
@@ -466,18 +466,18 @@ Position World::getGroupedSpawnPoint()
 
 void World::onEntityDestroyed(entt::entity entity)
 {
-    // Note: Only ClientConnectionSystem should be destroying client entities,
+    // Note: Only ClientConnectionSystem should be destroying player entities,
     //       so we don't handle clientHandleMap cleanup here.
 
     // Remove it from the locators.
-    // Note: Client entities could easily be removed where we delete them, but
-    //       NCEs may be deleted at any point by project code, so we handle it
-    //       here to avoid bugs.
+    // Note: Player entities could easily be removed where we delete them, but
+    //       non-player entities may be deleted at any point by project code, so
+    //       we handle it here to avoid bugs.
     entityLocator.removeEntity(entity);
     collisionLocator.removeEntity(entity);
 
     // If the entity is in the database, delete it (does nothing if it isn't).
-    // Note: This is to delete non-client entities, since they get persisted.
+    // Note: This is to delete non-player entities, since they get persisted.
     database->deleteEntityData(entity);
 }
 

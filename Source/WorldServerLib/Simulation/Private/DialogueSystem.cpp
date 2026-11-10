@@ -89,16 +89,16 @@ void DialogueSystem::processDialogueChoice(
     const DialogueChoiceRequest& choiceRequest)
 {
     // Find the entity ID of the client that sent this request.
-    entt::entity clientEntity{
-        world.getClientEntity(choiceRequest.clientHandle)};
-    if (clientEntity == entt::null) {
+    entt::entity playerEntity{
+        world.getPlayerEntity(choiceRequest.clientHandle)};
+    if (playerEntity == entt::null) {
         // Client doesn't exist (may have disconnected), skip this request.
         return;
     }
 
     // Validate the request.
     const Dialogue* dialogue{
-        validateChoiceRequest(choiceRequest, clientEntity)};
+        validateChoiceRequest(choiceRequest, playerEntity)};
     if (!dialogue) {
         return;
     }
@@ -114,9 +114,9 @@ void DialogueSystem::processDialogueChoice(
     // response.
     DialogueResponse dialogueResponse{choiceRequest.targetEntity, 0};
     dialogueLua.luaState["self"] = choiceRequest.targetEntity;
-    dialogueLua.luaState["target"] = clientEntity;
+    dialogueLua.luaState["target"] = playerEntity;
     dialogueLua.selfEntity = choiceRequest.targetEntity;
-    dialogueLua.targetEntity = clientEntity;
+    dialogueLua.targetEntity = playerEntity;
     dialogueLua.clientHandle = choiceRequest.clientHandle;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
@@ -140,7 +140,7 @@ void DialogueSystem::processDialogueChoice(
     // response.
     if (lastTopic.topic) {
         dialogueResponse.topicIndex = lastTopic.topicIndex;
-        addChoicesToResponse(lastTopic.topic->choices, clientEntity,
+        addChoicesToResponse(lastTopic.topic->choices, playerEntity,
                              choiceRequest.targetEntity,
                              choiceRequest.clientHandle, dialogueResponse);
     }
@@ -240,7 +240,7 @@ DialogueSystem::TopicPair
 }
 
 const Dialogue* DialogueSystem::validateChoiceRequest(
-    const DialogueChoiceRequest& choiceRequest, entt::entity clientEntity)
+    const DialogueChoiceRequest& choiceRequest, entt::entity playerEntity)
 {
     entt::registry& registry{world.registry};
 
@@ -267,11 +267,11 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
         return nullptr;
     }
 
-    // Check that the client entity can access the requested choice.
+    // Check that the player entity can access the requested choice.
     const Dialogue::Topic& topic{dialogue->topics[choiceRequest.topicIndex]};
     const Dialogue::Choice& choice{topic.choices[choiceRequest.choiceIndex]};
     if (!(choice.conditionScript.empty())
-        && !runChoiceCondition(choice, clientEntity, choiceRequest.targetEntity,
+        && !runChoiceCondition(choice, playerEntity, choiceRequest.targetEntity,
                                choiceRequest.clientHandle, true)) {
         return nullptr;
     }
@@ -280,7 +280,7 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
 }
 
 bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
-                                        entt::entity clientEntity,
+                                        entt::entity playerEntity,
                                         entt::entity targetEntity,
                                         ConnectionHandle clientHandle,
                                         bool sendAccessErrorMessage)
@@ -292,9 +292,9 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
 
     // Run the condition script.
     dialogueChoiceConditionLua.luaState["self"] = targetEntity;
-    dialogueChoiceConditionLua.luaState["target"] = clientEntity;
+    dialogueChoiceConditionLua.luaState["target"] = playerEntity;
     dialogueChoiceConditionLua.selfEntity = targetEntity;
-    dialogueChoiceConditionLua.targetEntity = clientEntity;
+    dialogueChoiceConditionLua.targetEntity = playerEntity;
     dialogueChoiceConditionLua.clientHandle = clientHandle;
     auto scriptResult{dialogueChoiceConditionLua.luaState.script(
         workString, &sol::script_pass_on_error)};
@@ -334,15 +334,15 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
 }
 
 void DialogueSystem::addChoicesToResponse(
-    const std::vector<Dialogue::Choice>& choices, entt::entity clientEntity,
+    const std::vector<Dialogue::Choice>& choices, entt::entity playerEntity,
     entt::entity targetEntity, ConnectionHandle clientHandle,
     DialogueResponse& response)
 {
     Uint8 index{0};
     for (const Dialogue::Choice& choice : choices) {
-        // If the client entity can access this choice, add it to the response.
+        // If the player entity can access this choice, add it to the response.
         if (choice.conditionScript.empty()
-            || runChoiceCondition(choice, clientEntity, targetEntity,
+            || runChoiceCondition(choice, playerEntity, targetEntity,
                                   clientHandle, false)) {
             response.choices.emplace_back(index, choice.displayText);
         }

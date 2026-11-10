@@ -23,10 +23,11 @@ struct Collision;
  * This is a class instead of a set of free functions to avoid needing to pass
  * dependencies on every call.
  *
- * Note: Since player movement is predicted on clients, a player colliding with
- *       a moving NPC is always going to cause mis-predictions and rollback.
+ * Note: Since clients predict the local player's movement, a local player
+ *       colliding with a moving non-player entity is always going to cause
+ *       mis-predictions and rollback.
  *       To avoid this, we have a blanket rule of "a moving entity (player or
- *       NPC) will ignore the collision of all movement-enabled entities
+ *       non-player) will ignore the collision of all movement-enabled entities
  *       (whether they're currently moving or not)".
  */
 class EntityMover

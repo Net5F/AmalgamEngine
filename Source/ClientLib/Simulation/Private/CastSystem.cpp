@@ -75,7 +75,7 @@ void CastSystem::processUICasts()
         CastFailureType failureType{castHelper.castItemInteraction(params)};
         if (failureType != CastFailureType::None) {
             simEventDispatcher.trigger(CastFailed{
-                world.playerEntity, params.interactionType, failureType});
+                world.localPlayerEntity, params.interactionType, failureType});
         }
     }
 
@@ -86,7 +86,7 @@ void CastSystem::processUICasts()
         CastFailureType failureType{castHelper.castEntityInteraction(params)};
         if (failureType != CastFailureType::None) {
             simEventDispatcher.trigger(CastFailed{
-                world.playerEntity, params.interactionType, failureType});
+                world.localPlayerEntity, params.interactionType, failureType});
         }
     }
 
@@ -96,7 +96,7 @@ void CastSystem::processUICasts()
         CastFailureType failureType{castHelper.castSpell(params)};
         if (failureType != CastFailureType::None) {
             simEventDispatcher.trigger(CastFailed{
-                world.playerEntity, params.interactionType, failureType});
+                world.localPlayerEntity, params.interactionType, failureType});
         }
     }
 }
@@ -133,8 +133,8 @@ void CastSystem::handleCastFailed(const CastFailed& castFailed)
                 world.registry.erase<ClientCastState>(castFailed.casterEntity);
             }
 
-            // If this is for the player entity, signal it to the UI.
-            if (castFailed.casterEntity == world.playerEntity) {
+            // If this is for the local player, signal it to the UI.
+            if (castFailed.casterEntity == world.localPlayerEntity) {
                 simEventDispatcher.trigger(castFailed);
             }
         }
@@ -144,13 +144,13 @@ void CastSystem::handleCastFailed(const CastFailed& castFailed)
 void CastSystem::handleCastCooldownInit(
     const CastCooldownInit& castCooldownInit)
 {
-    // Apply the given CastCooldown to the player entity.
-    // Note: We only receive this message for the player entity, never any
+    // Apply the given CastCooldown to the local player.
+    // Note: We only receive this message for the local player, never any
     //       other entity.
     // Note: We may be replacing a predicted cooldown by doing this, but the
     //       server-given cooldown will be more accurate anyway.
     world.registry.emplace_or_replace<CastCooldown>(
-        world.playerEntity, castCooldownInit.castCooldown);
+        world.localPlayerEntity, castCooldownInit.castCooldown);
 }
 
 void CastSystem::updateCasts()
@@ -167,10 +167,10 @@ void CastSystem::updateCasts()
             continue;
         }
 
-        // If the player entity has moved, cancel the cast.
-        // Note: We don't predict cast failures on non-player entities.
-        // Note: The player entity always has a PreviousPosition.
-        if (entity == world.playerEntity) {
+        // If the local player has moved, cancel the cast.
+        // Note: We don't predict cast failures on replicated entities.
+        // Note: The local player always has a PreviousPosition.
+        if (entity == world.localPlayerEntity) {
             auto [position, prevPosition]
                 = movementGroup.get<Position, PreviousPosition>(entity);
             if (position != prevPosition) {
@@ -236,10 +236,10 @@ void CastSystem::cancelCast(ClientCastState& castState)
         world.registry.get<CastCooldown>(castInfo.casterEntity)};
     castCooldown.gcdTicksRemaining = 0;
 
-    // If the caster is the player entity, signal the failure to the UI (the
-    // server doesn't send failure messages for the player entity, since we
+    // If the caster is the local player, signal the failure to the UI (the
+    // server doesn't send failure messages for the local player, since we
     // can detect them ourself).
-    if (castInfo.casterEntity == world.playerEntity) {
+    if (castInfo.casterEntity == world.localPlayerEntity) {
         simEventDispatcher.trigger(CastFailed{
             castInfo.casterEntity, castState.castInfo.castable->castableID,
             CastFailureType::Movement});

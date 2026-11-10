@@ -171,7 +171,7 @@ public:
                                std::numeric_limits<float>::max(),
                                std::numeric_limits<float>::max()};
         /** (Optional) The client that requested this cast. If casterEntity is a
-            client entity, you must fill this in. Otherwise it won't be
+            player entity, you must fill this in. Otherwise it won't be
            replicated properly. */
         ConnectionHandle clientHandle{};
     };
@@ -189,7 +189,7 @@ public:
                                std::numeric_limits<float>::max(),
                                std::numeric_limits<float>::max()};
         /** (Optional) The client that requested this cast. If casterEntity is a
-            client entity, you must fill this in. Otherwise it won't be
+            player entity, you must fill this in. Otherwise it won't be
            replicated properly. */
         ConnectionHandle clientHandle{};
     };
@@ -208,7 +208,7 @@ public:
                                std::numeric_limits<float>::max(),
                                std::numeric_limits<float>::max()};
         /** (Optional) The client that requested this cast. If casterEntity is a
-            client entity, you must fill this in. Otherwise it won't be
+            player entity, you must fill this in. Otherwise it won't be
            replicated properly. */
         ConnectionHandle clientHandle{};
     };

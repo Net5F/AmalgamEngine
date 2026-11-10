@@ -15,15 +15,15 @@ class Network;
 class ISimulationExtension;
 
 /**
- * Manages creation and destruction of non-client entities.
+ * Manages creation and destruction of non-player entities.
  *
- * Non-client entities are any entity not controlled by a client (dynamic
+ * Non-player entities are any entity not controlled by a client (dynamic
  * objects, NPCs, etc).
  */
-class NceLifetimeSystem
+class NonPlayerEntityLifetimeSystem
 {
 public:
-    NceLifetimeSystem(const SimulationContext& inSimContext);
+    NonPlayerEntityLifetimeSystem(const SimulationContext& inSimContext);
 
     /**
      * Processes any waiting EntityInitRequest or EntityDelete messages.

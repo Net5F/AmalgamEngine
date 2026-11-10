@@ -27,10 +27,10 @@ namespace WorldServer
  * All of the engine's component types that should be saved to the database
  * and loaded at startup.
  *
- * Format: <ComponentType, ID, VersionNumber, ClientPersistence>
+ * Format: <ComponentType, ID, VersionNumber, PlayerPersistence>
  *
- * ClientPersistence controls where the component is saved when it's
- * attached to a client entity (see PersistedComponentList.h). Account data
+ * PlayerPersistence controls where the component is saved when it's
+ * attached to a player entity (see PersistedComponentList.h). Account data
  * follows the player to every world, World data stays on this world, and
  * None data is rebuilt when the entity spawns.
  *
@@ -55,21 +55,21 @@ namespace WorldServer
  *       SaveTimestamp::lastSavedTick). Never compare one to the current tick.
  */
 using EnginePersistedComponentTypes = PersistedComponentList<
-    PersistedComponentEntry<SaveTimestamp, 1, 0, ClientPersistence::Account>,
-    PersistedComponentEntry<Name, 2, 0, ClientPersistence::None>,
-    PersistedComponentEntry<Input, 3, 0, ClientPersistence::None>,
-    PersistedComponentEntry<Position, 4, 0, ClientPersistence::Account>,
-    PersistedComponentEntry<Rotation, 5, 0, ClientPersistence::Account>,
-    PersistedComponentEntry<GraphicState, 6, 0, ClientPersistence::Account>,
-    PersistedComponentEntry<CollisionBitSets, 7, 0, ClientPersistence::None>,
-    PersistedComponentEntry<Interaction, 8, 0, ClientPersistence::None>,
-    PersistedComponentEntry<ItemHandler, 9, 0, ClientPersistence::None>,
-    PersistedComponentEntry<Dialogue, 10, 0, ClientPersistence::None>,
-    PersistedComponentEntry<EntityInitScript, 11, 0, ClientPersistence::None>,
-    PersistedComponentEntry<StoredValues, 12, 0, ClientPersistence::Account>,
-    PersistedComponentEntry<CastCooldown, 13, 0, ClientPersistence::Account>,
-    PersistedComponentEntry<StableID, 14, 0, ClientPersistence::None>,
-    PersistedComponentEntry<Inventory, 15, 0, ClientPersistence::Account>>;
+    PersistedComponentEntry<SaveTimestamp, 1, 0, PlayerPersistence::Account>,
+    PersistedComponentEntry<Name, 2, 0, PlayerPersistence::None>,
+    PersistedComponentEntry<Input, 3, 0, PlayerPersistence::None>,
+    PersistedComponentEntry<Position, 4, 0, PlayerPersistence::Account>,
+    PersistedComponentEntry<Rotation, 5, 0, PlayerPersistence::Account>,
+    PersistedComponentEntry<GraphicState, 6, 0, PlayerPersistence::Account>,
+    PersistedComponentEntry<CollisionBitSets, 7, 0, PlayerPersistence::None>,
+    PersistedComponentEntry<Interaction, 8, 0, PlayerPersistence::None>,
+    PersistedComponentEntry<ItemHandler, 9, 0, PlayerPersistence::None>,
+    PersistedComponentEntry<Dialogue, 10, 0, PlayerPersistence::None>,
+    PersistedComponentEntry<EntityInitScript, 11, 0, PlayerPersistence::None>,
+    PersistedComponentEntry<StoredValues, 12, 0, PlayerPersistence::Account>,
+    PersistedComponentEntry<CastCooldown, 13, 0, PlayerPersistence::Account>,
+    PersistedComponentEntry<StableID, 14, 0, PlayerPersistence::None>,
+    PersistedComponentEntry<Inventory, 15, 0, PlayerPersistence::Account>>;
 // clang-format on
 
 } // End namespace WorldServer

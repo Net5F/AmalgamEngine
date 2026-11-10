@@ -28,7 +28,7 @@ struct ConsumeServiceTicketRequest {
 
     /** If true, the response will include the account's AccountData.
         Only the world server may set this. It leaves it false if no
-        components use ClientPersistence::Account. */
+        components use PlayerPersistence::Account. */
     bool includeAccountData{false};
 };
 

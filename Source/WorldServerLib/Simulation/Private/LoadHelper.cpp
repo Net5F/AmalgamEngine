@@ -48,9 +48,9 @@ LoadHelper::LoadHelper(World& inWorld, Simulation& inSimulation,
 {
 }
 
-void LoadHelper::loadNonClientEntities()
+void LoadHelper::loadNonPlayerEntities()
 {
-    // Iterate and load each entity in the database (we only store non-client 
+    // Iterate and load each entity in the database (we only store non-player
     // entities in the database).
     world.database->iterateEntities(
         std::bind_front(&LoadHelper::loadEntity, this));
@@ -98,9 +98,9 @@ void LoadHelper::loadGlobalStoredValues()
     world.database->getGlobalStoredValueMap(std::move(loadGlobalMap));
 }
 
-entt::entity LoadHelper::loadClientEntity(
-    Sint64 accountID, const SerializedClientComponents& accountComponents,
-    const SerializedClientComponents& worldComponents)
+entt::entity LoadHelper::loadPlayerEntity(
+    Sint64 accountID, const SerializedPlayerComponents& accountComponents,
+    const SerializedPlayerComponents& worldComponents)
 {
     using EngineTypes = EnginePersistedComponentTypes;
     using ProjectTypes = ProjectPersistedComponentTypes;
@@ -122,7 +122,7 @@ entt::entity LoadHelper::loadClientEntity(
         || !parseComponents(worldComponents.projectComponents,
                             worldProjectComponents, entt::null,
                             "world project")) {
-        LOG_WARN("Failed to parse client entity data for accountID: %lld",
+        LOG_WARN("Failed to parse player entity data for accountID: %lld",
                  static_cast<long long>(accountID));
         return entt::null;
     }
@@ -132,11 +132,11 @@ entt::entity LoadHelper::loadClientEntity(
     //       position before creating it.
     std::optional<Position> savedPosition{};
     std::optional<GraphicState> savedGraphicState{};
-    if (!getSavedClientComponent(accountEngineComponents, worldEngineComponents,
+    if (!getSavedPlayerComponent(accountEngineComponents, worldEngineComponents,
                                  savedPosition)
-        || !getSavedClientComponent(accountEngineComponents,
+        || !getSavedPlayerComponent(accountEngineComponents,
                                     worldEngineComponents, savedGraphicState)) {
-        LOG_WARN("Failed to load client entity Position or GraphicState for "
+        LOG_WARN("Failed to load player entity Position or GraphicState for "
                  "accountID: %lld",
                  static_cast<long long>(accountID));
         return entt::null;
@@ -173,20 +173,20 @@ entt::entity LoadHelper::loadClientEntity(
     entt::entity entity{world.createEntity(
         savedPosition ? *savedPosition : world.getSpawnPoint())};
     if (entity == entt::null) {
-        LOG_ERROR("Failed to create client entity for accountID: %lld",
+        LOG_ERROR("Failed to create player entity for accountID: %lld",
                   static_cast<long long>(accountID));
         return entt::null;
     }
 
     // Load each set's persisted components into the registry.
     using AccountEngineEntries
-        = EngineTypes::ClientEntryTypes<ClientPersistence::Account>;
+        = EngineTypes::PlayerEntryTypes<PlayerPersistence::Account>;
     using AccountProjectEntries
-        = ProjectTypes::ClientEntryTypes<ClientPersistence::Account>;
+        = ProjectTypes::PlayerEntryTypes<PlayerPersistence::Account>;
     using WorldEngineEntries
-        = EngineTypes::ClientEntryTypes<ClientPersistence::World>;
+        = EngineTypes::PlayerEntryTypes<PlayerPersistence::World>;
     using WorldProjectEntries
-        = ProjectTypes::ClientEntryTypes<ClientPersistence::World>;
+        = ProjectTypes::PlayerEntryTypes<PlayerPersistence::World>;
     bool loadSucceeded{loadEngineComponents<AccountEngineEntries>(
                            entity, accountEngineComponents)
                        && loadProjectComponents<AccountProjectEntries>(
@@ -196,7 +196,7 @@ entt::entity LoadHelper::loadClientEntity(
                        && loadProjectComponents<WorldProjectEntries>(
                            entity, worldProjectComponents)};
     if (!loadSucceeded) {
-        LOG_WARN("Failed to load client entity components for accountID: "
+        LOG_WARN("Failed to load player entity components for accountID: "
                  "%lld",
                  static_cast<long long>(accountID));
         world.registry.destroy(entity);
@@ -217,7 +217,7 @@ void LoadHelper::loadEntity(
     entt::entity entity, std::span<const Uint8> serializedEngineComponents,
     std::span<const Uint8> serializedProjectComponents)
 {
-    // Note: Any failure to load this entity is fatal. Unlike client entities,
+    // Note: Any failure to load this entity is fatal. Unlike player entities,
     //       there's no way to recover (e.g. by rejecting the client), and if
     //       we kept going, the next save would overwrite the entity's data
     //       with whatever we managed to load. Failing at startup means
@@ -518,14 +518,14 @@ bool LoadHelper::deserializeComponent(
 
 void LoadHelper::initTimerComponents(entt::entity entity)
 {
-    // Timer components are updated using SaveTimestamp, so client entities
+    // Timer components are updated using SaveTimestamp, so player entities
     // must save them in the same set (otherwise, a timer could be loaded with
     // a SaveTimestamp from a different save).
     using EngineTypes = EnginePersistedComponentTypes;
     static_assert(
-        EngineTypes::EntryFor<CastCooldown>::CLIENT_PERSISTENCE
-            == EngineTypes::EntryFor<SaveTimestamp>::CLIENT_PERSISTENCE,
-        "CastCooldown must have the same ClientPersistence as SaveTimestamp.");
+        EngineTypes::EntryFor<CastCooldown>::PLAYER_PERSISTENCE
+            == EngineTypes::EntryFor<SaveTimestamp>::PLAYER_PERSISTENCE,
+        "CastCooldown must have the same PlayerPersistence as SaveTimestamp.");
 
     const SaveTimestamp* saveTimestamp{
         world.registry.try_get<SaveTimestamp>(entity)};
@@ -562,19 +562,19 @@ const LoadHelper::SerializedComponent* LoadHelper::findComponent(
 }
 
 template<typename Component>
-bool LoadHelper::getSavedClientComponent(
+bool LoadHelper::getSavedPlayerComponent(
     const std::vector<SerializedComponent>& accountEngineComponents,
     const std::vector<SerializedComponent>& worldEngineComponents,
     std::optional<Component>& component)
 {
     using Entry = EnginePersistedComponentTypes::EntryFor<Component>;
-    if constexpr (Entry::CLIENT_PERSISTENCE == ClientPersistence::None) {
-        // Client entities don't save this component.
+    if constexpr (Entry::PLAYER_PERSISTENCE == PlayerPersistence::None) {
+        // Player entities don't save this component.
         return true;
     }
     else {
         const std::vector<SerializedComponent>& engineComponents{
-            (Entry::CLIENT_PERSISTENCE == ClientPersistence::Account)
+            (Entry::PLAYER_PERSISTENCE == PlayerPersistence::Account)
                 ? accountEngineComponents
                 : worldEngineComponents};
         const SerializedComponent* serializedComponent{

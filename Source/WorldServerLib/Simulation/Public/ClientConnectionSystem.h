@@ -24,7 +24,7 @@ class ISimulationExtension;
 
 /**
  * This system is in charge of processing client connect/disconnect events and
- * updating the client's entity.
+ * updating the client's player entity.
  *
  * When a client disconnects, its entity lingers in the world for
  * Config::LOGOUT_DELAY_S before being removed. If the same account
@@ -36,7 +36,7 @@ class ISimulationExtension;
  * When the countdown finishes, the entity is removed immediately (it doesn't
  * linger), and the client is told to disconnect.
  *
- * When a client entity is removed, its components are saved.
+ * When a player entity is removed, its components are saved.
  *
  * When a client connects and its account has no lingering entity, a new
  * entity is created and its saved components are loaded. Its World components
@@ -86,10 +86,10 @@ private:
      * @return The new entity, or entt::null if the client's saved data failed
      *         to load (the client will be rejected).
      */
-    entt::entity createClientEntity(const ClientConnected& clientConnected);
+    entt::entity createPlayerEntity(const ClientConnected& clientConnected);
 
     /**
-     * Adds the engine's defaults for any of the given client entity's
+     * Adds the engine's defaults for any of the given player entity's
      * components that weren't loaded.
      *
      * @return true if successful, else false (the default graphics didn't fit
@@ -99,7 +99,7 @@ private:
                               const ClientConnected& clientConnected);
 
     /**
-     * Copies the given account's saved ClientPersistence::World components
+     * Copies the given account's saved PlayerPersistence::World components
      * into savedComponents.
      *
      * If we have data whose save failed (see
@@ -162,7 +162,7 @@ private:
     /**
      * Saves the given account's entity, then removes it from the sim.
      */
-    void removeClientEntity(Sint64 accountID);
+    void removePlayerEntity(Sint64 accountID);
 
     /**
      * Sends a connection response to the given client.
@@ -180,12 +180,12 @@ private:
     /** Used to send connection responses and receive connection events. */
     Network& network;
 
-    /** Used for getting the default graphic's data when constructing client
+    /** Used for getting the default graphic's data when constructing player
         entities. */
     GraphicData& graphicData;
 
     /** If non-nullptr, contains the project's simulation extension functions.
-        Used to let the project initialize new client entities. */
+        Used to let the project initialize new player entities. */
     ISimulationExtension* extension;
 
     EventQueue<ClientConnectionEvent> clientConnectionEventQueue;
@@ -197,7 +197,7 @@ private:
         CastState across ticks). */
     EnttObserver castStartedObserver;
 
-    /** Maps account IDs to their client entity. Includes entities that are
+    /** Maps account IDs to their player entity. Includes entities that are
         lingering. */
     std::unordered_map<Sint64, entt::entity> accountEntityMap;
 

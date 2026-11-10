@@ -110,7 +110,7 @@ private:
 
 public:
     struct CastItemInteractionParams {
-        // Note: The player entity is always assumed to be the caster.
+        // Note: The local player is always assumed to be the caster.
 
         /** The item interaction to cast. */
         ItemInteractionType interactionType{};
@@ -128,7 +128,7 @@ public:
     };
 
     struct CastEntityInteractionParams {
-        // Note: The player entity is always assumed to be the caster.
+        // Note: The local player is always assumed to be the caster.
 
         /** The entity interaction to cast. */
         EntityInteractionType interactionType{};
@@ -142,7 +142,7 @@ public:
     };
 
     struct CastSpellParams {
-        // Note: The player entity is always assumed to be the caster.
+        // Note: The local player is always assumed to be the caster.
 
         /** The item interaction to cast. */
         SpellType interactionType{};

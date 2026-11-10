@@ -1,6 +1,6 @@
 #include "CollisionBitSets.h"
 #include "Input.h"
-#include "IsClientEntity.h"
+#include "IsPlayerEntity.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
@@ -29,14 +29,14 @@ void CollisionBitSets::setCollisionLayers(
     collisionLayers
         &= ~(CollisionLayerType::TerrainWall | CollisionLayerType::Object);
 
-    // Set Client/NonClient ourselves, so it's always accurate.
-    collisionLayers &= ~(CollisionLayerType::ClientEntity
-                         | CollisionLayerType::NonClientEntity);
-    if (registry.all_of<IsClientEntity>(entity)) {
-        collisionLayers |= CollisionLayerType::ClientEntity;
+    // Set PlayerEntity/NonPlayerEntity ourselves, so it's always accurate.
+    collisionLayers &= ~(CollisionLayerType::PlayerEntity
+                         | CollisionLayerType::NonPlayerEntity);
+    if (registry.all_of<IsPlayerEntity>(entity)) {
+        collisionLayers |= CollisionLayerType::PlayerEntity;
     }
     else {
-        collisionLayers |= CollisionLayerType::NonClientEntity;
+        collisionLayers |= CollisionLayerType::NonPlayerEntity;
     }
 
     // If the entity is movement-enabled, don't let it block collision.
@@ -50,7 +50,7 @@ void CollisionBitSets::setCollisionMask(CollisionLayerBitSet inCollisionMask)
 {
     // Note: All entities always collide with TerrainWall. We do this to
     //       avoid devs accidentally removing TerrainWall collision and
-    //       having their NCE fall through the floor.
+    //       having their non-player entity fall through the floor.
     collisionMask = inCollisionMask | CollisionLayerType::TerrainWall;
 }
 

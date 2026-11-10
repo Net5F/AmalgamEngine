@@ -47,7 +47,7 @@ void MovementSyncSystem::sendMovementUpdates()
     // Send clients the updated movement state of any nearby entities that have
     // changed inputs, teleported, etc.
     auto clientView{world.registry.view<ClientSimData>()};
-    for (auto [clientEntity, client] : clientView.each()) {
+    for (auto [playerEntity, client] : clientView.each()) {
         // Collect the entities that have updated state that is relevant to
         // this client.
         collectEntitiesToSend(client);

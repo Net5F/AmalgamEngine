@@ -89,13 +89,13 @@ void SaveSystem::saveForShutdown()
 
 void SaveSystem::saveAll()
 {
-    LOG_INFO("Saving entities, client entities, items, and map...");
+    LOG_INFO("Saving entities, player entities, items, and map...");
 
     // Save all of our data to the in-memory database.
     SQLite::Transaction transaction{world.database->startTransaction()};
 
-    world.saveHelper.saveNonClientEntities();
-    world.saveHelper.saveClientEntities();
+    world.saveHelper.saveNonPlayerEntities();
+    world.saveHelper.savePlayerEntities();
     saveItems();
     saveGlobalStoredValues();
     // TODO: Track changed tiles and save to the database.

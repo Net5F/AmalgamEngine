@@ -65,7 +65,7 @@ private:
      */
     void applyChunkSnapshot(const ChunkWireSnapshot& chunkSnapshot);
 
-    /** Used to access the player entity and components. */
+    /** Used to access the local player and its components. */
     World& world;
     /** Used to send chunk update request messages and receive chunk updates. */
     Network& network;

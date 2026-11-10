@@ -7,7 +7,7 @@
 #include "Position.h"
 #include "Collision.h"
 #include "ClientGraphicState.h"
-#include "IsClientEntity.h"
+#include "IsPlayerEntity.h"
 #include "Transforms.h"
 #include "Log.h"
 
@@ -47,12 +47,12 @@ void ComponentUpdateSystem::processUpdates()
     //       here. Otherwise, it will be auto-applied over your predicted state.
     Uint32 desiredTick{simulation.getReplicationTick()};
 
-    // Immediately process any player entity messages, push the rest into a
+    // Immediately process any local player messages, push the rest into a
     // secondary queue.
     {
         ComponentUpdate componentUpdate{};
         while (componentUpdateQueue.pop(componentUpdate)) {
-            if (componentUpdate.entity == world.playerEntity) {
+            if (componentUpdate.entity == world.localPlayerEntity) {
                 processComponentUpdate(componentUpdate);
             }
             else {

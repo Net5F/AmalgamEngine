@@ -158,10 +158,10 @@ void ComponentSyncSystem::sendSelfUpdates()
             continue;
         }
 
-        // Note: Every message in the map should be for a client entity, since
+        // Note: Every message in the map should be for a player entity, since
         //       we check for it above.
         AM_ASSERT(registry.all_of<ClientSimData>(updatedEntity),
-                  "Somehow added a message for a non-client entity.");
+                  "Somehow added a message for a non-player entity.");
         const ClientSimData& client{registry.get<ClientSimData>(updatedEntity)};
 
         // Serialize the message.
@@ -183,7 +183,7 @@ void ComponentSyncSystem::addAttachedClientComponents()
     entt::registry& registry{world.registry};
 
     for (entt::entity entity : clientAttachedObserver) {
-        if (!registry.all_of<IsClientEntity, ClientSimData>(entity)) {
+        if (!registry.all_of<IsPlayerEntity, ClientSimData>(entity)) {
             continue;
         }
 
@@ -288,10 +288,10 @@ void ComponentSyncSystem::addConstructDestroyComponents(
         // For each entity that has a constructed component of this type, push
         // the component into the entity's message.
         for (entt::entity entity : constructObservers[observedTypeIndex]) {
-            // If the entity isn't a client entity, skip it.
+            // If the entity isn't a player entity, skip it.
             // If the entity no longer has this component (it was constructed/
             // destructed on the same tick), don't send it.
-            if (!registry.all_of<IsClientEntity, ComponentType>(entity)) {
+            if (!registry.all_of<IsPlayerEntity, ComponentType>(entity)) {
                 continue;
             }
 
@@ -310,8 +310,8 @@ void ComponentSyncSystem::addConstructDestroyComponents(
         // For each entity that has a destroyed component of this type, push
         // the component into the entity's message.
         for (entt::entity entity : destroyObservers[observedTypeIndex]) {
-            // If the entity isn't a client entity, skip it.
-            if (!registry.all_of<IsClientEntity>(entity)) {
+            // If the entity isn't a player entity, skip it.
+            if (!registry.all_of<IsPlayerEntity>(entity)) {
                 continue;
             }
 
@@ -341,10 +341,10 @@ void ComponentSyncSystem::addUpdateComponents(auto& updateObservers)
         // For each entity that has an updated component of this type, push
         // the component into the entity's message.
         for (entt::entity entity : updateObservers[observedTypeIndex]) {
-            // If the entity isn't a client entity, skip it.
+            // If the entity isn't a player entity, skip it.
             // If the entity no longer has this component (it was constructed/
             // destructed on the same tick), don't send it.
-            if (!registry.all_of<IsClientEntity, ComponentType>(entity)) {
+            if (!registry.all_of<IsPlayerEntity, ComponentType>(entity)) {
                 continue;
             }
 

@@ -39,15 +39,15 @@ void ChunkUpdateSystem::updateChunks()
 void ChunkUpdateSystem::requestNeededUpdates()
 {
     entt::registry& registry{world.registry};
-    Position& currentPosition{registry.get<Position>(world.playerEntity)};
+    Position& currentPosition{registry.get<Position>(world.localPlayerEntity)};
     PreviousPosition& previousPosition{
-        registry.get<PreviousPosition>(world.playerEntity)};
+        registry.get<PreviousPosition>(world.localPlayerEntity)};
 
     // If we're flagged as needing to load all adjacent chunks, request them.
-    if (registry.all_of<NeedsAdjacentChunks>(world.playerEntity)) {
+    if (registry.all_of<NeedsAdjacentChunks>(world.localPlayerEntity)) {
         requestAllInRangeChunks(ChunkPosition(currentPosition));
 
-        registry.erase<NeedsAdjacentChunks>(world.playerEntity);
+        registry.erase<NeedsAdjacentChunks>(world.localPlayerEntity);
     }
     // If we moved, check if we're in range of any new chunks.
     else if (previousPosition != currentPosition) {

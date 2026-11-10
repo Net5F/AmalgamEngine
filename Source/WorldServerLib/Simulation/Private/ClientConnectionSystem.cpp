@@ -2,13 +2,13 @@
 #include "SimulationContext.h"
 #include "Simulation.h"
 #include "ISimulationExtension.h"
-#include "ClientEntityLoadInfo.h"
+#include "PlayerEntityLoadInfo.h"
 #include "Network.h"
 #include "GraphicData.h"
 #include "Database.h"
 #include "EnginePersistedComponentTypes.h"
 #include "ProjectPersistedComponentTypes.h"
-#include "ClientPersistenceUsage.h"
+#include "PlayerPersistenceUsage.h"
 #include "AccountSaveQueue.h"
 #include "SharedConfig.h"
 #include "Config.h"
@@ -24,7 +24,7 @@
 #include "Name.h"
 #include "Inventory.h"
 #include "ClientSimData.h"
-#include "IsClientEntity.h"
+#include "IsPlayerEntity.h"
 #include "GraphicState.h"
 #include "CollisionBitSets.h"
 #include "VariantTools.h"
@@ -103,7 +103,7 @@ void ClientConnectionSystem::processConnectEvent(
         attachClientToEntity(clientConnected, entityIt->second);
     }
     else {
-        entt::entity newEntity{createClientEntity(clientConnected)};
+        entt::entity newEntity{createPlayerEntity(clientConnected)};
         if (newEntity != entt::null) {
             accountEntityMap[clientConnected.accountID] = newEntity;
         }
@@ -142,7 +142,7 @@ void ClientConnectionSystem::processDisconnectEvent(
     // immediately.
     if ((clientDisconnected.reason == DisconnectNotice::Logout)
         || (Config::LOGOUT_DELAY_TICKS == 0)) {
-        removeClientEntity(accountID);
+        removePlayerEntity(accountID);
         return;
     }
 
@@ -158,7 +158,7 @@ void ClientConnectionSystem::processDisconnectEvent(
              clientDisconnected.clientHandle.id(), entity);
 }
 
-entt::entity ClientConnectionSystem::createClientEntity(
+entt::entity ClientConnectionSystem::createPlayerEntity(
     const ClientConnected& clientConnected)
 {
     entt::registry& registry{world.registry};
@@ -191,7 +191,7 @@ entt::entity ClientConnectionSystem::createClientEntity(
     }
 
     // Create the entity and load its saved components.
-    entt::entity newEntity{world.loadHelper.loadClientEntity(
+    entt::entity newEntity{world.loadHelper.loadPlayerEntity(
         accountID,
         {accountData->engineComponents, accountData->projectComponents},
         {worldComponents.engineComponents, worldComponents.projectComponents})};
@@ -202,7 +202,7 @@ entt::entity ClientConnectionSystem::createClientEntity(
 
     // Add defaults for any engine components that weren't loaded.
     if (!addDefaultComponents(newEntity, clientConnected)) {
-        LOG_ERROR("Failed to add default components to client entity for "
+        LOG_ERROR("Failed to add default components to player entity for "
                   "accountID: %lld",
                   static_cast<long long>(accountID));
         registry.destroy(newEntity);
@@ -212,24 +212,24 @@ entt::entity ClientConnectionSystem::createClientEntity(
 
     // Let the project add its defaults.
     if (extension) {
-        extension->onClientEntityLoaded(
+        extension->onPlayerEntityLoaded(
             newEntity,
             {.accountID{accountID},
              .hadAccountData{hadAccountData},
              .hadWorldData{worldResult == GetSavedComponentsResult::Success}});
     }
 
-    // Mark the entity as a client entity.
+    // Mark the entity as a player entity.
     // Note: We do this last, so anything that reacts to these sees the
     //       entity's loaded state.
-    registry.emplace<IsClientEntity>(newEntity);
+    registry.emplace<IsPlayerEntity>(newEntity);
     registry.emplace<ClientSimData>(newEntity, clientConnected.clientHandle,
                                     accountID);
 
-    // Add the new client entity to the client handle map.
+    // Add the new player entity to the client handle map.
     world.clientHandleMap[clientConnected.clientHandle] = newEntity;
 
-    LOG_INFO("Constructed client entity with clientID: %u, accountID: %lld, "
+    LOG_INFO("Constructed player entity with clientID: %u, accountID: %lld, "
              "entityID: %u",
              clientConnected.clientHandle.id(),
              static_cast<long long>(clientConnected.accountID), newEntity);
@@ -272,7 +272,7 @@ void ClientConnectionSystem::attachClientToEntity(
 
     // Let the project react to the reconnect.
     if (extension) {
-        extension->onClientEntityReattached(entity, clientConnected.accountID);
+        extension->onPlayerEntityReattached(entity, clientConnected.accountID);
     }
 
     LOG_INFO(
@@ -289,13 +289,13 @@ void ClientConnectionSystem::processLogoutRequest(
     const WorldLogoutRequest& logoutRequest)
 {
     // Find the entity ID of the client that sent this request.
-    entt::entity clientEntity{
-        world.getClientEntity(logoutRequest.clientHandle)};
-    if (clientEntity == entt::null) {
+    entt::entity playerEntity{
+        world.getPlayerEntity(logoutRequest.clientHandle)};
+    if (playerEntity == entt::null) {
         // Client doesn't exist (may have disconnected), skip this request.
         return;
     }
-    Sint64 accountID{world.registry.get<ClientSimData>(clientEntity).accountID};
+    Sint64 accountID{world.registry.get<ClientSimData>(playerEntity).accountID};
 
     if (logoutRequest.type == WorldLogoutRequest::Start) {
         // If this client is already logging out, ignore the request.
@@ -304,7 +304,7 @@ void ClientConnectionSystem::processLogoutRequest(
         }
 
         // Entities can't log out while moving.
-        if (entityIsMoving(clientEntity)) {
+        if (entityIsMoving(playerEntity)) {
             network.clientEndpoint.send(
                 logoutRequest.clientHandle,
                 WorldLogoutUpdate{WorldLogoutUpdate::Canceled});
@@ -322,7 +322,7 @@ void ClientConnectionSystem::processLogoutRequest(
     }
     else if (logoutRequest.type == WorldLogoutRequest::Cancel) {
         if (logoutTickMap.contains(accountID)) {
-            cancelLogout(accountID, clientEntity);
+            cancelLogout(accountID, playerEntity);
         }
     }
 }
@@ -422,7 +422,7 @@ void ClientConnectionSystem::removeExpiredEntities()
     Uint32 currentTick{simulation.getCurrentTick()};
     for (auto it = removalTickMap.begin(); it != removalTickMap.end();) {
         if (currentTick >= it->second) {
-            removeClientEntity(it->first);
+            removePlayerEntity(it->first);
             it = removalTickMap.erase(it);
         }
         else {
@@ -431,7 +431,7 @@ void ClientConnectionSystem::removeExpiredEntities()
     }
 }
 
-void ClientConnectionSystem::removeClientEntity(Sint64 accountID)
+void ClientConnectionSystem::removePlayerEntity(Sint64 accountID)
 {
     auto entityIt{accountEntityMap.find(accountID)};
     if (entityIt == accountEntityMap.end()) {
@@ -446,7 +446,7 @@ void ClientConnectionSystem::removeClientEntity(Sint64 accountID)
     //       triggering ClientAOISystem to tell peers to delete it.
     entt::entity entity{entityIt->second};
     if (world.registry.valid(entity)) {
-        world.saveHelper.saveClientEntity(entity);
+        world.saveHelper.savePlayerEntity(entity);
         world.registry.destroy(entity);
         LOG_INFO("Removed entity with entityID: %u", entity);
     }
@@ -499,14 +499,14 @@ bool ClientConnectionSystem::addDefaultComponents(
         }
     }
 
-    // Set the default client entity collision (unless it's persisted).
+    // Set the default player entity collision (unless it's persisted).
     if constexpr (EnginePersistedComponentTypes::EntryFor<
-                      CollisionBitSets>::CLIENT_PERSISTENCE
-                  == ClientPersistence::None) {
+                      CollisionBitSets>::PLAYER_PERSISTENCE
+                  == PlayerPersistence::None) {
         registry.patch<CollisionBitSets>(
             entity, [&](CollisionBitSets& collisionBitSets) {
                 collisionBitSets.setCollisionLayers(
-                    CollisionLayerType::ClientEntity, entity, registry);
+                    CollisionLayerType::PlayerEntity, entity, registry);
                 collisionBitSets.setCollisionMask(
                     CollisionLayerType::TerrainWall
                     | CollisionLayerType::BlockCollision);
@@ -521,7 +521,7 @@ ClientConnectionSystem::GetSavedComponentsResult
         Sint64 accountID, SaveHelper::ClientWorldData& savedComponents)
 {
     // If no components use World persistence, there's nothing to get.
-    if constexpr (!USES_CLIENT_PERSISTENCE<ClientPersistence::World>) {
+    if constexpr (!USES_PLAYER_PERSISTENCE<PlayerPersistence::World>) {
         return GetSavedComponentsResult::NotFound;
     }
 
@@ -540,12 +540,12 @@ ClientConnectionSystem::GetSavedComponentsResult
         savedComponents.projectComponents.assign(projectComponents.begin(),
                                                  projectComponents.end());
     };
-    switch (world.database->getClientEntityData(accountID,
+    switch (world.database->getPlayerEntityData(accountID,
                                                 std::move(copyComponents))) {
-        case Database::GetClientEntityDataResult::Success: {
+        case Database::GetPlayerEntityDataResult::Success: {
             return GetSavedComponentsResult::Success;
         }
-        case Database::GetClientEntityDataResult::NotFound: {
+        case Database::GetPlayerEntityDataResult::NotFound: {
             return GetSavedComponentsResult::NotFound;
         }
         default: {

@@ -1,4 +1,4 @@
-#include "PlayerInputSystem.h"
+#include "LocalPlayerInputSystem.h"
 #include "SimulationContext.h"
 #include "Simulation.h"
 #include "World.h"
@@ -15,7 +15,8 @@ namespace AM
 {
 namespace Client
 {
-PlayerInputSystem::PlayerInputSystem(const SimulationContext& inSimContext)
+LocalPlayerInputSystem::LocalPlayerInputSystem(
+    const SimulationContext& inSimContext)
 : simulation{inSimContext.simulation}
 , world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
@@ -23,7 +24,7 @@ PlayerInputSystem::PlayerInputSystem(const SimulationContext& inSimContext)
 {
 }
 
-void PlayerInputSystem::processMomentaryInput(SDL_Event& event)
+void LocalPlayerInputSystem::processMomentaryInput(SDL_Event& event)
 {
     switch (event.type) {
         case SDL_EVENT_MOUSE_WHEEL: {
@@ -49,7 +50,7 @@ void PlayerInputSystem::processMomentaryInput(SDL_Event& event)
     }
 }
 
-void PlayerInputSystem::processHeldInputs()
+void LocalPlayerInputSystem::processHeldInputs()
 {
     // If a text input UI widget is capturing keyboard input, do nothing.
     if (AUI::Core::getIsTextInputFocused()) {
@@ -80,14 +81,15 @@ void PlayerInputSystem::processHeldInputs()
     }
 
     // Update our saved input state.
-    Input& playerInput{world.registry.get<Input>(world.playerEntity)};
+    Input& localPlayerInput{world.registry.get<Input>(world.localPlayerEntity)};
     bool inputHasChanged{false};
     for (std::size_t inputType{0}; inputType < Input::Type::Count;
          ++inputType) {
         // If the saved state doesn't match the latest.
-        if (newInputStates[inputType] != playerInput.inputStates[inputType]) {
+        if (newInputStates[inputType]
+            != localPlayerInput.inputStates[inputType]) {
             // Save the new state.
-            playerInput.inputStates[inputType] = newInputStates[inputType];
+            localPlayerInput.inputStates[inputType] = newInputStates[inputType];
             inputHasChanged = true;
         }
     }
@@ -95,29 +97,31 @@ void PlayerInputSystem::processHeldInputs()
     // If our input state has changed, ask the server to apply the new state.
     if (inputHasChanged && !Config::RUN_OFFLINE) {
         network.worldEndpoint.send<InputChangeRequest>(
-            {simulation.getCurrentTick(), playerInput});
+            {simulation.getCurrentTick(), localPlayerInput});
     }
 }
 
-void PlayerInputSystem::addCurrentInputsToHistory()
+void LocalPlayerInputSystem::addCurrentInputsToHistory()
 {
-    CircularBuffer<Input::StateArr, InputHistory::LENGTH>& playerInputHistory{
-        world.registry.get<InputHistory>(world.playerEntity).inputHistory};
-    Input::StateArr& playerInputs{
-        world.registry.get<Input>(world.playerEntity).inputStates};
+    CircularBuffer<Input::StateArr,
+                   InputHistory::LENGTH>& localPlayerInputHistory{
+        world.registry.get<InputHistory>(world.localPlayerEntity).inputHistory};
+    Input::StateArr& localPlayerInputs{
+        world.registry.get<Input>(world.localPlayerEntity).inputStates};
 
-    // Push the player's current inputs into the player's input history.
-    playerInputHistory.push(playerInputs);
+    // Push the local player's current inputs into the local player's input
+    // history.
+    localPlayerInputHistory.push(localPlayerInputs);
 }
 
-void PlayerInputSystem::handleZoomIn()
+void LocalPlayerInputSystem::handleZoomIn()
 {
     // If zooming is disabled, do nothing.
     if (!Config::ENABLE_ZOOM) {
         return;
     }
-    // If the player doesn't have a camera, do nothing.
-    else if (!(world.registry.all_of<Camera>(world.playerEntity))) {
+    // If the local player doesn't have a camera, do nothing.
+    else if (!(world.registry.all_of<Camera>(world.localPlayerEntity))) {
         return;
     }
 
@@ -125,19 +129,19 @@ void PlayerInputSystem::handleZoomIn()
     if (currentZoomLevelIndex < (Config::ZOOM_LEVELS.size()) - 1) {
         currentZoomLevelIndex++;
 
-        Camera& camera{world.registry.get<Camera>(world.playerEntity)};
+        Camera& camera{world.registry.get<Camera>(world.localPlayerEntity)};
         camera.zoomFactor = Config::ZOOM_LEVELS.at(currentZoomLevelIndex);
     }
 }
 
-void PlayerInputSystem::handleZoomOut()
+void LocalPlayerInputSystem::handleZoomOut()
 {
     // If zooming is disabled, do nothing.
     if (!Config::ENABLE_ZOOM) {
         return;
     }
-    // If the player doesn't have a camera, do nothing.
-    else if (!(world.registry.all_of<Camera>(world.playerEntity))) {
+    // If the local player doesn't have a camera, do nothing.
+    else if (!(world.registry.all_of<Camera>(world.localPlayerEntity))) {
         return;
     }
 
@@ -145,7 +149,7 @@ void PlayerInputSystem::handleZoomOut()
     if (currentZoomLevelIndex > 0) {
         currentZoomLevelIndex--;
 
-        Camera& camera{world.registry.get<Camera>(world.playerEntity)};
+        Camera& camera{world.registry.get<Camera>(world.localPlayerEntity)};
         camera.zoomFactor = Config::ZOOM_LEVELS.at(currentZoomLevelIndex);
     }
 }

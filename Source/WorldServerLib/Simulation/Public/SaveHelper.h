@@ -17,18 +17,18 @@ class Simulation;
  * Helper class for saving persisted entity state.
  *
  * Note: Saves go to the in-memory database, which is only backed up to the
- *       file database periodically (see SaveSystem). The exception is client
- *       entity ClientPersistence::Account components, which are queued to be
+ *       file database periodically (see SaveSystem). The exception is player
+ *       entity PlayerPersistence::Account components, which are queued to be
  *       saved to the account server (see AccountSaveQueue).
  *
- * If a client entity's World components fail to save, we keep the serialized
- * data and retry each time client entities are saved. Until it succeeds, the
+ * If a player entity's World components fail to save, we keep the serialized
+ * data and retry each time player entities are saved. Until it succeeds, the
  * data is used if the account logs back in (see getUnsavedWorldData()).
  */
 class SaveHelper
 {
 public:
-    /** A client entity's serialized ClientPersistence::World components. */
+    /** A player entity's serialized PlayerPersistence::World components. */
     struct ClientWorldData {
         /** Ordered tagged engine component records. */
         BinaryBuffer engineComponents{};
@@ -39,26 +39,26 @@ public:
     SaveHelper(World& inWorld, Simulation& inSimulation);
 
     /**
-     * Saves all non-client entities to the in-memory database.
+     * Saves all non-player entities to the in-memory database.
      */
-    void saveNonClientEntities();
+    void saveNonPlayerEntities();
 
     /**
-     * Saves all client entities (including lingering ones), then retries any
+     * Saves all player entities (including lingering ones), then retries any
      * World saves that previously failed.
      */
-    void saveClientEntities();
+    void savePlayerEntities();
 
     /**
-     * Saves the given client entity's persisted components, split by
-     * ClientPersistence. World components are saved to the in-memory
+     * Saves the given player entity's persisted components, split by
+     * PlayerPersistence. World components are saved to the in-memory
      * database, Account components are queued to be saved to the account
      * server.
      *
-     * Call this before removing a client entity from the world, so its latest
+     * Call this before removing a player entity from the world, so its latest
      * state is what gets loaded when it reconnects.
      */
-    void saveClientEntity(entt::entity entity);
+    void savePlayerEntity(entt::entity entity);
 
     /**
      * Returns the given account's World data, if its last save failed and
@@ -72,14 +72,14 @@ public:
 
 private:
     /**
-     * Queues the given client entity's ClientPersistence::Account components
+     * Queues the given player entity's PlayerPersistence::Account components
      * to be saved to the account server. Does nothing if no components use
      * Account.
      */
     void saveAccountComponents(entt::entity entity, Sint64 accountID);
 
     /**
-     * Saves the given client entity's ClientPersistence::World components to
+     * Saves the given player entity's PlayerPersistence::World components to
      * the in-memory database. Does nothing if no components use World.
      *
      * If the save fails, adds the data to failedWorldSaves.
@@ -99,7 +99,7 @@ private:
      *
      * @tparam EntryList A list of persisted component entries, e.g.
      *                   EnginePersistedComponentTypes::EntryTypes or
-     *                   EnginePersistedComponentTypes::ClientEntryTypes<...>.
+     *                   EnginePersistedComponentTypes::PlayerEntryTypes<...>.
      *
      * Note: PersistedComponentList requires its entries to be ordered by
      *       ascending ID, so the serialized records will also be ordered.

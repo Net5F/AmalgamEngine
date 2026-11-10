@@ -11,8 +11,8 @@ namespace WorldServer
 /**
  * Holds all client-related sim data.
  *
- * If you need to tell if an entity is a client entity or not, favor checking
- * for IsClientEntity over this. IsClientEntity gets replicated to the clients,
+ * If you need to tell if an entity is a player entity or not, favor checking
+ * for IsPlayerEntity over this. IsPlayerEntity gets replicated to the clients,
  * so it's more expected to see.
  */
 struct ClientSimData {
@@ -28,7 +28,7 @@ struct ClientSimData {
     /** The ID of the account that this client is logged in to. */
     Sint64 accountID{0};
 
-    /** Tracks the entities that are in range of this client's entity. */
+    /** Tracks the entities that are in range of this client's player entity. */
     std::vector<entt::entity> entitiesInAOI{};
 };
 

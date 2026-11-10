@@ -40,7 +40,7 @@ void Renderer::render()
     // Note: When we're disconnected from the server, the camera will be
     //       default (the UI will be covering it anyway).
     Camera lerpedCamera{};
-    if (world.playerEntity != entt::null) {
+    if (world.localPlayerEntity != entt::null) {
         lerpedCamera = getLerpedCamera(alpha);
     }
 
@@ -91,7 +91,7 @@ Camera Renderer::getLerpedCamera(double alpha)
     // Get the lerped camera position based on the alpha.
     auto [playerCamera, playerPosition, playerPreviousPos]
         = world.registry.get<Camera, Position, PreviousPosition>(
-            world.playerEntity);
+            world.localPlayerEntity);
     Position cameraLerp{MovementHelpers::interpolatePosition(
         playerCamera.prevTarget, playerCamera.target, alpha)};
 

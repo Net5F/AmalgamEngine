@@ -54,8 +54,8 @@ private:
     GraphicData& graphicData;
 
     /** We pop messages off componentUpdateQueue and push them into here, so
-        we can find and immediately process any messages for the player
-        entity. */
+        we can find and immediately process any messages for the local player.
+        */
     std::queue<ComponentUpdate> componentUpdateSecondaryQueue;
 
     EventQueue<ComponentUpdate> componentUpdateQueue;

@@ -18,8 +18,8 @@ class Network;
  * Processes tile updates.
  *
  * Note: If an updated tile collides with an entity, visual desyncs can occur.
- *       This client-side visual desync can occur for NPC entities as well as
- *       the player entity.
+ *       This client-side visual desync can occur for replicated entities as
+ *       well as the local player.
  *       This desync is easily fixed, the offending entity just needs to change
  *       inputs. The received authoritative state will correct the desync.
  *       In the future, we may wish to build a more sophisticated solution.

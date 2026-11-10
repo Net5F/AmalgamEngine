@@ -14,7 +14,7 @@ namespace AM
  * items are added, moved, and removed.
  *
  * Note: This is currently only used for player inventories. If we reuse it for
- *       NPC inventories, we can add an entity ID field.
+ *       non-player inventories, we can add an entity ID field.
  */
 struct InventoryInit {
     // The MessageType enum value that this message corresponds to.

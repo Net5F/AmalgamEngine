@@ -93,7 +93,7 @@ void Application::shutdown()
 
     // Disconnect all clients and stop accepting new ones.
     // Note: The sim won't tick again, so it won't process the disconnects.
-    //       Client entities (including lingering ones) are saved as they are.
+    //       Player entities (including lingering ones) are saved as they are.
     network.clientEndpoint.disconnectAll(DisconnectNotice::ServerShutdown);
     network.clientEndpoint.tick();
 

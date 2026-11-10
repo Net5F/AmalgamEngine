@@ -16,7 +16,7 @@ namespace AM
  *   2. Re-create it and add back its default components.
  *   3. Run the new init script on it.
  *
- * Init scripts aren't used by client entities.
+ * Init scripts aren't used by player entities.
  */
 struct EntityInitScript {
     /** Used as a "we should never hit this" cap on the length of the script

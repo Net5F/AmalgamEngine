@@ -4,7 +4,7 @@
 #include "Database.h"
 #include "EnginePersistedComponentTypes.h"
 #include "ProjectPersistedComponentTypes.h"
-#include "ClientPersistenceUsage.h"
+#include "PlayerPersistenceUsage.h"
 #include "AccountSaveQueue.h"
 #include "PersistedComponentDefs.h"
 #include "ClientSimData.h"
@@ -31,10 +31,10 @@ SaveHelper::SaveHelper(World& inWorld, Simulation& inSimulation)
 {
 }
 
-void SaveHelper::saveNonClientEntities()
+void SaveHelper::saveNonPlayerEntities()
 {
     // Note: If doing a full save ever starts taking too long, we can add
-    //       an observer that tracks changes to non-client entities and only
+    //       an observer that tracks changes to non-player entities and only
     //       save those.
 
     // Queue all of our entity save queries.
@@ -57,12 +57,12 @@ void SaveHelper::saveNonClientEntities()
     }
 }
 
-void SaveHelper::saveClientEntities()
+void SaveHelper::savePlayerEntities()
 {
     // Note: Lingering entities keep their ClientSimData, so this includes
     //       them.
     for (entt::entity entity : world.registry.view<ClientSimData>()) {
-        saveClientEntity(entity);
+        savePlayerEntity(entity);
     }
 
     // Retry any saves that failed (including those of entities that have
@@ -70,7 +70,7 @@ void SaveHelper::saveClientEntities()
     retryFailedWorldSaves();
 }
 
-void SaveHelper::saveClientEntity(entt::entity entity)
+void SaveHelper::savePlayerEntity(entt::entity entity)
 {
     // Update the entity's SaveTimestamp.
     SaveTimestamp& saveTimestamp{
@@ -96,18 +96,18 @@ const SaveHelper::ClientWorldData*
 
 void SaveHelper::saveAccountComponents(entt::entity entity, Sint64 accountID)
 {
-    constexpr ClientPersistence Persistence{ClientPersistence::Account};
+    constexpr PlayerPersistence Persistence{PlayerPersistence::Account};
 
     // If no components use this persistence, there's nothing to save.
-    if constexpr (USES_CLIENT_PERSISTENCE<Persistence>) {
+    if constexpr (USES_PLAYER_PERSISTENCE<Persistence>) {
         // Note: We serialize directly into the AccountData, since the queue
         //       takes ownership of it.
         AccountData accountData{};
         serializeComponents<
-            EnginePersistedComponentTypes::ClientEntryTypes<Persistence>>(
+            EnginePersistedComponentTypes::PlayerEntryTypes<Persistence>>(
             entity, accountData.engineComponents);
         serializeComponents<
-            ProjectPersistedComponentTypes::ClientEntryTypes<Persistence>>(
+            ProjectPersistedComponentTypes::PlayerEntryTypes<Persistence>>(
             entity, accountData.projectComponents);
 
         world.accountSaveQueue.queueSave(accountID, std::move(accountData));
@@ -116,15 +116,15 @@ void SaveHelper::saveAccountComponents(entt::entity entity, Sint64 accountID)
 
 void SaveHelper::saveWorldComponents(entt::entity entity, Sint64 accountID)
 {
-    constexpr ClientPersistence Persistence{ClientPersistence::World};
+    constexpr PlayerPersistence Persistence{PlayerPersistence::World};
 
     // If no components use this persistence, there's nothing to save.
-    if constexpr (USES_CLIENT_PERSISTENCE<Persistence>) {
+    if constexpr (USES_PLAYER_PERSISTENCE<Persistence>) {
         serializeComponents<
-            EnginePersistedComponentTypes::ClientEntryTypes<Persistence>>(
+            EnginePersistedComponentTypes::PlayerEntryTypes<Persistence>>(
             entity, workBuffer1);
         serializeComponents<
-            ProjectPersistedComponentTypes::ClientEntryTypes<Persistence>>(
+            ProjectPersistedComponentTypes::PlayerEntryTypes<Persistence>>(
             entity, workBuffer2);
 
         // If the data is too large, skip the save. Keep whatever data is
@@ -140,7 +140,7 @@ void SaveHelper::saveWorldComponents(entt::entity entity, Sint64 accountID)
 
         // If the save succeeds, it replaces any data that previously failed.
         // If it fails, keep the data so it isn't lost.
-        if (world.database->saveClientEntityData(accountID, workBuffer1,
+        if (world.database->savePlayerEntityData(accountID, workBuffer1,
                                                  workBuffer2)) {
             failedWorldSaves.erase(accountID);
         }
@@ -155,7 +155,7 @@ void SaveHelper::retryFailedWorldSaves()
 {
     for (auto it = failedWorldSaves.begin(); it != failedWorldSaves.end();) {
         const ClientWorldData& data{it->second};
-        if (world.database->saveClientEntityData(
+        if (world.database->savePlayerEntityData(
                 it->first, data.engineComponents, data.projectComponents)) {
             it = failedWorldSaves.erase(it);
         }
@@ -165,7 +165,7 @@ void SaveHelper::retryFailedWorldSaves()
     }
 
     if (!(failedWorldSaves.empty())) {
-        LOG_ERROR("%zu client entities' World data failed to save. It will "
+        LOG_ERROR("%zu player entities' World data failed to save. It will "
                   "be retried, but will be lost if the server exits first.",
                   failedWorldSaves.size());
     }

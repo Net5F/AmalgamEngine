@@ -13,19 +13,19 @@ class World;
 class Network;
 
 /**
- * Processes the player's input state.
+ * Processes the local player's input state.
  *
  * Performs updates locally, and sends state change requests to the server.
- * If a change is refused, PlayerMovementSystem will handle the resolution of
- * our local state.
+ * If a change is refused, LocalPlayerMovementSystem will handle the resolution
+ * of our local state.
  */
-class PlayerInputSystem
+class LocalPlayerInputSystem
 {
 public:
-    PlayerInputSystem(const SimulationContext& inSimContext);
+    LocalPlayerInputSystem(const SimulationContext& inSimContext);
 
     /**
-     * Updates the player's input state with the given event.
+     * Updates the local player's input state with the given event.
      */
     void processMomentaryInput(SDL_Event& event);
 
@@ -36,7 +36,7 @@ public:
     void processHeldInputs();
 
     /**
-     * Adds the current player input state to the world's playerInputHistory.
+     * Adds the local player's current input state to its InputHistory.
      */
     void addCurrentInputsToHistory();
 
