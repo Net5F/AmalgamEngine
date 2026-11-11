@@ -24,6 +24,7 @@
 #include "SharedConfig.h"
 #include "Config.h"
 #include "StringTools.h"
+#include "Timer.h"
 #include "Log.h"
 #include "AMAssert.h"
 #include "sol/sol.hpp"
@@ -39,6 +40,7 @@ World::World(const SimulationContext& inSimContext)
 , entityLocator{registry}
 , collisionLocator{}
 , tileMap{inSimContext.graphicData, collisionLocator}
+, navGrid{collisionLocator}
 , globalStoredValueMap{}
 , inventoryHelper{*this, inSimContext.network, inSimContext.itemData}
 , castHelper{inSimContext.simulation, inSimContext.itemData,
@@ -83,6 +85,12 @@ World::World(const SimulationContext& inSimContext)
 
     // Allocate the entity locator grid.
     entityLocator.setGridSize(tileMap.getTileExtent());
+
+    // Build the nav grid from the loaded map.
+    Timer navGridTimer{};
+    navGrid.setGridSize(tileMap.getTileExtent());
+    navGrid.build();
+    LOG_INFO("Built nav grid in %.0fms.", (navGridTimer.getTime() * 1000));
 
     // When an entity is destroyed, do any necessary cleanup.
     registry.on_destroy<entt::entity>().connect<&World::onEntityDestroyed>(

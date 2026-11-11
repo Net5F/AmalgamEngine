@@ -26,6 +26,7 @@ target_sources(SharedLib
         Private/IconData/IconDataBase.cpp
         Private/ItemData/Item.cpp
         Private/ItemData/ItemDataBase.cpp
+        Private/Pathfinding/NavGrid.cpp
         Private/TileMap/CellExtent.cpp
         Private/TileMap/CellPosition.cpp
         Private/TileMap/Chunk.cpp
@@ -102,6 +103,8 @@ target_sources(SharedLib
         Public/ItemData/ItemID.h
         Public/ItemData/ItemInitScript.h
         Public/ItemData/ItemProperty.h
+        Public/Pathfinding/NavGrid.h
+        Public/Pathfinding/NavNode.h
         Public/TileMap/CellExtent.h
         Public/TileMap/CellPosition.h
         Public/TileMap/Chunk.h
@@ -130,6 +133,7 @@ target_include_directories(SharedLib
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/GraphicData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/IconData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/ItemData
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/Pathfinding
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/TileMap
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
@@ -138,6 +142,7 @@ target_include_directories(SharedLib
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/GraphicData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/IconData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Pathfinding
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/TypeLists
 )

@@ -47,8 +47,8 @@ Simulation::Simulation(const SimulationContext& inSimContext)
 , componentChangeSystem{inSimContext}
 , tileUpdateSystem{inSimContext}
 , inputSystem{inSimContext}
-, movementSystem{inSimContext}
 , aiSystem{inSimContext}
+, movementSystem{inSimContext}
 , castSystem{inSimContext}
 , itemSystem{inSimContext}
 , inventorySystem{inSimContext}
@@ -135,11 +135,11 @@ void Simulation::tick()
     // Receive and process client input messages.
     inputSystem.processInputMessages();
 
-    // Move all of our entities.
-    movementSystem.processMovements();
-
     // Run all of our AI.
     aiSystem.processAITick();
+
+    // Move all of our entities.
+    movementSystem.processMovements();
 
     // Process any cast requests and ongoing casts.
     castSystem.processCasts();

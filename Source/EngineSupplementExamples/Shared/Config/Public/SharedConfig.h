@@ -15,7 +15,7 @@ class SharedConfig
 {
 public:
     //-------------------------------------------------------------------------
-    // Simulation
+    // General Simulation
     //-------------------------------------------------------------------------
     /** The rate at which the simulation will be processed. */
     static constexpr unsigned int SIM_TICKS_PER_SECOND{30};
@@ -25,6 +25,27 @@ public:
     /** The max number of entities that we will allow. */
     static constexpr std::size_t MAX_ENTITIES{1100};
 
+    /** The string ID of the default graphic set for entities. */
+    static constexpr const char* DEFAULT_ENTITY_GRAPHIC_SET{"ghost"};
+
+    //-------------------------------------------------------------------------
+    // Movement
+    //-------------------------------------------------------------------------
+    /** The force of gravity in world units per second. */
+    static constexpr float FORCE_OF_GRAVITY{20};
+
+    /** The maximum negative Z velocity that entities can reach. */
+    static constexpr float TERMINAL_VELOCITY{-300};
+
+    /** The amount of velocity that's added to the player if they try to move
+        while falling straight through the air, e.g. after jumping straight up.
+        This is a constant instead of being affected by runspeed, because it's
+        intended to be a consistent, small movement. */
+    static constexpr float VERTICAL_FALL_MOVE_VELOCITY{15};
+
+    //-------------------------------------------------------------------------
+    // Interactions 
+    //-------------------------------------------------------------------------
     /** The max number of interactions that an entity can support.
         Interactions are the options that show up when you right-click an
         entity or item. */
@@ -33,6 +54,9 @@ public:
     /** The max number of non-built-in interactions that an item can support. */
     static constexpr std::size_t MAX_ITEM_CUSTOM_INTERACTIONS{64};
 
+    //-------------------------------------------------------------------------
+    // Tile Map 
+    //-------------------------------------------------------------------------
     /** The maximum map size that we'll load, in tiles. */
     static constexpr std::size_t MAX_MAP_WIDTH_TILES{1'024};
 
@@ -66,6 +90,9 @@ public:
         partitioning grid (CollisionLocator). */
     static constexpr std::size_t COLLISION_LOCATOR_CELL_HEIGHT{2};
 
+    //-------------------------------------------------------------------------
+    // Entity Replication
+    //-------------------------------------------------------------------------
     /** The number of world units around an entity that are considered to be
         within the entity's "Area of Interest" cylinder.
         Used in the simulation to tell if data is relevant to a client. */
@@ -75,6 +102,9 @@ public:
         to be within the entity's "Area of Interest" cylinder. */
     static constexpr float AOI_HALF_HEIGHT{TILE_WORLD_HEIGHT * 3};
 
+    //-------------------------------------------------------------------------
+    // Chat
+    //-------------------------------------------------------------------------
     /** The number of world units around an entity that are considered to be
         within range of its local chat messages. */
     static constexpr float LOCAL_CHAT_RADIUS{AOI_RADIUS};
@@ -83,21 +113,9 @@ public:
         to be within range of its local chat messages. */
     static constexpr float LOCAL_CHAT_HALF_HEIGHT{AOI_HALF_HEIGHT};
 
-    /** The string ID of the default graphic set for entities. */
-    static constexpr const char* DEFAULT_ENTITY_GRAPHIC_SET{"ghost"};
-
-    /** The force of gravity in world units per second. */
-    static constexpr float FORCE_OF_GRAVITY{20};
-
-    /** The maximum negative Z velocity that entities can reach. */
-    static constexpr float TERMINAL_VELOCITY{-300};
-
-    /** The amount of velocity that's added to the player if they try to move
-        while falling straight through the air, e.g. after jumping straight up.
-        This is a constant instead of being affected by runspeed, because it's
-        intended to be a consistent, small movement. */
-    static constexpr float VERTICAL_FALL_MOVE_VELOCITY{15};
-
+    //-------------------------------------------------------------------------
+    // Casting 
+    //-------------------------------------------------------------------------
     /** The distance above a casting target circle that will be included in
         the area of effect. */
     static constexpr float CAST_TARGET_CYLINDER_HEIGHT{3};
@@ -116,6 +134,29 @@ public:
         you can choose to use it for project interactions as well. */
     static constexpr float CAST_ENTITY_INTERACTION_STANDARD_RANGE{
         TILE_WORLD_WIDTH};
+
+    //-------------------------------------------------------------------------
+    // Pathfinding
+    //-------------------------------------------------------------------------
+    // Note: Pathfinding measures heights in "thirds" of a tile
+    //       (TILE_WORLD_HEIGHT / 3), matching our terrain heights.
+
+    /** The width, in tiles, of the common pathfinding agent's footprint.
+        Pathfinding is optimized for agents that fit the common agent profile.
+        Other agents can still path, but some optimizations won't apply to
+        them. */
+    static constexpr unsigned int PATHFINDING_COMMON_FOOTPRINT_TILES{1};
+
+    /** The height, in thirds, of the common pathfinding agent. */
+    static constexpr unsigned int PATHFINDING_COMMON_HEIGHT_THIRDS{2};
+
+    /** The max height, in thirds, that the common pathfinding agent can climb
+        when moving from one tile to the next. */
+    static constexpr unsigned int PATHFINDING_COMMON_CLIMB_THIRDS{1};
+
+    /** The max height, in thirds, that the common pathfinding agent will drop
+        when moving from one tile to the next. */
+    static constexpr unsigned int PATHFINDING_COMMON_MAX_DROP_THIRDS{3};
 
     //-------------------------------------------------------------------------
     // Network

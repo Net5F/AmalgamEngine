@@ -7,8 +7,8 @@
 #include "ComponentChangeSystem.h"
 #include "TileUpdateSystem.h"
 #include "InputSystem.h"
-#include "MovementSystem.h"
 #include "AISystem.h"
+#include "MovementSystem.h"
 #include "CastSystem.h"
 #include "ItemSystem.h"
 #include "InventorySystem.h"
@@ -147,8 +147,8 @@ private:
     ComponentChangeSystem componentChangeSystem;
     TileUpdateSystem tileUpdateSystem;
     InputSystem inputSystem;
-    MovementSystem movementSystem;
     AISystem aiSystem;
+    MovementSystem movementSystem;
     CastSystem castSystem;
     ItemSystem itemSystem;
     InventorySystem inventorySystem;

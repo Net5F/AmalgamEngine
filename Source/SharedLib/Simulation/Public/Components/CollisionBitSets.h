@@ -42,10 +42,11 @@ private:
         CollisionLayerType::BlockCollision};
 
     /**
-     * By default, entities should collide with terrain and wall tile layers.
+     * By default, entities should collide with terrain and wall tile layers,
+     * and objects.
      */
     static constexpr CollisionLayerBitSet DEFAULT_COLLISION_MASK{
-        CollisionLayerType::TerrainWall};
+        CollisionLayerType::TerrainWall | CollisionLayerType::Object};
 
     /** The layers that this entity appears in. */
     CollisionLayerBitSet collisionLayers;
