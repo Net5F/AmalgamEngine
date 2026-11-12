@@ -12,6 +12,20 @@ namespace AM
  */
 struct CollisionBitSets {
 public:
+    /**
+     * By default, entities should block collision but not block LoS.
+     */
+    static constexpr CollisionLayerBitSet DEFAULT_COLLISION_LAYERS{
+        CollisionLayerType::BlockCollision};
+
+    /**
+     * By default, entities should collide with terrain and wall tile layers,
+     * objects, and collidable entities.
+     */
+    static constexpr CollisionLayerBitSet DEFAULT_COLLISION_MASK{
+        CollisionLayerType::TerrainWall | CollisionLayerType::Object
+        | CollisionLayerType::BlockCollision};
+
     /** Sets to defaults. */
     CollisionBitSets();
 
@@ -35,19 +49,6 @@ public:
     CollisionLayerBitSet getCollisionMask() const;
 
 private:
-    /**
-     * By default, entities should block collision but not block LoS.
-     */
-    static constexpr CollisionLayerBitSet DEFAULT_COLLISION_LAYERS{
-        CollisionLayerType::BlockCollision};
-
-    /**
-     * By default, entities should collide with terrain and wall tile layers,
-     * and objects.
-     */
-    static constexpr CollisionLayerBitSet DEFAULT_COLLISION_MASK{
-        CollisionLayerType::TerrainWall | CollisionLayerType::Object};
-
     /** The layers that this entity appears in. */
     CollisionLayerBitSet collisionLayers;
 

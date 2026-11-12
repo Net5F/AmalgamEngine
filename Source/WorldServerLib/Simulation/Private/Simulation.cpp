@@ -135,6 +135,10 @@ void Simulation::tick()
     // Receive and process client input messages.
     inputSystem.processInputMessages();
 
+    // Update the nav grid to reflect any collision changes, so AI sees the
+    // current state of the world.
+    world.navGrid.update();
+
     // Run all of our AI.
     aiSystem.processAITick();
 

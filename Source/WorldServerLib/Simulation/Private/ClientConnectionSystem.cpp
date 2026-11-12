@@ -508,8 +508,7 @@ bool ClientConnectionSystem::addDefaultComponents(
                 collisionBitSets.setCollisionLayers(
                     CollisionLayerType::PlayerEntity, entity, registry);
                 collisionBitSets.setCollisionMask(
-                    CollisionLayerType::TerrainWall
-                    | CollisionLayerType::BlockCollision);
+                    CollisionBitSets::DEFAULT_COLLISION_MASK);
             });
     }
 

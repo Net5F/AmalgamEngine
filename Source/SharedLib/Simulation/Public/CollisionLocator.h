@@ -86,6 +86,29 @@ public:
      */
     void removeEntity(entt::entity entity);
 
+    /**
+     * Sets which collision layers will have their changes tracked.
+     * Tracking is disabled by default.
+     *
+     * While tracking is enabled, any added, updated, or removed volume in a
+     * tracked layer will have its bounds added to the tracked changes. Tile
+     * updates are tracked as the tile's bounds, plus the old and new volumes
+     * of its layers.
+     */
+    void setTrackedChangeLayers(CollisionLayerBitSet inTrackedChangeLayers);
+
+    /**
+     * Returns the world-space bounds of every change that's been tracked since
+     * the last time clearTrackedChanges() was called.
+     * Note: Changes may overlap.
+     */
+    const std::vector<BoundingBox>& getTrackedChanges() const;
+
+    /**
+     * Clears the tracked changes.
+     */
+    void clearTrackedChanges();
+
     struct RaycastParams {
         const Vector3& start;
         const Vector3& end;
@@ -250,6 +273,13 @@ private:
     void addTileCollisionVolumes(const TilePosition& tilePosition,
                                  const Tile& tile);
 
+    /**
+     * If any of the given layers are tracked, adds the given volume to the
+     * tracked changes.
+     */
+    void trackChange(const BoundingBox& collisionVolume,
+                     CollisionLayerBitSet collisionLayers);
+
     template<typename RaycastStrategy>
     void raycastInternal(RaycastStrategy& strategy,
                          const RaycastParams& params);
@@ -358,6 +388,12 @@ private:
 
     /** The vector that we use to return raycast results. */
     std::vector<RaycastHitInfo> raycastReturnVector;
+
+    /** The collision layers that will have their changes tracked. */
+    CollisionLayerBitSet trackedChangeLayers;
+
+    /** The bounds of each change that's been tracked since the last clear. */
+    std::vector<BoundingBox> trackedChanges;
 };
 
 } // End namespace AM

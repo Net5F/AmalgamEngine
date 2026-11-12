@@ -27,6 +27,8 @@ CollisionLocator::CollisionLocator()
 , indexVector{}
 , collisionReturnVector{}
 , raycastReturnVector{}
+, trackedChangeLayers{0}
+, trackedChanges{}
 {
 }
 
@@ -60,6 +62,8 @@ bool CollisionLocator::updateEntity(entt::entity entity,
         return false;
     }
 
+    trackChange(collisionVolume, collisionLayers);
+
     // If we're already tracking this entity.
     auto entityIt{entityMap.find(entity)};
     Uint16 volumeIndex{};
@@ -67,6 +71,7 @@ bool CollisionLocator::updateEntity(entt::entity entity,
         CollisionInfo& volumeInfo{collisionVolumes[entityIt->second]};
         CellExtent oldCellExtent(volumeInfo.collisionVolume, CELL_WORLD_WIDTH,
                                  CELL_WORLD_HEIGHT);
+        trackChange(volumeInfo.collisionVolume, volumeInfo.collisionLayers);
 
         // Update their collision volume.
         volumeIndex = entityIt->second;
@@ -114,6 +119,12 @@ bool CollisionLocator::updateEntity(entt::entity entity,
 void CollisionLocator::updateTile(const TilePosition& tilePosition,
                                   const Tile& tile)
 {
+    // Track the tile's bounds, to cover any terrain changes.
+    // Note: Terrain is always in the TerrainWall layer.
+    trackChange(BoundingBox{TileExtent{tilePosition.x, tilePosition.y,
+                                       tilePosition.z, 1, 1, 1}},
+                CollisionLayerType::TerrainWall);
+
     // If we're already tracking this tile, clear its old collision data.
     auto tileIt{tileMap.find(tilePosition)};
     if (tileIt != tileMap.end()) {
@@ -122,6 +133,7 @@ void CollisionLocator::updateTile(const TilePosition& tilePosition,
         //       they aren't added to collisionVolumes or tileMap.
         for (Uint16 volumeIndex : tileIt->second) {
             CollisionInfo& volumeInfo{collisionVolumes[volumeIndex]};
+            trackChange(volumeInfo.collisionVolume, volumeInfo.collisionLayers);
 
             // Clear it from the grid.
             CellExtent cellExtent(volumeInfo.collisionVolume, CELL_WORLD_WIDTH,
@@ -146,6 +158,12 @@ void CollisionLocator::updateTile(const TilePosition& tilePosition,
     // Add the tile to tileMap, and add all of its collidable layers to
     // collisionGrid and terrainGrid.
     addTileCollisionVolumes(tilePosition, tile);
+
+    // Track the tile's new collision volumes.
+    for (Uint16 volumeIndex : tileMap[tilePosition]) {
+        const CollisionInfo& volumeInfo{collisionVolumes[volumeIndex]};
+        trackChange(volumeInfo.collisionVolume, volumeInfo.collisionLayers);
+    }
 }
 
 void CollisionLocator::removeEntity(entt::entity entity)
@@ -160,6 +178,7 @@ void CollisionLocator::removeEntity(entt::entity entity)
 
     // Remove the entity from the cells that it's located in.
     const CollisionInfo& volumeInfo{collisionVolumes[entityIt->second]};
+    trackChange(volumeInfo.collisionVolume, volumeInfo.collisionLayers);
     CellExtent cellExtent(volumeInfo.collisionVolume, CELL_WORLD_WIDTH,
                           CELL_WORLD_HEIGHT);
     clearCollisionVolumeFromCells(entityIt->second, cellExtent);
@@ -169,6 +188,22 @@ void CollisionLocator::removeEntity(entt::entity entity)
 
     // Remove the entity from the map.
     entityMap.erase(entityIt);
+}
+
+void CollisionLocator::setTrackedChangeLayers(
+    CollisionLayerBitSet inTrackedChangeLayers)
+{
+    trackedChangeLayers = inTrackedChangeLayers;
+}
+
+const std::vector<BoundingBox>& CollisionLocator::getTrackedChanges() const
+{
+    return trackedChanges;
+}
+
+void CollisionLocator::clearTrackedChanges()
+{
+    trackedChanges.clear();
 }
 
 bool CollisionLocator::raycastAny(const RaycastParams& params)
@@ -433,6 +468,14 @@ void CollisionLocator::addTileCollisionVolumes(const TilePosition& tilePosition,
 
         // Add this layer's index to the map.
         tileLayerCollisionIndices.push_back(volumeIndex);
+    }
+}
+
+void CollisionLocator::trackChange(const BoundingBox& collisionVolume,
+                                   CollisionLayerBitSet collisionLayers)
+{
+    if (collisionLayers & trackedChangeLayers) {
+        trackedChanges.push_back(collisionVolume);
     }
 }
 

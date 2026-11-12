@@ -16,14 +16,18 @@ NavGrid::NavGrid(CollisionLocator& inCollisionLocator)
 , chunkXLength{0}
 , chunkYLength{0}
 , nodes{}
-, columnOriginX{0}
-, columnOriginY{0}
+, volumeExtent{}
 , columnVolumes{}
 , tileVolumeIndices{}
 , nodeVolumeIndices{}
 , westIntervals{}
 , northIntervals{}
+, dirtyColumnExtents{}
+, clearanceQueue{}
 {
+    // Track changes to the volumes that affect navigation, so that update()
+    // knows which nodes to rebuild.
+    collisionLocator.setTrackedChangeLayers(COLLISION_MASK);
 }
 
 void NavGrid::setGridSize(const TileExtent& tileExtent)
@@ -48,23 +52,52 @@ void NavGrid::setGridSize(const TileExtent& tileExtent)
 void NavGrid::build()
 {
     ZoneScoped;
+    static constexpr int CHUNK_WIDTH{
+        static_cast<int>(SharedConfig::CHUNK_WIDTH)};
+
+    // We're rebuilding everything, so any tracked changes are irrelevant.
+    collisionLocator.clearTrackedChanges();
 
     std::ranges::fill(nodes, NavNode{});
 
     // Build each column of chunks.
     for (int chunkY{0}; chunkY < chunkYLength; ++chunkY) {
         for (int chunkX{0}; chunkX < chunkXLength; ++chunkX) {
-            buildChunkColumn(
-                gridTileExtent.x
-                    + (chunkX * static_cast<int>(SharedConfig::CHUNK_WIDTH)),
-                gridTileExtent.y
-                    + (chunkY * static_cast<int>(SharedConfig::CHUNK_WIDTH)));
+            buildNodes({gridTileExtent.x + (chunkX * CHUNK_WIDTH),
+                        gridTileExtent.y + (chunkY * CHUNK_WIDTH),
+                        gridTileExtent.z, CHUNK_WIDTH, CHUNK_WIDTH,
+                        gridTileExtent.zLength});
         }
     }
 
     // Clearance depends on neighboring nodes, so it's built after all nodes
     // are otherwise complete.
     buildClearance();
+}
+
+void NavGrid::update()
+{
+    const std::vector<BoundingBox>& changes{
+        collisionLocator.getTrackedChanges()};
+    if (changes.empty()) {
+        return;
+    }
+    ZoneScoped;
+
+    // Gather the nodes that may be affected by each change.
+    dirtyColumnExtents.clear();
+    for (const BoundingBox& change : changes) {
+        addDirtyNodes(change);
+    }
+    collisionLocator.clearTrackedChanges();
+
+    // Rebuild the dirty nodes, then update the clearance of any nodes that
+    // may depend on them.
+    for (const auto& [columnIndex, nodeExtent] : dirtyColumnExtents) {
+        buildNodes(nodeExtent);
+        queueClearanceUpdates(nodeExtent);
+    }
+    updateQueuedClearance();
 }
 
 NavNode NavGrid::getNode(const TilePosition& tilePosition) const
@@ -103,32 +136,35 @@ std::size_t NavGrid::linearizeIndex(int x, int y, int z) const
            + static_cast<std::size_t>(tileIndex);
 }
 
-std::size_t NavGrid::linearizeColumnIndex(int x, int y, int z) const
+std::size_t NavGrid::linearizeVolumeIndex(int x, int y, int z) const
 {
     static constexpr int CHUNK_WIDTH{
         static_cast<int>(SharedConfig::CHUNK_WIDTH)};
     static constexpr int CHUNK_TILE_COUNT{
         static_cast<int>(SharedConfig::CHUNK_TILE_COUNT)};
 
+    // Note: volumeExtent is always within a single chunk column, so we can
+    //       use the chunk dimensions.
     return static_cast<std::size_t>(((z - gridTileExtent.z) * CHUNK_TILE_COUNT)
-                                    + ((y - columnOriginY) * CHUNK_WIDTH)
-                                    + (x - columnOriginX));
+                                    + ((y - volumeExtent.y) * CHUNK_WIDTH)
+                                    + (x - volumeExtent.x));
 }
 
-void NavGrid::buildChunkColumn(int originX, int originY)
+void NavGrid::buildNodes(const TileExtent& nodeExtent)
 {
-    static constexpr int CHUNK_WIDTH{
-        static_cast<int>(SharedConfig::CHUNK_WIDTH)};
-    columnOriginX = originX;
-    columnOriginY = originY;
+    // Gather the volumes that may affect these nodes. A node's surface may
+    // come from the tile below it, and its headroom may extend up to 2 tiles
+    // above it.
+    TileExtent volumeQueryExtent{nodeExtent.x,       nodeExtent.y,
+                                 nodeExtent.z - 1,   nodeExtent.xLength,
+                                 nodeExtent.yLength, nodeExtent.zLength + 3};
+    volumeExtent = volumeQueryExtent.intersectWith(gridTileExtent);
 
-    // Copy this column's volumes out of the locator (the pointers that it
-    // returns aren't stable).
-    TileExtent columnExtent{originX,     originY,     gridTileExtent.z,
-                            CHUNK_WIDTH, CHUNK_WIDTH, gridTileExtent.zLength};
+    // Copy the volumes out of the locator (the pointers that it returns aren't
+    // stable).
     columnVolumes.clear();
     for (const CollisionLocator::CollisionInfo* collisionInfo :
-         collisionLocator.getCollisions(columnExtent, COLLISION_MASK)) {
+         collisionLocator.getCollisions(volumeExtent, COLLISION_MASK)) {
         columnVolumes.emplace_back(collisionInfo->collisionVolume,
                                    collisionInfo->collisionLayers);
     }
@@ -141,10 +177,10 @@ void NavGrid::buildChunkColumn(int originX, int originY)
         addVolumeToTiles(i);
     }
 
-    // Calculate each node in the column.
-    for (int z{gridTileExtent.z}; z <= gridTileExtent.zMax(); ++z) {
-        for (int y{originY}; y < (originY + CHUNK_WIDTH); ++y) {
-            for (int x{originX}; x < (originX + CHUNK_WIDTH); ++x) {
+    // Calculate each node.
+    for (int z{nodeExtent.z}; z <= nodeExtent.zMax(); ++z) {
+        for (int y{nodeExtent.y}; y <= nodeExtent.yMax(); ++y) {
+            for (int x{nodeExtent.x}; x <= nodeExtent.xMax(); ++x) {
                 nodes[linearizeIndex(x, y, z)] = calcNode(x, y, z);
             }
         }
@@ -157,31 +193,29 @@ void NavGrid::addVolumeToTiles(Uint32 volumeIndex)
         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
     static constexpr float TILE_HEIGHT{
         static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
-    static constexpr int CHUNK_WIDTH{
-        static_cast<int>(SharedConfig::CHUNK_WIDTH)};
 
-    // Calc the range of tiles that the volume may intersect, clipped to the
-    // current column.
+    // Calc the range of tiles that the volume may intersect, clipped to
+    // volumeExtent.
     // Note: This range includes tiles that the volume only touches. That's
     //       fine, since nodes check for actual intersections.
     const BoundingBox& bounds{columnVolumes[volumeIndex].bounds};
     int minX{std::max(static_cast<int>(std::floor(bounds.min.x / TILE_WIDTH)),
-                      columnOriginX)};
+                      volumeExtent.x)};
     int maxX{std::min(static_cast<int>(std::floor(bounds.max.x / TILE_WIDTH)),
-                      columnOriginX + CHUNK_WIDTH - 1)};
+                      volumeExtent.xMax())};
     int minY{std::max(static_cast<int>(std::floor(bounds.min.y / TILE_WIDTH)),
-                      columnOriginY)};
+                      volumeExtent.y)};
     int maxY{std::min(static_cast<int>(std::floor(bounds.max.y / TILE_WIDTH)),
-                      columnOriginY + CHUNK_WIDTH - 1)};
+                      volumeExtent.yMax())};
     int minZ{std::max(static_cast<int>(std::floor(bounds.min.z / TILE_HEIGHT)),
-                      gridTileExtent.z)};
+                      volumeExtent.z)};
     int maxZ{std::min(static_cast<int>(std::floor(bounds.max.z / TILE_HEIGHT)),
-                      gridTileExtent.zMax())};
+                      volumeExtent.zMax())};
 
     for (int z{minZ}; z <= maxZ; ++z) {
         for (int y{minY}; y <= maxY; ++y) {
             for (int x{minX}; x <= maxX; ++x) {
-                tileVolumeIndices[linearizeColumnIndex(x, y, z)].push_back(
+                tileVolumeIndices[linearizeVolumeIndex(x, y, z)].push_back(
                     volumeIndex);
             }
         }
@@ -296,11 +330,11 @@ void NavGrid::gatherNodeVolumes(int x, int y, int z)
     // A node's surface may come from the tile below it, and its headroom may
     // extend up to 2 tiles above it.
     nodeVolumeIndices.clear();
-    int minZ{std::max(z - 1, gridTileExtent.z)};
-    int maxZ{std::min(z + 2, gridTileExtent.zMax())};
+    int minZ{std::max(z - 1, volumeExtent.z)};
+    int maxZ{std::min(z + 2, volumeExtent.zMax())};
     for (int volumeZ{minZ}; volumeZ <= maxZ; ++volumeZ) {
         const std::vector<Uint32>& volumeIndices{
-            tileVolumeIndices[linearizeColumnIndex(x, y, volumeZ)]};
+            tileVolumeIndices[linearizeVolumeIndex(x, y, volumeZ)]};
         nodeVolumeIndices.insert(nodeVolumeIndices.end(), volumeIndices.begin(),
                                  volumeIndices.end());
     }
@@ -394,6 +428,117 @@ Uint8 NavGrid::calcClearance(int x, int y, int z, const NavNode& node) const
                   southEastNode.getClearance()})};
     return std::min(static_cast<Uint8>(neighborClearance + 1),
                     NavNode::MAX_CLEARANCE);
+}
+
+void NavGrid::addDirtyNodes(const BoundingBox& change)
+{
+    static constexpr float TILE_WIDTH{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
+    static constexpr float TILE_HEIGHT{
+        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
+    static constexpr int CHUNK_WIDTH{
+        static_cast<int>(SharedConfig::CHUNK_WIDTH)};
+
+    // Calc the range of tiles that the change may intersect.
+    // Note: Like addVolumeToTiles(), this includes tiles that are only
+    //       touched.
+    int minX{static_cast<int>(std::floor(change.min.x / TILE_WIDTH))};
+    int maxX{static_cast<int>(std::floor(change.max.x / TILE_WIDTH))};
+    int minY{static_cast<int>(std::floor(change.min.y / TILE_WIDTH))};
+    int maxY{static_cast<int>(std::floor(change.max.y / TILE_WIDTH))};
+    int minZ{static_cast<int>(std::floor(change.min.z / TILE_HEIGHT))};
+    int maxZ{static_cast<int>(std::floor(change.max.z / TILE_HEIGHT))};
+
+    // A volume in a given tile may affect the nodes from 2 tiles below it to
+    // 1 tile above it (see gatherNodeVolumes()).
+    minZ -= 2;
+    maxZ += 1;
+    TileExtent dirtyExtent{TileExtent{minX, minY, minZ, (maxX - minX + 1),
+                                      (maxY - minY + 1), (maxZ - minZ + 1)}
+                               .intersectWith(gridTileExtent)};
+    if (dirtyExtent.isEmpty()) {
+        return;
+    }
+
+    // Split the extent into chunk columns and add each part to its column's
+    // dirty extent.
+    int minChunkX{(dirtyExtent.x - gridTileExtent.x) / CHUNK_WIDTH};
+    int maxChunkX{(dirtyExtent.xMax() - gridTileExtent.x) / CHUNK_WIDTH};
+    int minChunkY{(dirtyExtent.y - gridTileExtent.y) / CHUNK_WIDTH};
+    int maxChunkY{(dirtyExtent.yMax() - gridTileExtent.y) / CHUNK_WIDTH};
+    for (int chunkY{minChunkY}; chunkY <= maxChunkY; ++chunkY) {
+        for (int chunkX{minChunkX}; chunkX <= maxChunkX; ++chunkX) {
+            TileExtent columnExtent{gridTileExtent.x + (chunkX * CHUNK_WIDTH),
+                                    gridTileExtent.y + (chunkY * CHUNK_WIDTH),
+                                    gridTileExtent.z,
+                                    CHUNK_WIDTH,
+                                    CHUNK_WIDTH,
+                                    gridTileExtent.zLength};
+            TileExtent columnDirtyExtent{
+                dirtyExtent.intersectWith(columnExtent)};
+
+            int columnIndex{(chunkY * chunkXLength) + chunkX};
+            auto [it, wasInserted]{
+                dirtyColumnExtents.try_emplace(columnIndex, columnDirtyExtent)};
+            if (!wasInserted) {
+                it->second = it->second.unionWith(columnDirtyExtent);
+            }
+        }
+    }
+}
+
+void NavGrid::queueClearanceUpdates(const TileExtent& nodeExtent)
+{
+    // A node's clearance depends on the square of nodes to its southeast, so
+    // any node within MAX_CLEARANCE of the extent (to the northwest) may need
+    // to be updated.
+    static constexpr int REACH{NavNode::MAX_CLEARANCE - 1};
+    TileExtent clearanceExtent{
+        TileExtent{nodeExtent.x - REACH, nodeExtent.y - REACH, nodeExtent.z,
+                   nodeExtent.xLength + REACH, nodeExtent.yLength + REACH,
+                   nodeExtent.zLength}
+            .intersectWith(gridTileExtent)};
+
+    for (int z{clearanceExtent.z}; z <= clearanceExtent.zMax(); ++z) {
+        for (int y{clearanceExtent.y}; y <= clearanceExtent.yMax(); ++y) {
+            for (int x{clearanceExtent.x}; x <= clearanceExtent.xMax(); ++x) {
+                clearanceQueue.emplace_back(x, y, z);
+            }
+        }
+    }
+}
+
+void NavGrid::updateQueuedClearance()
+{
+    // Sort the queue so that each node's east, south, and southeast neighbors
+    // are updated before it, and remove duplicates.
+    std::ranges::sort(clearanceQueue,
+                      [](const TilePosition& a, const TilePosition& b) {
+                          if (a.z != b.z) {
+                              return (a.z < b.z);
+                          }
+                          else if (a.y != b.y) {
+                              return (a.y > b.y);
+                          }
+                          else {
+                              return (a.x > b.x);
+                          }
+                      });
+    auto duplicates{std::ranges::unique(clearanceQueue)};
+    clearanceQueue.erase(duplicates.begin(), duplicates.end());
+
+    // Note: Nodes that aren't in the queue can't have been affected by the
+    //       changes, so their clearance is still valid.
+    for (const TilePosition& position : clearanceQueue) {
+        NavNode& node{
+            nodes[linearizeIndex(position.x, position.y, position.z)]};
+        if (node.isStandable()) {
+            node.setClearance(
+                calcClearance(position.x, position.y, position.z, node));
+        }
+    }
+
+    clearanceQueue.clear();
 }
 
 } // End namespace AM

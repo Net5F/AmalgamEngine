@@ -10,6 +10,7 @@
 #include "SharedConfig.h"
 #include "entt/entity/entity.hpp"
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 using namespace AM;
@@ -53,6 +54,8 @@ struct TestMap {
 
     std::unordered_map<TilePosition, Terrain::Value> terrain{};
     std::unordered_map<TilePosition, std::vector<Wall::Type>> walls{};
+    /** Tiles that have changed since they were last added to the locator. */
+    std::unordered_set<TilePosition> dirtyTiles{};
     Uint32 nextEntityID{0};
 
     CollisionLocator collisionLocator{};
@@ -64,6 +67,13 @@ struct TestMap {
                     Terrain::Height startHeight = Terrain::Height::Flat)
     {
         terrain[tilePosition] = Terrain::toValue(height, startHeight);
+        dirtyTiles.insert(tilePosition);
+    }
+
+    void remTerrain(const TilePosition& tilePosition)
+    {
+        terrain.erase(tilePosition);
+        dirtyTiles.insert(tilePosition);
     }
 
     /** Fills the given Z level with terrain of the given height. */
@@ -79,47 +89,103 @@ struct TestMap {
     void addWall(const TilePosition& tilePosition, Wall::Type wallType)
     {
         walls[tilePosition].push_back(wallType);
+        dirtyTiles.insert(tilePosition);
+    }
+
+    void remWalls(const TilePosition& tilePosition)
+    {
+        walls.erase(tilePosition);
+        dirtyTiles.insert(tilePosition);
     }
 
     /** Adds an entity with the given world-space collision. */
-    void addEntity(const BoundingBox& worldBounds,
-                   CollisionLayerBitSet collisionLayers
-                   = CollisionLayerType::BlockCollision)
+    entt::entity addEntity(const BoundingBox& worldBounds,
+                           CollisionLayerBitSet collisionLayers
+                           = CollisionLayerType::BlockCollision)
     {
-        collisionLocator.updateEntity(static_cast<entt::entity>(nextEntityID++),
-                                      worldBounds, collisionLayers);
+        entt::entity entity{static_cast<entt::entity>(nextEntityID++)};
+        collisionLocator.updateEntity(entity, worldBounds, collisionLayers);
+        return entity;
     }
 
     /** Adds an entity within the given tile, offset by the given bounds. */
-    void addTileEntity(const TilePosition& tilePosition,
-                       const BoundingBox& tileBounds,
-                       CollisionLayerBitSet collisionLayers
-                       = CollisionLayerType::BlockCollision)
+    entt::entity addTileEntity(const TilePosition& tilePosition,
+                               const BoundingBox& tileBounds,
+                               CollisionLayerBitSet collisionLayers
+                               = CollisionLayerType::BlockCollision)
     {
-        addEntity(tileBounds.translateBy(tilePosition.getOriginPoint()),
-                  collisionLayers);
+        return addEntity(tileBounds.translateBy(tilePosition.getOriginPoint()),
+                         collisionLayers);
+    }
+
+    /** Moves an entity to the given tile, offset by the given bounds. */
+    void moveTileEntity(entt::entity entity, const TilePosition& tilePosition,
+                        const BoundingBox& tileBounds,
+                        CollisionLayerBitSet collisionLayers
+                        = CollisionLayerType::BlockCollision)
+    {
+        collisionLocator.updateEntity(
+            entity, tileBounds.translateBy(tilePosition.getOriginPoint()),
+            collisionLayers);
     }
 
     /** Adds the tiles to the collision locator and builds the nav grid. */
     void build()
     {
-        std::unordered_map<TilePosition, Tile> tiles{};
-        for (const auto& [tilePosition, terrainValue] : terrain) {
-            tiles[tilePosition].addLayer({}, TileLayer::Type::Terrain,
-                                         terrainSet, terrainValue);
-        }
-        for (const auto& [tilePosition, wallTypes] : walls) {
-            for (Wall::Type wallType : wallTypes) {
-                tiles[tilePosition].addLayer({}, TileLayer::Type::Wall, wallSet,
-                                             wallType);
-            }
-        }
-        for (const auto& [tilePosition, tile] : tiles) {
-            collisionLocator.updateTile(tilePosition, tile);
-        }
-
+        syncTiles();
         navGrid.setGridSize(extent);
         navGrid.build();
+    }
+
+    /** Adds any tile changes to the collision locator and updates the nav
+        grid. */
+    void update()
+    {
+        syncTiles();
+        navGrid.update();
+    }
+
+    /** Adds any changed tiles to the collision locator. */
+    void syncTiles()
+    {
+        for (const TilePosition& tilePosition : dirtyTiles) {
+            Tile tile{};
+            if (auto terrainIt{terrain.find(tilePosition)};
+                terrainIt != terrain.end()) {
+                tile.addLayer({}, TileLayer::Type::Terrain, terrainSet,
+                              terrainIt->second);
+            }
+            if (auto wallsIt{walls.find(tilePosition)};
+                wallsIt != walls.end()) {
+                for (Wall::Type wallType : wallsIt->second) {
+                    tile.addLayer({}, TileLayer::Type::Wall, wallSet, wallType);
+                }
+            }
+            collisionLocator.updateTile(tilePosition, tile);
+        }
+        dirtyTiles.clear();
+    }
+
+    /** Requires that the nav grid matches a freshly built one. */
+    void requireMatchesFullBuild()
+    {
+        NavGrid fullGrid{collisionLocator};
+        fullGrid.setGridSize(extent);
+        fullGrid.build();
+
+        for (int z{extent.z}; z <= extent.zMax(); ++z) {
+            for (int y{extent.y}; y <= extent.yMax(); ++y) {
+                for (int x{extent.x}; x <= extent.xMax(); ++x) {
+                    NavNode updatedNode{navGrid.getNode({x, y, z})};
+                    NavNode builtNode{fullGrid.getNode({x, y, z})};
+                    if (updatedNode != builtNode) {
+                        INFO("Mismatch at (" << x << ", " << y << ", " << z
+                                             << ")");
+                        REQUIRE(updatedNode.value == builtNode.value);
+                    }
+                }
+            }
+        }
     }
 
     NavNode node(int x, int y, int z) { return navGrid.getNode({x, y, z}); }
@@ -309,4 +375,84 @@ TEST_CASE_METHOD(TestMap, "NavGrid obstacles")
     // Neighbors are unaffected.
     REQUIRE(node(1, 0, 0).isStandable());
     REQUIRE(!(node(1, 0, 0).isWestBlocked()));
+}
+
+TEST_CASE_METHOD(TestMap, "NavGrid updates tile changes")
+{
+    fillTerrain(0, Terrain::Height::Flat);
+    build();
+
+    // Add a wall on a chunk boundary, so the clearance updates spill into
+    // the neighboring chunk columns.
+    addWall({0, 0, 0}, Wall::Type::West);
+    update();
+    REQUIRE(node(0, 0, 0).isWestBlocked());
+    REQUIRE(node(-1, 0, 0).getClearance() == 1);
+    REQUIRE(node(-1, -1, 0).getClearance() == 1);
+    requireMatchesFullBuild();
+
+    // Raise some terrain and add a ceiling over it.
+    addTerrain({5, 5, 0}, Terrain::Height::OneThird);
+    addTerrain({5, 5, 1}, Terrain::Height::Full);
+    update();
+    REQUIRE(node(5, 5, 0).getSurfaceHeight() == 1);
+    REQUIRE(node(5, 5, 0).getHeadroom() == 2);
+    requireMatchesFullBuild();
+
+    // Remove everything that was added.
+    remWalls({0, 0, 0});
+    addTerrain({5, 5, 0}, Terrain::Height::Flat);
+    remTerrain({5, 5, 1});
+    update();
+    REQUIRE(!(node(0, 0, 0).isWestBlocked()));
+    REQUIRE(node(-1, -1, 0).getClearance() == NavNode::MAX_CLEARANCE);
+    REQUIRE(node(5, 5, 0).getSurfaceHeight() == 0);
+    requireMatchesFullBuild();
+
+    // Remove the ground entirely.
+    remTerrain({-3, -3, 0});
+    update();
+    REQUIRE(!(node(-3, -3, 0).isStandable()));
+    requireMatchesFullBuild();
+}
+
+TEST_CASE_METHOD(TestMap, "NavGrid updates entity changes")
+{
+    fillTerrain(0, Terrain::Height::Flat);
+    build();
+
+    // Add an obstacle that spans multiple chunk columns.
+    entt::entity bigEntity{
+        addEntity({{-2 * TILE_WIDTH, -2 * TILE_WIDTH, 0},
+                   {2 * TILE_WIDTH, 2 * TILE_WIDTH, TILE_HEIGHT}})};
+    update();
+    REQUIRE(!(node(-1, -1, 0).isStandable()));
+    REQUIRE(!(node(1, 1, 0).isStandable()));
+    REQUIRE(node(2, 2, 0).isStandable());
+    requireMatchesFullBuild();
+
+    // Move an obstacle from one tile to another.
+    entt::entity smallEntity{
+        addTileEntity({8, 8, 0}, {{10, 10, 0}, {20, 20, 30}})};
+    update();
+    REQUIRE(!(node(8, 8, 0).isStandable()));
+    moveTileEntity(smallEntity, {-8, 8, 0}, {{10, 10, 0}, {20, 20, 30}});
+    update();
+    REQUIRE(node(8, 8, 0).isStandable());
+    REQUIRE(!(node(-8, 8, 0).isStandable()));
+    requireMatchesFullBuild();
+
+    // Remove the big obstacle.
+    collisionLocator.removeEntity(bigEntity);
+    update();
+    REQUIRE(node(-1, -1, 0).isStandable());
+    REQUIRE(node(1, 1, 0).isStandable());
+    requireMatchesFullBuild();
+
+    // Moving entities aren't tracked.
+    addTileEntity({4, 4, 0}, {{10, 10, 0}, {20, 20, 30}},
+                  CollisionLayerType::NonPlayerEntity);
+    REQUIRE(collisionLocator.getTrackedChanges().empty());
+    update();
+    REQUIRE(node(4, 4, 0).isStandable());
 }
