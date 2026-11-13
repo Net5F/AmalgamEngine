@@ -4,6 +4,9 @@
 #include "AMAssert.h"
 #include "tracy/Tracy.hpp"
 #include <algorithm>
+#include <array>
+#include <ranges>
+#include <utility>
 #include <cstdlib>
 #include <cstdint>
 
@@ -171,6 +174,12 @@ std::size_t NavSearch::getLastRunExpansionCount() const
 
 void NavSearch::expandNode(Uint32 recordIndex)
 {
+    // Small agents are the most common, so they get a faster path.
+    if (agent.footprintTiles == 1) {
+        expandSmallAgentNode(recordIndex);
+        return;
+    }
+
     // Note: We copy these, since adding records may invalidate references.
     const int x{records[recordIndex].x};
     const int y{records[recordIndex].y};
@@ -185,6 +194,112 @@ void NavSearch::expandNode(Uint32 recordIndex)
     expandDiagonal(recordIndex, x, y, height, 1, 1);
     expandDiagonal(recordIndex, x, y, height, -1, 1);
     expandDiagonal(recordIndex, x, y, height, -1, -1);
+}
+
+void NavSearch::expandSmallAgentNode(Uint32 recordIndex)
+{
+    static constexpr float DIAGONAL_COST{1.41421356f};
+
+    // Note: We copy these, since adding records may invalidate references.
+    const int x{records[recordIndex].x};
+    const int y{records[recordIndex].y};
+    const int height{records[recordIndex].height};
+    const float gCost{records[recordIndex].gCost};
+
+    // Look up the 3x3 block of columns around the node, once.
+    // Note: Indexed by ((yOffset + 1) * 3) + (xOffset + 1).
+    std::array<std::span<const NavSurface>, 9> columns{};
+    for (int yOffset{-1}; yOffset <= 1; ++yOffset) {
+        for (int xOffset{-1}; xOffset <= 1; ++xOffset) {
+            columns[((yOffset + 1) * 3) + (xOffset + 1)]
+                = navGrid.getSurfaces(x + xOffset, y + yOffset);
+        }
+    }
+
+    // Note: The agent fits here, or the node wouldn't have been reached.
+    const NavSurface* fromSurface{findStandableSurface(columns[4], height)};
+    AM_ASSERT(fromSurface != nullptr, "Expanded node has no surface.");
+
+    expandSmallAgentCardinal(recordIndex, x, y, *fromSurface, columns[1], 0,
+                             -1);
+    expandSmallAgentCardinal(recordIndex, x, y, *fromSurface, columns[5], 1, 0);
+    expandSmallAgentCardinal(recordIndex, x, y, *fromSurface, columns[7], 0, 1);
+    expandSmallAgentCardinal(recordIndex, x, y, *fromSurface, columns[3], -1,
+                             0);
+
+    // Diagonal steps must be flat, and the agent must fit at all 3 anchors
+    // (to avoid cutting corners), without crossing any blocked edges.
+    static constexpr std::array<std::pair<int, int>, 4> DIAGONAL_OFFSETS{
+        {{1, -1}, {1, 1}, {-1, 1}, {-1, -1}}};
+    for (auto [xOffset, yOffset] : DIAGONAL_OFFSETS) {
+        const int toX{x + xOffset};
+        const int toY{y + yOffset};
+        const NavSurface* xSideSurface{
+            findStandableSurface(columns[4 + xOffset], height)};
+        const NavSurface* ySideSurface{
+            findStandableSurface(columns[4 + (yOffset * 3)], height)};
+        const NavSurface* toSurface{
+            findStandableSurface(columns[4 + (yOffset * 3) + xOffset], height)};
+        if (!xSideSurface || !ySideSurface || !toSurface
+            || isEdgeBlocked(x, y, *fromSurface, toX, y, *xSideSurface)
+            || isEdgeBlocked(x, y, *fromSurface, x, toY, *ySideSurface)
+            || isEdgeBlocked(toX, y, *xSideSurface, toX, toY, *toSurface)
+            || isEdgeBlocked(x, toY, *ySideSurface, toX, toY, *toSurface)) {
+            continue;
+        }
+
+        relaxNode(toX, toY, height, gCost + DIAGONAL_COST, recordIndex, false);
+    }
+}
+
+void NavSearch::expandSmallAgentCardinal(Uint32 recordIndex, int fromX,
+                                         int fromY,
+                                         const NavSurface& fromSurface,
+                                         std::span<const NavSurface> toSurfaces,
+                                         int xOffset, int yOffset)
+{
+    static constexpr int MAX_HEADROOM{
+        static_cast<int>(NavSurface::MAX_HEADROOM)};
+
+    const int toX{fromX + xOffset};
+    const int toY{fromY + yOffset};
+    const int fromHeight{fromSurface.height};
+    const int minHeight{fromHeight - agent.maxDropThirds};
+    const int maxHeight{fromHeight + agent.climbThirds};
+    const float fromGCost{records[recordIndex].gCost};
+
+    // Try each surface that the agent could rest on after the step, from
+    // highest to lowest (matching expandCardinal()).
+    for (const NavSurface& toSurface : toSurfaces | std::views::reverse) {
+        const int toHeight{toSurface.height};
+        if (toHeight > maxHeight) {
+            continue;
+        }
+        else if (toHeight < minHeight) {
+            break;
+        }
+
+        // While stepping, the agent is at the higher of the two heights, so
+        // both surfaces need room for it at that height.
+        // Note: Headroom is capped, so if we need more than the cap, accept
+        //       the cap.
+        const int topHeight{std::max(fromHeight, toHeight)};
+        const int toRequiredHeadroom{std::min(
+            (topHeight - toHeight) + agent.heightThirds, MAX_HEADROOM)};
+        const int fromRequiredHeadroom{std::min(
+            (topHeight - fromHeight) + agent.heightThirds, MAX_HEADROOM)};
+        if ((toSurface.headroom < toRequiredHeadroom)
+            || (fromSurface.headroom < fromRequiredHeadroom)
+            || isEdgeBlocked(fromX, fromY, fromSurface, toX, toY, toSurface)) {
+            continue;
+        }
+
+        bool isJump{toHeight > fromHeight};
+        float stepCost{1.f
+                       + (isJump ? SharedConfig::PATHFINDING_JUMP_COST : 0.f)};
+        relaxNode(toX, toY, toHeight, fromGCost + stepCost, recordIndex,
+                  isJump);
+    }
 }
 
 void NavSearch::expandCardinal(Uint32 recordIndex, int fromX, int fromY,
@@ -295,7 +410,7 @@ void NavSearch::relaxNode(int x, int y, int height, float gCost,
 
     // Add an entry to the open list. If the node already had one, it will be
     // skipped when it's popped (see run()).
-    float hCost{calcHeuristic(x, y, height)};
+    float hCost{calcHeuristic(x, y)};
     openList.emplace_back(gCost + hCost, hCost, recordIndexRef);
     std::ranges::push_heap(openList, IsLowerPriority{});
 }
@@ -351,6 +466,27 @@ const NavSurface* NavSearch::findSurfaceBelow(int x, int y, int height) const
     }
 
     return surfaceBelow;
+}
+
+const NavSurface*
+    NavSearch::findStandableSurface(std::span<const NavSurface> surfaces,
+                                    int height) const
+{
+    // Note: Surfaces are sorted by increasing height.
+    for (const NavSurface& surface : surfaces) {
+        if (surface.height == height) {
+            return (surface.headroom
+                    >= std::min(static_cast<int>(agent.heightThirds),
+                                static_cast<int>(NavSurface::MAX_HEADROOM)))
+                       ? &surface
+                       : nullptr;
+        }
+        else if (surface.height > height) {
+            break;
+        }
+    }
+
+    return nullptr;
 }
 
 bool NavSearch::isEdgeBlocked(int fromX, int fromY,
@@ -412,41 +548,21 @@ void NavSearch::findCandidateHeights(int anchorX, int anchorY, int minHeight,
     candidateHeights.erase(duplicates.begin(), duplicates.end());
 }
 
-float NavSearch::calcHeuristic(int x, int y, int height) const
+float NavSearch::calcHeuristic(int x, int y) const
 {
     static constexpr float DIAGONAL_EXTRA_COST{1.41421356f - 1.f};
 
     // Octile distance.
+    // Note: We tried adding a term for the minimum number of steps needed to
+    //       climb or drop to the goal's height, but it didn't reduce the
+    //       number of expanded nodes on real maps or multi-floor buildings.
+    //       It only helps when the goal is almost directly above or below,
+    //       and those nodes are expanded anyway.
     int xDistance{std::abs(goalPosition.x - x)};
     int yDistance{std::abs(goalPosition.y - y)};
-    float octileDistance{
-        static_cast<float>(std::max(xDistance, yDistance))
-        + (DIAGONAL_EXTRA_COST
-           * static_cast<float>(std::min(xDistance, yDistance)))};
-
-    // Each step can only climb or drop so far, so the height difference
-    // requires a minimum number of steps. Only cardinal steps change height,
-    // and climbing steps cost extra.
-    // Note: Each step changes this estimate by at most its own cost, so the
-    //       heuristic stays consistent.
-    // TODO: Test whether this height term is beneficial on real maps (e.g.
-    //       compare expanded node counts with and without it, on
-    //       multi-floor buildings). In a small single-tower test it made no
-    //       difference. If it isn't beneficial, remove it.
-    float heightSteps{0};
-    int heightDifference{goalHeight - height};
-    if ((heightDifference > 0) && (agent.climbThirds > 0)) {
-        int stepCount{(heightDifference + agent.climbThirds - 1)
-                      / agent.climbThirds};
-        heightSteps = stepCount * (1.f + SharedConfig::PATHFINDING_JUMP_COST);
-    }
-    else if ((heightDifference < 0) && (agent.maxDropThirds > 0)) {
-        int stepCount{(-heightDifference + agent.maxDropThirds - 1)
-                      / agent.maxDropThirds};
-        heightSteps = static_cast<float>(stepCount);
-    }
-
-    return std::max(octileDistance, heightSteps);
+    return static_cast<float>(std::max(xDistance, yDistance))
+           + (DIAGONAL_EXTRA_COST
+              * static_cast<float>(std::min(xDistance, yDistance)));
 }
 
 Uint64 NavSearch::calcKey(int x, int y, int height) const

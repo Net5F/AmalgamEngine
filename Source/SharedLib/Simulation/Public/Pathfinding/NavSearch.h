@@ -7,6 +7,7 @@
 #include "SharedConfig.h"
 #include <SDL3/SDL_stdinc.h>
 #include <vector>
+#include <span>
 #include <optional>
 #include <cstddef>
 
@@ -188,6 +189,27 @@ private:
     void expandNode(Uint32 recordIndex);
 
     /**
+     * Expands the neighbors of the given record's node, for agents with a
+     * 1-tile footprint.
+     *
+     * This follows the same step rules as the general path (expandCardinal()
+     * and expandDiagonal()), but only looks up each neighboring column once.
+     */
+    void expandSmallAgentNode(Uint32 recordIndex);
+
+    /**
+     * Adds any valid cardinal steps from the given node in the given
+     * direction, for agents with a 1-tile footprint.
+     *
+     * @param fromSurface The surface that the agent is resting on.
+     * @param toSurfaces The surfaces in the destination column.
+     */
+    void expandSmallAgentCardinal(Uint32 recordIndex, int fromX, int fromY,
+                                  const NavSurface& fromSurface,
+                                  std::span<const NavSurface> toSurfaces,
+                                  int xOffset, int yOffset);
+
+    /**
      * Adds any valid cardinal steps from the given node in the given
      * direction.
      */
@@ -226,6 +248,14 @@ private:
     const NavSurface* findSurfaceBelow(int x, int y, int height) const;
 
     /**
+     * Returns the surface at the given height within the given column's
+     * surfaces, if it has room for the agent to stand on it. Else, returns
+     * nullptr.
+     */
+    const NavSurface* findStandableSurface(std::span<const NavSurface> surfaces,
+                                           int height) const;
+
+    /**
      * Returns true if a small agent at the given surfaces can't cross the
      * edge between them.
      */
@@ -247,9 +277,9 @@ private:
                               int maxHeight);
 
     /**
-     * Returns the estimated cost from the given node to the goal.
+     * Returns the estimated cost from the given column to the goal.
      */
-    float calcHeuristic(int x, int y, int height) const;
+    float calcHeuristic(int x, int y) const;
 
     /**
      * Returns a unique key for the given node.

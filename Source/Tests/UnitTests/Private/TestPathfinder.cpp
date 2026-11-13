@@ -36,10 +36,9 @@ struct ExtentTileMap : public TileMapBase {
     }
 };
 
-const nlohmann::json EMPTY_RESOURCE_DATA{
-    nlohmann::json::parse(R"({"spriteSheets": [], "animations": [],
-        "terrain": [], "floors": [], "walls": [], "objects": [],
-        "entities": []})")};
+const nlohmann::json EMPTY_RESOURCE_DATA = nlohmann::json::parse(
+    R"({"spriteSheets": [], "animations": [], "terrain": [], "floors": [],
+        "walls": [], "objects": [], "entities": []})");
 
 /** Collision bounds that match the engine's default (ghost) entity. */
 const BoundingBox GHOST_BOUNDS{{6.875f, 7.625f, 0}, {16.75f, 17.25f, 26.4f}};
