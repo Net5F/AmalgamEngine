@@ -40,8 +40,7 @@ World::World(const SimulationContext& inSimContext)
 , entityLocator{registry}
 , collisionLocator{}
 , tileMap{inSimContext.graphicData, collisionLocator}
-, navGrid{collisionLocator}
-, navRequestQueue{navGrid}
+, pathfinder{registry, collisionLocator}
 , globalStoredValueMap{}
 , inventoryHelper{*this, inSimContext.network, inSimContext.itemData}
 , castHelper{inSimContext.simulation, inSimContext.itemData,
@@ -89,8 +88,7 @@ World::World(const SimulationContext& inSimContext)
 
     // Build the nav grid from the loaded map.
     Timer navGridTimer{};
-    navGrid.setGridSize(tileMap.getTileExtent());
-    navGrid.build();
+    pathfinder.init(tileMap.getTileExtent());
     LOG_INFO("Built nav grid in %.0fms.", (navGridTimer.getTime() * 1000));
 
     // When an entity is destroyed, do any necessary cleanup.

@@ -31,6 +31,7 @@ add_executable(UnitTests
     Private/TestNavGrid.cpp
     Private/TestNavRequestQueue.cpp
     Private/TestNavSearch.cpp
+    Private/TestPathfinder.cpp
 )
 
 # Include our source dir.

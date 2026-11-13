@@ -175,6 +175,20 @@ public:
         At roughly 0.5us per node, 2048 is about 1ms per tick. */
     static constexpr std::size_t PATHFINDING_NODES_PER_TICK{2048};
 
+    /** Agents that are following a target entity will find a new path when
+        the target moves this many tiles away from where their current path
+        ends. */
+    static constexpr float PATHFINDING_REPATH_DISTANCE_TILES{2};
+
+    /** The min number of ticks between an agent's path requests. Keeps
+        agents with moving targets from using up the per-tick node budget. */
+    static constexpr unsigned int PATHFINDING_REPATH_INTERVAL_TICKS{15};
+
+    /** If an agent moves less than a quarter of a tile within this many ticks
+        while following a path, it's considered stuck. It'll try jumping,
+        then finding a new path, then give up. */
+    static constexpr unsigned int PATHFINDING_STUCK_TICKS{30};
+
     //-------------------------------------------------------------------------
     // Network
     //-------------------------------------------------------------------------

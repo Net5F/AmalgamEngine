@@ -135,15 +135,12 @@ void Simulation::tick()
     // Receive and process client input messages.
     inputSystem.processInputMessages();
 
-    // Update the nav grid to reflect any collision changes, so AI sees the
-    // current state of the world.
-    world.navGrid.update();
-
     // Run all of our AI.
     aiSystem.processAITick();
 
-    // Search for any requested paths (within this tick's budget).
-    world.navRequestQueue.processRequests();
+    // Find paths for any entities that AI wants to move, and set their inputs
+    // to follow them.
+    world.pathfinder.processPathFollowing();
 
     // Move all of our entities.
     movementSystem.processMovements();

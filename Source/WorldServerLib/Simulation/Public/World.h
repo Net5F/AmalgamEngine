@@ -4,8 +4,7 @@
 #include "ConnectionHandle.h"
 #include "EntityLocator.h"
 #include "CollisionLocator.h"
-#include "NavGrid.h"
-#include "NavRequestQueue.h"
+#include "Pathfinder.h"
 #include "GlobalStoredValueMap.h"
 #include "InventoryHelper.h"
 #include "CastHelper.h"
@@ -78,12 +77,8 @@ public:
     /** The tile map that makes up the world. */
     TileMap tileMap;
 
-    /** Navigation data for each tile. Used for pathfinding. */
-    NavGrid navGrid;
-
-    /** Queues path requests and searches for them, within a per-tick
-        budget. */
-    NavRequestQueue navRequestQueue;
+    /** Holds the world's navigation data, and manages NPC pathfinding. */
+    Pathfinder pathfinder;
 
     /** Global key-value store.
         Note: "Global" means global to this world. Each world has its own map,

@@ -29,6 +29,7 @@ target_sources(SharedLib
         Private/Pathfinding/NavGrid.cpp
         Private/Pathfinding/NavRequestQueue.cpp
         Private/Pathfinding/NavSearch.cpp
+        Private/Pathfinding/Pathfinder.cpp
         Private/TileMap/CellExtent.cpp
         Private/TileMap/CellPosition.cpp
         Private/TileMap/Chunk.cpp
@@ -105,12 +106,15 @@ target_sources(SharedLib
         Public/ItemData/ItemID.h
         Public/ItemData/ItemInitScript.h
         Public/ItemData/ItemProperty.h
+        Public/Pathfinding/MoveStatus.h
         Public/Pathfinding/NavAgentProfile.h
         Public/Pathfinding/NavGrid.h
         Public/Pathfinding/NavRequestQueue.h
         Public/Pathfinding/NavSearch.h
         Public/Pathfinding/NavSurface.h
         Public/Pathfinding/NavWaypoint.h
+        Public/Pathfinding/Pathfinder.h
+        Public/Pathfinding/PathFollow.h
         Public/TileMap/CellExtent.h
         Public/TileMap/CellPosition.h
         Public/TileMap/Chunk.h
