@@ -1,13 +1,12 @@
 #pragma once
 
-#include "NavNode.h"
+#include "NavSurface.h"
 #include "TileExtent.h"
-#include "TilePosition.h"
 #include "BoundingBox.h"
 #include "CollisionLayerType.h"
 #include "SharedConfig.h"
 #include <vector>
-#include <unordered_map>
+#include <span>
 #include <utility>
 
 namespace AM
@@ -15,27 +14,29 @@ namespace AM
 class CollisionLocator;
 
 /**
- * A grid of navigation nodes, one per tile, used for pathfinding.
- * See NavNode.h for the data that each node holds.
+ * Navigation data for the tile map, used for pathfinding.
  *
- * Nodes are derived from the collision volumes in CollisionLocator, so they
- * match what entities actually collide with while moving:
+ * Each column of tiles (X, Y) holds a list of the walkable surfaces within
+ * it, sorted by increasing height. Heights are absolute (relative to the
+ * bottom of the grid), so surfaces don't depend on which tile they're in, and
+ * agents can move between tile layers like they move anywhere else.
+ *
+ * Surfaces are derived from the collision volumes in CollisionLocator, so
+ * they match what entities actually collide with while moving:
  *   - Terrain provides the walkable surfaces. Other volumes never act as
  *     surfaces (e.g. agents won't path across the tops of objects).
  *   - Volumes that fit within a band along a tile's west or north edge (e.g.
  *     walls) block that edge, if they cover most of it.
  *   - Any other volume above a surface limits its headroom. If it leaves less
- *     than a third of headroom, the node isn't standable.
+ *     than a third of headroom, there's no surface.
  *   - Moving entities are ignored, since they never block movement (see
  *     EntityMover.h).
  *
- * Each node holds a single surface. If a tile contains multiple surfaces
- * (e.g. floating terrain, with space beneath it), the highest one is used.
+ * Surfaces are stored per chunk (a 16x16 column of tiles, through all tile
+ * layers). Chunks without any surfaces don't allocate anything, so memory
+ * scales with the walkable area of the map, not its volume.
  *
- * Nodes are stored in chunk-sized groups, so that nearby nodes are usually
- * close in memory.
- *
- * To keep the nodes up to date, this grid enables change tracking on the
+ * To keep the surfaces up to date, this grid enables change tracking on the
  * collision locator (for COLLISION_MASK). Call update() each tick to process
  * the changes.
  */
@@ -47,39 +48,63 @@ public:
         CollisionLayerType::TerrainWall | CollisionLayerType::Object
         | CollisionLayerType::BlockCollision};
 
+    /** The height of a "third" of a tile, in world units. */
+    static constexpr float THIRD_HEIGHT{
+        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT) / 3.f};
+
     NavGrid(CollisionLocator& inCollisionLocator);
 
     /**
-     * Sets this grid's size to match the given extent, and clears all nodes.
+     * Sets this grid's size to match the given extent, and clears all
+     * surfaces.
      *
      * Note: The extent's X and Y axes must be aligned to chunk boundaries.
      */
     void setGridSize(const TileExtent& tileExtent);
 
     /**
-     * Rebuilds every node in this grid, using the current state of the
+     * Rebuilds every surface in this grid, using the current state of the
      * collision locator.
      * Any changes that the locator tracked before this call are discarded.
      */
     void build();
 
     /**
-     * Rebuilds the nodes affected by any changes that the collision locator
+     * Rebuilds the chunks affected by any changes that the collision locator
      * has tracked since the last update or build.
      */
     void update();
 
     /**
-     * Returns the node at the given position.
-     * If the position is outside of this grid, returns an empty node (not
-     * standable).
+     * Returns the surfaces in the given column, sorted by increasing height.
+     * If the column is outside of this grid, returns an empty span.
+     *
+     * Note: The span is invalidated when the column's chunk is rebuilt.
      */
-    NavNode getNode(const TilePosition& tilePosition) const;
+    std::span<const NavSurface> getSurfaces(int x, int y) const;
+
+    /**
+     * Returns the surface at the given height in the given column, or nullptr
+     * if there isn't one.
+     */
+    const NavSurface* findSurface(int x, int y, int height) const;
 
     /**
      * Returns this grid's extent, with tiles as the unit.
      */
     const TileExtent& getTileExtent() const;
+
+    /**
+     * Returns this grid's version, which is incremented whenever any surfaces
+     * change.
+     */
+    Uint32 getVersion() const;
+
+    /**
+     * Returns the world Z coordinate of the given height (in thirds, relative
+     * to the bottom of this grid).
+     */
+    float getWorldZ(int height) const;
 
 private:
     /** A collision volume, copied out of the collision locator. */
@@ -88,9 +113,36 @@ private:
         CollisionLayerBitSet collisionLayers{};
     };
 
-    /** The height of a "third" of a tile, in world units. */
-    static constexpr float THIRD_HEIGHT{
-        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT) / 3.f};
+    /**
+     * The surfaces within a chunk.
+     *
+     * Note: If we ever need to save memory on large maps, chunks with exactly
+     *       one surface in every column (common on flat ground) could drop
+     *       their column offsets, since column i's surface would just be
+     *       surfaces[i]. That would bring flat ground from roughly 6 to 4
+     *       bytes per column.
+     * TODO: If chunk lookups show up when profiling searches, we could store
+     *       columnOffsets and surfaces in a single buffer per chunk. Getting
+     *       a column's surfaces currently goes through 3 separate
+     *       allocations (chunks, columnOffsets, surfaces), so a search
+     *       entering a new chunk may take 3 cache misses. A single buffer
+     *       would reduce that, and halve the allocations when rebuilding.
+     */
+    struct Chunk {
+        /** The index in surfaces where each column's surfaces start.
+            Column i's surfaces start at columnOffsets[i], and end just
+            before columnOffsets[i + 1] (where the next column's start).
+            This holds one extra element at the end (CHUNK_TILE_COUNT + 1
+            total), so the last column also has an end.
+            Empty if this chunk has no surfaces.
+            Note: Since these are Uint16, a chunk can hold at most
+                  SDL_MAX_UINT16 surfaces (see buildChunk()). */
+        std::vector<Uint16> columnOffsets;
+
+        /** The surfaces in this chunk, grouped by column (in row-major order)
+            and sorted by increasing height within each column. */
+        std::vector<NavSurface> surfaces;
+    };
 
     /** The width of the band along a tile's west and north edges. Volumes
         that fit within it are treated as edges (e.g. walls) instead of as
@@ -104,41 +156,31 @@ private:
         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH) / 2.f};
 
     /**
-     * Returns the index in the nodes vector of the node at the given position.
-     * Note: The position must be within this grid.
+     * Rebuilds all of the surfaces in the given chunk.
      */
-    std::size_t linearizeIndex(int x, int y, int z) const;
+    void buildChunk(int chunkIndex);
 
     /**
-     * Returns the index in tileVolumeIndices of the tile at the given position.
-     * Note: The position must be within volumeExtent.
+     * Adds the given volume's index to the volume lists of every column in the
+     * current chunk that it may intersect.
      */
-    std::size_t linearizeVolumeIndex(int x, int y, int z) const;
+    void addVolumeToColumns(Uint32 volumeIndex, int chunkOriginX,
+                            int chunkOriginY);
 
     /**
-     * Builds all nodes within the given extent, except for their clearance
-     * (which must be built after all affected nodes are built).
+     * Calculates the given column's surfaces and adds them to
+     * chunkSurfaces.
+     */
+    void buildColumn(int x, int y, const std::vector<Uint32>& volumeIndices);
+
+    /**
+     * Calculates the surface at the given height in the given column.
      *
-     * Note: The extent must be within a single chunk column.
+     * @return true if there's room for a surface, else false.
      */
-    void buildNodes(const TileExtent& nodeExtent);
-
-    /**
-     * Adds the given volume's index to every tile in volumeExtent that it may
-     * intersect.
-     */
-    void addVolumeToTiles(Uint32 volumeIndex);
-
-    /**
-     * Calculates all of the given node's data, except for clearance.
-     * If the node is standable, its clearance is set to 1.
-     */
-    NavNode calcNode(int x, int y, int z);
-
-    /**
-     * Fills nodeVolumeIndices with the volumes that may affect the given node.
-     */
-    void gatherNodeVolumes(int x, int y, int z);
+    bool calcSurface(int x, int y, int height,
+                     const std::vector<Uint32>& volumeIndices,
+                     NavSurface& surface);
 
     /**
      * Returns true if the given bounds cover the entire X/Y area of the given
@@ -154,34 +196,10 @@ private:
     float calcCoveredLength(std::vector<std::pair<float, float>>& intervals);
 
     /**
-     * Calculates the clearance of every standable node in the grid.
+     * Returns the index in chunks of the chunk containing the given column.
+     * Note: The column must be within this grid.
      */
-    void buildClearance();
-
-    /**
-     * Returns the clearance of the given standable node.
-     * Note: The nodes to the east, south, and southeast must already have
-     *       their clearance built.
-     */
-    Uint8 calcClearance(int x, int y, int z, const NavNode& node) const;
-
-    /**
-     * Adds the nodes that may be affected by the given change to
-     * dirtyColumnExtents.
-     */
-    void addDirtyNodes(const BoundingBox& change);
-
-    /**
-     * Adds the nodes whose clearance may depend on the nodes in the given
-     * extent (including the nodes in the extent) to clearanceQueue.
-     */
-    void queueClearanceUpdates(const TileExtent& nodeExtent);
-
-    /**
-     * Calculates the clearance of every node in clearanceQueue, then clears
-     * the queue.
-     */
-    void updateQueuedClearance();
+    int getChunkIndex(int x, int y) const;
 
     /** Used to get the collision volumes that make up the world. */
     CollisionLocator& collisionLocator;
@@ -193,37 +211,34 @@ private:
     int chunkXLength;
     int chunkYLength;
 
-    /** The nodes that make up this grid.
-        Nodes are grouped by chunk, and each group is in row-major order. */
-    std::vector<NavNode> nodes;
+    /** The chunks that make up this grid, in row-major order. */
+    std::vector<Chunk> chunks;
 
-    /** The extent that the current volumes were gathered from.
-        Always within a single chunk column. */
-    TileExtent volumeExtent;
+    /** This grid's version. See getVersion(). */
+    Uint32 version;
 
-    /** Scratch vector for holding the volumes within volumeExtent. */
-    std::vector<Volume> columnVolumes;
+    /** Scratch vector for holding the current chunk's volumes. */
+    std::vector<Volume> chunkVolumes;
 
-    /** Scratch vectors, holding the indices in columnVolumes of the volumes
-        that may intersect each tile in volumeExtent. */
-    std::vector<std::vector<Uint32>> tileVolumeIndices;
+    /** Scratch vectors, holding the indices in chunkVolumes of the volumes
+        that may intersect each column in the current chunk. */
+    std::vector<std::vector<Uint32>> columnVolumeIndices;
 
-    /** Scratch vector, holding the indices in columnVolumes of the volumes
-        that may affect the current node. */
-    std::vector<Uint32> nodeVolumeIndices;
+    /** Scratch vectors for building the current chunk's surfaces. */
+    std::vector<Uint16> chunkColumnOffsets;
+    std::vector<NavSurface> chunkSurfaces;
+
+    /** Scratch vector, holding the candidate surface heights in the current
+        column. */
+    std::vector<int> candidateHeights;
 
     /** Scratch vectors for holding the covered intervals of a tile's west and
         north edges. */
     std::vector<std::pair<float, float>> westIntervals;
     std::vector<std::pair<float, float>> northIntervals;
 
-    /** Scratch map, holding the extent of dirty nodes within each chunk column
-        (keyed by the column's index). */
-    std::unordered_map<int, TileExtent> dirtyColumnExtents;
-
-    /** Scratch vector, holding the positions of nodes that need their
-        clearance updated. */
-    std::vector<TilePosition> clearanceQueue;
+    /** Scratch vector, holding the indices of chunks that need rebuilding. */
+    std::vector<int> dirtyChunkIndices;
 };
 
 } // End namespace AM

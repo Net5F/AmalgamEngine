@@ -27,7 +27,9 @@ add_executable(UnitTests
     Private/TestComponentMigration.cpp
 #    Private/TestEntityLocator.cpp
     Private/TestMain.cpp
+    Private/NavTestMap.h
     Private/TestNavGrid.cpp
+    Private/TestNavSearch.cpp
 )
 
 # Include our source dir.

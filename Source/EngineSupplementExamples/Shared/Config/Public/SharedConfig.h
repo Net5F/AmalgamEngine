@@ -158,6 +158,17 @@ public:
         when moving from one tile to the next. */
     static constexpr unsigned int PATHFINDING_COMMON_MAX_DROP_THIRDS{3};
 
+    /** The extra cost of a step that requires a jump, relative to walking
+        one tile. Raising this makes agents prefer walking around ledges
+        instead of jumping onto them. */
+    static constexpr float PATHFINDING_JUMP_COST{1.f};
+
+    /** The max number of nodes that a single path search will expand before
+        giving up. 4096 covers roughly a 64x64 tile area, which is plenty for
+        combat. Searches that need more (e.g. returning to a distant spawn)
+        can pass a higher limit. */
+    static constexpr std::size_t PATHFINDING_MAX_SEARCH_NODES{4096};
+
     //-------------------------------------------------------------------------
     // Network
     //-------------------------------------------------------------------------

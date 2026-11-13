@@ -1,253 +1,46 @@
 #include "catch2/catch_all.hpp"
-#include "NavGrid.h"
-#include "CollisionLocator.h"
-#include "GraphicSets.h"
-#include "Tile.h"
-#include "TilePosition.h"
-#include "TileExtent.h"
-#include "Terrain.h"
-#include "Wall.h"
-#include "SharedConfig.h"
-#include "entt/entity/entity.hpp"
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
+#include "NavTestMap.h"
 
 using namespace AM;
 
-namespace
+TEST_CASE("NavSurface flags")
 {
-constexpr float TILE_WIDTH{static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
-constexpr float TILE_HEIGHT{
-    static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
+    NavSurface surface{};
+    REQUIRE(!(surface.isWestBlocked()));
+    REQUIRE(!(surface.isNorthBlocked()));
 
-/**
- * A small test map: 2x2 chunks centered on the origin, 4 tiles tall.
- *
- * Tile layers and static entities are added directly to a collision locator,
- * then the nav grid is built from it.
- */
-struct TestMap {
-    TileExtent extent{-16, -16, 0, 32, 32, 4};
+    surface.setWestBlocked(true);
+    REQUIRE(surface.isWestBlocked());
+    REQUIRE(!(surface.isNorthBlocked()));
 
-    // Terrain graphics don't affect collision, so one sprite is enough.
-    Sprite terrainSprite{};
-    TerrainGraphicSet terrainSet{
-        {},
-        {GraphicRef{terrainSprite}, GraphicRef{terrainSprite},
-         GraphicRef{terrainSprite}, GraphicRef{terrainSprite}}};
-
-    // These bounds match the engine's default wall graphics.
-    Sprite westWallSprite{.collisionEnabled{true},
-                          .modelBounds{{0, 0, 0}, {5.5f, 32, 84}}};
-    Sprite northWallSprite{.collisionEnabled{true},
-                           .modelBounds{{0, 0, 0}, {32, 5.5f, 84}}};
-    Sprite northWestGapFillSprite{.collisionEnabled{true},
-                                  .modelBounds{{0, 0, 0}, {5.5f, 5.5f, 84}}};
-    Sprite northEastGapFillSprite{.collisionEnabled{true},
-                                  .modelBounds{{5.5f, 0, 0}, {32, 5.5f, 84}}};
-    WallGraphicSet wallSet{{},
-                           {GraphicRef{westWallSprite},
-                            GraphicRef{northWallSprite},
-                            GraphicRef{northWestGapFillSprite},
-                            GraphicRef{northEastGapFillSprite}}};
-
-    std::unordered_map<TilePosition, Terrain::Value> terrain{};
-    std::unordered_map<TilePosition, std::vector<Wall::Type>> walls{};
-    /** Tiles that have changed since they were last added to the locator. */
-    std::unordered_set<TilePosition> dirtyTiles{};
-    Uint32 nextEntityID{0};
-
-    CollisionLocator collisionLocator{};
-    NavGrid navGrid{collisionLocator};
-
-    TestMap() { collisionLocator.setGridSize(extent); }
-
-    void addTerrain(const TilePosition& tilePosition, Terrain::Height height,
-                    Terrain::Height startHeight = Terrain::Height::Flat)
-    {
-        terrain[tilePosition] = Terrain::toValue(height, startHeight);
-        dirtyTiles.insert(tilePosition);
-    }
-
-    void remTerrain(const TilePosition& tilePosition)
-    {
-        terrain.erase(tilePosition);
-        dirtyTiles.insert(tilePosition);
-    }
-
-    /** Fills the given Z level with terrain of the given height. */
-    void fillTerrain(int z, Terrain::Height height)
-    {
-        for (int y{extent.y}; y <= extent.yMax(); ++y) {
-            for (int x{extent.x}; x <= extent.xMax(); ++x) {
-                addTerrain({x, y, z}, height);
-            }
-        }
-    }
-
-    void addWall(const TilePosition& tilePosition, Wall::Type wallType)
-    {
-        walls[tilePosition].push_back(wallType);
-        dirtyTiles.insert(tilePosition);
-    }
-
-    void remWalls(const TilePosition& tilePosition)
-    {
-        walls.erase(tilePosition);
-        dirtyTiles.insert(tilePosition);
-    }
-
-    /** Adds an entity with the given world-space collision. */
-    entt::entity addEntity(const BoundingBox& worldBounds,
-                           CollisionLayerBitSet collisionLayers
-                           = CollisionLayerType::BlockCollision)
-    {
-        entt::entity entity{static_cast<entt::entity>(nextEntityID++)};
-        collisionLocator.updateEntity(entity, worldBounds, collisionLayers);
-        return entity;
-    }
-
-    /** Adds an entity within the given tile, offset by the given bounds. */
-    entt::entity addTileEntity(const TilePosition& tilePosition,
-                               const BoundingBox& tileBounds,
-                               CollisionLayerBitSet collisionLayers
-                               = CollisionLayerType::BlockCollision)
-    {
-        return addEntity(tileBounds.translateBy(tilePosition.getOriginPoint()),
-                         collisionLayers);
-    }
-
-    /** Moves an entity to the given tile, offset by the given bounds. */
-    void moveTileEntity(entt::entity entity, const TilePosition& tilePosition,
-                        const BoundingBox& tileBounds,
-                        CollisionLayerBitSet collisionLayers
-                        = CollisionLayerType::BlockCollision)
-    {
-        collisionLocator.updateEntity(
-            entity, tileBounds.translateBy(tilePosition.getOriginPoint()),
-            collisionLayers);
-    }
-
-    /** Adds the tiles to the collision locator and builds the nav grid. */
-    void build()
-    {
-        syncTiles();
-        navGrid.setGridSize(extent);
-        navGrid.build();
-    }
-
-    /** Adds any tile changes to the collision locator and updates the nav
-        grid. */
-    void update()
-    {
-        syncTiles();
-        navGrid.update();
-    }
-
-    /** Adds any changed tiles to the collision locator. */
-    void syncTiles()
-    {
-        for (const TilePosition& tilePosition : dirtyTiles) {
-            Tile tile{};
-            if (auto terrainIt{terrain.find(tilePosition)};
-                terrainIt != terrain.end()) {
-                tile.addLayer({}, TileLayer::Type::Terrain, terrainSet,
-                              terrainIt->second);
-            }
-            if (auto wallsIt{walls.find(tilePosition)};
-                wallsIt != walls.end()) {
-                for (Wall::Type wallType : wallsIt->second) {
-                    tile.addLayer({}, TileLayer::Type::Wall, wallSet, wallType);
-                }
-            }
-            collisionLocator.updateTile(tilePosition, tile);
-        }
-        dirtyTiles.clear();
-    }
-
-    /** Requires that the nav grid matches a freshly built one. */
-    void requireMatchesFullBuild()
-    {
-        NavGrid fullGrid{collisionLocator};
-        fullGrid.setGridSize(extent);
-        fullGrid.build();
-
-        for (int z{extent.z}; z <= extent.zMax(); ++z) {
-            for (int y{extent.y}; y <= extent.yMax(); ++y) {
-                for (int x{extent.x}; x <= extent.xMax(); ++x) {
-                    NavNode updatedNode{navGrid.getNode({x, y, z})};
-                    NavNode builtNode{fullGrid.getNode({x, y, z})};
-                    if (updatedNode != builtNode) {
-                        INFO("Mismatch at (" << x << ", " << y << ", " << z
-                                             << ")");
-                        REQUIRE(updatedNode.value == builtNode.value);
-                    }
-                }
-            }
-        }
-    }
-
-    NavNode node(int x, int y, int z) { return navGrid.getNode({x, y, z}); }
-};
-} // namespace
-
-TEST_CASE("NavNode bit packing")
-{
-    NavNode node{};
-    REQUIRE(!(node.isStandable()));
-
-    node.setSurfaceHeight(2);
-    node.setClearance(5);
-    node.setHeadroom(7);
-    node.setWestBlocked(true);
-    node.setNorthBlocked(false);
-    REQUIRE(node.getSurfaceHeight() == 2);
-    REQUIRE(node.getClearance() == 5);
-    REQUIRE(node.getHeadroom() == 7);
-    REQUIRE(node.isWestBlocked());
-    REQUIRE(!(node.isNorthBlocked()));
-    REQUIRE(node.isStandable());
-
-    // Changing one field shouldn't affect the others.
-    node.setClearance(0);
-    node.setWestBlocked(false);
-    node.setNorthBlocked(true);
-    REQUIRE(node.getSurfaceHeight() == 2);
-    REQUIRE(node.getClearance() == 0);
-    REQUIRE(node.getHeadroom() == 7);
-    REQUIRE(!(node.isWestBlocked()));
-    REQUIRE(node.isNorthBlocked());
-    REQUIRE(!(node.isStandable()));
+    // Changing one flag shouldn't affect the other.
+    surface.setNorthBlocked(true);
+    surface.setWestBlocked(false);
+    REQUIRE(!(surface.isWestBlocked()));
+    REQUIRE(surface.isNorthBlocked());
 }
 
-TEST_CASE_METHOD(TestMap, "NavGrid flat ground")
+TEST_CASE_METHOD(NavTestMap, "NavGrid flat ground")
 {
     fillTerrain(0, Terrain::Height::Flat);
     build();
 
-    NavNode origin{node(0, 0, 0)};
-    REQUIRE(origin.isStandable());
-    REQUIRE(origin.getSurfaceHeight() == 0);
-    REQUIRE(origin.getHeadroom() == NavNode::MAX_HEADROOM);
-    REQUIRE(!(origin.isWestBlocked()));
-    REQUIRE(!(origin.isNorthBlocked()));
+    // Each column has a single surface.
+    std::span<const NavSurface> surfaces{navGrid.getSurfaces(0, 0)};
+    REQUIRE(surfaces.size() == 1);
+    REQUIRE(surfaces[0].height == 0);
+    REQUIRE(surfaces[0].headroom == openHeadroom(0));
+    REQUIRE(!(surfaces[0].isWestBlocked()));
+    REQUIRE(!(surfaces[0].isNorthBlocked()));
+    REQUIRE(navGrid.findSurface(0, 0, 0) == &(surfaces[0]));
+    REQUIRE(navGrid.findSurface(0, 0, 1) == nullptr);
+    REQUIRE(navGrid.getWorldZ(3) == TILE_HEIGHT);
 
-    // Nothing to stand on above the ground.
-    REQUIRE(!(node(0, 0, 1).isStandable()));
-
-    // Clearance grows away from the east and south edges of the grid, up to
-    // the max.
-    REQUIRE(node(15, 15, 0).getClearance() == 1);
-    REQUIRE(node(14, 0, 0).getClearance() == 2);
-    REQUIRE(node(13, 13, 0).getClearance() == 3);
-    REQUIRE(node(-16, -16, 0).getClearance() == NavNode::MAX_CLEARANCE);
-
-    // Out of bounds nodes are empty.
-    REQUIRE(navGrid.getNode({100, 0, 0}) == NavNode{});
+    // Out of bounds columns are empty.
+    REQUIRE(navGrid.getSurfaces(100, 0).empty());
 }
 
-TEST_CASE_METHOD(TestMap, "NavGrid terrain heights")
+TEST_CASE_METHOD(NavTestMap, "NavGrid terrain heights")
 {
     fillTerrain(0, Terrain::Height::Flat);
     addTerrain({0, 0, 0}, Terrain::Height::OneThird);
@@ -255,21 +48,18 @@ TEST_CASE_METHOD(TestMap, "NavGrid terrain heights")
     addTerrain({2, 0, 0}, Terrain::Height::Full);
     build();
 
-    REQUIRE(node(0, 0, 0).getSurfaceHeight() == 1);
-    REQUIRE(node(1, 0, 0).getSurfaceHeight() == 2);
+    REQUIRE(tileSurface(0, 0, 0).getSurfaceHeight() == 1);
+    REQUIRE(tileSurface(1, 0, 0).getSurfaceHeight() == 2);
 
-    // Full terrain's surface is stored in the tile above it.
-    REQUIRE(!(node(2, 0, 0).isStandable()));
-    REQUIRE(node(2, 0, 1).isStandable());
-    REQUIRE(node(2, 0, 1).getSurfaceHeight() == 0);
-    REQUIRE(node(2, 0, 1).getHeadroom() == NavNode::MAX_HEADROOM);
-
-    // Squares can't span multiple heights.
-    REQUIRE(node(-1, -1, 0).getClearance() == 1);
-    REQUIRE(node(-2, -2, 0).getClearance() == 2);
+    // Full terrain's surface is at the bottom of the tile above it.
+    REQUIRE(!(tileSurface(2, 0, 0).isStandable()));
+    REQUIRE(tileSurface(2, 0, 1).isStandable());
+    REQUIRE(tileSurface(2, 0, 1).getSurfaceHeight() == 0);
+    REQUIRE(navGrid.findSurface(2, 0, 3) != nullptr);
+    REQUIRE(tileSurface(2, 0, 1).getHeadroom() == openHeadroom(3));
 }
 
-TEST_CASE_METHOD(TestMap, "NavGrid headroom")
+TEST_CASE_METHOD(NavTestMap, "NavGrid headroom")
 {
     fillTerrain(0, Terrain::Height::Flat);
 
@@ -290,21 +80,49 @@ TEST_CASE_METHOD(TestMap, "NavGrid headroom")
                   CollisionLayerType::NonPlayerEntity);
     build();
 
-    REQUIRE(node(0, 0, 0).getHeadroom() == 3);
+    REQUIRE(tileSurface(0, 0, 0).getHeadroom() == 3);
 
     // The floating terrain limits the headroom below it, and provides a
     // surface on top of it.
-    REQUIRE(node(1, 0, 0).getSurfaceHeight() == 0);
-    REQUIRE(node(1, 0, 0).getHeadroom() == 4);
-    REQUIRE(node(1, 0, 1).isStandable());
-    REQUIRE(node(1, 0, 1).getSurfaceHeight() == 2);
+    REQUIRE(tileSurface(1, 0, 0).getSurfaceHeight() == 0);
+    REQUIRE(tileSurface(1, 0, 0).getHeadroom() == 4);
+    REQUIRE(tileSurface(1, 0, 1).isStandable());
+    REQUIRE(tileSurface(1, 0, 1).getSurfaceHeight() == 2);
 
-    REQUIRE(!(node(2, 0, 0).isStandable()));
-    REQUIRE(node(3, 0, 0).getHeadroom() == 1);
-    REQUIRE(node(4, 0, 0).getHeadroom() == NavNode::MAX_HEADROOM);
+    REQUIRE(!(tileSurface(2, 0, 0).isStandable()));
+    REQUIRE(tileSurface(3, 0, 0).getHeadroom() == 1);
+    REQUIRE(tileSurface(4, 0, 0).getHeadroom() == openHeadroom(0));
 }
 
-TEST_CASE_METHOD(TestMap, "NavGrid walls")
+TEST_CASE_METHOD(NavTestMap, "NavGrid multiple surfaces in a tile")
+{
+    // Full terrain, with floating terrain above it in the next tile (from 1/3
+    // to 2/3). Both surfaces are in the upper tile.
+    addTerrain({0, 0, 0}, Terrain::Height::Full);
+    addTerrain({0, 0, 1}, Terrain::Height::OneThird, Terrain::Height::OneThird);
+
+    // A stack of full terrain, leaving no room between the blocks.
+    addTerrain({1, 0, 0}, Terrain::Height::Full);
+    addTerrain({1, 0, 1}, Terrain::Height::Full);
+    build();
+
+    std::span<const NavSurface> surfaces{navGrid.getSurfaces(0, 0)};
+    REQUIRE(surfaces.size() == 2);
+    REQUIRE(surfaces[0].height == 3);
+    REQUIRE(surfaces[0].headroom == 1);
+    REQUIRE(surfaces[1].height == 5);
+    REQUIRE(surfaces[1].headroom == openHeadroom(5));
+
+    // Only the top of the stack is a surface.
+    std::span<const NavSurface> stackSurfaces{navGrid.getSurfaces(1, 0)};
+    REQUIRE(stackSurfaces.size() == 1);
+    REQUIRE(stackSurfaces[0].height == 6);
+
+    // Empty columns have no surfaces.
+    REQUIRE(navGrid.getSurfaces(2, 0).empty());
+}
+
+TEST_CASE_METHOD(NavTestMap, "NavGrid walls")
 {
     fillTerrain(0, Terrain::Height::Flat);
     addWall({0, 0, 0}, Wall::Type::West);
@@ -318,39 +136,33 @@ TEST_CASE_METHOD(TestMap, "NavGrid walls")
     build();
 
     // Walls block their edge, but don't affect the rest of the tile.
-    NavNode westWallNode{node(0, 0, 0)};
-    REQUIRE(westWallNode.isStandable());
-    REQUIRE(westWallNode.getHeadroom() == NavNode::MAX_HEADROOM);
-    REQUIRE(westWallNode.isWestBlocked());
-    REQUIRE(!(westWallNode.isNorthBlocked()));
-    REQUIRE(!(node(-1, 0, 0).isWestBlocked()));
+    auto westWallSurface{tileSurface(0, 0, 0)};
+    REQUIRE(westWallSurface.isStandable());
+    REQUIRE(westWallSurface.getHeadroom() == openHeadroom(0));
+    REQUIRE(westWallSurface.isWestBlocked());
+    REQUIRE(!(westWallSurface.isNorthBlocked()));
+    REQUIRE(!(tileSurface(-1, 0, 0).isWestBlocked()));
 
-    NavNode northWallNode{node(0, 2, 0)};
-    REQUIRE(northWallNode.isNorthBlocked());
-    REQUIRE(!(northWallNode.isWestBlocked()));
+    auto northWallSurface{tileSurface(0, 2, 0)};
+    REQUIRE(northWallSurface.isNorthBlocked());
+    REQUIRE(!(northWallSurface.isWestBlocked()));
 
     // A corner column only covers a small part of each edge.
-    NavNode northWestGapFillNode{node(0, 4, 0)};
-    REQUIRE(northWestGapFillNode.isStandable());
-    REQUIRE(!(northWestGapFillNode.isWestBlocked()));
-    REQUIRE(!(northWestGapFillNode.isNorthBlocked()));
+    auto northWestGapFillSurface{tileSurface(0, 4, 0)};
+    REQUIRE(northWestGapFillSurface.isStandable());
+    REQUIRE(!(northWestGapFillSurface.isWestBlocked()));
+    REQUIRE(!(northWestGapFillSurface.isNorthBlocked()));
 
     // A 3/4 north wall covers most of the north edge.
-    NavNode northEastGapFillNode{node(0, 6, 0)};
-    REQUIRE(northEastGapFillNode.isNorthBlocked());
-    REQUIRE(!(northEastGapFillNode.isWestBlocked()));
+    auto northEastGapFillSurface{tileSurface(0, 6, 0)};
+    REQUIRE(northEastGapFillSurface.isNorthBlocked());
+    REQUIRE(!(northEastGapFillSurface.isWestBlocked()));
 
-    REQUIRE(node(0, 8, 0).getSurfaceHeight() == 1);
-    REQUIRE(node(0, 8, 0).isWestBlocked());
-
-    // Squares can't contain blocked edges.
-    REQUIRE(node(-1, 0, 0).getClearance() == 1);
-    REQUIRE(node(-1, -1, 0).getClearance() == 1);
-    REQUIRE(node(0, 1, 0).getClearance() == 1);
-    REQUIRE(node(0, 0, 0).getClearance() == 2);
+    REQUIRE(tileSurface(0, 8, 0).getSurfaceHeight() == 1);
+    REQUIRE(tileSurface(0, 8, 0).isWestBlocked());
 }
 
-TEST_CASE_METHOD(TestMap, "NavGrid obstacles")
+TEST_CASE_METHOD(NavTestMap, "NavGrid obstacles")
 {
     fillTerrain(0, Terrain::Height::Flat);
 
@@ -365,38 +177,42 @@ TEST_CASE_METHOD(TestMap, "NavGrid obstacles")
                   CollisionLayerType::Object);
     build();
 
-    REQUIRE(!(node(0, 0, 0).isStandable()));
+    REQUIRE(!(tileSurface(0, 0, 0).isStandable()));
 
-    REQUIRE(node(2, 0, 0).isStandable());
-    REQUIRE(node(2, 0, 0).isWestBlocked());
+    REQUIRE(tileSurface(2, 0, 0).isStandable());
+    REQUIRE(tileSurface(2, 0, 0).isWestBlocked());
 
-    REQUIRE(!(node(4, 0, 0).isStandable()));
+    REQUIRE(!(tileSurface(4, 0, 0).isStandable()));
 
     // Neighbors are unaffected.
-    REQUIRE(node(1, 0, 0).isStandable());
-    REQUIRE(!(node(1, 0, 0).isWestBlocked()));
+    REQUIRE(tileSurface(1, 0, 0).isStandable());
+    REQUIRE(!(tileSurface(1, 0, 0).isWestBlocked()));
 }
 
-TEST_CASE_METHOD(TestMap, "NavGrid updates tile changes")
+TEST_CASE_METHOD(NavTestMap, "NavGrid updates tile changes")
 {
     fillTerrain(0, Terrain::Height::Flat);
     build();
+    Uint32 version{navGrid.getVersion()};
 
-    // Add a wall on a chunk boundary, so the clearance updates spill into
-    // the neighboring chunk columns.
+    // Updating with no changes does nothing.
+    update();
+    REQUIRE(navGrid.getVersion() == version);
+
+    // Add a wall on a chunk boundary.
     addWall({0, 0, 0}, Wall::Type::West);
     update();
-    REQUIRE(node(0, 0, 0).isWestBlocked());
-    REQUIRE(node(-1, 0, 0).getClearance() == 1);
-    REQUIRE(node(-1, -1, 0).getClearance() == 1);
+    REQUIRE(navGrid.getVersion() != version);
+    REQUIRE(tileSurface(0, 0, 0).isWestBlocked());
     requireMatchesFullBuild();
 
     // Raise some terrain and add a ceiling over it.
     addTerrain({5, 5, 0}, Terrain::Height::OneThird);
     addTerrain({5, 5, 1}, Terrain::Height::Full);
     update();
-    REQUIRE(node(5, 5, 0).getSurfaceHeight() == 1);
-    REQUIRE(node(5, 5, 0).getHeadroom() == 2);
+    REQUIRE(tileSurface(5, 5, 0).getSurfaceHeight() == 1);
+    REQUIRE(tileSurface(5, 5, 0).getHeadroom() == 2);
+    REQUIRE(navGrid.findSurface(5, 5, 6) != nullptr);
     requireMatchesFullBuild();
 
     // Remove everything that was added.
@@ -404,49 +220,49 @@ TEST_CASE_METHOD(TestMap, "NavGrid updates tile changes")
     addTerrain({5, 5, 0}, Terrain::Height::Flat);
     remTerrain({5, 5, 1});
     update();
-    REQUIRE(!(node(0, 0, 0).isWestBlocked()));
-    REQUIRE(node(-1, -1, 0).getClearance() == NavNode::MAX_CLEARANCE);
-    REQUIRE(node(5, 5, 0).getSurfaceHeight() == 0);
+    REQUIRE(!(tileSurface(0, 0, 0).isWestBlocked()));
+    REQUIRE(navGrid.getSurfaces(5, 5).size() == 1);
+    REQUIRE(tileSurface(5, 5, 0).getSurfaceHeight() == 0);
     requireMatchesFullBuild();
 
     // Remove the ground entirely.
     remTerrain({-3, -3, 0});
     update();
-    REQUIRE(!(node(-3, -3, 0).isStandable()));
+    REQUIRE(navGrid.getSurfaces(-3, -3).empty());
     requireMatchesFullBuild();
 }
 
-TEST_CASE_METHOD(TestMap, "NavGrid updates entity changes")
+TEST_CASE_METHOD(NavTestMap, "NavGrid updates entity changes")
 {
     fillTerrain(0, Terrain::Height::Flat);
     build();
 
-    // Add an obstacle that spans multiple chunk columns.
+    // Add an obstacle that spans multiple chunks.
     entt::entity bigEntity{
         addEntity({{-2 * TILE_WIDTH, -2 * TILE_WIDTH, 0},
                    {2 * TILE_WIDTH, 2 * TILE_WIDTH, TILE_HEIGHT}})};
     update();
-    REQUIRE(!(node(-1, -1, 0).isStandable()));
-    REQUIRE(!(node(1, 1, 0).isStandable()));
-    REQUIRE(node(2, 2, 0).isStandable());
+    REQUIRE(!(tileSurface(-1, -1, 0).isStandable()));
+    REQUIRE(!(tileSurface(1, 1, 0).isStandable()));
+    REQUIRE(tileSurface(2, 2, 0).isStandable());
     requireMatchesFullBuild();
 
     // Move an obstacle from one tile to another.
     entt::entity smallEntity{
         addTileEntity({8, 8, 0}, {{10, 10, 0}, {20, 20, 30}})};
     update();
-    REQUIRE(!(node(8, 8, 0).isStandable()));
+    REQUIRE(!(tileSurface(8, 8, 0).isStandable()));
     moveTileEntity(smallEntity, {-8, 8, 0}, {{10, 10, 0}, {20, 20, 30}});
     update();
-    REQUIRE(node(8, 8, 0).isStandable());
-    REQUIRE(!(node(-8, 8, 0).isStandable()));
+    REQUIRE(tileSurface(8, 8, 0).isStandable());
+    REQUIRE(!(tileSurface(-8, 8, 0).isStandable()));
     requireMatchesFullBuild();
 
     // Remove the big obstacle.
     collisionLocator.removeEntity(bigEntity);
     update();
-    REQUIRE(node(-1, -1, 0).isStandable());
-    REQUIRE(node(1, 1, 0).isStandable());
+    REQUIRE(tileSurface(-1, -1, 0).isStandable());
+    REQUIRE(tileSurface(1, 1, 0).isStandable());
     requireMatchesFullBuild();
 
     // Moving entities aren't tracked.
@@ -454,5 +270,31 @@ TEST_CASE_METHOD(TestMap, "NavGrid updates entity changes")
                   CollisionLayerType::NonPlayerEntity);
     REQUIRE(collisionLocator.getTrackedChanges().empty());
     update();
-    REQUIRE(node(4, 4, 0).isStandable());
+    REQUIRE(tileSurface(4, 4, 0).isStandable());
+}
+
+namespace
+{
+/** A test map that's taller than the old 85-layer limit. */
+struct TallNavTestMap : public NavTestMap {
+    TallNavTestMap()
+    : NavTestMap(TileExtent{-16, -16, 0, 32, 32, 100})
+    {
+    }
+};
+} // namespace
+
+TEST_CASE_METHOD(TallNavTestMap, "NavGrid tall maps")
+{
+    // Ground at the bottom, and a platform near the top.
+    fillTerrain(0, Terrain::Height::Flat);
+    addTerrain({0, 0, 98}, Terrain::Height::Full);
+    build();
+
+    std::span<const NavSurface> surfaces{navGrid.getSurfaces(0, 0)};
+    REQUIRE(surfaces.size() == 2);
+    REQUIRE(surfaces[0].height == 0);
+    REQUIRE(surfaces[0].headroom == NavSurface::MAX_HEADROOM);
+    REQUIRE(surfaces[1].height == (99 * 3));
+    REQUIRE(surfaces[1].headroom == 3);
 }
