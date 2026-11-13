@@ -1,6 +1,7 @@
 #include "catch2/catch_all.hpp"
 #include "NavTestMap.h"
 #include "NavSearch.h"
+#include "NavRegions.h"
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -518,13 +519,27 @@ TEST_CASE_METHOD(BenchmarkTestMap, "NavSearch benchmark", "[.benchmark]")
         gapAtTop = !gapAtTop;
     }
 
+    // A walled-in tile, for unreachable searches.
+    TilePosition enclosedTile{extent.xMax() - 3, extent.yMax() - 3, 0};
+    addWall(enclosedTile, Wall::Type::West);
+    addWall(enclosedTile, Wall::Type::North);
+    addWall({enclosedTile.x + 1, enclosedTile.y, 0}, Wall::Type::West);
+    addWall({enclosedTile.x, enclosedTile.y + 1, 0}, Wall::Type::North);
+
     Clock::time_point buildStart{Clock::now()};
     build();
+    NavRegions regions{navGrid};
+    Clock::time_point regionStart{Clock::now()};
+    regions.build();
+    double regionMs{
+        std::chrono::duration<double, std::milli>(Clock::now() - regionStart)
+            .count()};
     double buildMs{
         std::chrono::duration<double, std::milli>(Clock::now() - buildStart)
             .count()};
     WARN("Built " << extent.xLength << "x" << extent.yLength << "x"
                   << extent.zLength << " grid in " << buildMs << "ms.");
+    WARN("Built regions in " << regionMs << "ms.");
 
     auto runBenchmark = [&](const char* name, const NavAgentProfile& agent) {
         static constexpr int RUN_COUNT{20};
@@ -557,4 +572,27 @@ TEST_CASE_METHOD(BenchmarkTestMap, "NavSearch benchmark", "[.benchmark]")
     runBenchmark("2-tile agent", largeAgent);
     largeAgent.footprintTiles = 4;
     runBenchmark("4-tile agent", largeAgent);
+
+    // An unreachable goal, with and without regions.
+    auto runUnreachable = [&](const char* name, NavRegions* navRegions) {
+        static constexpr int RUN_COUNT{20};
+        NavSearch benchmarkSearch{navGrid, navRegions};
+        TilePosition start{extent.x + 2, extent.y + 2, 0};
+        benchmarkSearch.findPath(start, enclosedTile, {}, 10'000'000);
+        Clock::time_point runStart{Clock::now()};
+        for (int i{0}; i < RUN_COUNT; ++i) {
+            REQUIRE(
+                benchmarkSearch.findPath(start, enclosedTile, {}, 10'000'000)
+                == NavSearch::Status::Unreachable);
+        }
+        double averageUs{
+            std::chrono::duration<double, std::micro>(Clock::now() - runStart)
+                .count()
+            / RUN_COUNT};
+        WARN(name << ": " << averageUs << "us per unreachable search ("
+                  << benchmarkSearch.getExpandedNodeCount()
+                  << " nodes expanded).");
+    };
+    runUnreachable("Without regions", nullptr);
+    runUnreachable("With regions", &regions);
 }

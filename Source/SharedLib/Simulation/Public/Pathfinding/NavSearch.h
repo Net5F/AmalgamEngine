@@ -13,6 +13,7 @@
 namespace AM
 {
 class NavGrid;
+class NavRegions;
 
 /**
  * Finds paths through a NavGrid, using an 8-direction A* search.
@@ -64,7 +65,12 @@ public:
         NodeLimitReached
     };
 
-    NavSearch(const NavGrid& inNavGrid);
+    /**
+     * @param inNavRegions (Optional) If given, searches between surfaces
+     *                     that the regions show are unreachable will fail
+     *                     immediately (for agents that the regions support).
+     */
+    NavSearch(const NavGrid& inNavGrid, NavRegions* inNavRegions = nullptr);
 
     /**
      * Runs a complete search. See begin() for the parameters.
@@ -282,6 +288,9 @@ private:
 
     /** The grid to search through. */
     const NavGrid& navGrid;
+
+    /** If non-null, used to rule out unreachable goals before searching. */
+    NavRegions* navRegions;
 
     /** The current search's parameters. */
     TilePosition startPosition;

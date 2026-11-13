@@ -1,6 +1,7 @@
 #pragma once
 
 #include "NavGrid.h"
+#include "NavRegions.h"
 #include "NavRequestQueue.h"
 #include "MoveStatus.h"
 #include "PathFollow.h"
@@ -224,6 +225,9 @@ private:
 
     /** The navigation data for the world. */
     NavGrid navGrid;
+
+    /** Tracks which areas of the nav grid can reach each other. */
+    NavRegions navRegions;
 
     /** Used to search for paths. */
     NavRequestQueue requestQueue;

@@ -141,17 +141,19 @@ public:
     // Note: Pathfinding measures heights in "thirds" of a tile
     //       (TILE_WORLD_HEIGHT / 3), matching our terrain heights.
 
-    /** The width, in tiles, of the common pathfinding agent's footprint.
-        Pathfinding is optimized for agents that fit the common agent profile.
-        Other agents can still path, but some optimizations won't apply to
-        them. */
-    static constexpr unsigned int PATHFINDING_COMMON_FOOTPRINT_TILES{1};
+    // The common pathfinding agent profile. Pathfinding is optimized for
+    // agents that fit this profile (1 tile wide, at least this tall, and
+    // climbing and dropping no further). Other agents can still path, but
+    // some optimizations won't apply to them.
 
     /** The height, in thirds, of the common pathfinding agent. */
-    static constexpr unsigned int PATHFINDING_COMMON_HEIGHT_THIRDS{2};
+    static constexpr unsigned int PATHFINDING_COMMON_HEIGHT_THIRDS{1};
 
     /** The max height, in thirds, that the common pathfinding agent can climb
-        when moving from one tile to the next. */
+        when moving from one tile to the next.
+        Entities don't automatically step up onto ledges, so climbing is done
+        by jumping. For each agent, Pathfinder derives this from its jump
+        height (rounded down to whole thirds). */
     static constexpr unsigned int PATHFINDING_COMMON_CLIMB_THIRDS{1};
 
     /** The max height, in thirds, that the common pathfinding agent will drop

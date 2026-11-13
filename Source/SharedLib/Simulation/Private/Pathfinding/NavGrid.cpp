@@ -74,6 +74,7 @@ void NavGrid::update()
     static constexpr int CHUNK_WIDTH{
         static_cast<int>(SharedConfig::CHUNK_WIDTH)};
 
+    dirtyChunkIndices.clear();
     const std::vector<BoundingBox>& changes{
         collisionLocator.getTrackedChanges()};
     if (changes.empty()) {
@@ -86,7 +87,6 @@ void NavGrid::update()
     //       only need to rebuild the chunks that the changes overlap.
     // Note: Like addVolumeToColumns(), this includes columns that are only
     //       touched.
-    dirtyChunkIndices.clear();
     for (const BoundingBox& change : changes) {
         int minX{
             std::max(static_cast<int>(std::floor(change.min.x / TILE_WIDTH)),
@@ -182,6 +182,26 @@ float NavGrid::getWorldZ(int height) const
         static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
 
     return (gridTileExtent.z * TILE_HEIGHT) + (height * THIRD_HEIGHT);
+}
+
+int NavGrid::getChunkCount() const
+{
+    return static_cast<int>(chunks.size());
+}
+
+std::size_t NavGrid::getSurfaceIndex(int chunkIndex,
+                                     const NavSurface& surface) const
+{
+    const std::vector<NavSurface>& surfaces{chunks[chunkIndex].surfaces};
+    AM_ASSERT((&surface >= surfaces.data())
+                  && (&surface < (surfaces.data() + surfaces.size())),
+              "Surface isn't in the given chunk.");
+    return static_cast<std::size_t>(&surface - surfaces.data());
+}
+
+const std::vector<int>& NavGrid::getUpdatedChunks() const
+{
+    return dirtyChunkIndices;
 }
 
 void NavGrid::buildChunk(int chunkIndex)

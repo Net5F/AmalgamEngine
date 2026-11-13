@@ -5,8 +5,9 @@
 namespace AM
 {
 
-NavRequestQueue::NavRequestQueue(const NavGrid& inNavGrid)
-: search{inNavGrid}
+NavRequestQueue::NavRequestQueue(const NavGrid& inNavGrid,
+                                 NavRegions* inNavRegions)
+: search{inNavGrid, inNavRegions}
 , requests{}
 , freeIndices{}
 , queue{}

@@ -27,6 +27,7 @@ target_sources(SharedLib
         Private/ItemData/Item.cpp
         Private/ItemData/ItemDataBase.cpp
         Private/Pathfinding/NavGrid.cpp
+        Private/Pathfinding/NavRegions.cpp
         Private/Pathfinding/NavRequestQueue.cpp
         Private/Pathfinding/NavSearch.cpp
         Private/Pathfinding/Pathfinder.cpp
@@ -109,6 +110,7 @@ target_sources(SharedLib
         Public/Pathfinding/MoveStatus.h
         Public/Pathfinding/NavAgentProfile.h
         Public/Pathfinding/NavGrid.h
+        Public/Pathfinding/NavRegions.h
         Public/Pathfinding/NavRequestQueue.h
         Public/Pathfinding/NavSearch.h
         Public/Pathfinding/NavSurface.h

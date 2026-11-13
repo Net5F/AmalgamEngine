@@ -1,5 +1,6 @@
 #include "NavSearch.h"
 #include "NavGrid.h"
+#include "NavRegions.h"
 #include "AMAssert.h"
 #include "tracy/Tracy.hpp"
 #include <algorithm>
@@ -9,8 +10,9 @@
 namespace AM
 {
 
-NavSearch::NavSearch(const NavGrid& inNavGrid)
+NavSearch::NavSearch(const NavGrid& inNavGrid, NavRegions* inNavRegions)
 : navGrid{inNavGrid}
+, navRegions{inNavRegions}
 , startPosition{}
 , goalPosition{}
 , agent{}
@@ -80,6 +82,14 @@ void NavSearch::begin(const TilePosition& start, const TilePosition& goal,
         return;
     }
     goalHeight = *goalRestingHeight;
+
+    // If the regions show that the goal can't be reached, don't search.
+    if (navRegions && navRegions->supportsAgent(agent)
+        && !(navRegions->isReachable(start.x, start.y, *startHeight, goal.x,
+                                     goal.y, goalHeight))) {
+        status = Status::Unreachable;
+        return;
+    }
 
     relaxNode(start.x, start.y, *startHeight, 0, NO_PARENT, false);
     status = Status::InProgress;

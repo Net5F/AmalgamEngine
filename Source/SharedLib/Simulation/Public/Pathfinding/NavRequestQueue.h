@@ -13,6 +13,7 @@
 namespace AM
 {
 class NavGrid;
+class NavRegions;
 
 /**
  * A handle to a path request. See NavRequestQueue.
@@ -50,7 +51,11 @@ struct NavRequestHandle {
 class NavRequestQueue
 {
 public:
-    NavRequestQueue(const NavGrid& inNavGrid);
+    /**
+     * @param inNavRegions (Optional) See NavSearch().
+     */
+    NavRequestQueue(const NavGrid& inNavGrid,
+                    NavRegions* inNavRegions = nullptr);
 
     /**
      * Queues a path request.

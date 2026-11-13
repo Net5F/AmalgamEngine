@@ -106,6 +106,35 @@ public:
      */
     float getWorldZ(int height) const;
 
+    /**
+     * Returns the number of chunks in this grid.
+     * Chunks are indexed in row-major order, starting at the grid's origin.
+     */
+    int getChunkCount() const;
+
+    /**
+     * Returns the index of the chunk containing the given column.
+     * Note: The column must be within this grid.
+     */
+    int getChunkIndex(int x, int y) const;
+
+    /**
+     * Returns the index of the given surface within its chunk.
+     * Surfaces are indexed in the same order as they're stored: by column (in
+     * row-major order), then by increasing height.
+     *
+     * Note: The surface must be from getSurfaces() or findSurface(), and
+     *       chunkIndex must be the index of the chunk that contains it.
+     */
+    std::size_t getSurfaceIndex(int chunkIndex,
+                                const NavSurface& surface) const;
+
+    /**
+     * Returns the indices of the chunks that were rebuilt by the last call to
+     * update().
+     */
+    const std::vector<int>& getUpdatedChunks() const;
+
 private:
     /** A collision volume, copied out of the collision locator. */
     struct Volume {
@@ -194,12 +223,6 @@ private:
      * Note: The given vector will be sorted.
      */
     float calcCoveredLength(std::vector<std::pair<float, float>>& intervals);
-
-    /**
-     * Returns the index in chunks of the chunk containing the given column.
-     * Note: The column must be within this grid.
-     */
-    int getChunkIndex(int x, int y) const;
 
     /** Used to get the collision volumes that make up the world. */
     CollisionLocator& collisionLocator;

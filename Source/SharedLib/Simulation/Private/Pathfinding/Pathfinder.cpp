@@ -17,7 +17,8 @@ Pathfinder::Pathfinder(entt::registry& inRegistry,
                        CollisionLocator& inCollisionLocator)
 : registry{inRegistry}
 , navGrid{inCollisionLocator}
-, requestQueue{navGrid}
+, navRegions{navGrid}
+, requestQueue{navGrid, &navRegions}
 {
     // When a follower is destroyed, release its path request.
     registry.on_destroy<PathFollow>()
@@ -34,6 +35,7 @@ void Pathfinder::init(const TileExtent& mapTileExtent)
 {
     navGrid.setGridSize(mapTileExtent);
     navGrid.build();
+    navRegions.build();
 }
 
 void Pathfinder::processPathFollowing()
@@ -42,6 +44,7 @@ void Pathfinder::processPathFollowing()
 
     // Update the nav grid to reflect any collision changes.
     navGrid.update();
+    navRegions.update();
 
     // Check for arrivals and request any paths that are needed.
     auto view{registry.view<PathFollow>()};

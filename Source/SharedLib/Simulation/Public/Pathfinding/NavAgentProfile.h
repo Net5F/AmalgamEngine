@@ -19,7 +19,7 @@ struct NavAgentProfile {
 
     /** The width, in tiles, of the agent's square footprint.
         Must be between 1 and MAX_FOOTPRINT_TILES. */
-    Uint8 footprintTiles{SharedConfig::PATHFINDING_COMMON_FOOTPRINT_TILES};
+    Uint8 footprintTiles{1};
 
     /** The agent's height, in thirds. */
     Uint8 heightThirds{SharedConfig::PATHFINDING_COMMON_HEIGHT_THIRDS};
