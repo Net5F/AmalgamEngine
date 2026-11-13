@@ -19,6 +19,7 @@ NavSearch::NavSearch(const NavGrid& inNavGrid)
 , gridVersion{0}
 , status{Status::Idle}
 , expandedNodeCount{0}
+, lastRunExpansionCount{0}
 , records{}
 , recordSlots(static_cast<std::size_t>(1) << INITIAL_SLOT_BITS)
 , recordSlotBits{INITIAL_SLOT_BITS}
@@ -86,6 +87,7 @@ void NavSearch::begin(const TilePosition& start, const TilePosition& goal,
 
 NavSearch::Status NavSearch::run(std::size_t maxExpansions)
 {
+    lastRunExpansionCount = 0;
     if (status != Status::InProgress) {
         return status;
     }
@@ -99,8 +101,7 @@ NavSearch::Status NavSearch::run(std::size_t maxExpansions)
     }
     ZoneScoped;
 
-    std::size_t expansionCount{0};
-    while (expansionCount < maxExpansions) {
+    while (lastRunExpansionCount < maxExpansions) {
         if (openList.empty()) {
             status = Status::Unreachable;
             return status;
@@ -131,7 +132,7 @@ NavSearch::Status NavSearch::run(std::size_t maxExpansions)
 
         record.isClosed = true;
         expandedNodeCount++;
-        expansionCount++;
+        lastRunExpansionCount++;
         expandNode(recordIndex);
     }
 
@@ -151,6 +152,11 @@ const std::vector<NavWaypoint>& NavSearch::getWaypoints() const
 std::size_t NavSearch::getExpandedNodeCount() const
 {
     return expandedNodeCount;
+}
+
+std::size_t NavSearch::getLastRunExpansionCount() const
+{
+    return lastRunExpansionCount;
 }
 
 void NavSearch::expandNode(Uint32 recordIndex)

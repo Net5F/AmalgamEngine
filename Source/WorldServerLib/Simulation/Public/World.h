@@ -5,6 +5,7 @@
 #include "EntityLocator.h"
 #include "CollisionLocator.h"
 #include "NavGrid.h"
+#include "NavRequestQueue.h"
 #include "GlobalStoredValueMap.h"
 #include "InventoryHelper.h"
 #include "CastHelper.h"
@@ -79,6 +80,10 @@ public:
 
     /** Navigation data for each tile. Used for pathfinding. */
     NavGrid navGrid;
+
+    /** Queues path requests and searches for them, within a per-tick
+        budget. */
+    NavRequestQueue navRequestQueue;
 
     /** Global key-value store.
         Note: "Global" means global to this world. Each world has its own map,

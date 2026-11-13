@@ -29,6 +29,7 @@ add_executable(UnitTests
     Private/TestMain.cpp
     Private/NavTestMap.h
     Private/TestNavGrid.cpp
+    Private/TestNavRequestQueue.cpp
     Private/TestNavSearch.cpp
 )
 

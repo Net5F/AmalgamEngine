@@ -116,6 +116,11 @@ public:
      */
     std::size_t getExpandedNodeCount() const;
 
+    /**
+     * Returns the number of nodes that the last call to run() expanded.
+     */
+    std::size_t getLastRunExpansionCount() const;
+
 private:
     /** Used to mark records that have no parent. */
     static constexpr Uint32 NO_PARENT{SDL_MAX_UINT32};
@@ -295,6 +300,9 @@ private:
 
     /** The number of nodes that the current search has expanded. */
     std::size_t expandedNodeCount;
+
+    /** The number of nodes that the last call to run() expanded. */
+    std::size_t lastRunExpansionCount;
 
     /** The nodes that the current search has reached. */
     std::vector<NodeRecord> records;

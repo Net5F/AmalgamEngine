@@ -142,6 +142,9 @@ void Simulation::tick()
     // Run all of our AI.
     aiSystem.processAITick();
 
+    // Search for any requested paths (within this tick's budget).
+    world.navRequestQueue.processRequests();
+
     // Move all of our entities.
     movementSystem.processMovements();
 

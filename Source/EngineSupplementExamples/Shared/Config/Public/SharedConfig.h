@@ -44,7 +44,7 @@ public:
     static constexpr float VERTICAL_FALL_MOVE_VELOCITY{15};
 
     //-------------------------------------------------------------------------
-    // Interactions 
+    // Interactions
     //-------------------------------------------------------------------------
     /** The max number of interactions that an entity can support.
         Interactions are the options that show up when you right-click an
@@ -55,7 +55,7 @@ public:
     static constexpr std::size_t MAX_ITEM_CUSTOM_INTERACTIONS{64};
 
     //-------------------------------------------------------------------------
-    // Tile Map 
+    // Tile Map
     //-------------------------------------------------------------------------
     /** The maximum map size that we'll load, in tiles. */
     static constexpr std::size_t MAX_MAP_WIDTH_TILES{1'024};
@@ -114,7 +114,7 @@ public:
     static constexpr float LOCAL_CHAT_HALF_HEIGHT{AOI_HALF_HEIGHT};
 
     //-------------------------------------------------------------------------
-    // Casting 
+    // Casting
     //-------------------------------------------------------------------------
     /** The distance above a casting target circle that will be included in
         the area of effect. */
@@ -168,6 +168,12 @@ public:
         combat. Searches that need more (e.g. returning to a distant spawn)
         can pass a higher limit. */
     static constexpr std::size_t PATHFINDING_MAX_SEARCH_NODES{4096};
+
+    /** The max number of nodes that path searches will expand per tick,
+        across all queued path requests. Searches that don't finish continue
+        on the next tick.
+        At roughly 0.5us per node, 2048 is about 1ms per tick. */
+    static constexpr std::size_t PATHFINDING_NODES_PER_TICK{2048};
 
     //-------------------------------------------------------------------------
     // Network

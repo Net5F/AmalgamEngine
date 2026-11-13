@@ -41,6 +41,7 @@ World::World(const SimulationContext& inSimContext)
 , collisionLocator{}
 , tileMap{inSimContext.graphicData, collisionLocator}
 , navGrid{collisionLocator}
+, navRequestQueue{navGrid}
 , globalStoredValueMap{}
 , inventoryHelper{*this, inSimContext.network, inSimContext.itemData}
 , castHelper{inSimContext.simulation, inSimContext.itemData,

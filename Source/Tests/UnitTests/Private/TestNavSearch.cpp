@@ -3,6 +3,7 @@
 #include "NavSearch.h"
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <utility>
 #include <vector>
 
@@ -484,4 +485,76 @@ TEST_CASE_METHOD(SearchTestMap, "NavSearch climbing a tower")
             return waypoint.isJump;
         }))};
     REQUIRE(jumpCount == 6);
+}
+
+namespace
+{
+/** A larger map, for benchmarking. */
+struct BenchmarkTestMap : public NavTestMap {
+    BenchmarkTestMap()
+    : NavTestMap(TileExtent{-128, -128, 0, 256, 256, 4})
+    {
+    }
+};
+} // namespace
+
+// Note: Hidden by default. Run with: UnitTests "[benchmark]"
+TEST_CASE_METHOD(BenchmarkTestMap, "NavSearch benchmark", "[.benchmark]")
+{
+    using Clock = std::chrono::steady_clock;
+
+    // Flat ground, divided by walls into a serpentine. Each wall has a gap
+    // at alternating ends, so paths must zig-zag across the whole map.
+    fillTerrain(0, Terrain::Height::Flat);
+    bool gapAtTop{true};
+    for (int x{extent.x + 16}; x <= extent.xMax(); x += 16) {
+        for (int y{extent.y}; y <= extent.yMax(); ++y) {
+            bool isGap{gapAtTop ? (y < (extent.y + 4))
+                                : (y > (extent.yMax() - 4))};
+            if (!isGap) {
+                addWall({x, y, 0}, Wall::Type::West);
+            }
+        }
+        gapAtTop = !gapAtTop;
+    }
+
+    Clock::time_point buildStart{Clock::now()};
+    build();
+    double buildMs{
+        std::chrono::duration<double, std::milli>(Clock::now() - buildStart)
+            .count()};
+    WARN("Built " << extent.xLength << "x" << extent.yLength << "x"
+                  << extent.zLength << " grid in " << buildMs << "ms.");
+
+    auto runBenchmark = [&](const char* name, const NavAgentProfile& agent) {
+        static constexpr int RUN_COUNT{20};
+        NavSearch benchmarkSearch{navGrid};
+        TilePosition start{extent.x + 2, extent.y + 2, 0};
+        TilePosition goal{extent.xMax() - 8, extent.yMax() - 8, 0};
+
+        // Warm up (grows the search's buffers).
+        REQUIRE(benchmarkSearch.findPath(start, goal, agent, 10'000'000)
+                == NavSearch::Status::Found);
+
+        std::size_t totalExpanded{0};
+        Clock::time_point runStart{Clock::now()};
+        for (int i{0}; i < RUN_COUNT; ++i) {
+            benchmarkSearch.findPath(start, goal, agent, 10'000'000);
+            totalExpanded += benchmarkSearch.getExpandedNodeCount();
+        }
+        double totalNs{
+            std::chrono::duration<double, std::nano>(Clock::now() - runStart)
+                .count()};
+        WARN(name << ": " << (totalExpanded / RUN_COUNT)
+                  << " nodes per search, "
+                  << (totalNs / static_cast<double>(totalExpanded))
+                  << "ns per node.");
+    };
+
+    runBenchmark("Small agent", {});
+    NavAgentProfile largeAgent{};
+    largeAgent.footprintTiles = 2;
+    runBenchmark("2-tile agent", largeAgent);
+    largeAgent.footprintTiles = 4;
+    runBenchmark("4-tile agent", largeAgent);
 }
