@@ -33,6 +33,7 @@ add_executable(UnitTests
     Private/TestNavRequestQueue.cpp
     Private/TestNavSearch.cpp
     Private/TestPathfinder.cpp
+    Private/TestSecret.cpp
 )
 
 # Include our source dir.

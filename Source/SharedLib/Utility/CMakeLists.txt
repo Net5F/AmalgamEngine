@@ -34,6 +34,8 @@ target_sources(SharedLib
         Public/PeriodicCaller.h
         Public/PeriodicCallerGroup.h
         Public/SDLHelpers.h
+        Public/Secret.h
+        Public/SecretString.h
         Public/Serialize.h
         Public/SerializeBuffer.h
         Public/StringTools.h

@@ -80,6 +80,14 @@ public:
     // Sensitive Data
     //-------------------------------------------------------------------------
     /**
+     * Overwrites the given memory with zeros, in a way that won't be optimized
+     * out by the compiler.
+     *
+     * Used for memory that contained sensitive data, e.g. passwords.
+     */
+    static void wipe(void* data, std::size_t size) noexcept;
+
+    /**
      * Takes ownership of the given buffer, returning a shared pointer that
      * wipes the buffer's contents when it's released.
      *

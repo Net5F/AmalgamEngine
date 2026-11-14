@@ -87,13 +87,18 @@ std::size_t ByteTools::decompress(const Uint8* sourceBuffer,
     return decompressedLength;
 }
 
+void ByteTools::wipe(void* data, std::size_t size) noexcept
+{
+    OPENSSL_cleanse(data, size);
+}
+
 BinaryBufferSharedPtr ByteTools::makeWipedOnRelease(BinaryBuffer&& buffer)
 {
     // Note: Moving the vector transfers its storage, so the original bytes
     //       aren't left behind in a copy.
     return BinaryBufferSharedPtr{
         new BinaryBuffer(std::move(buffer)), [](BinaryBuffer* wipedBuffer) {
-            OPENSSL_cleanse(wipedBuffer->data(), wipedBuffer->size());
+            wipe(wipedBuffer->data(), wipedBuffer->size());
             delete wipedBuffer;
         }};
 }
