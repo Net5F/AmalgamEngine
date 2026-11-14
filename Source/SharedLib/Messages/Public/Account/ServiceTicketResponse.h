@@ -2,7 +2,6 @@
 
 #include "AccountDefs.h"
 #include "AccountClientMessageType.h"
-#include <array>
 
 namespace AM
 {
@@ -20,7 +19,7 @@ struct ServiceTicketResponse {
     Result result{Result::InternalError};
 
     /** If result == success, this authorizes one connection attempt. */
-    std::array<Uint8, SERVICE_TICKET_BYTES> ticket{};
+    ServiceTicket ticket{};
 
     /** The service that the ticket authorizes a connection to. Matches the
         request's audience, so the client can tell which request this
@@ -35,7 +34,7 @@ template<typename S>
 void serialize(S& serializer, ServiceTicketResponse& serviceTicketResponse)
 {
     serializer.value1b(serviceTicketResponse.result);
-    serializer.container1b(serviceTicketResponse.ticket);
+    serializer.container1b(serviceTicketResponse.ticket.get());
     serializer.value1b(serviceTicketResponse.audience);
     serializer.value8b(serviceTicketResponse.expiresAt);
 }

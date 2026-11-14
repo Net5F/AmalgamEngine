@@ -51,7 +51,7 @@ public:
      * a connection to AccountServer is established first.
      */
     template<typename Message>
-    void send(const Message& message);
+    void send(Message message);
 
 private:
     using Connection = SimpleConnection<AccountClientMessageType>;
@@ -115,14 +115,16 @@ private:
 };
 
 template<typename Message>
-void AccountClientEndpoint::send(const Message& message)
+void AccountClientEndpoint::send(Message message)
 {
     using DeclaredMessageType
         = std::remove_cv_t<decltype(Message::MESSAGE_TYPE)>;
     static_assert(std::is_same_v<DeclaredMessageType, AccountClientMessageType>,
                   "Message::MESSAGE_TYPE is not an AccountClientMessageType.");
 
-    asio::post(ioContext, [this, message]() mutable {
+    // Note: We move the message through, since moving a message that holds
+    //       secrets wipes the source.
+    asio::post(ioContext, [this, message = std::move(message)]() mutable {
         sendOnIOThread(std::move(message));
     });
 }

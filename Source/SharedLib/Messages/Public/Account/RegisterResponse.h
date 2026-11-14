@@ -2,7 +2,6 @@
 
 #include "AccountDefs.h"
 #include "AccountClientMessageType.h"
-#include <string>
 
 namespace AM
 {
@@ -27,9 +26,8 @@ struct RegisterResponse {
     };
     Result result{Result::InternalError};
 
-    // TODO: Need SecureString, secure fill
     /** If result == success, this is the recovery key for the account. */
-    std::string recoveryKey{};
+    RecoveryKey recoveryKey{};
 };
 
 template<typename S>

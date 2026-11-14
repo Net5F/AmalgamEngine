@@ -21,7 +21,7 @@ void CryptoHelpers::fillRandomBytes(std::span<Uint8> buffer)
     randombytes_buf(buffer.data(), buffer.size());
 }
 
-std::string CryptoHelpers::generateRecoveryKey()
+RecoveryKey CryptoHelpers::generateRecoveryKey()
 {
     std::array<unsigned char, RECOVERY_KEY_RANDOM_BYTES> keyBytes{};
     randombytes_buf(keyBytes.data(), keyBytes.size());
@@ -32,10 +32,14 @@ std::string CryptoHelpers::generateRecoveryKey()
                       keyBytes.size(),
                       sodium_base64_VARIANT_URLSAFE_NO_PADDING);
 
-    // The encoded key is retained, so erase the raw copy.
-    sodium_memzero(keyBytes.data(), keyBytes.size());
+    RecoveryKey recoveryKey{
+        std::string_view{encodedKey.data(), RECOVERY_KEY_CHARACTERS}};
 
-    return std::string{encodedKey.data(), RECOVERY_KEY_CHARACTERS};
+    // Erase our intermediate copies.
+    sodium_memzero(keyBytes.data(), keyBytes.size());
+    sodium_memzero(encodedKey.data(), encodedKey.size());
+
+    return recoveryKey;
 }
 
 std::optional<std::string>

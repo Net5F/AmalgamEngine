@@ -2,7 +2,6 @@
 
 #include "AccountDefs.h"
 #include "AccountServiceMessageType.h"
-#include <array>
 
 namespace AM
 {
@@ -24,7 +23,7 @@ struct ConsumeServiceTicketRequest {
     Uint32 requestID{0};
 
     /** The single-use ticket presented by the client. */
-    std::array<Uint8, SERVICE_TICKET_BYTES> ticket{};
+    ServiceTicket ticket{};
 
     /** If true, the response will include the account's AccountData.
         Only the world server may set this. It leaves it false if no
@@ -37,7 +36,7 @@ void serialize(S& serializer,
                ConsumeServiceTicketRequest& consumeServiceTicketRequest)
 {
     serializer.value4b(consumeServiceTicketRequest.requestID);
-    serializer.container1b(consumeServiceTicketRequest.ticket);
+    serializer.container1b(consumeServiceTicketRequest.ticket.get());
     serializer.value1b(consumeServiceTicketRequest.includeAccountData);
 }
 

@@ -13,7 +13,6 @@
 #include "asio/error.hpp"
 #include "asio/ip/address.hpp"
 #include "asio/system_error.hpp"
-#include <openssl/crypto.h>
 #include <chrono>
 #include <limits>
 
@@ -44,13 +43,11 @@ ChatClientEndpoint::~ChatClientEndpoint()
     closeOnIOThread();
 }
 
-Uint32 ChatClientEndpoint::connect(
-    const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket)
+Uint32 ChatClientEndpoint::connect(const ServiceTicket& ticket)
 {
     Uint32 connectionID{nextConnectionID++};
-    asio::post(ioContext, [this, connectionID, ticketCopy = ticket]() mutable {
-        connectOnIOThread(connectionID, ticketCopy);
-        OPENSSL_cleanse(ticketCopy.data(), ticketCopy.size());
+    asio::post(ioContext, [this, connectionID, ticket]() mutable {
+        connectOnIOThread(connectionID, std::move(ticket));
     });
 
     return connectionID;
@@ -61,16 +58,15 @@ void ChatClientEndpoint::disconnect()
     asio::post(ioContext, [this]() { closeOnIOThread(); });
 }
 
-void ChatClientEndpoint::connectOnIOThread(
-    Uint32 connectionID, std::array<Uint8, SERVICE_TICKET_BYTES> ticket)
+void ChatClientEndpoint::connectOnIOThread(Uint32 connectionID,
+                                           ServiceTicket ticket)
 {
     // If a connection is already open, close it.
     closeOnIOThread();
 
     currentConnectionID = connectionID;
     connectionState = ConnectionState::Connecting;
-    pendingTicket = ticket;
-    OPENSSL_cleanse(ticket.data(), ticket.size());
+    pendingTicket = std::move(ticket);
 
     UserConfig::ServerAddress serverAddress{
         UserConfig::get().getChatServerAddress()};
@@ -126,7 +122,7 @@ void ChatClientEndpoint::closeOnIOThread()
     connectionState = ConnectionState::Disconnected;
     cancelTimer(connectionTimer);
     cancelTimer(heartbeatTimer);
-    OPENSSL_cleanse(pendingTicket.data(), pendingTicket.size());
+    pendingTicket.wipe();
 
     asio::error_code ignoredError{};
     if (connectingSocket) {
@@ -254,13 +250,10 @@ void ChatClientEndpoint::onConnectionReady(Uint32 connectionID)
     connectionState = ConnectionState::Authenticating;
     // Note: We frame the request ourselves so that we can wipe the ticket from
     //       every buffer that holds it.
-    ChatConnectionRequest connectionRequest{pendingTicket};
+    ChatConnectionRequest connectionRequest{std::move(pendingTicket)};
     BinaryBufferSharedPtr framedRequest{
         SimpleMessageFramer<ChatClientMessageType>{MAX_WRITE_PAYLOAD_SIZE}
             .frameMessage(connectionRequest)};
-    OPENSSL_cleanse(connectionRequest.ticket.data(),
-                    connectionRequest.ticket.size());
-    OPENSSL_cleanse(pendingTicket.data(), pendingTicket.size());
     if (!framedRequest
         || !connection->sendFramed(
             ByteTools::makeWipedOnRelease(std::move(*framedRequest)))) {

@@ -2,7 +2,6 @@
 
 #include "ChatClientMessageType.h"
 #include "AccountDefs.h"
-#include <array>
 
 namespace AM
 {
@@ -19,13 +18,13 @@ struct ChatConnectionRequest {
 
     /** The single-use Chat Server ticket that the client received from
         AccountServer. */
-    std::array<Uint8, SERVICE_TICKET_BYTES> ticket{};
+    ServiceTicket ticket{};
 };
 
 template<typename S>
 void serialize(S& serializer, ChatConnectionRequest& chatConnectionRequest)
 {
-    serializer.container1b(chatConnectionRequest.ticket);
+    serializer.container1b(chatConnectionRequest.ticket.get());
 }
 
 } // End namespace AM

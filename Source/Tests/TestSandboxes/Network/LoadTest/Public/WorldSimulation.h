@@ -40,7 +40,7 @@ public:
      * Connects to the game server using the given ticket, waits for a
      * ConnectionResponse.
      */
-    void connect(const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket);
+    void connect(const ServiceTicket& worldTicket);
 
     /**
      * Processes one tick of the "sim", checking if we need to send inputs or

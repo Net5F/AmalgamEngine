@@ -6,7 +6,6 @@
 #include "RegisterRequest.h"
 #include "ServiceTicketRequest.h"
 #include "Log.h"
-#include <openssl/crypto.h>
 
 namespace AM
 {
@@ -84,43 +83,58 @@ void AccountSession::tick()
 }
 
 bool AccountSession::login(const std::string& username,
-                           const std::string& password)
+                           std::string_view password)
 {
     if ((loginState != LoginState::LoggedOut) || registrationPending
         || recoveryPending) {
+        return false;
+    }
+
+    LoginRequest loginRequest{.username{username}};
+    if (!loginRequest.password.assign(password)) {
         return false;
     }
 
     loginState = LoginState::LoggingIn;
-    network.accountEndpoint.send(LoginRequest{username, password});
+    network.accountEndpoint.send(std::move(loginRequest));
     return true;
 }
 
 bool AccountSession::registerAccount(const std::string& username,
-                                     const std::string& password)
+                                     std::string_view password)
 {
     if ((loginState != LoginState::LoggedOut) || registrationPending
         || recoveryPending) {
+        return false;
+    }
+
+    RegisterRequest registerRequest{.username{username}};
+    if (!registerRequest.password.assign(password)) {
         return false;
     }
 
     registrationPending = true;
-    network.accountEndpoint.send(RegisterRequest{username, password});
+    network.accountEndpoint.send(std::move(registerRequest));
     return true;
 }
 
 bool AccountSession::recoverAccount(const std::string& username,
-                                    const std::string& recoveryKey,
-                                    const std::string& newPassword)
+                                    std::string_view recoveryKey,
+                                    std::string_view newPassword)
 {
     if ((loginState != LoginState::LoggedOut) || registrationPending
         || recoveryPending) {
         return false;
     }
 
+    RecoverAccountRequest recoverAccountRequest{.username{username}};
+    if (!recoverAccountRequest.recoveryKey.assign(recoveryKey)
+        || !recoverAccountRequest.newPassword.assign(newPassword)) {
+        return false;
+    }
+
     recoveryPending = true;
-    network.accountEndpoint.send(
-        RecoverAccountRequest{username, recoveryKey, newPassword});
+    network.accountEndpoint.send(std::move(recoverAccountRequest));
     return true;
 }
 
@@ -183,8 +197,6 @@ Sint64 AccountSession::getAbsoluteExpiresAt() const noexcept
 void AccountSession::handleLoginResponse(LoginResponse& response)
 {
     if (loginState != LoginState::LoggingIn) {
-        OPENSSL_cleanse(response.sessionToken.data(),
-                        response.sessionToken.size());
         LOG_WARN("Received an unexpected login response.");
         return;
     }
@@ -201,7 +213,7 @@ void AccountSession::handleLoginResponse(LoginResponse& response)
         clearSession();
     }
 
-    OPENSSL_cleanse(response.sessionToken.data(), response.sessionToken.size());
+    response.sessionToken.wipe();
     loginCompletedSig.publish(result);
 }
 
@@ -214,7 +226,7 @@ void AccountSession::handleRegisterResponse(RegisterResponse& response)
 
     registrationPending = false;
     registrationCompletedSig.publish(response);
-    OPENSSL_cleanse(response.recoveryKey.data(), response.recoveryKey.size());
+    response.recoveryKey.clear();
 }
 
 void AccountSession::handleLogoutResponse(const LogoutResponse& response)
@@ -239,15 +251,13 @@ void AccountSession::handleRecoverAccountResponse(
     RecoverAccountResponse& response)
 {
     if (!recoveryPending) {
-        OPENSSL_cleanse(response.recoveryKey.data(),
-                        response.recoveryKey.size());
         LOG_WARN("Received an unexpected account recovery response.");
         return;
     }
 
     recoveryPending = false;
     recoveryCompletedSig.publish(response);
-    OPENSSL_cleanse(response.recoveryKey.data(), response.recoveryKey.size());
+    response.recoveryKey.clear();
 }
 
 void AccountSession::handleServiceTicketResponse(
@@ -257,7 +267,6 @@ void AccountSession::handleServiceTicketResponse(
     if (!isValidServiceTicketAudience(response.audience)
         || !serviceTicketRequestPending[static_cast<std::size_t>(
             response.audience)]) {
-        OPENSSL_cleanse(response.ticket.data(), response.ticket.size());
         LOG_WARN("Received an unexpected service-ticket response.");
         return;
     }
@@ -268,7 +277,7 @@ void AccountSession::handleServiceTicketResponse(
         clearSession();
     }
     serviceTicketRequestCompletedSig.publish(response);
-    OPENSSL_cleanse(response.ticket.data(), response.ticket.size());
+    response.ticket.wipe();
 }
 
 void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
@@ -315,7 +324,7 @@ void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
 void AccountSession::clearSession() noexcept
 {
     accountID = 0;
-    OPENSSL_cleanse(sessionToken.data(), sessionToken.size());
+    sessionToken.wipe();
     idleExpiresAt = 0;
     absoluteExpiresAt = 0;
     serviceTicketRequestPending.fill(false);

@@ -66,7 +66,7 @@ private:
      *
      * Blocks until complete. Errors if any step fails.
      */
-    std::array<Uint8, SERVICE_TICKET_BYTES> requestWorldTicket();
+    ServiceTicket requestWorldTicket();
 
     /** The index of the load test account that we log in as. */
     const unsigned int accountIndex;

@@ -298,8 +298,6 @@ void WorldClientEndpoint::processConnectionRequest(Client& client,
             const ConsumeServiceTicketResponse& response) {
             onTicketResult(handle, response);
         });
-    OPENSSL_cleanse(connectionRequest.ticket.data(),
-                    connectionRequest.ticket.size());
 }
 
 void WorldClientEndpoint::onTicketResult(

@@ -25,13 +25,11 @@ struct RecoverAccountRequest {
     /** The account's username. */
     std::string username{};
 
-    // TODO: Need SecureString, secure fill
     /** The account's current recovery key. */
-    std::string recoveryKey{};
+    RecoveryKey recoveryKey{};
 
-    // TODO: Need SecureString, secure fill
     /** The desired new password in plaintext. */
-    std::string newPassword{};
+    SecretString<PASSWORD_MAX> newPassword{};
 };
 
 template<typename S>

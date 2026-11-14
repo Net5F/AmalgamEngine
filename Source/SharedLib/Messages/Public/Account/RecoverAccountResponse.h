@@ -2,7 +2,6 @@
 
 #include "AccountDefs.h"
 #include "AccountClientMessageType.h"
-#include <string>
 
 namespace AM
 {
@@ -27,10 +26,9 @@ struct RecoverAccountResponse {
     };
     Result result{Result::InternalError};
 
-    // TODO: Need SecureString, secure fill
     /** If result == success, this is the account's new recovery key.
         Recovery keys are single-use, so the old key is no longer valid. */
-    std::string recoveryKey{};
+    RecoveryKey recoveryKey{};
 };
 
 template<typename S>

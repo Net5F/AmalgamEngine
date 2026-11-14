@@ -17,6 +17,7 @@
 #include <functional>
 #include <span>
 #include <string>
+#include <string_view>
 
 namespace AM
 {
@@ -91,7 +92,7 @@ private:
      * Returns an appropriate response message.
      */
     RegisterResponse registerAccount(const std::string& username,
-                                     const std::string& password);
+                                     std::string_view password);
 
     /**
      * Attempts to create a login session for an account with the given username
@@ -99,13 +100,12 @@ private:
      * Returns an appropriate response message.
      */
     LoginResponse authenticateAndCreateSession(const std::string& username,
-                                               const std::string& password);
+                                               std::string_view password);
 
     /**
      * Attempts to revoke the account session represented by the given token.
      */
-    LogoutResponse logoutSession(
-        const std::array<Uint8, SESSION_TOKEN_BYTES>& sessionToken);
+    LogoutResponse logoutSession(const SessionToken& sessionToken);
 
     /**
      * Attempts to use the given recovery key to set a new password on the
@@ -113,17 +113,17 @@ private:
      * Returns an appropriate response message.
      */
     RecoverAccountResponse recoverAccount(const std::string& username,
-                                          const std::string& recoveryKey,
-                                          const std::string& newPassword);
+                                          std::string_view recoveryKey,
+                                          std::string_view newPassword);
 
     /**
      * Attempts to issue a single-use ticket for the given service.
      *
      * Note: audience must already be validated.
      */
-    ServiceTicketResponse issueServiceTicket(
-        ServiceTicketAudience audience,
-        const std::array<Uint8, SESSION_TOKEN_BYTES>& accountSessionToken);
+    ServiceTicketResponse
+        issueServiceTicket(ServiceTicketAudience audience,
+                           const SessionToken& accountSessionToken);
 
     /**
      * Runs createResponse on a database worker, then sends the returned

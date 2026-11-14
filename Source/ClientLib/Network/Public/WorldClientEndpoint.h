@@ -57,7 +57,7 @@ public:
      * Note: ServerConnectionSystem is responsible for calling this. See class
      *       comment.
      */
-    void connect(const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket);
+    void connect(const ServiceTicket& worldTicket);
 
     /**
      * Closes our server connection.
@@ -146,8 +146,7 @@ private:
     };
 
     /** Connection logic */
-    void connectOnIOThread(
-        const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket);
+    void connectOnIOThread(ServiceTicket worldTicket);
     void closeOnIOThread();
     void handleConnectionFailure(Uint32 connectionID,
                                  const asio::error_code& error);
@@ -205,7 +204,7 @@ private:
     std::shared_ptr<WorldConnection> connection;
 
     /** The ticket to present once connected. Cleared after it's sent. */
-    std::array<Uint8, SERVICE_TICKET_BYTES> pendingWorldTicket;
+    ServiceTicket pendingWorldTicket;
 
     ConnectionState connectionState;
 

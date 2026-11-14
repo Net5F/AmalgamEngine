@@ -53,8 +53,6 @@ namespace AM
 class AccountServiceEndpoint
 {
 public:
-    using ServiceTicket = std::array<Uint8, SERVICE_TICKET_BYTES>;
-
     /**
      * Called with AccountServer's response to a ticket request.
      *

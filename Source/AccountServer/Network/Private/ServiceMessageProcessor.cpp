@@ -141,13 +141,13 @@ void ServiceMessageProcessor::handleMessage(ConnectionHandle handle,
 }
 
 ConsumeServiceTicketResponse ServiceMessageProcessor::consumeServiceTicket(
-    ServiceTicketAudience audience,
-    const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket,
+    ServiceTicketAudience audience, const ServiceTicket& ticket,
     bool includeAccountData)
 {
     ConsumeServiceTicketResponse response{};
 
-    std::optional<std::string> ticketHash{CryptoHelpers::hashSecret(ticket)};
+    std::optional<std::string> ticketHash{
+        CryptoHelpers::hashSecret(ticket.get())};
     if (!ticketHash) {
         LOG_ERROR("Failed to hash service ticket.");
         response.result = ConsumeServiceTicketResponse::InternalError;

@@ -2,7 +2,6 @@
 
 #include "AccountDefs.h"
 #include "AccountClientMessageType.h"
-#include <array>
 
 namespace AM
 {
@@ -17,13 +16,13 @@ struct LogoutRequest {
         AccountClientMessageType::LogoutRequest};
 
     /** The account session to revoke. */
-    std::array<Uint8, SESSION_TOKEN_BYTES> sessionToken{};
+    SessionToken sessionToken{};
 };
 
 template<typename S>
 void serialize(S& serializer, LogoutRequest& logoutRequest)
 {
-    serializer.container1b(logoutRequest.sessionToken);
+    serializer.container1b(logoutRequest.sessionToken.get());
 }
 
 } // End namespace AM

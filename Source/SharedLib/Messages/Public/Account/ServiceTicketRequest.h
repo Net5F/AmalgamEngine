@@ -2,7 +2,6 @@
 
 #include "AccountDefs.h"
 #include "AccountClientMessageType.h"
-#include <array>
 
 namespace AM
 {
@@ -21,14 +20,14 @@ struct ServiceTicketRequest {
     ServiceTicketAudience audience{ServiceTicketAudience::WorldServer};
 
     /** The client's current account session token. */
-    std::array<Uint8, SESSION_TOKEN_BYTES> accountSessionToken{};
+    SessionToken accountSessionToken{};
 };
 
 template<typename S>
 void serialize(S& serializer, ServiceTicketRequest& serviceTicketRequest)
 {
     serializer.value1b(serviceTicketRequest.audience);
-    serializer.container1b(serviceTicketRequest.accountSessionToken);
+    serializer.container1b(serviceTicketRequest.accountSessionToken.get());
 }
 
 } // End namespace AM

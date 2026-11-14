@@ -26,7 +26,6 @@
 #include "Config.h"
 #include "Log.h"
 #include "entt/signal/dispatcher.hpp"
-#include <openssl/crypto.h>
 
 namespace AM
 {
@@ -65,8 +64,6 @@ void ServerConnectionSystem::processConnectionEvents()
                 connectionState = ConnectionState::AwaitingResponse;
                 connectionAttemptTimer.reset();
             }
-            OPENSSL_cleanse(connectionRequest.ticket.data(),
-                            connectionRequest.ticket.size());
             connectionRequestQueue.pop();
 
             if (Config::RUN_OFFLINE) {
@@ -162,7 +159,8 @@ void ServerConnectionSystem::disconnectFromServer(
 void ServerConnectionSystem::onUIConnectionRequest(
     ConnectionRequest& connectionRequest)
 {
-    connectionRequestQueue.emplace(connectionRequest);
+    // Note: Moving wipes the ticket from the given request.
+    connectionRequestQueue.emplace(std::move(connectionRequest));
 }
 
 void ServerConnectionSystem::processLogoutUpdates()

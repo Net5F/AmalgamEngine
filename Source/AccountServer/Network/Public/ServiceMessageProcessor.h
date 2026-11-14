@@ -81,10 +81,10 @@ private:
      * If includeAccountData is true, also gets the account's AccountData.
      * Returns an appropriate response message.
      */
-    ConsumeServiceTicketResponse consumeServiceTicket(
-        ServiceTicketAudience audience,
-        const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket,
-        bool includeAccountData);
+    ConsumeServiceTicketResponse
+        consumeServiceTicket(ServiceTicketAudience audience,
+                             const ServiceTicket& ticket,
+                             bool includeAccountData);
 
     /**
      * If the given service is allowed to access AccountData, returns true.

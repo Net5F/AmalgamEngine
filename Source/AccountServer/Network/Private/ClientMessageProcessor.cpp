@@ -105,7 +105,7 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
 
     // Validate the password.
     AccountHelpers::ValidateResult passwordResult{
-        AccountHelpers::validatePassword(message.password)};
+        AccountHelpers::validatePassword(message.password.view())};
     if (!(passwordResult.success())) {
         sendCallback(handle, messageFramer.frameMessage(RegisterResponse{
                                  .result{RegisterResponse::InvalidPassword}}));
@@ -115,7 +115,7 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
     // Attempt to register the account.
     respondFromDatabasePool(handle, [this, username = message.username,
                                      password = message.password]() {
-        return registerAccount(username, password);
+        return registerAccount(username, password.view());
     });
 }
 
@@ -125,7 +125,7 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
     // Attempt to create a login session for the account.
     respondFromDatabasePool(handle, [this, username = message.username,
                                      password = message.password]() {
-        return authenticateAndCreateSession(username, password);
+        return authenticateAndCreateSession(username, password.view());
     });
 }
 
@@ -143,7 +143,7 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
 {
     // Validate the new password.
     AccountHelpers::ValidateResult passwordResult{
-        AccountHelpers::validatePassword(message.newPassword)};
+        AccountHelpers::validatePassword(message.newPassword.view())};
     if (!(passwordResult.success())) {
         sendCallback(handle,
                      messageFramer.frameMessage(RecoverAccountResponse{
@@ -164,7 +164,7 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
     respondFromDatabasePool(handle, [this, username = message.username,
                                      recoveryKey = message.recoveryKey,
                                      newPassword = message.newPassword]() {
-        return recoverAccount(username, recoveryKey, newPassword);
+        return recoverAccount(username, recoveryKey.view(), newPassword.view());
     });
 }
 
@@ -191,12 +191,12 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
 
 RegisterResponse
     ClientMessageProcessor::registerAccount(const std::string& username,
-                                            const std::string& password)
+                                            std::string_view password)
 {
     RegisterResponse response{};
 
     // Generate the recovery key.
-    std::string recoveryKey{CryptoHelpers::generateRecoveryKey()};
+    RecoveryKey recoveryKey{CryptoHelpers::generateRecoveryKey()};
 
     // Hash the password.
     std::optional<std::string> passwordHash{
@@ -209,7 +209,7 @@ RegisterResponse
 
     // Hash the recovery key.
     std::optional<std::string> recoveryKeyHash{
-        CryptoHelpers::hashSecret(recoveryKey)};
+        CryptoHelpers::hashSecret(recoveryKey.view())};
     if (!recoveryKeyHash) {
         LOG_ERROR("Failed to hash recovery key.");
         response.result = RegisterResponse::InternalError;
@@ -235,7 +235,7 @@ RegisterResponse
 }
 
 LoginResponse ClientMessageProcessor::authenticateAndCreateSession(
-    const std::string& username, const std::string& password)
+    const std::string& username, std::string_view password)
 {
     LoginResponse response{};
 
@@ -264,10 +264,10 @@ LoginResponse ClientMessageProcessor::authenticateAndCreateSession(
     }
 
     // Generate the raw token returned to the client, then hash it for storage.
-    std::array<Uint8, SESSION_TOKEN_BYTES> sessionToken{};
-    CryptoHelpers::fillRandomBytes(sessionToken);
+    SessionToken sessionToken{};
+    CryptoHelpers::fillRandomBytes(sessionToken.get());
     std::optional<std::string> sessionTokenHash{
-        CryptoHelpers::hashSecret(sessionToken)};
+        CryptoHelpers::hashSecret(sessionToken.get())};
     if (!sessionTokenHash) {
         LOG_ERROR("Failed to hash account session token.");
         response.result = LoginResponse::InternalError;
@@ -294,20 +294,20 @@ LoginResponse ClientMessageProcessor::authenticateAndCreateSession(
     }
 
     response.accountID = loginInfo.accountID;
-    response.sessionToken = sessionToken;
+    response.sessionToken = std::move(sessionToken);
     response.idleExpiresAt = idleExpiresAt;
     response.absoluteExpiresAt = absoluteExpiresAt;
     response.result = LoginResponse::Success;
     return response;
 }
 
-LogoutResponse ClientMessageProcessor::logoutSession(
-    const std::array<Uint8, SESSION_TOKEN_BYTES>& sessionToken)
+LogoutResponse
+    ClientMessageProcessor::logoutSession(const SessionToken& sessionToken)
 {
     LogoutResponse response{};
 
     std::optional<std::string> sessionTokenHash{
-        CryptoHelpers::hashSecret(sessionToken)};
+        CryptoHelpers::hashSecret(sessionToken.get())};
     if (!sessionTokenHash) {
         LOG_ERROR("Failed to hash account session token.");
         response.result = LogoutResponse::InternalError;
@@ -331,8 +331,8 @@ LogoutResponse ClientMessageProcessor::logoutSession(
 
 RecoverAccountResponse
     ClientMessageProcessor::recoverAccount(const std::string& username,
-                                           const std::string& recoveryKey,
-                                           const std::string& newPassword)
+                                           std::string_view recoveryKey,
+                                           std::string_view newPassword)
 {
     RecoverAccountResponse response{};
 
@@ -357,9 +357,9 @@ RecoverAccountResponse
     }
 
     // Recovery keys are single-use, so generate a replacement.
-    std::string newRecoveryKey{CryptoHelpers::generateRecoveryKey()};
+    RecoveryKey newRecoveryKey{CryptoHelpers::generateRecoveryKey()};
     std::optional<std::string> newRecoveryKeyHash{
-        CryptoHelpers::hashSecret(newRecoveryKey)};
+        CryptoHelpers::hashSecret(newRecoveryKey.view())};
     if (!newRecoveryKeyHash) {
         LOG_ERROR("Failed to hash recovery key.");
         response.result = RecoverAccountResponse::InternalError;
@@ -385,8 +385,7 @@ RecoverAccountResponse
 }
 
 ServiceTicketResponse ClientMessageProcessor::issueServiceTicket(
-    ServiceTicketAudience audience,
-    const std::array<Uint8, SESSION_TOKEN_BYTES>& accountSessionToken)
+    ServiceTicketAudience audience, const SessionToken& accountSessionToken)
 {
     // Note: The audience is echoed back even on failure, so the client can
     //       match the response to its request.
@@ -394,7 +393,7 @@ ServiceTicketResponse ClientMessageProcessor::issueServiceTicket(
 
     // Validate (and refresh) the session that's requesting the ticket.
     std::optional<std::string> sessionTokenHash{
-        CryptoHelpers::hashSecret(accountSessionToken)};
+        CryptoHelpers::hashSecret(accountSessionToken.get())};
     if (!sessionTokenHash) {
         LOG_ERROR("Failed to hash account session token.");
         response.result = ServiceTicketResponse::InternalError;
@@ -415,10 +414,10 @@ ServiceTicketResponse ClientMessageProcessor::issueServiceTicket(
     }
 
     // Generate the raw ticket returned to the client, then hash it for storage.
-    std::array<Uint8, SERVICE_TICKET_BYTES> serviceTicket{};
-    CryptoHelpers::fillRandomBytes(serviceTicket);
+    ServiceTicket serviceTicket{};
+    CryptoHelpers::fillRandomBytes(serviceTicket.get());
     std::optional<std::string> serviceTicketHash{
-        CryptoHelpers::hashSecret(serviceTicket)};
+        CryptoHelpers::hashSecret(serviceTicket.get())};
     if (!serviceTicketHash) {
         LOG_ERROR("Failed to hash service ticket.");
         response.result = ServiceTicketResponse::InternalError;
@@ -448,7 +447,7 @@ ServiceTicketResponse ClientMessageProcessor::issueServiceTicket(
         return response;
     }
 
-    response.ticket = serviceTicket;
+    response.ticket = std::move(serviceTicket);
     response.expiresAt = expiresAt;
     response.result = ServiceTicketResponse::Success;
     return response;

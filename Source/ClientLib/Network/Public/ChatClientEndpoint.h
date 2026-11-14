@@ -57,7 +57,7 @@ public:
      * @return An ID for this connection. All ChatConnectionEvents for it will
      *         carry this ID.
      */
-    Uint32 connect(const std::array<Uint8, SERVICE_TICKET_BYTES>& ticket);
+    Uint32 connect(const ServiceTicket& ticket);
 
     /**
      * Closes the current connection, if there is one.
@@ -100,8 +100,7 @@ private:
     };
 
     /** Connection logic */
-    void connectOnIOThread(Uint32 connectionID,
-                           std::array<Uint8, SERVICE_TICKET_BYTES> ticket);
+    void connectOnIOThread(Uint32 connectionID, ServiceTicket ticket);
     void closeOnIOThread();
     void handleConnectionFailure(Uint32 connectionID,
                                  const asio::error_code& error);
@@ -142,7 +141,7 @@ private:
     std::shared_ptr<Connection> connection;
 
     /** The ticket to present once connected. Cleared after it's sent. */
-    std::array<Uint8, SERVICE_TICKET_BYTES> pendingTicket;
+    ServiceTicket pendingTicket;
 
     /** Only accessed on the IO thread. */
     ConnectionState connectionState;

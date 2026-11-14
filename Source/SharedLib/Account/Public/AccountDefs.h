@@ -1,6 +1,9 @@
 #pragma once
 
+#include "Secret.h"
+#include "SecretString.h"
 #include <SDL3/SDL_stdinc.h>
+#include <array>
 #include <cstddef>
 
 /**
@@ -28,6 +31,18 @@ inline constexpr std::size_t SESSION_TOKEN_BYTES{32};
 
 /** Length of a service ticket in bytes. */
 inline constexpr std::size_t SERVICE_TICKET_BYTES{32};
+
+//--------------------------------------------------------------------------
+// Secrets
+//--------------------------------------------------------------------------
+/** An account session token. Wiped from memory when no longer needed. */
+using SessionToken = Secret<std::array<Uint8, SESSION_TOKEN_BYTES>>;
+
+/** A single-use service ticket. Wiped from memory when no longer needed. */
+using ServiceTicket = Secret<std::array<Uint8, SERVICE_TICKET_BYTES>>;
+
+/** An account recovery key. Wiped from memory when no longer needed. */
+using RecoveryKey = SecretString<RECOVERY_KEY_CHARACTERS>;
 
 /** The max size of each AccountData blob (engine and project components), in
     bytes.

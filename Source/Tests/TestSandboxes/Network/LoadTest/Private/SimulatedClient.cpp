@@ -42,7 +42,7 @@ SimulatedClient::SimulatedClient(unsigned int inAccountIndex,
 void SimulatedClient::connect()
 {
     // Get a ticket from AccountServer.
-    std::array<Uint8, SERVICE_TICKET_BYTES> worldTicket{requestWorldTicket()};
+    ServiceTicket worldTicket{requestWorldTicket()};
 
     // Connect to WorldServer.
     worldSim.connect(worldTicket);
@@ -65,12 +65,12 @@ void SimulatedClient::tick()
     }
 }
 
-std::array<Uint8, SERVICE_TICKET_BYTES> SimulatedClient::requestWorldTicket()
+ServiceTicket SimulatedClient::requestWorldTicket()
 {
     // Log in.
     std::string username{getLoadTestUsername(accountIndex)};
     accountEndpoint.send(
-        LoginRequest{username, std::string{LOAD_TEST_PASSWORD}});
+        LoginRequest{.username{username}, .password{LOAD_TEST_PASSWORD}});
 
     LoginResponse loginResponse{};
     if (!(loginResponseQueue.waitPop(loginResponse,
@@ -105,7 +105,7 @@ std::array<Uint8, SERVICE_TICKET_BYTES> SimulatedClient::requestWorldTicket()
                   static_cast<unsigned int>(ticketResponse.result));
     }
 
-    return ticketResponse.ticket;
+    return std::move(ticketResponse.ticket);
 }
 
 } // End namespace LTC

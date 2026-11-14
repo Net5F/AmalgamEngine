@@ -11,6 +11,7 @@
 #include "entt/signal/sigh.hpp"
 #include <array>
 #include <string>
+#include <string_view>
 
 namespace AM
 {
@@ -41,18 +42,22 @@ public:
     /** Processes responses received from AccountServer. */
     void tick();
 
-    /** Starts a login request. Returns false if another request conflicts. */
-    bool login(const std::string& username, const std::string& password);
+    /** Starts a login request. Returns false if another request conflicts,
+        or if the password is longer than LoginRequest::PASSWORD_MAX. */
+    bool login(const std::string& username, std::string_view password);
 
-    /** Starts a registration request. */
+    /** Starts a registration request. Returns false if another request
+        conflicts, or if the password is longer than
+        RegisterRequest::PASSWORD_MAX. */
     bool registerAccount(const std::string& username,
-                         const std::string& password);
+                         std::string_view password);
 
     /** Starts an account recovery request, which uses the account's recovery
-        key to set a new password. */
+        key to set a new password. Returns false if another request conflicts,
+        or if the key or password is too long. */
     bool recoverAccount(const std::string& username,
-                        const std::string& recoveryKey,
-                        const std::string& newPassword);
+                        std::string_view recoveryKey,
+                        std::string_view newPassword);
 
     /** Revokes the current account session. */
     bool logout();
@@ -98,7 +103,7 @@ private:
 
     /** If we're logged in, these are our current session's info. */
     Sint64 accountID;
-    std::array<Uint8, SESSION_TOKEN_BYTES> sessionToken;
+    SessionToken sessionToken;
     Sint64 idleExpiresAt;
     Sint64 absoluteExpiresAt;
 

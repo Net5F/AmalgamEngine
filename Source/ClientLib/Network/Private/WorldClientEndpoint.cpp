@@ -12,7 +12,6 @@
 #include "asio/error.hpp"
 #include "asio/ip/address.hpp"
 #include "asio/system_error.hpp"
-#include <openssl/crypto.h>
 #include <chrono>
 #include <future>
 #include <limits>
@@ -52,8 +51,7 @@ WorldClientEndpoint::~WorldClientEndpoint()
     closeOnIOThread();
 }
 
-void WorldClientEndpoint::connect(
-    const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket)
+void WorldClientEndpoint::connect(const ServiceTicket& worldTicket)
 {
     if (connectionActive) {
         LOG_WARN("Attempted to connect while connected.");
@@ -61,9 +59,8 @@ void WorldClientEndpoint::connect(
     }
 
     connectionActive = true;
-    asio::post(ioContext, [this, ticketCopy = worldTicket]() mutable {
-        connectOnIOThread(ticketCopy);
-        OPENSSL_cleanse(ticketCopy.data(), ticketCopy.size());
+    asio::post(ioContext, [this, worldTicket]() mutable {
+        connectOnIOThread(std::move(worldTicket));
     });
 }
 
@@ -159,15 +156,14 @@ void WorldClientEndpoint::setMessageProcessorExtension(
     messageProcessor.setExtension(extension);
 }
 
-void WorldClientEndpoint::connectOnIOThread(
-    const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket)
+void WorldClientEndpoint::connectOnIOThread(ServiceTicket worldTicket)
 {
     // If a connection is already open, close it.
     closeOnIOThread();
 
     const Uint32 connectionID{currentConnectionID};
     connectionState = ConnectionState::Connecting;
-    pendingWorldTicket = worldTicket;
+    pendingWorldTicket = std::move(worldTicket);
 
     UserConfig::ServerAddress serverAddress{
         UserConfig::get().getWorldServerAddress()};
@@ -222,7 +218,7 @@ void WorldClientEndpoint::closeOnIOThread()
     ++currentConnectionID;
     connectionState = ConnectionState::Disconnected;
     cancelTimer(connectionTimer);
-    OPENSSL_cleanse(pendingWorldTicket.data(), pendingWorldTicket.size());
+    pendingWorldTicket.wipe();
 
     asio::error_code ignoredError{};
     if (connectingSocket) {
@@ -324,12 +320,9 @@ void WorldClientEndpoint::onConnectionReady(Uint32 connectionID)
     //       idle timeout bound how long we'll wait.
     cancelTimer(connectionTimer);
     connectionState = ConnectionState::Connected;
-    ConnectionRequest connectionRequest{pendingWorldTicket};
+    ConnectionRequest connectionRequest{std::move(pendingWorldTicket)};
     BinaryBufferSharedPtr framedRequest{WorldMessageFramer::frameMessage(
         connectionRequest, adjustmentIteration)};
-    OPENSSL_cleanse(connectionRequest.ticket.data(),
-                    connectionRequest.ticket.size());
-    OPENSSL_cleanse(pendingWorldTicket.data(), pendingWorldTicket.size());
     if (!framedRequest) {
         return;
     }

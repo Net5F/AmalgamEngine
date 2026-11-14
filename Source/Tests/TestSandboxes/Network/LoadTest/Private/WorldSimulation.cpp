@@ -26,8 +26,7 @@ WorldSimulation::WorldSimulation(Client::WorldClientEndpoint& inWorldEndpoint,
     worldEndpoint.registerCurrentTickPtr(&currentTick);
 }
 
-void WorldSimulation::connect(
-    const std::array<Uint8, SERVICE_TICKET_BYTES>& worldTicket)
+void WorldSimulation::connect(const ServiceTicket& worldTicket)
 {
     worldEndpoint.connect(worldTicket);
 

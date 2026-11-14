@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AccountDefs.h"
 #include <SDL3/SDL_stdinc.h>
 #include <cstddef>
 #include <optional>
@@ -33,7 +34,7 @@ public:
     /**
      * Generates an account recovery key, RECOVERY_KEY_CHARACTERS long.
      */
-    static std::string generateRecoveryKey();
+    static RecoveryKey generateRecoveryKey();
 
     /**
      * Hashes the given password using argon2id.

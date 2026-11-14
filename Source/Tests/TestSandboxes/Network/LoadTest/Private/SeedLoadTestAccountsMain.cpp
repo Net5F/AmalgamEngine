@@ -85,8 +85,8 @@ try {
 
         // Every account needs a recovery key, but nobody will use these, so
         // we just store the hash and discard the key.
-        std::optional<std::string> recoveryKeyHash{
-            CryptoHelpers::hashSecret(CryptoHelpers::generateRecoveryKey())};
+        std::optional<std::string> recoveryKeyHash{CryptoHelpers::hashSecret(
+            CryptoHelpers::generateRecoveryKey().view())};
         if (!recoveryKeyHash) {
             std::printf("Failed to hash recovery key for: %s\n",
                         username.c_str());

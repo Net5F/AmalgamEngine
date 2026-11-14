@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AccountClientMessageType.h"
+#include "SecretString.h"
 #include <string>
 
 namespace AM
@@ -23,9 +24,8 @@ struct LoginRequest {
     /** The account's username. */
     std::string username{};
 
-    // TODO: Need SecureString, secure fill
     /** The account's password in plaintext. */
-    std::string password{};
+    SecretString<PASSWORD_MAX> password{};
 };
 
 template<typename S>
