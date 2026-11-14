@@ -16,6 +16,9 @@ struct ServiceTicketRequest {
     static constexpr AccountClientMessageType MESSAGE_TYPE{
         AccountClientMessageType::ServiceTicketRequest};
 
+    /** This message holds secrets, so its buffers are wiped. */
+    static constexpr bool IS_SENSITIVE{true};
+
     /** The service that the ticket should authorize a connection to. */
     ServiceTicketAudience audience{ServiceTicketAudience::WorldServer};
 

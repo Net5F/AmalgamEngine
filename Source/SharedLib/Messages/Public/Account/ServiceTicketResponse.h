@@ -15,6 +15,9 @@ struct ServiceTicketResponse {
     static constexpr AccountClientMessageType MESSAGE_TYPE{
         AccountClientMessageType::ServiceTicketResponse};
 
+    /** This message holds secrets, so its buffers are wiped. */
+    static constexpr bool IS_SENSITIVE{true};
+
     enum Result : Uint8 { Success, InvalidSession, RateLimited, InternalError };
     Result result{Result::InternalError};
 

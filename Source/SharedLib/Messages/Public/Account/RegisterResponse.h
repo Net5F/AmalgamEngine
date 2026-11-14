@@ -15,6 +15,9 @@ struct RegisterResponse {
     static constexpr AccountClientMessageType MESSAGE_TYPE{
         AccountClientMessageType::RegisterResponse};
 
+    /** This message holds secrets, so its buffers are wiped. */
+    static constexpr bool IS_SENSITIVE{true};
+
     enum Result : Uint8 {
         Success,
         InvalidUsername,

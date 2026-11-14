@@ -15,6 +15,9 @@ struct RecoverAccountResponse {
     static constexpr AccountClientMessageType MESSAGE_TYPE{
         AccountClientMessageType::RecoverAccountResponse};
 
+    /** This message holds secrets, so its buffers are wiped. */
+    static constexpr bool IS_SENSITIVE{true};
+
     enum Result : Uint8 {
         Success,
         /** The username or recovery key was incorrect, or the account is

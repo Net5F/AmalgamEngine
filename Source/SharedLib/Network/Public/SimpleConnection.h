@@ -4,6 +4,7 @@
 #include "SimpleMessageFramer.h"
 #include "SimpleMessageComposer.h"
 #include "BinaryBuffer.h"
+#include "ByteTools.h"
 #include "Log.h"
 #include "asio/buffer.hpp"
 #include "asio/error.hpp"
@@ -66,6 +67,14 @@ public:
             LOG_FATAL("TLS write queue byte limit is smaller than the max "
                       "write frame size.");
         }
+    }
+
+    ~SimpleConnection() override
+    {
+        // If we disconnected partway through a message, wipe what we received.
+        // Note: Pending reads hold a reference to this connection, so none can
+        //       be in progress by the time this runs.
+        ByteTools::wipe(readBuffer.data(), readBuffer.size());
     }
 
     /**
@@ -224,24 +233,36 @@ private:
             return;
         }
 
+        // A message was completed. Process it, then wipe its payload since
+        // it may hold secrets.
+        BinaryBuffer& payload{composeResult.message.payload};
+        bool keepReading{processMessage(composeResult.message.type, payload)};
+        ByteTools::wipe(payload.data(), payload.size());
+        if (keepReading) {
+            readNext();
+        }
+    }
+
+    /**
+     * Passes a completed message to the registered callback.
+     *
+     * @return true if we should keep reading, else false.
+     */
+    bool processMessage(MessageType type, std::span<const Uint8> payload)
+    {
         if (!cancelReceiveTimer()) {
-            return;
+            return false;
         }
         frameInProgress = false;
 
-        // A message was completed. Pass it to the registered callback.
-        const auto& message{composeResult.message};
         if (!messageCallback) {
             disconnect(
                 asio::error::make_error_code(asio::error::invalid_argument));
-            return;
+            return false;
         }
-        messageCallback(message.type, message.payload);
-        if (!isReady()) {
-            return;
-        }
+        messageCallback(type, payload);
 
-        readNext();
+        return isReady();
     }
 
     /**

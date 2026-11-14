@@ -18,6 +18,9 @@ struct ConsumeServiceTicketRequest {
     static constexpr AccountServiceMessageType MESSAGE_TYPE{
         AccountServiceMessageType::ConsumeServiceTicketRequest};
 
+    /** This message holds secrets, so its buffers are wiped. */
+    static constexpr bool IS_SENSITIVE{true};
+
     /** Chosen by the requesting service. Echoed back in the response so
         the service can match it to this request. */
     Uint32 requestID{0};

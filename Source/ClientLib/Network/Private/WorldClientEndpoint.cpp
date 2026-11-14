@@ -327,7 +327,7 @@ void WorldClientEndpoint::onConnectionReady(Uint32 connectionID)
         return;
     }
 
-    sendOnIOThread(ByteTools::makeWipedOnRelease(std::move(*framedRequest)));
+    sendOnIOThread(std::move(framedRequest));
 }
 
 void WorldClientEndpoint::onConnectionDisconnected(

@@ -15,6 +15,9 @@ struct LogoutRequest {
     static constexpr AccountClientMessageType MESSAGE_TYPE{
         AccountClientMessageType::LogoutRequest};
 
+    /** This message holds secrets, so its buffers are wiped. */
+    static constexpr bool IS_SENSITIVE{true};
+
     /** The account session to revoke. */
     SessionToken sessionToken{};
 };

@@ -103,4 +103,13 @@ struct MessageHeaderIndex {
 static constexpr unsigned int MESSAGE_HEADER_SIZE{
     MessageHeaderIndex::MessageStart};
 
+/**
+ * Satisfied by message types that hold secrets (passwords, tokens, tickets,
+ * etc), declared with "static constexpr bool IS_SENSITIVE{true};".
+ *
+ * When a sensitive message is framed, its buffer is wiped when released.
+ */
+template<typename Message>
+concept SensitiveMessage = Message::IS_SENSITIVE;
+
 } // End namespace AM

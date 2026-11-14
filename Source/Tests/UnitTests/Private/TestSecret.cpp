@@ -3,6 +3,22 @@
 #include "SecretString.h"
 #include "Serialize.h"
 #include "Deserialize.h"
+#include "NetworkDefs.h"
+#include "SimpleMessageFramer.h"
+#include "LoginRequest.h"
+#include "LoginResponse.h"
+#include "RegisterRequest.h"
+#include "RegisterResponse.h"
+#include "RecoverAccountRequest.h"
+#include "RecoverAccountResponse.h"
+#include "LogoutRequest.h"
+#include "ServiceTicketRequest.h"
+#include "ServiceTicketResponse.h"
+#include "ConsumeServiceTicketRequest.h"
+#include "ChatConnectionRequest.h"
+#include "ConnectionRequest.h"
+#include "ChatSendRequest.h"
+#include "SaveAccountDataRequest.h"
 #include <algorithm>
 #include <array>
 #include <new>
@@ -180,5 +196,47 @@ TEST_CASE("SecretString")
         REQUIRE(!Deserialize::fromBuffer(bytes.data(), bytes.size(),
                                          secretMessage));
         REQUIRE(secretMessage.text.empty());
+    }
+}
+
+TEST_CASE("SensitiveMessage")
+{
+    SECTION("Every message that holds a secret is flagged")
+    {
+        STATIC_REQUIRE(SensitiveMessage<LoginRequest>);
+        STATIC_REQUIRE(SensitiveMessage<LoginResponse>);
+        STATIC_REQUIRE(SensitiveMessage<RegisterRequest>);
+        STATIC_REQUIRE(SensitiveMessage<RegisterResponse>);
+        STATIC_REQUIRE(SensitiveMessage<RecoverAccountRequest>);
+        STATIC_REQUIRE(SensitiveMessage<RecoverAccountResponse>);
+        STATIC_REQUIRE(SensitiveMessage<LogoutRequest>);
+        STATIC_REQUIRE(SensitiveMessage<ServiceTicketRequest>);
+        STATIC_REQUIRE(SensitiveMessage<ServiceTicketResponse>);
+        STATIC_REQUIRE(SensitiveMessage<ConsumeServiceTicketRequest>);
+        STATIC_REQUIRE(SensitiveMessage<ChatConnectionRequest>);
+        STATIC_REQUIRE(SensitiveMessage<ConnectionRequest>);
+    }
+
+    SECTION("Messages without secrets aren't flagged")
+    {
+        STATIC_REQUIRE(!SensitiveMessage<ChatSendRequest>);
+        STATIC_REQUIRE(!SensitiveMessage<SaveAccountDataRequest>);
+    }
+
+    SECTION("Framed sensitive messages are still correct")
+    {
+        // Note: The wiping deleter is internal to the shared_ptr, so we check
+        //       that framing through it produces the same bytes.
+        LoginRequest loginRequest{.username{"user"}, .password{"password123"}};
+        SimpleMessageFramer<AccountClientMessageType> framer{500};
+        BinaryBufferSharedPtr framed{framer.frameMessage(loginRequest)};
+        REQUIRE(framed);
+
+        LoginRequest decoded{};
+        REQUIRE(Deserialize::fromBuffer(framed->data(),
+                                        (framed->size() - MESSAGE_HEADER_SIZE),
+                                        decoded, MESSAGE_HEADER_SIZE));
+        REQUIRE(decoded.username == "user");
+        REQUIRE(std::string{decoded.password.view()} == "password123");
     }
 }

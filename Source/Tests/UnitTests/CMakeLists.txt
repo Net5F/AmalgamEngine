@@ -32,6 +32,7 @@ add_executable(UnitTests
     Private/TestNavRegions.cpp
     Private/TestNavRequestQueue.cpp
     Private/TestNavSearch.cpp
+    Private/TestNetworkBenchmark.cpp
     Private/TestPathfinder.cpp
     Private/TestSecret.cpp
 )

@@ -16,6 +16,9 @@ struct ChatConnectionRequest {
     static constexpr ChatClientMessageType MESSAGE_TYPE{
         ChatClientMessageType::ChatConnectionRequest};
 
+    /** This message holds secrets, so its buffers are wiped. */
+    static constexpr bool IS_SENSITIVE{true};
+
     /** The single-use Chat Server ticket that the client received from
         AccountServer. */
     ServiceTicket ticket{};

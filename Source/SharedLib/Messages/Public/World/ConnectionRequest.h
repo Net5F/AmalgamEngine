@@ -18,6 +18,9 @@ struct ConnectionRequest {
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::ConnectionRequest};
 
+    /** This message holds secrets, so its buffers are wiped. */
+    static constexpr bool IS_SENSITIVE{true};
+
     /** The single-use World Server ticket that the client received from
         AccountServer. */
     ServiceTicket ticket{};

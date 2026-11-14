@@ -17,6 +17,9 @@ struct RecoverAccountRequest {
     static constexpr AccountClientMessageType MESSAGE_TYPE{
         AccountClientMessageType::RecoverAccountRequest};
 
+    /** This message holds secrets, so its buffers are wiped. */
+    static constexpr bool IS_SENSITIVE{true};
+
     /** Used as a "we should never hit this" cap on username length. */
     static constexpr std::size_t USERNAME_MAX{100};
     /** Used as a "we should never hit this" cap on password length. */

@@ -60,8 +60,13 @@ BinaryBufferSharedPtr
 
     // Serialize the message struct into a buffer, leaving room for the
     // headers.
-    BinaryBufferSharedPtr buffer{
-        std::make_shared<BinaryBuffer>(totalMessageSize)};
+    BinaryBufferSharedPtr buffer{};
+    if constexpr (SensitiveMessage<Message>) {
+        buffer = ByteTools::makeWipedOnRelease(BinaryBuffer(totalMessageSize));
+    }
+    else {
+        buffer = std::make_shared<BinaryBuffer>(totalMessageSize);
+    }
     std::size_t serializedSize{
         Serialize::toBuffer(buffer->data(), buffer->size(), message,
                             (CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE))};

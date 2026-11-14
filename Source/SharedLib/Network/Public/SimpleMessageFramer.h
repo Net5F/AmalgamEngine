@@ -51,8 +51,15 @@ public:
             return {};
         }
 
-        BinaryBufferSharedPtr buffer{
-            std::make_shared<BinaryBuffer>(MESSAGE_HEADER_SIZE + payloadSize)};
+        BinaryBufferSharedPtr buffer{};
+        if constexpr (SensitiveMessage<Message>) {
+            buffer = ByteTools::makeWipedOnRelease(
+                BinaryBuffer(MESSAGE_HEADER_SIZE + payloadSize));
+        }
+        else {
+            buffer = std::make_shared<BinaryBuffer>(MESSAGE_HEADER_SIZE
+                                                    + payloadSize);
+        }
         std::size_t serializedSize{Serialize::toBuffer(
             buffer->data(), buffer->size(), message, MESSAGE_HEADER_SIZE)};
         if (serializedSize != payloadSize) {
