@@ -57,9 +57,7 @@ public:
     , receiveTimer{tlsTransport->getExecutor()}
     , messageFramer{config.maxWritePayloadSize}
     , messageComposer{config.maxReadPayloadSize}
-    , readBuffer{}
     , messageCallback{}
-    , frameInProgress{false}
     {
         std::size_t maxWriteFrameSize{MESSAGE_HEADER_SIZE
                                       + config.maxWritePayloadSize};
@@ -67,14 +65,6 @@ public:
             LOG_FATAL("TLS write queue byte limit is smaller than the max "
                       "write frame size.");
         }
-    }
-
-    ~SimpleConnection() override
-    {
-        // If we disconnected partway through a message, wipe what we received.
-        // Note: Pending reads hold a reference to this connection, so none can
-        //       be in progress by the time this runs.
-        ByteTools::wipe(readBuffer.data(), readBuffer.size());
     }
 
     /**
@@ -134,75 +124,20 @@ private:
             return;
         }
 
-        std::size_t readSize{messageComposer.nextReadSize()};
-        if (readSize == 0) {
-            disconnect(
-                asio::error::make_error_code(asio::error::invalid_argument));
-            return;
-        }
-
-        readBuffer.resize(readSize);
-        std::shared_ptr<Self> self{
-            std::static_pointer_cast<Self>(shared_from_this())};
-
-        // While no frame is in progress, read the first byte separately so we
-        // can distinguish an idle connection from a partially received frame.
-        // This lets us detect slowloris-style attacks.
-        if (!frameInProgress) {
+        // If we're waiting for a new frame, start the idle timer.
+        // Note: The composer reads a frame's first byte separately, so we can
+        //       distinguish an idle connection from a partially received
+        //       frame. This lets us detect slowloris-style attacks.
+        if (!messageComposer.isFrameInProgress()) {
             if (!startReceiveTimer(idleTimeoutS)) {
                 return;
             }
-
-            // Async read the first byte.
-            if (!tlsTransport->asyncReadExactly(
-                    asio::buffer(readBuffer.data(), 1),
-                    [self](std::size_t) { self->handleFrameStarted(); })) {
-                cancelReceiveTimer();
-                disconnect(
-                    asio::error::make_error_code(asio::error::not_connected));
-            }
-            return;
         }
 
-        // Header received. Async read the message payload.
-        if (!tlsTransport->asyncReadExactly(
-                asio::buffer(readBuffer),
-                [self](std::size_t) { self->handleRead(); })) {
-            cancelReceiveTimer();
-            disconnect(
-                asio::error::make_error_code(asio::error::not_connected));
-        }
-    }
-
-    /**
-     * Handles the state changes for the "first byte received" state.
-     */
-    void handleFrameStarted()
-    {
-        if (!isReady()) {
-            return;
-        }
-
-        if (!cancelReceiveTimer()) {
-            return;
-        }
-
-        frameInProgress = true;
-        if (!startReceiveTimer(partialReceiveTimeoutS)) {
-            return;
-        }
-
-        // If the message is 1-byte long, handle it immediately.
-        if (readBuffer.size() == 1) {
-            handleRead();
-            return;
-        }
-
-        // Async read the rest of the message header.
         std::shared_ptr<Self> self{
             std::static_pointer_cast<Self>(shared_from_this())};
         if (!tlsTransport->asyncReadExactly(
-                asio::buffer(readBuffer.data() + 1, readBuffer.size() - 1),
+                messageComposer.getNextReadBuffer(),
                 [self](std::size_t) { self->handleRead(); })) {
             cancelReceiveTimer();
             disconnect(
@@ -219,15 +154,25 @@ private:
             return;
         }
 
-        // Add bytes to the composer. If a message hasn't been completed, start
-        // the next async read.
-        auto composeResult{messageComposer.addBytes(std::move(readBuffer))};
-        readBuffer = {};
+        // Tell the composer to process the read bytes (they were written
+        // directly into its buffer).
+        auto composeResult{messageComposer.processReadBytes()};
         if (composeResult.error) {
             cancelReceiveTimer();
             disconnect(composeResult.error);
             return;
         }
+
+        // If a frame was started, switch from the idle timer to the partial
+        // receive timer.
+        if (composeResult.frameStarted) {
+            if (!cancelReceiveTimer()
+                || !startReceiveTimer(partialReceiveTimeoutS)) {
+                return;
+            }
+        }
+
+        // If a message hasn't been completed, start the next async read.
         if (!composeResult.frameComplete) {
             readNext();
             return;
@@ -235,7 +180,7 @@ private:
 
         // A message was completed. Process it, then wipe its payload since
         // it may hold secrets.
-        BinaryBuffer& payload{composeResult.message.payload};
+        std::span<Uint8> payload{composeResult.message.payload};
         bool keepReading{processMessage(composeResult.message.type, payload)};
         ByteTools::wipe(payload.data(), payload.size());
         if (keepReading) {
@@ -253,7 +198,6 @@ private:
         if (!cancelReceiveTimer()) {
             return false;
         }
-        frameInProgress = false;
 
         if (!messageCallback) {
             disconnect(
@@ -326,15 +270,12 @@ private:
     asio::steady_timer receiveTimer;
 
     SimpleMessageFramer<MessageType> messageFramer;
+    /** Owns our receive buffers. On destruction, wipes them. */
     SimpleMessageComposer<MessageType> messageComposer;
-
-    BinaryBuffer readBuffer;
 
     // Note: We don't expect this to throw. It's up to the caller to ensure
     // that.
     MessageCallback messageCallback;
-
-    bool frameInProgress;
 };
 
 } // namespace AM

@@ -25,7 +25,7 @@ void WorldClientMessageComposer::setMaxPayloadSize(std::size_t inMaxPayloadSize)
     maxPayloadSize = inMaxPayloadSize;
 }
 
-asio::mutable_buffer WorldClientMessageComposer::nextReadBuffer()
+asio::mutable_buffer WorldClientMessageComposer::getNextReadBuffer()
 {
     if (state == ReadState::Header) {
         return asio::buffer(headerBuffer);
@@ -34,7 +34,7 @@ asio::mutable_buffer WorldClientMessageComposer::nextReadBuffer()
 }
 
 WorldClientMessageComposer::ComposeResult
-    WorldClientMessageComposer::onBytesRead()
+    WorldClientMessageComposer::processReadBytes()
 {
     if (state == ReadState::Header) {
         return parseHeader();

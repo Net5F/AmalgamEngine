@@ -63,7 +63,7 @@ void WorldConnection::readNext()
     std::shared_ptr<WorldConnection> self{
         std::static_pointer_cast<WorldConnection>(shared_from_this())};
     if (!tlsTransport->asyncReadExactly(
-            batchComposer.nextReadBuffer(),
+            batchComposer.getNextReadBuffer(),
             [self](std::size_t) { self->handleRead(); })) {
         disconnect(asio::error::make_error_code(asio::error::not_connected));
     }
@@ -75,10 +75,11 @@ void WorldConnection::handleRead()
         return;
     }
 
-    // Pass the bytes to the composer. If a batch hasn't been completed, start
-    // the next async read.
+    // Tell the composer to process the read bytes (they were written directly
+    // into its buffer). If a batch hasn't been completed, start the next async
+    // read.
     WorldBatchComposer::ComposeResult composeResult{
-        batchComposer.onBytesRead()};
+        batchComposer.processReadBytes()};
     if (composeResult.error) {
         disconnect(composeResult.error);
         return;

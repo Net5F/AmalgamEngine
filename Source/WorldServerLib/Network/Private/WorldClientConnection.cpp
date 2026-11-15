@@ -104,7 +104,7 @@ void WorldClientConnection::readNext()
     std::shared_ptr<WorldClientConnection> self{
         std::static_pointer_cast<WorldClientConnection>(shared_from_this())};
     if (!tlsTransport->asyncReadExactly(
-            messageComposer.nextReadBuffer(),
+            messageComposer.getNextReadBuffer(),
             [self](std::size_t) { self->handleRead(); })) {
         disconnect(asio::error::make_error_code(asio::error::not_connected));
     }
@@ -116,10 +116,11 @@ void WorldClientConnection::handleRead()
         return;
     }
 
-    // Pass the bytes to the composer. If a message hasn't been completed,
-    // start the next async read.
+    // Tell the composer to process the read bytes (they were written directly
+    // into its buffer). If a message hasn't been completed, start the next
+    // async read.
     WorldClientMessageComposer::ComposeResult composeResult{
-        messageComposer.onBytesRead()};
+        messageComposer.processReadBytes()};
     if (composeResult.error) {
         disconnect(composeResult.error);
         return;

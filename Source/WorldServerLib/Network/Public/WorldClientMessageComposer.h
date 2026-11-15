@@ -19,7 +19,7 @@ namespace WorldServer
  *
  * Clients send each message individually, prefixed by a client header and a
  * message header. This class owns the receive buffers: the caller reads
- * directly into nextReadBuffer(), then calls onBytesRead().
+ * directly into getNextReadBuffer(), then calls processReadBytes().
  *
  * Note: Since deserialization requires extra context, we defer it to
  *       MessageProcessor.
@@ -56,12 +56,12 @@ public:
     /**
      * Returns the buffer that the next read should exactly fill.
      */
-    asio::mutable_buffer nextReadBuffer();
+    asio::mutable_buffer getNextReadBuffer();
 
     /**
-     * Consumes the bytes that were read into nextReadBuffer().
+     * Consumes the bytes that were read into getNextReadBuffer().
      */
-    ComposeResult onBytesRead();
+    ComposeResult processReadBytes();
 
     void reset();
 

@@ -22,7 +22,7 @@ WorldBatchComposer::WorldBatchComposer()
 {
 }
 
-asio::mutable_buffer WorldBatchComposer::nextReadBuffer()
+asio::mutable_buffer WorldBatchComposer::getNextReadBuffer()
 {
     if (state == ReadState::Header) {
         return asio::buffer(headerBuffer);
@@ -30,7 +30,7 @@ asio::mutable_buffer WorldBatchComposer::nextReadBuffer()
     return asio::buffer(batchBuffer.data(), pendingBatchSize);
 }
 
-WorldBatchComposer::ComposeResult WorldBatchComposer::onBytesRead()
+WorldBatchComposer::ComposeResult WorldBatchComposer::processReadBytes()
 {
     if (state == ReadState::Header) {
         return parseHeader();
