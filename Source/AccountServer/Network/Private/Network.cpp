@@ -1,12 +1,15 @@
 #include "Network.h"
 #include "Database.h"
+#include "Config.h"
 #include "UserConfig.h"
 #include "TlsHelpers.h"
 #include "Paths.h"
 #include "Log.h"
 #include "asio/io_context.hpp"
+#include "asio/post.hpp"
 #include "asio/system_error.hpp"
 #include <openssl/ssl.h>
+#include <chrono>
 #include <string>
 
 namespace AM
@@ -16,9 +19,11 @@ namespace AccountServer
 
 Network::Network(asio::io_context& inIoContext, Database& inDatabase)
 : ioContext{inIoContext}
+, database{inDatabase}
 , clientSSLContext{asio::ssl::context::tls_server}
 , serviceSSLContext{asio::ssl::context::tls_server}
 , databasePool{UserConfig::get().getDatabaseWorkerCount()}
+, sessionCleanupTimer{inIoContext}
 , servicePins{loadServicePins()}
 , clientEndpoint{inIoContext, clientSSLContext, databasePool, inDatabase}
 , serviceEndpoint{inIoContext, serviceSSLContext, databasePool, inDatabase,
@@ -38,6 +43,10 @@ void Network::start()
 {
     clientEndpoint.start();
     serviceEndpoint.start();
+
+    // Clean up anything that expired while we were offline, and schedule the
+    // periodic cleanup.
+    cleanUpExpiredSessions();
 
     // clientEndpoint and serviceEndpoint both use this context
     // for their events. By running it, we run them all.
@@ -128,6 +137,22 @@ void Network::configureServicePeerVerification()
     } catch (const asio::system_error& e) {
         LOG_FATAL("Failed to configure service certificate pins: %s", e.what());
     }
+}
+
+void Network::cleanUpExpiredSessions()
+{
+    // Run the cleanup on the database pool, so it doesn't block network IO.
+    // Note: Database logs any errors, and we'll retry on the next interval.
+    asio::post(databasePool, [this]() { database.deleteExpiredSessions(); });
+
+    sessionCleanupTimer.expires_after(
+        std::chrono::duration_cast<asio::steady_timer::duration>(
+            std::chrono::duration<double>(Config::SESSION_CLEANUP_INTERVAL_S)));
+    sessionCleanupTimer.async_wait([this](const asio::error_code& error) {
+        if (!error) {
+            cleanUpExpiredSessions();
+        }
+    });
 }
 
 } // End namespace AccountServer

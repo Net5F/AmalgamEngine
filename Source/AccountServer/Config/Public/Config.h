@@ -91,6 +91,10 @@ public:
 
     /** How long a service ticket remains valid. */
     static constexpr Sint64 SERVICE_TICKET_LIFETIME_S{60};
+
+    /** How often we delete expired sessions and service tickets from the
+        database. */
+    static constexpr double SESSION_CLEANUP_INTERVAL_S{60 * 60};
 };
 
 } // End namespace AccountServer

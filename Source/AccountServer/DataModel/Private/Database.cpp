@@ -39,7 +39,14 @@ Database::Database(const std::string& databasePath)
 , consumeServiceTicketQuery{nullptr}
 , getAccountDataQuery{nullptr}
 , saveAccountDataQuery{nullptr}
+, deleteExpiredServiceTicketsQuery{nullptr}
+, deleteExpiredSessionsQuery{nullptr}
 {
+    // Enforce our REFERENCES constraints, including their ON DELETE CASCADE.
+    // Note: SQLite leaves this off by default, and it must be set per
+    //       connection (outside of any transaction).
+    database.exec("PRAGMA foreign_keys = ON");
+
     // If any of our tables don't exist in Accounts.db, initialize them.
     initTables();
 
@@ -227,6 +234,24 @@ Database::Database(const std::string& databasePath)
                 serialized_project_components
                     = excluded.serialized_project_components,
                 updated_at = excluded.updated_at
+        )");
+
+    // Note: Consumed and revoked tickets are kept until they expire, which is
+    //       at most SERVICE_TICKET_LIFETIME_S later.
+    deleteExpiredServiceTicketsQuery
+        = std::make_unique<SQLite::Statement>(database, R"(
+            DELETE FROM service_tickets
+            WHERE expires_at <= unixepoch()
+        )");
+
+    // Note: idle_expires_at is clamped to absolute_expires_at on refresh, so
+    //       checking it covers both expirations.
+    // Note: Deleting a session cascades to its service tickets.
+    deleteExpiredSessionsQuery
+        = std::make_unique<SQLite::Statement>(database, R"(
+            DELETE FROM account_sessions
+            WHERE revoked_at IS NOT NULL
+               OR idle_expires_at <= unixepoch()
         )");
 }
 
@@ -465,6 +490,35 @@ Database::RevokeAllSessionsResult Database::revokeAllSessions(Sint64 accountID)
     }
 }
 
+Database::DeleteExpiredSessionsResult Database::deleteExpiredSessions()
+{
+    std::scoped_lock lock{databaseMutex};
+
+    try {
+        SQLite::Transaction transaction{database};
+
+        int deletedTicketCount{deleteExpiredServiceTicketsQuery->exec()};
+        deleteExpiredServiceTicketsQuery->reset();
+
+        int deletedSessionCount{deleteExpiredSessionsQuery->exec()};
+        deleteExpiredSessionsQuery->reset();
+
+        transaction.commit();
+
+        if ((deletedSessionCount > 0) || (deletedTicketCount > 0)) {
+            LOG_INFO("Deleted %d expired sessions and %d expired service "
+                     "tickets.",
+                     deletedSessionCount, deletedTicketCount);
+        }
+        return DeleteExpiredSessionsResult::Success;
+    } catch (std::exception& e) {
+        deleteExpiredServiceTicketsQuery->tryReset();
+        deleteExpiredSessionsQuery->tryReset();
+        LOG_ERROR("Failed to delete expired sessions: %s", e.what());
+        return DeleteExpiredSessionsResult::DatabaseError;
+    }
+}
+
 Database::CreateServiceTicketResult Database::createServiceTicket(
     Sint64 accountSessionID, const std::string& tokenHash,
     ServiceTicketAudience audience, Sint64 expiresAt)
@@ -670,6 +724,9 @@ void Database::initTables()
                 CREATE UNIQUE INDEX account_recovery_keys_one_active_uq
                     ON account_recovery_keys(account_id)
                     WHERE used_at IS NULL AND revoked_at IS NULL;
+
+                CREATE INDEX account_recovery_keys_account_id_idx
+                    ON account_recovery_keys(account_id);
             )");
         }
 
@@ -703,14 +760,10 @@ void Database::initTables()
                 ) STRICT;
 
                 CREATE INDEX account_sessions_account_id_idx
-                    ON account_sessions(account_id)
-                    WHERE revoked_at IS NULL;
+                    ON account_sessions(account_id);
 
                 CREATE INDEX account_sessions_idle_expires_at_idx
                     ON account_sessions(idle_expires_at);
-
-                CREATE INDEX account_sessions_absolute_expires_at_idx
-                    ON account_sessions(absolute_expires_at);
             )");
         }
 
@@ -747,8 +800,7 @@ void Database::initTables()
                 ) STRICT;
 
                 CREATE INDEX service_tickets_account_session_id_idx
-                    ON service_tickets(account_session_id)
-                    WHERE consumed_at IS NULL AND revoked_at IS NULL;
+                    ON service_tickets(account_session_id);
 
                 CREATE INDEX service_tickets_expires_at_idx
                     ON service_tickets(expires_at);

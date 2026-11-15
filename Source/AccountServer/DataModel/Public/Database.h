@@ -151,6 +151,15 @@ public:
      */
     RevokeAllSessionsResult revokeAllSessions(Sint64 accountID);
 
+    enum class DeleteExpiredSessionsResult { Success, DatabaseError };
+    /**
+     * Deletes all expired service tickets, and all revoked or expired
+     * sessions (along with their remaining tickets).
+     *
+     * Every query already ignores these rows, so this only reclaims space.
+     */
+    DeleteExpiredSessionsResult deleteExpiredSessions();
+
     //-------------------------------------------------------------------------
     // Service tickets
     //-------------------------------------------------------------------------
@@ -250,6 +259,8 @@ protected:
     std::unique_ptr<SQLite::Statement> consumeServiceTicketQuery;
     std::unique_ptr<SQLite::Statement> getAccountDataQuery;
     std::unique_ptr<SQLite::Statement> saveAccountDataQuery;
+    std::unique_ptr<SQLite::Statement> deleteExpiredServiceTicketsQuery;
+    std::unique_ptr<SQLite::Statement> deleteExpiredSessionsQuery;
 };
 
 } // End namespace AccountServer

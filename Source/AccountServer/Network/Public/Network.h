@@ -4,6 +4,7 @@
 #include "AccountServiceEndpoint.h"
 #include "TlsHelpers.h"
 #include "asio/ssl/context.hpp"
+#include "asio/steady_timer.hpp"
 #include "asio/thread_pool.hpp"
 
 namespace asio
@@ -50,8 +51,16 @@ private:
      */
     void configureServicePeerVerification();
 
+    /**
+     * Deletes expired sessions and service tickets on the database pool, then
+     * schedules the next cleanup.
+     */
+    void cleanUpExpiredSessions();
+
     /** Shared network event queue for all endpoints. */
     asio::io_context& ioContext;
+
+    Database& database;
 
     /** Used by clientEndpoint. Doesn't authenticate peers. */
     asio::ssl::context clientSSLContext;
@@ -61,6 +70,10 @@ private:
     asio::ssl::context serviceSSLContext;
 
     asio::thread_pool databasePool;
+
+    /** Fires every SESSION_CLEANUP_INTERVAL_S to trigger
+        cleanUpExpiredSessions(). */
+    asio::steady_timer sessionCleanupTimer;
 
     /** The pins of each service that's allowed to connect to us, indexed by
         service. */
