@@ -222,12 +222,8 @@ public:
     bool saveItemData(ItemID itemID, std::span<const Uint8> serializedItem,
                       ItemVersion version, std::string_view initScript);
 
-    /**
-     * Attempts to delete an item table entry for the given item.
-     *
-     * If the item is not found in the database, does nothing.
-     */
-    void deleteItemData(ItemID itemID);
+    // Note: There's no deleteItemData because items should never be deleted,
+    //       only modified.
 
     /**
      * Calls the given callback on each item data entry.
@@ -344,7 +340,6 @@ protected:
     std::unique_ptr<SQLite::Statement> insertPlayerEntityQuery;
     std::unique_ptr<SQLite::Statement> getPlayerEntityQuery;
     std::unique_ptr<SQLite::Statement> insertItemQuery;
-    std::unique_ptr<SQLite::Statement> deleteItemQuery;
     std::unique_ptr<SQLite::Statement> iterateItemsQuery;
     std::unique_ptr<SQLite::Statement> insertGlobalStoredValueMapQuery;
     std::unique_ptr<SQLite::Statement> getGlobalStoredValueMapQuery;

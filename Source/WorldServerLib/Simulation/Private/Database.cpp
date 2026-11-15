@@ -43,7 +43,6 @@ Database::Database()
 , insertPlayerEntityQuery{nullptr}
 , getPlayerEntityQuery{nullptr}
 , insertItemQuery{nullptr}
-, deleteItemQuery{nullptr}
 , iterateItemsQuery{nullptr}
 , insertGlobalStoredValueMapQuery{nullptr}
 , getGlobalStoredValueMapQuery{nullptr}
@@ -92,8 +91,6 @@ Database::Database()
                 version=excluded.version,
                 init_script=excluded.init_script
         )");
-    deleteItemQuery = std::make_unique<SQLite::Statement>(
-        database, "DELETE FROM items WHERE id=?");
     iterateItemsQuery
         = std::make_unique<SQLite::Statement>(database, "SELECT * FROM items");
 
@@ -262,22 +259,6 @@ bool Database::saveItemData(ItemID itemID,
     //       error.
     insertItemQuery->tryReset();
     return succeeded;
-}
-
-void Database::deleteItemData(ItemID itemID)
-{
-    try {
-        deleteItemQuery->bind(1, static_cast<int>(itemID));
-
-        deleteItemQuery->exec();
-    } catch (std::exception& e) {
-        LOG_ERROR("Failed to delete item data: %s", e.what());
-    }
-
-    // Note: We reset even on failure, so one failed delete doesn't block
-    //       the rest. We use tryReset() since reset() re-throws a failed
-    //       step's error.
-    deleteItemQuery->tryReset();
 }
 
 void Database::saveGlobalStoredValueMap(std::span<const Uint8> serializedMap)
