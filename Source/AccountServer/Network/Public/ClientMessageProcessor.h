@@ -2,6 +2,7 @@
 
 #include "AccountDefs.h"
 #include "AccountClientMessageType.h"
+#include "AccountServiceMessageType.h"
 #include "ConnectionHandle.h"
 #include "SimpleMessageFramer.h"
 #include "RegisterResponse.h"
@@ -9,15 +10,19 @@
 #include "LogoutResponse.h"
 #include "RecoverAccountResponse.h"
 #include "ServiceTicketResponse.h"
+#include "AccountModerationResponse.h"
+#include "AccountModeratedNotice.h"
 #include "asio/error_code.hpp"
 #include "asio/thread_pool.hpp"
 #include "asio/io_context.hpp"
 #include <SDL3/SDL_stdinc.h>
 #include <array>
 #include <functional>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace AM
 {
@@ -26,6 +31,7 @@ struct LoginRequest;
 struct LogoutRequest;
 struct RecoverAccountRequest;
 struct ServiceTicketRequest;
+struct AccountModerationRequest;
 
 namespace AccountServer
 {
@@ -48,12 +54,16 @@ class ClientMessageProcessor
 public:
     using SendCallback
         = std::function<void(ConnectionHandle, BinaryBufferSharedPtr)>;
+    /** Sends the given message to every connected service. Must be called
+        on the network thread. */
+    using BroadcastCallback = std::function<void(BinaryBufferSharedPtr)>;
     using DisconnectCallback
         = std::function<void(ConnectionHandle, const asio::error_code&)>;
 
     ClientMessageProcessor(asio::io_context& inNetworkIoContext,
                            asio::thread_pool& inDatabasePool,
                            Database& inDatabase, SendCallback inSendCallback,
+                           BroadcastCallback inBroadcastCallback,
                            DisconnectCallback inDisconnectCallback);
 
     /**
@@ -83,6 +93,9 @@ private:
 
     void handleMessage(ConnectionHandle handle,
                        const ServiceTicketRequest& message);
+
+    void handleMessage(ConnectionHandle handle,
+                       const AccountModerationRequest& message);
 
     //-------------------------------------------------------------------------
     // Helpers
@@ -126,6 +139,15 @@ private:
                            const SessionToken& accountSessionToken);
 
     /**
+     * Validates the requester's session, then attempts to apply the given
+     * moderation action.
+     * Returns an appropriate response message. If the action affects
+     * connected clients, also returns the notice to send to our services.
+     */
+    std::pair<AccountModerationResponse, std::optional<AccountModeratedNotice>>
+        moderate(const AccountModerationRequest& request);
+
+    /**
      * Runs createResponse on a database worker, then sends the returned
      * response message to the given connection.
      *
@@ -147,11 +169,18 @@ private:
     /** Used to send messages through the owning endpoint. */
     SendCallback sendCallback;
 
+    /** Used to tell our services about moderation actions. */
+    BroadcastCallback broadcastCallback;
+
     /** Used to disconnect clients that send invalid messages. */
     DisconnectCallback disconnectCallback;
 
     /** Used to serialize and frame our outgoing messages. */
     SimpleMessageFramer<AccountClientMessageType> messageFramer;
+
+    /** Used to serialize and frame the messages that we broadcast to our
+        services. */
+    SimpleMessageFramer<AccountServiceMessageType> serviceMessageFramer;
 
     /** A valid hash that we can verify against when a login references an
         unknown account. This keeps that path close to the cost of verifying a

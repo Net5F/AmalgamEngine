@@ -2,6 +2,7 @@
 
 #include "NetworkDefs.h"
 #include "entt/fwd.hpp"
+#include <string>
 #include <vector>
 
 namespace AM
@@ -27,6 +28,9 @@ struct ClientSimData {
 
     /** The ID of the account that this client is logged in to. */
     Sint64 accountID{0};
+
+    /** The username of the account that this client is logged in to. */
+    std::string username{};
 
     /** Tracks the entities that are in range of this client's player entity. */
     std::vector<entt::entity> entitiesInAOI{};

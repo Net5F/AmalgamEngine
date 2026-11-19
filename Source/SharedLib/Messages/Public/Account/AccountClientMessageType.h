@@ -18,6 +18,7 @@ enum class AccountClientMessageType : Uint8 {
     LogoutRequest,
     RecoverAccountRequest,
     ServiceTicketRequest,
+    AccountModerationRequest,
 
     // Server -> Client Messages
     RegisterResponse,
@@ -25,6 +26,7 @@ enum class AccountClientMessageType : Uint8 {
     LogoutResponse,
     RecoverAccountResponse,
     ServiceTicketResponse,
+    AccountModerationResponse,
 };
 
 } // End namespace AM

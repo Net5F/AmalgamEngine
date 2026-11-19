@@ -7,6 +7,8 @@
 #include "RecoverAccountResponse.h"
 #include "RegisterResponse.h"
 #include "ServiceTicketResponse.h"
+#include "AccountModerationRequest.h"
+#include "AccountModerationResponse.h"
 #include "QueuedEvents.h"
 #include "entt/signal/sigh.hpp"
 #include <array>
@@ -68,6 +70,13 @@ public:
      */
     bool requestServiceTicket(ServiceTicketAudience audience);
 
+    /**
+     * Sends the given moderation request (ban, unban, set role) to
+     * AccountServer. Its session token is filled in by us.
+     * Returns false if we aren't logged in.
+     */
+    bool sendModerationRequest(AccountModerationRequest request);
+
     LoginState getLoginState() const noexcept;
     bool isAuthenticated() const noexcept;
     Sint64 getAccountID() const noexcept;
@@ -80,6 +89,7 @@ private:
     void handleLogoutResponse(const LogoutResponse& response);
     void handleRecoverAccountResponse(RecoverAccountResponse& response);
     void handleServiceTicketResponse(ServiceTicketResponse& response);
+    void handleModerationResponse(const AccountModerationResponse& response);
     void handleConnectionEvent(const AccountConnectionEvent& event);
 
     void clearSession() noexcept;
@@ -91,6 +101,7 @@ private:
     EventQueue<LogoutResponse> logoutResponseQueue;
     EventQueue<RecoverAccountResponse> recoverAccountResponseQueue;
     EventQueue<ServiceTicketResponse> serviceTicketQueue;
+    EventQueue<AccountModerationResponse> moderationResponseQueue;
     EventQueue<AccountConnectionEvent> connectionEventQueue;
 
     /** The current state of our various operations. */
@@ -100,6 +111,8 @@ private:
     /** Tracks which audiences have a service ticket request pending. */
     std::array<bool, static_cast<std::size_t>(ServiceTicketAudience::Count)>
         serviceTicketRequestPending;
+    /** The number of moderation requests that are awaiting a response. */
+    std::size_t moderationRequestsPending;
 
     /** If we're logged in, these are our current session's info. */
     Sint64 accountID;
@@ -113,6 +126,8 @@ private:
     entt::sigh<void(const RecoverAccountResponse&)> recoveryCompletedSig;
     entt::sigh<void(const ServiceTicketResponse&)>
         serviceTicketRequestCompletedSig;
+    entt::sigh<void(const AccountModerationResponse&)>
+        moderationRequestCompletedSig;
     entt::sigh<void()> requestConnectionFailedSig;
 
 public:
@@ -135,6 +150,12 @@ public:
         this is published with result == InternalError. */
     entt::sink<entt::sigh<void(const ServiceTicketResponse&)>>
         serviceTicketRequestCompleted;
+
+    /** A moderation request completed.
+        If the AccountServer connection is lost while a request is pending,
+        this is published with result == InternalError. */
+    entt::sink<entt::sigh<void(const AccountModerationResponse&)>>
+        moderationRequestCompleted;
 
     /** An in-progress login, logout, registration, or recovery request lost
         its AccountServer connection. */

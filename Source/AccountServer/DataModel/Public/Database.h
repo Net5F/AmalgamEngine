@@ -2,6 +2,8 @@
 
 #include "AccountDefs.h"
 #include "AccountData.h"
+#include "AccountRoleDef.h"
+#include "ModerationDefs.h"
 #include "SQLiteCpp/SQLiteCpp.h"
 #include <SDL3/SDL_stdinc.h>
 #include <memory>
@@ -17,7 +19,8 @@ namespace AccountServer
  * Interface for interacting with the account database (Accounts.db).
  *
  * We use the database to persist accounts, account sessions, service
- * tickets, and characters (each account's AccountData).
+ * tickets, characters (each account's AccountData), bans, and the moderation
+ * log.
  *
  * Secrets (recovery keys, session tokens, service tickets) are never stored
  * directly. Instead, we store their hashes (see CryptoHelpers::hashSecret()).
@@ -36,6 +39,10 @@ public:
 
     /**
      * Opens the database at the given path. Creates it if it doesn't exist.
+     *
+     * Note: Another process (e.g. AccountServer --set-role) may use the same
+     *       file. If it's holding a lock, we wait up to BUSY_TIMEOUT_MS
+     *       for it.
      */
     explicit Database(const std::string& databasePath);
 
@@ -45,6 +52,7 @@ public:
     enum class RegisterResult { Success, UsernameUnavailable, DatabaseError };
     /**
      * Registers an account using an already-hashed password and recovery key.
+     * The account is given the default role.
      *
      * @return UsernameUnavailable if the normalized username is already
      *         registered, DatabaseError if either insert fails, otherwise
@@ -61,6 +69,8 @@ public:
         Sint64 accountID{0};
         std::string passwordHash{};
         std::string status{};
+        /** True if the account has a ban that's in effect. */
+        bool isBanned{false};
     };
     /**
      * Gets the information needed to attempt a login for the account with the
@@ -103,7 +113,7 @@ public:
         DatabaseError
     };
     /**
-     * Creates a session for an active account.
+     * Creates a session for an active, unbanned account.
      *
      * @param accountID The account that owns the session.
      * @param tokenHash The 32-byte hash of the session token.
@@ -189,6 +199,7 @@ public:
         Sint64 accountID{0};
         std::string accountStatus{};
         std::string username{};
+        std::string roleID{};
         Sint64 consumedAt{0};
     };
     /**
@@ -233,11 +244,100 @@ public:
     SaveAccountDataResult saveAccountData(Sint64 accountID,
                                           const AccountData& accountData);
 
+    //-------------------------------------------------------------------------
+    // Moderation
+    //-------------------------------------------------------------------------
+    struct ModerationInfo {
+        /** The account that's taking the action. */
+        Sint64 actorAccountID{0};
+        AccountModerationAction action{AccountModerationAction::Ban};
+        std::string targetUsername{};
+        /** (SetRole only) The role to give the target. */
+        std::string roleID{};
+        /** (Ban only) How long the ban lasts. 0 means permanent. */
+        Sint64 durationS{0};
+        std::string reason{};
+    };
+    struct ModerationOutcome {
+        ModerationResult result{ModerationResult::InternalError};
+        /** If result == Success, the target's account ID. */
+        Sint64 targetAccountID{0};
+        /** If result == Success, the target's username as registered. */
+        std::string targetUsername{};
+        /** If result == Success and action == SetRole, the target's new role
+            ID. */
+        std::string roleID{};
+    };
+    /**
+     * Atomically checks that the actor may take the given action against the
+     * target, applies it, and records it in the moderation log.
+     *
+     * Roles are read from the database, so the result reflects any role
+     * changes that services haven't heard about yet.
+     *
+     * Ban: Lifts any existing ban, adds the new one, and revokes all of the
+     *      target's sessions.
+     * Unban: Lifts the target's active ban.
+     * SetRole: Changes the target's role.
+     */
+    ModerationOutcome moderate(const ModerationInfo& info);
+
+    struct ConsoleSetRoleResult {
+        enum class Result { Success, AccountNotFound, DatabaseError };
+
+        Result result{Result::DatabaseError};
+        /** If result == Success, the account's username as registered. */
+        std::string username{};
+        /** If result == Success, the role that the account held before. */
+        std::string previousRoleID{};
+    };
+    /**
+     * Changes the given account's role without any permission checks, and
+     * records it in the moderation log as being done by the console.
+     *
+     * Used by the --set-role command line option, e.g. to create the first
+     * SuperAdmin.
+     *
+     * @param roleID Must be a valid role ID.
+     */
+    ConsoleSetRoleResult setRoleFromConsole(const std::string& username,
+                                            const std::string& roleID);
+
 protected:
+    /** How long we'll wait for another connection's lock before failing. */
+    static constexpr int BUSY_TIMEOUT_MS{5000};
+
+    /** The name that the moderation log uses for console actions. */
+    static constexpr const char* CONSOLE_ACTOR_NAME{"console"};
+
     /**
      * Creates our tables in Accounts.db, if they don't already exist.
      */
     void initTables();
+
+    /**
+     * Returns the permission that the given action requires.
+     */
+    AccountPermission getRequiredPermission(AccountModerationAction action);
+
+    /**
+     * Returns the name that the moderation log uses for the given action.
+     */
+    const char* getLogActionName(AccountModerationAction action);
+
+    /**
+     * Adds an entry to the moderation log.
+     * Must be called while holding databaseMutex.
+     *
+     * @param actorAccountID The acting account, or 0 for the console.
+     */
+    void insertModerationLog(Sint64 actorAccountID,
+                             const std::string& actorName,
+                             Sint64 targetAccountID,
+                             const std::string& targetName,
+                             AccountModerationAction action,
+                             const std::string& details,
+                             const std::string& reason);
 
     /** Serializes access to database and our pre-built queries. */
     std::mutex databaseMutex;
@@ -261,6 +361,12 @@ protected:
     std::unique_ptr<SQLite::Statement> saveAccountDataQuery;
     std::unique_ptr<SQLite::Statement> deleteExpiredServiceTicketsQuery;
     std::unique_ptr<SQLite::Statement> deleteExpiredSessionsQuery;
+    std::unique_ptr<SQLite::Statement> getAccountByIDQuery;
+    std::unique_ptr<SQLite::Statement> getAccountByUsernameQuery;
+    std::unique_ptr<SQLite::Statement> setRoleQuery;
+    std::unique_ptr<SQLite::Statement> liftBansQuery;
+    std::unique_ptr<SQLite::Statement> insertBanQuery;
+    std::unique_ptr<SQLite::Statement> insertModerationLogQuery;
 };
 
 } // End namespace AccountServer

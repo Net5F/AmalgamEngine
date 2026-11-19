@@ -8,6 +8,8 @@
 #include "LogoutRequest.h"
 #include "RecoverAccountRequest.h"
 #include "ServiceTicketRequest.h"
+#include "AccountModerationRequest.h"
+#include "AccountModeratedNotice.h"
 #include "AccountHelpers.h"
 #include "Log.h"
 #include "asio/error.hpp"
@@ -36,13 +38,16 @@ static Sint64 getCurrentUnixTime()
 ClientMessageProcessor::ClientMessageProcessor(
     asio::io_context& inNetworkIoContext, asio::thread_pool& inDatabasePool,
     Database& inDatabase, SendCallback inSendCallback,
+    BroadcastCallback inBroadcastCallback,
     DisconnectCallback inDisconnectCallback)
 : networkIoContext{inNetworkIoContext}
 , databasePool{inDatabasePool}
 , database{inDatabase}
 , sendCallback{std::move(inSendCallback)}
+, broadcastCallback{std::move(inBroadcastCallback)}
 , disconnectCallback{std::move(inDisconnectCallback)}
 , messageFramer{Config::MAX_WRITE_PAYLOAD_SIZE}
+, serviceMessageFramer{Config::SERVICE_MAX_WRITE_PAYLOAD_SIZE}
 , dummyPasswordHash{}
 {
     // Generate the dummy hash.
@@ -79,6 +84,10 @@ void ClientMessageProcessor::processReceivedMessage(
         }
         case AccountClientMessageType::ServiceTicketRequest: {
             handleMessage<ServiceTicketRequest>(handle, messageBuffer);
+            break;
+        }
+        case AccountClientMessageType::AccountModerationRequest: {
+            handleMessage<AccountModerationRequest>(handle, messageBuffer);
             break;
         }
         default: {
@@ -189,6 +198,37 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
         });
 }
 
+void ClientMessageProcessor::handleMessage(
+    ConnectionHandle handle, const AccountModerationRequest& message)
+{
+    // Validate the action.
+    // Note: A real client will never send an invalid action, so we treat it
+    //       as a malformed message.
+    if (!isValidAccountModerationAction(message.action)) {
+        LOG_WARN("Received moderation request with invalid action: %u",
+                 static_cast<unsigned int>(message.action));
+        disconnectCallback(handle, asio::error::make_error_code(
+                                       asio::error::invalid_argument));
+        return;
+    }
+
+    // Note: We use a database worker so we don't hold up the network thread.
+    asio::post(databasePool, [this, handle, request = message]() {
+        auto [response, notice] = moderate(request);
+
+        // Send the response, then tell our services about the change (must be
+        // done on the network thread).
+        asio::post(networkIoContext, [this, handle,
+                                      response = std::move(response),
+                                      notice = std::move(notice)]() {
+            sendCallback(handle, messageFramer.frameMessage(response));
+            if (notice) {
+                broadcastCallback(serviceMessageFramer.frameMessage(*notice));
+            }
+        });
+    });
+}
+
 RegisterResponse
     ClientMessageProcessor::registerAccount(const std::string& username,
                                             std::string_view password)
@@ -260,6 +300,13 @@ LoginResponse ClientMessageProcessor::authenticateAndCreateSession(
     // inactive account so we don't reveal which check failed.
     if (!accountExists || !passwordMatches || (loginInfo.status != "active")) {
         response.result = LoginResponse::InvalidAccountDetails;
+        return response;
+    }
+
+    // The password was correct, so it's safe to tell them that they're
+    // banned.
+    if (loginInfo.isBanned) {
+        response.result = LoginResponse::Banned;
         return response;
     }
 
@@ -451,6 +498,65 @@ ServiceTicketResponse ClientMessageProcessor::issueServiceTicket(
     response.expiresAt = expiresAt;
     response.result = ServiceTicketResponse::Success;
     return response;
+}
+
+std::pair<AccountModerationResponse, std::optional<AccountModeratedNotice>>
+    ClientMessageProcessor::moderate(const AccountModerationRequest& request)
+{
+    // Note: The request's details are echoed back, so the client can describe
+    //       the result.
+    AccountModerationResponse response{
+        .action{request.action},
+        .targetUsername{request.targetUsername},
+        .roleID{request.roleID},
+        .durationS{
+            std::clamp(request.durationS, Sint64{0}, MAX_BAN_DURATION_S)}};
+
+    // Validate the requester's session.
+    std::optional<std::string> sessionTokenHash{
+        CryptoHelpers::hashSecret(request.accountSessionToken.get())};
+    if (!sessionTokenHash) {
+        LOG_ERROR("Failed to hash account session token.");
+        response.result = ModerationResult::InternalError;
+        return {response, std::nullopt};
+    }
+
+    Database::AccountSessionInfo sessionInfo{database.validateSession(
+        *sessionTokenHash, Config::ACCOUNT_SESSION_IDLE_TIMEOUT_S)};
+    if (sessionInfo.result
+        == Database::AccountSessionInfo::Result::DatabaseError) {
+        response.result = ModerationResult::InternalError;
+        return {response, std::nullopt};
+    }
+    if (sessionInfo.result
+        == Database::AccountSessionInfo::Result::SessionNotFound) {
+        response.result = ModerationResult::InvalidSession;
+        return {response, std::nullopt};
+    }
+
+    // Apply the action.
+    Database::ModerationOutcome outcome{
+        database.moderate({.actorAccountID{sessionInfo.accountID},
+                           .action{request.action},
+                           .targetUsername{request.targetUsername},
+                           .roleID{request.roleID},
+                           .durationS{response.durationS},
+                           .reason{request.reason}})};
+    response.result = outcome.result;
+    if (outcome.result != ModerationResult::Success) {
+        return {response, std::nullopt};
+    }
+    response.targetUsername = outcome.targetUsername;
+
+    // Unbans don't affect any connected clients.
+    if (request.action == AccountModerationAction::Unban) {
+        return {response, std::nullopt};
+    }
+
+    return {response,
+            AccountModeratedNotice{.accountID{outcome.targetAccountID},
+                                   .action{request.action},
+                                   .roleID{outcome.roleID}}};
 }
 
 template<typename CreateResponse>

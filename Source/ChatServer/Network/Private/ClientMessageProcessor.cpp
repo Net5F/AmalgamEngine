@@ -13,6 +13,7 @@
 #include "ChatHeartbeatResponse.h"
 #include "ChatHelpers.h"
 #include "Shared/AccountServiceEndpoint.h"
+#include "AccountModeratedNotice.h"
 #include "Log.h"
 #include "asio/error.hpp"
 #include <algorithm>
@@ -35,6 +36,13 @@ ClientMessageProcessor::ClientMessageProcessor(
 , sessions{}
 , accountClients{}
 {
+    // Note: The handler is called on the network IO thread (this thread).
+    // Note: This must be set before accountEndpoint is started, which it is
+    //       since Network starts its endpoints after constructing us.
+    accountEndpoint.setAccountModeratedHandler(
+        [this](const AccountModeratedNotice& notice) {
+            handleAccountModeratedNotice(notice);
+        });
 }
 
 void ClientMessageProcessor::processReceivedMessage(
@@ -185,6 +193,26 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
 {
     // Respond so the client knows we're still here.
     sendCallback(handle, messageFramer.frameMessage(ChatHeartbeatResponse{}));
+}
+
+void ClientMessageProcessor::handleAccountModeratedNotice(
+    const AccountModeratedNotice& notice)
+{
+    // We only care about bans.
+    if (notice.action != AccountModerationAction::Ban) {
+        return;
+    }
+
+    auto accountIt{accountClients.find(notice.accountID)};
+    if (accountIt == accountClients.end()) {
+        return;
+    }
+
+    // Note: Our disconnect handler will clean up the session.
+    LOG_INFO("Disconnecting banned client. AccountID: %lld",
+             static_cast<long long>(notice.accountID));
+    disconnectCallback(accountIt->second, asio::error::make_error_code(
+                                              asio::error::connection_aborted));
 }
 
 void ClientMessageProcessor::handleTicketResponse(

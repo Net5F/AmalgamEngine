@@ -48,7 +48,10 @@ target_sources(SharedLib
         Public/World/UseItemOnEntityRequest.h
         Public/World/WorldLogoutRequest.h
         Public/World/WorldLogoutUpdate.h
+        Public/World/WorldModerationRequest.h
+        Public/World/WorldModerationResponse.h
         Public/Account/AccountClientMessageType.h
+        Public/Account/AccountModeratedNotice.h
         Public/Account/AccountData.h
         Public/Account/AccountServiceMessageType.h
         Public/Account/ConsumeServiceTicketRequest.h
@@ -57,6 +60,8 @@ target_sources(SharedLib
         Public/Account/LoginResponse.h
         Public/Account/LogoutRequest.h
         Public/Account/LogoutResponse.h
+        Public/Account/AccountModerationRequest.h
+        Public/Account/AccountModerationResponse.h
         Public/Account/RecoverAccountRequest.h
         Public/Account/RecoverAccountResponse.h
         Public/Account/RegisterRequest.h

@@ -63,6 +63,13 @@ public:
      */
     void start();
 
+    /**
+     * Sends the given message to every connected service.
+     *
+     * Note: Must be called on the network thread.
+     */
+    void broadcastMessage(BinaryBufferSharedPtr message);
+
 private:
     using Connection = SimpleConnection<AccountServiceMessageType>;
 

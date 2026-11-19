@@ -10,6 +10,8 @@
 #include "ItemInitLua.h"
 #include "Database.h"
 #include "ClientSimData.h"
+#include "AccountRole.h"
+#include "AccountRoleHelpers.h"
 #include "InRangeInitComponentList.h"
 #include "Position.h"
 #include "PreviousPosition.h"
@@ -115,6 +117,19 @@ entt::entity World::getPlayerEntity(ConnectionHandle clientHandle)
     }
 
     return it->second;
+}
+
+bool World::hasPermission(ConnectionHandle clientHandle,
+                          AccountPermission permission) const
+{
+    auto it{clientHandleMap.find(clientHandle)};
+    if (it == clientHandleMap.end()) {
+        return false;
+    }
+
+    const AccountRole& accountRole{registry.get<AccountRole>(it->second)};
+    return AccountRoleHelpers::getRoleOrDefault(accountRole.roleID)
+        .hasPermission(permission);
 }
 
 bool World::teleportEntity(entt::entity entity, const Vector3& newPosition)

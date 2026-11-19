@@ -5,6 +5,7 @@
 #include "RecoverAccountResponse.h"
 #include "RegisterResponse.h"
 #include "ServiceTicketResponse.h"
+#include "AccountModerationResponse.h"
 #include "Deserialize.h"
 #include "QueuedEvents.h"
 #include "Log.h"
@@ -45,6 +46,10 @@ void AccountMessageProcessor::processReceivedMessage(
         }
         case AccountClientMessageType::ServiceTicketResponse: {
             dispatchMessage<ServiceTicketResponse>(messageBuffer);
+            break;
+        }
+        case AccountClientMessageType::AccountModerationResponse: {
+            dispatchMessage<AccountModerationResponse>(messageBuffer);
             break;
         }
         default: {

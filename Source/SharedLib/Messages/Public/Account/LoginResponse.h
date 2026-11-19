@@ -22,6 +22,8 @@ struct LoginResponse {
         Success,
         InvalidAccountDetails,
         RateLimited,
+        /** The account is banned. Only sent if the password was correct. */
+        Banned,
         InternalError
     };
     Result result{Result::InternalError};

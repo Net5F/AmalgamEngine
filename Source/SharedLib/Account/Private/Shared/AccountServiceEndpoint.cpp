@@ -40,6 +40,7 @@ AccountServiceEndpoint::AccountServiceEndpoint(asio::io_context& inIoContext,
 , connectingSocket{}
 , connection{}
 , messageFramer{MAX_WRITE_PAYLOAD_SIZE}
+, accountModeratedHandler{}
 , pendingRequests{}
 , nextRequestID{0}
 , reconnectDelayS{RECONNECT_MIN_DELAY_S}
@@ -100,6 +101,12 @@ void AccountServiceEndpoint::saveAccountData(Sint64 accountID,
                            callback = std::move(callback)]() mutable {
         saveAccountDataOnIOThread(accountID, accountData, std::move(callback));
     });
+}
+
+void AccountServiceEndpoint::setAccountModeratedHandler(
+    AccountModeratedHandler handler)
+{
+    accountModeratedHandler = std::move(handler);
 }
 
 void AccountServiceEndpoint::consumeServiceTicketOnIOThread(
@@ -525,6 +532,10 @@ void AccountServiceEndpoint::onMessageReceived(
             handleResponse<SaveAccountDataResponse>(messageBuffer);
             break;
         }
+        case AccountServiceMessageType::AccountModeratedNotice: {
+            handleAccountModeratedNotice(messageBuffer);
+            break;
+        }
         case AccountServiceMessageType::ServiceHeartbeatResponse: {
             // Nothing to do. Receiving any message resets our idle timeout.
             break;
@@ -553,6 +564,23 @@ void AccountServiceEndpoint::handleResponse(
     }
 
     completeRequest(response.requestID, response);
+}
+
+void AccountServiceEndpoint::handleAccountModeratedNotice(
+    std::span<const Uint8> messageBuffer)
+{
+    AccountModeratedNotice notice{};
+    if (!Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
+                                 notice)) {
+        LOG_WARN("Failed to deserialize an AccountServer message.");
+        disconnectWithError(
+            asio::error::make_error_code(asio::error::invalid_argument));
+        return;
+    }
+
+    if (accountModeratedHandler) {
+        accountModeratedHandler(notice);
+    }
 }
 
 } // namespace AM

@@ -22,6 +22,7 @@
 #include "CastRequest.h"
 #include "WorldLogoutRequest.h"
 #include "TileAddLayer.h"
+#include "WorldModerationRequest.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
@@ -162,6 +163,12 @@ Sint64 MessageProcessor::processReceivedMessage(ConnectionHandle clientHandle,
         }
         case EngineMessageType::WorldLogoutRequest: {
             dispatchWithClientHandle<WorldLogoutRequest>(
+                clientHandle, {messageBuffer, messageSize},
+                networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::WorldModerationRequest: {
+            dispatchWithClientHandle<WorldModerationRequest>(
                 clientHandle, {messageBuffer, messageSize},
                 networkEventDispatcher);
             break;

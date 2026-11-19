@@ -20,11 +20,13 @@ AccountSession::AccountSession(Network& inNetwork,
 , logoutResponseQueue{networkEventDispatcher}
 , recoverAccountResponseQueue{networkEventDispatcher}
 , serviceTicketQueue{networkEventDispatcher}
+, moderationResponseQueue{networkEventDispatcher}
 , connectionEventQueue{networkEventDispatcher}
 , loginState{LoginState::LoggedOut}
 , registrationPending{false}
 , recoveryPending{false}
 , serviceTicketRequestPending{}
+, moderationRequestsPending{0}
 , accountID{0}
 , sessionToken{}
 , idleExpiresAt{0}
@@ -34,12 +36,14 @@ AccountSession::AccountSession(Network& inNetwork,
 , logoutCompletedSig{}
 , recoveryCompletedSig{}
 , serviceTicketRequestCompletedSig{}
+, moderationRequestCompletedSig{}
 , requestConnectionFailedSig{}
 , loginCompleted{loginCompletedSig}
 , registrationCompleted{registrationCompletedSig}
 , logoutCompleted{logoutCompletedSig}
 , recoveryCompleted{recoveryCompletedSig}
 , serviceTicketRequestCompleted{serviceTicketRequestCompletedSig}
+, moderationRequestCompleted{moderationRequestCompletedSig}
 , requestConnectionFailed{requestConnectionFailedSig}
 {
 }
@@ -74,6 +78,11 @@ void AccountSession::tick()
     ServiceTicketResponse newServiceTicketResponse{};
     while (serviceTicketQueue.pop(newServiceTicketResponse)) {
         handleServiceTicketResponse(newServiceTicketResponse);
+    }
+
+    AccountModerationResponse moderationResponse{};
+    while (moderationResponseQueue.pop(moderationResponse)) {
+        handleModerationResponse(moderationResponse);
     }
 
     AccountConnectionEvent connectionEvent{};
@@ -165,6 +174,18 @@ bool AccountSession::requestServiceTicket(ServiceTicketAudience audience)
 
     requestPending = true;
     network.accountEndpoint.send(ServiceTicketRequest{audience, sessionToken});
+    return true;
+}
+
+bool AccountSession::sendModerationRequest(AccountModerationRequest request)
+{
+    if (loginState != LoginState::LoggedIn) {
+        return false;
+    }
+
+    request.accountSessionToken = sessionToken;
+    moderationRequestsPending++;
+    network.accountEndpoint.send(request);
     return true;
 }
 
@@ -280,6 +301,21 @@ void AccountSession::handleServiceTicketResponse(
     response.ticket.wipe();
 }
 
+void AccountSession::handleModerationResponse(
+    const AccountModerationResponse& response)
+{
+    if (moderationRequestsPending == 0) {
+        LOG_WARN("Received an unexpected moderation response.");
+        return;
+    }
+
+    moderationRequestsPending--;
+    if (response.result == ModerationResult::InvalidSession) {
+        clearSession();
+    }
+    moderationRequestCompletedSig.publish(response);
+}
+
 void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
 {
     if (event.type == AccountConnectionEvent::Type::Connected) {
@@ -298,6 +334,12 @@ void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
                 .result{ServiceTicketResponse::InternalError},
                 .audience{static_cast<ServiceTicketAudience>(i)}});
         }
+    }
+
+    // Fail any pending moderation requests.
+    for (; moderationRequestsPending > 0; --moderationRequestsPending) {
+        moderationRequestCompletedSig.publish(AccountModerationResponse{
+            .result{ModerationResult::InternalError}});
     }
 
     bool requestWasPending{(loginState == LoginState::LoggingIn)
@@ -328,6 +370,7 @@ void AccountSession::clearSession() noexcept
     idleExpiresAt = 0;
     absoluteExpiresAt = 0;
     serviceTicketRequestPending.fill(false);
+    moderationRequestsPending = 0;
     loginState = LoginState::LoggedOut;
 }
 

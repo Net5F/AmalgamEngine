@@ -23,6 +23,9 @@ struct ClientConnected {
 
     /** The username of the account that the client authenticated as. */
     std::string username{};
+    /** The ID of the account's role (see AccountRoleDefs.h), as of when its
+        ticket was consumed. */
+    std::string roleID{};
 
     /** True if the account has saved AccountData (i.e. it has played on
         some world before).

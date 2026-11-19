@@ -1,9 +1,11 @@
 target_sources(AccountServer
     PRIVATE
         Private/main.cpp
+        Private/CommandLineTool.cpp
         Private/Application.cpp
     PUBLIC
         Public/Application.h
+        Public/CommandLineTool.h
 )
 
 target_include_directories(AccountServer

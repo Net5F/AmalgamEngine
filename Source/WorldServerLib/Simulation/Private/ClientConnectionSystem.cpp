@@ -24,6 +24,7 @@
 #include "Name.h"
 #include "Inventory.h"
 #include "ClientSimData.h"
+#include "AccountRole.h"
 #include "IsPlayerEntity.h"
 #include "GraphicState.h"
 #include "CollisionBitSets.h"
@@ -219,12 +220,17 @@ entt::entity ClientConnectionSystem::createPlayerEntity(
              .hadWorldData{worldResult == GetSavedComponentsResult::Success}});
     }
 
+    // Give the entity its account's role.
+    // Note: AccountServer is the source of truth for roles, so they aren't
+    //       persisted.
+    registry.emplace_or_replace<AccountRole>(newEntity, clientConnected.roleID);
+
     // Mark the entity as a player entity.
     // Note: We do this last, so anything that reacts to these sees the
     //       entity's loaded state.
     registry.emplace<IsPlayerEntity>(newEntity);
     registry.emplace<ClientSimData>(newEntity, clientConnected.clientHandle,
-                                    accountID);
+                                    accountID, clientConnected.username);
 
     // Add the new player entity to the client handle map.
     world.clientHandleMap[clientConnected.clientHandle] = newEntity;
@@ -261,12 +267,17 @@ void ClientConnectionSystem::attachClientToEntity(
     // Stop the entity from being removed.
     removalTickMap.erase(clientConnected.accountID);
 
+    // Refresh the entity's role, in case it changed while we were
+    // disconnected.
+    registry.emplace_or_replace<AccountRole>(entity, clientConnected.roleID);
+
     // Re-construct the client data. This gives the new client a fresh AOI
     // list, and causes the systems that observe ClientSimData to send it its
     // initial state (inventory, self components, etc).
     registry.erase<ClientSimData>(entity);
     registry.emplace<ClientSimData>(entity, clientConnected.clientHandle,
-                                    clientConnected.accountID);
+                                    clientConnected.accountID,
+                                    clientConnected.username);
 
     world.clientHandleMap[clientConnected.clientHandle] = entity;
 

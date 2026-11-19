@@ -1,10 +1,14 @@
 target_sources(SharedLib
     PRIVATE
         Private/AccountHelpers.cpp
+        Private/AccountRoleHelpers.cpp
         Private/Shared/AccountServiceEndpoint.cpp
     PUBLIC
         Public/AccountDefs.h
         Public/AccountHelpers.h
+        Public/AccountRoleDef.h
+        Public/AccountRoleHelpers.h
+        Public/ModerationDefs.h
         Public/Shared/AccountServiceEndpoint.h
 )
 

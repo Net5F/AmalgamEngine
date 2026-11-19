@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AccountDefs.h"
+#include "AccountRoleDef.h"
 #include "AccountServiceMessageType.h"
 #include "AccountData.h"
 #include <string>
@@ -38,6 +39,10 @@ struct ConsumeServiceTicketResponse {
     /** If result == success, this is the account's username. */
     std::string username{};
 
+    /** If result == success, this is the ID of the account's role (see
+        AccountRoleDefs.h). */
+    std::string roleID{};
+
     /** If result == success and the request set includeAccountData, this is
         true if the account has saved AccountData (i.e. it has played on some
         world before). */
@@ -59,6 +64,8 @@ void serialize(S& serializer,
                       ConsumeServiceTicketResponse::ACCOUNT_STATUS_MAX);
     serializer.text1b(consumeServiceTicketResponse.username,
                       USERNAME_MAX_LENGTH);
+    serializer.text1b(consumeServiceTicketResponse.roleID,
+                      ACCOUNT_ROLE_ID_MAX_LENGTH);
     serializer.value1b(consumeServiceTicketResponse.hasAccountData);
     serializer.object(consumeServiceTicketResponse.accountData);
 }

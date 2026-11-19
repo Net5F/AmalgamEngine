@@ -342,6 +342,7 @@ void WorldClientEndpoint::onTicketResult(
                 ClientConnected{.clientHandle{clientHandle},
                                 .accountID{response.accountID},
                                 .username{response.username},
+                                .roleID{response.roleID},
                                 .hasAccountData{response.hasAccountData},
                                 .accountData{response.accountData}});
             break;

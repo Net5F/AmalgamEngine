@@ -1,9 +1,11 @@
 target_sources(ClientLib
     PRIVATE
+        Private/ModerationCommandParser.cpp
         Private/UserInterface.cpp
         Private/WorldObjectLocator.cpp
     PUBLIC
         Public/IUserInterfaceExtension.h
+        Public/ModerationCommandParser.h
         Public/PhantomSpriteInfo.h
         Public/SpriteColorModInfo.h
         Public/UserInterface.h

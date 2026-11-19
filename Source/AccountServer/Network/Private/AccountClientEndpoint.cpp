@@ -10,10 +10,10 @@ namespace AM
 namespace AccountServer
 {
 
-AccountClientEndpoint::AccountClientEndpoint(asio::io_context& inIoContext,
-                                             asio::ssl::context& inSSLContext,
-                                             asio::thread_pool& inDatabasePool,
-                                             Database& inDatabase)
+AccountClientEndpoint::AccountClientEndpoint(
+    asio::io_context& inIoContext, asio::ssl::context& inSSLContext,
+    asio::thread_pool& inDatabasePool, Database& inDatabase,
+    ClientMessageProcessor::BroadcastCallback inBroadcastToServices)
 : ioContext{inIoContext}
 , sslContext{inSSLContext}
 , connectionRegistry(UserConfig::get().getMaxClients())
@@ -23,8 +23,11 @@ AccountClientEndpoint::AccountClientEndpoint(asio::io_context& inIoContext,
       std::bind_front(&AccountClientEndpoint::connectionFactory, this),
       std::bind_front(&AccountClientEndpoint::onConnectionAccepted, this),
       std::bind_front(&AccountClientEndpoint::onAcceptorError, this))
-, messageProcessor{inIoContext, inDatabasePool, inDatabase,
+, messageProcessor{inIoContext,
+                   inDatabasePool,
+                   inDatabase,
                    std::bind_front(&AccountClientEndpoint::sendMessage, this),
+                   std::move(inBroadcastToServices),
                    std::bind_front(&AccountClientEndpoint::disconnect, this)}
 {
 }

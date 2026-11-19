@@ -22,6 +22,7 @@ enum class AccountServiceMessageType : Uint8 {
     ConsumeServiceTicketResponse,
     ServiceHeartbeatResponse,
     SaveAccountDataResponse,
+    AccountModeratedNotice,
 };
 
 } // End namespace AM

@@ -3,6 +3,7 @@
 #include "World.h"
 #include "EngineLuaBindings.h"
 #include "ClientConnectionSystem.h"
+#include "ModerationSystem.h"
 #include "NonPlayerEntityLifetimeSystem.h"
 #include "ComponentChangeSystem.h"
 #include "TileUpdateSystem.h"
@@ -143,6 +144,7 @@ private:
     // Systems
     //-------------------------------------------------------------------------
     ClientConnectionSystem clientConnectionSystem;
+    ModerationSystem moderationSystem;
     NonPlayerEntityLifetimeSystem nonPlayerEntityLifetimeSystem;
     ComponentChangeSystem componentChangeSystem;
     TileUpdateSystem tileUpdateSystem;

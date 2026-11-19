@@ -7,6 +7,7 @@
 #include "ExplicitConfirmation.h"
 #include "ConnectionResponse.h"
 #include "SystemMessage.h"
+#include "WorldModerationResponse.h"
 #include "EntityInit.h"
 #include "EntityDelete.h"
 #include "EntityInitScriptResponse.h"
@@ -148,6 +149,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         case EngineMessageType::WorldLogoutUpdate: {
             dispatchMessage<WorldLogoutUpdate>(messageBuffer, messageSize,
                                                networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::WorldModerationResponse: {
+            dispatchMessage<WorldModerationResponse>(messageBuffer, messageSize,
+                                                     networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {

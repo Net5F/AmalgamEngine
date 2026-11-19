@@ -17,6 +17,7 @@ target_sources(WorldServerLib
         Private/InventorySystem.cpp
         Private/ItemSystem.cpp
         Private/LoadHelper.cpp
+        Private/ModerationSystem.cpp
         Private/MovementSyncSystem.cpp
         Private/MovementSystem.cpp
         Private/NonPlayerEntityLifetimeSystem.cpp
@@ -60,6 +61,7 @@ target_sources(WorldServerLib
         Public/ISimulationExtension.h
         Public/ItemSystem.h
         Public/LoadHelper.h
+        Public/ModerationSystem.h
         Public/MovementSyncSystem.h
         Public/MovementSystem.h
         Public/NonPlayerEntityLifetimeSystem.h

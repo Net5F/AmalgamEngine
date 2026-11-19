@@ -166,6 +166,15 @@ void AccountServiceEndpoint::sendMessage(ConnectionHandle handle,
     }
 }
 
+void AccountServiceEndpoint::broadcastMessage(BinaryBufferSharedPtr message)
+{
+    for (ConnectionHandle handle : serviceHandles) {
+        if (handle) {
+            sendMessage(handle, message);
+        }
+    }
+}
+
 void AccountServiceEndpoint::disconnect(ConnectionHandle handle,
                                         const asio::error_code& error)
 {

@@ -25,7 +25,10 @@ Network::Network(asio::io_context& inIoContext, Database& inDatabase)
 , databasePool{UserConfig::get().getDatabaseWorkerCount()}
 , sessionCleanupTimer{inIoContext}
 , servicePins{loadServicePins()}
-, clientEndpoint{inIoContext, clientSSLContext, databasePool, inDatabase}
+, clientEndpoint{inIoContext, clientSSLContext, databasePool, inDatabase,
+                 [this](BinaryBufferSharedPtr message) {
+                     serviceEndpoint.broadcastMessage(std::move(message));
+                 }}
 , serviceEndpoint{inIoContext, serviceSSLContext, databasePool, inDatabase,
                   servicePins}
 {

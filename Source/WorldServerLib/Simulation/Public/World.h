@@ -2,6 +2,7 @@
 
 #include "TileMap.h"
 #include "ConnectionHandle.h"
+#include "AccountRoleDef.h"
 #include "EntityLocator.h"
 #include "CollisionLocator.h"
 #include "Pathfinder.h"
@@ -132,6 +133,15 @@ public:
      * ClientSimData.
      */
     entt::entity getPlayerEntity(ConnectionHandle clientHandle);
+
+    /**
+     * Returns true if the given client's account holds a role that grants
+     * the given permission (see AccountRoleDefs.h).
+     *
+     * If the client doesn't exist (e.g. it disconnected), returns false.
+     */
+    bool hasPermission(ConnectionHandle clientHandle,
+                       AccountPermission permission) const;
 
     /**
      * Teleports the given entity to the given position.

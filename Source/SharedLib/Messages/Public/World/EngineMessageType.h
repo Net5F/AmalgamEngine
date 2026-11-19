@@ -35,6 +35,7 @@ enum class EngineMessageType : Uint8 {
     DialogueChoiceRequest,
     CastRequest,
     WorldLogoutRequest,
+    WorldModerationRequest,
 
     // Server -> Client Messages
     ExplicitConfirmation,
@@ -57,6 +58,7 @@ enum class EngineMessageType : Uint8 {
     CastStarted,
     WorldLogoutUpdate,
     DisconnectNotice,
+    WorldModerationResponse,
 
     // Bidirectional Messages
     TileAddLayer,

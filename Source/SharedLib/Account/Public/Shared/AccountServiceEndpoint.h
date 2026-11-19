@@ -4,6 +4,7 @@
 #include "AccountServiceMessageType.h"
 #include "ConsumeServiceTicketResponse.h"
 #include "SaveAccountDataResponse.h"
+#include "AccountModeratedNotice.h"
 #include "AccountData.h"
 #include "SimpleConnection.h"
 #include "SimpleMessageFramer.h"
@@ -42,6 +43,9 @@ namespace AM
  * alive. If the connection fails or is lost, we reconnect with an increasing
  * delay. Requests that are made while we're disconnected fail immediately.
  *
+ * AccountServer may also send us notices that aren't responses to a request
+ * (e.g. AccountModeratedNotice). See setAccountModeratedHandler().
+ *
  * Note: Public functions are thread-safe. All other work happens on the
  *       network IO thread.
  *
@@ -76,6 +80,15 @@ public:
      */
     using SaveAccountDataCallback
         = std::function<void(const SaveAccountDataResponse&)>;
+
+    /**
+     * Called when AccountServer tells us that an account was moderated.
+     *
+     * Note: This is called on the network IO thread. Callers should forward
+     *       the notice to their own thread rather than doing work here.
+     */
+    using AccountModeratedHandler
+        = std::function<void(const AccountModeratedNotice&)>;
 
     /**
      * @param inSSLContext Must present the service's certificate, and verify
@@ -130,6 +143,14 @@ public:
      */
     void saveAccountData(Sint64 accountID, AccountData accountData,
                          SaveAccountDataCallback callback);
+
+    /**
+     * Sets the handler that's called when AccountServer tells us that an
+     * account was moderated. If no handler is set, these notices are ignored.
+     *
+     * Must be called before start().
+     */
+    void setAccountModeratedHandler(AccountModeratedHandler handler);
 
 private:
     using Connection = SimpleConnection<AccountServiceMessageType>;
@@ -247,6 +268,11 @@ private:
     template<typename Response>
     void handleResponse(std::span<const Uint8> messageBuffer);
 
+    /**
+     * Deserializes an AccountModeratedNotice and passes it to our handler.
+     */
+    void handleAccountModeratedNotice(std::span<const Uint8> messageBuffer);
+
     asio::io_context& ioContext;
     asio::ssl::context& sslContext;
 
@@ -265,6 +291,9 @@ private:
     std::shared_ptr<Connection> connection;
 
     SimpleMessageFramer<AccountServiceMessageType> messageFramer;
+
+    /** If set, called when we receive an AccountModeratedNotice. */
+    AccountModeratedHandler accountModeratedHandler;
 
     /** Maps request IDs to the callback that's waiting on a response. */
     std::unordered_map<Uint32, PendingCallback> pendingRequests;

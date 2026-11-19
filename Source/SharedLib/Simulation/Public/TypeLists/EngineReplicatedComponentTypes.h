@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AccountRole.h"
 #include "IsPlayerEntity.h"
 #include "Name.h"
 #include "Input.h"
@@ -56,9 +57,9 @@ namespace AM
  *   EngineInitSelfComponentTypes.h, ProjectInitSelfComponentTypes.h.
  */
 
-using EngineSelfInitComponentTypes = boost::mp11::mp_list<>;
+using EngineSelfInitComponentTypes = boost::mp11::mp_list<AccountRole>;
 
-using EngineSelfUpdateComponentTypes = boost::mp11::mp_list<>;
+using EngineSelfUpdateComponentTypes = boost::mp11::mp_list<AccountRole>;
 
 /**
  * Note: We handle Position separately because every entity is guaranteed to

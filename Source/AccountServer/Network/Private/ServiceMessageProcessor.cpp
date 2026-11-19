@@ -196,6 +196,7 @@ ConsumeServiceTicketResponse ServiceMessageProcessor::consumeServiceTicket(
     response.accountSessionID = ticketInfo.accountSessionID;
     response.accountStatus = std::move(ticketInfo.accountStatus);
     response.username = std::move(ticketInfo.username);
+    response.roleID = std::move(ticketInfo.roleID);
     response.result = ConsumeServiceTicketResponse::Success;
     return response;
 }

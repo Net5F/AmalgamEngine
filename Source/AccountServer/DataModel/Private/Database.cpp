@@ -1,7 +1,10 @@
 #include "Database.h"
 #include "Paths.h"
+#include "AccountRoleHelpers.h"
+#include "AccountRoleDefs.h"
 #include "Log.h"
 #include <mutex>
+#include <string>
 
 #ifdef SQLITECPP_ENABLE_ASSERT_HANDLER
 namespace SQLite
@@ -25,7 +28,8 @@ Database::Database()
 }
 
 Database::Database(const std::string& databasePath)
-: database{databasePath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE}
+: database{databasePath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE,
+           BUSY_TIMEOUT_MS}
 , registerAccountQuery{nullptr}
 , insertRecoveryKeyQuery{nullptr}
 , getAccountLoginInfoQuery{nullptr}
@@ -41,6 +45,12 @@ Database::Database(const std::string& databasePath)
 , saveAccountDataQuery{nullptr}
 , deleteExpiredServiceTicketsQuery{nullptr}
 , deleteExpiredSessionsQuery{nullptr}
+, getAccountByIDQuery{nullptr}
+, getAccountByUsernameQuery{nullptr}
+, setRoleQuery{nullptr}
+, liftBansQuery{nullptr}
+, insertBanQuery{nullptr}
+, insertModerationLogQuery{nullptr}
 {
     // Enforce our REFERENCES constraints, including their ON DELETE CASCADE.
     // Note: SQLite leaves this off by default, and it must be set per
@@ -54,10 +64,10 @@ Database::Database(const std::string& databasePath)
     //       segfault if there's no DB with the expected fields.
     registerAccountQuery = std::make_unique<SQLite::Statement>(database, R"(
             INSERT INTO accounts
-                (username, normalized_username, password_hash,
+                (username, normalized_username, password_hash, role,
                  created_at, updated_at)
             VALUES
-                (:username, lower(:username), :password_hash,
+                (:username, lower(:username), :password_hash, :role,
                  unixepoch(), unixepoch())
             ON CONFLICT(normalized_username) DO NOTHING
         )");
@@ -70,7 +80,14 @@ Database::Database(const std::string& databasePath)
         )");
 
     getAccountLoginInfoQuery = std::make_unique<SQLite::Statement>(database, R"(
-            SELECT account_id, password_hash, status
+            SELECT account_id, password_hash, status,
+                EXISTS (
+                    SELECT 1
+                    FROM account_bans
+                    WHERE account_bans.account_id = accounts.account_id
+                      AND lifted_at IS NULL
+                      AND (expires_at IS NULL OR expires_at > unixepoch())
+                )
             FROM accounts
             WHERE normalized_username = lower(:username)
             LIMIT 1
@@ -108,6 +125,13 @@ Database::Database(const std::string& databasePath)
             FROM accounts
             WHERE account_id = :account_id
               AND status = 'active'
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM account_bans
+                  WHERE account_bans.account_id = accounts.account_id
+                    AND lifted_at IS NULL
+                    AND (expires_at IS NULL OR expires_at > unixepoch())
+              )
         )");
 
     validateSessionQuery = std::make_unique<SQLite::Statement>(database, R"(
@@ -208,6 +232,14 @@ Database::Database(const std::string& databasePath)
                     WHERE sessions.session_id
                               = service_tickets.account_session_id
                 ),
+                (
+                    SELECT accounts.role
+                    FROM account_sessions AS sessions
+                    JOIN accounts
+                      ON accounts.account_id = sessions.account_id
+                    WHERE sessions.session_id
+                              = service_tickets.account_session_id
+                ),
                 consumed_at
         )");
 
@@ -253,6 +285,54 @@ Database::Database(const std::string& databasePath)
             WHERE revoked_at IS NOT NULL
                OR idle_expires_at <= unixepoch()
         )");
+
+    getAccountByIDQuery = std::make_unique<SQLite::Statement>(database, R"(
+            SELECT username, role
+            FROM accounts
+            WHERE account_id = :account_id
+        )");
+
+    getAccountByUsernameQuery
+        = std::make_unique<SQLite::Statement>(database, R"(
+            SELECT account_id, username, role
+            FROM accounts
+            WHERE normalized_username = lower(:username)
+        )");
+
+    setRoleQuery = std::make_unique<SQLite::Statement>(database, R"(
+            UPDATE accounts
+            SET role = :role,
+                updated_at = unixepoch()
+            WHERE account_id = :account_id
+        )");
+
+    liftBansQuery = std::make_unique<SQLite::Statement>(database, R"(
+            UPDATE account_bans
+            SET lifted_at = unixepoch(),
+                lifted_by = :lifted_by
+            WHERE account_id = :account_id
+              AND lifted_at IS NULL
+              AND (expires_at IS NULL OR expires_at > unixepoch())
+        )");
+
+    // Note: A duration of 0 means the ban is permanent.
+    insertBanQuery = std::make_unique<SQLite::Statement>(database, R"(
+            INSERT INTO account_bans
+                (account_id, banned_by, reason, created_at, expires_at)
+            VALUES
+                (:account_id, :banned_by, :reason, unixepoch(),
+                 CASE WHEN :duration_s > 0 THEN unixepoch() + :duration_s
+                      ELSE NULL END)
+        )");
+
+    insertModerationLogQuery = std::make_unique<SQLite::Statement>(database, R"(
+            INSERT INTO moderation_log
+                (actor_account_id, actor_name, target_account_id, target_name,
+                 action, details, reason, created_at)
+            VALUES
+                (:actor_account_id, :actor_name, :target_account_id,
+                 :target_name, :action, :details, :reason, unixepoch())
+        )");
 }
 
 Database::RegisterResult
@@ -268,6 +348,8 @@ Database::RegisterResult
         // Insert the username/password.
         registerAccountQuery->bind(":username", username);
         registerAccountQuery->bind(":password_hash", passwordHash);
+        registerAccountQuery->bind(
+            ":role", std::string{AccountRoleDefs::DEFAULT_ROLE_ID});
 
         int changedRowCount{registerAccountQuery->exec()};
 
@@ -315,6 +397,8 @@ Database::AccountLoginInfo
         loginInfo.passwordHash
             = getAccountLoginInfoQuery->getColumn(1).getString();
         loginInfo.status = getAccountLoginInfoQuery->getColumn(2).getString();
+        loginInfo.isBanned
+            = (getAccountLoginInfoQuery->getColumn(3).getInt() != 0);
 
         getAccountLoginInfoQuery->reset();
         loginInfo.result = AccountLoginInfo::Result::Success;
@@ -576,8 +660,9 @@ Database::ConsumedServiceTicketInfo
             = consumeServiceTicketQuery->getColumn(2).getString();
         ticketInfo.username
             = consumeServiceTicketQuery->getColumn(3).getString();
+        ticketInfo.roleID = consumeServiceTicketQuery->getColumn(4).getString();
         ticketInfo.consumedAt
-            = consumeServiceTicketQuery->getColumn(4).getInt64();
+            = consumeServiceTicketQuery->getColumn(5).getInt64();
 
         consumeServiceTicketQuery->reset();
         ticketInfo.result = ConsumedServiceTicketInfo::Result::Success;
@@ -654,6 +739,200 @@ Database::SaveAccountDataResult
     }
 }
 
+Database::ModerationOutcome Database::moderate(const ModerationInfo& info)
+{
+    std::scoped_lock lock{databaseMutex};
+
+    ModerationOutcome outcome{};
+
+    try {
+        // Note: If we return before committing, the transaction is rolled
+        //       back.
+        SQLite::Transaction transaction{database};
+
+        // Get the actor's role, and check that it permits this action.
+        getAccountByIDQuery->bind(":account_id", info.actorAccountID);
+        if (!(getAccountByIDQuery->executeStep())) {
+            // The actor's account no longer exists.
+            getAccountByIDQuery->reset();
+            outcome.result = ModerationResult::NotPermitted;
+            return outcome;
+        }
+        std::string actorName{getAccountByIDQuery->getColumn(0).getString()};
+        const AccountRoleDef& actorRole{AccountRoleHelpers::getRoleOrDefault(
+            getAccountByIDQuery->getColumn(1).getString())};
+        getAccountByIDQuery->reset();
+
+        if (!(actorRole.hasPermission(getRequiredPermission(info.action)))) {
+            outcome.result = ModerationResult::NotPermitted;
+            return outcome;
+        }
+
+        // Get the target, and check that the actor outranks them.
+        getAccountByUsernameQuery->bind(":username", info.targetUsername);
+        if (!(getAccountByUsernameQuery->executeStep())) {
+            getAccountByUsernameQuery->reset();
+            outcome.result = ModerationResult::TargetNotFound;
+            return outcome;
+        }
+        Sint64 targetAccountID{
+            getAccountByUsernameQuery->getColumn(0).getInt64()};
+        std::string targetName{
+            getAccountByUsernameQuery->getColumn(1).getString()};
+        const AccountRoleDef& targetRole{AccountRoleHelpers::getRoleOrDefault(
+            getAccountByUsernameQuery->getColumn(2).getString())};
+        getAccountByUsernameQuery->reset();
+
+        if (!(AccountRoleHelpers::canActOn(actorRole, targetRole))) {
+            outcome.result = ModerationResult::NotPermitted;
+            return outcome;
+        }
+
+        // Apply the action.
+        std::string details{};
+        switch (info.action) {
+            case AccountModerationAction::Ban: {
+                // Replace any existing ban.
+                liftBansQuery->bind(":account_id", targetAccountID);
+                liftBansQuery->bind(":lifted_by", info.actorAccountID);
+                liftBansQuery->exec();
+                liftBansQuery->reset();
+
+                insertBanQuery->bind(":account_id", targetAccountID);
+                insertBanQuery->bind(":banned_by", info.actorAccountID);
+                insertBanQuery->bind(":reason", info.reason);
+                insertBanQuery->bind(":duration_s", info.durationS);
+                insertBanQuery->exec();
+                insertBanQuery->reset();
+
+                // Log out everywhere.
+                // Note: Outstanding service tickets become unusable along
+                //       with their sessions.
+                revokeAllSessionsQuery->bind(":account_id", targetAccountID);
+                revokeAllSessionsQuery->exec();
+                revokeAllSessionsQuery->reset();
+
+                details = (info.durationS > 0)
+                              ? (std::to_string(info.durationS) + "s")
+                              : "permanent";
+                break;
+            }
+            case AccountModerationAction::Unban: {
+                liftBansQuery->bind(":account_id", targetAccountID);
+                liftBansQuery->bind(":lifted_by", info.actorAccountID);
+                int liftedCount{liftBansQuery->exec()};
+                liftBansQuery->reset();
+
+                if (liftedCount == 0) {
+                    outcome.result = ModerationResult::NotBanned;
+                    return outcome;
+                }
+                break;
+            }
+            case AccountModerationAction::SetRole: {
+                const AccountRoleDef* newRole{
+                    AccountRoleHelpers::findRole(info.roleID)};
+                if (!newRole) {
+                    outcome.result = ModerationResult::InvalidRole;
+                    return outcome;
+                }
+                if (!(AccountRoleHelpers::canAssign(actorRole, *newRole))) {
+                    outcome.result = ModerationResult::NotPermitted;
+                    return outcome;
+                }
+
+                setRoleQuery->bind(":account_id", targetAccountID);
+                setRoleQuery->bind(":role", std::string{newRole->id});
+                setRoleQuery->exec();
+                setRoleQuery->reset();
+
+                details = std::string{targetRole.id} + " -> "
+                          + std::string{newRole->id};
+                outcome.roleID = newRole->id;
+                break;
+            }
+            default: {
+                LOG_ERROR("Unknown moderation action: %u",
+                          static_cast<unsigned int>(info.action));
+                outcome.result = ModerationResult::InternalError;
+                return outcome;
+            }
+        }
+
+        insertModerationLog(info.actorAccountID, actorName, targetAccountID,
+                            targetName, info.action, details, info.reason);
+
+        transaction.commit();
+
+        outcome.result = ModerationResult::Success;
+        outcome.targetAccountID = targetAccountID;
+        outcome.targetUsername = std::move(targetName);
+        return outcome;
+    } catch (std::exception& e) {
+        // Ensure the pre-built statements are reusable after a failure.
+        getAccountByIDQuery->tryReset();
+        getAccountByUsernameQuery->tryReset();
+        liftBansQuery->tryReset();
+        insertBanQuery->tryReset();
+        revokeAllSessionsQuery->tryReset();
+        setRoleQuery->tryReset();
+        insertModerationLogQuery->tryReset();
+        LOG_ERROR("Failed to apply moderation action: %s", e.what());
+        outcome = {};
+        outcome.result = ModerationResult::InternalError;
+        return outcome;
+    }
+}
+
+Database::ConsoleSetRoleResult
+    Database::setRoleFromConsole(const std::string& username,
+                                 const std::string& roleID)
+{
+    std::scoped_lock lock{databaseMutex};
+
+    ConsoleSetRoleResult setRoleResult{};
+
+    try {
+        SQLite::Transaction transaction{database};
+
+        getAccountByUsernameQuery->bind(":username", username);
+        if (!(getAccountByUsernameQuery->executeStep())) {
+            getAccountByUsernameQuery->reset();
+            setRoleResult.result
+                = ConsoleSetRoleResult::Result::AccountNotFound;
+            return setRoleResult;
+        }
+        Sint64 accountID{getAccountByUsernameQuery->getColumn(0).getInt64()};
+        setRoleResult.username
+            = getAccountByUsernameQuery->getColumn(1).getString();
+        setRoleResult.previousRoleID
+            = getAccountByUsernameQuery->getColumn(2).getString();
+        getAccountByUsernameQuery->reset();
+
+        setRoleQuery->bind(":account_id", accountID);
+        setRoleQuery->bind(":role", roleID);
+        setRoleQuery->exec();
+        setRoleQuery->reset();
+
+        insertModerationLog(
+            0, CONSOLE_ACTOR_NAME, accountID, setRoleResult.username,
+            AccountModerationAction::SetRole,
+            (setRoleResult.previousRoleID + " -> " + roleID), "");
+
+        transaction.commit();
+        setRoleResult.result = ConsoleSetRoleResult::Result::Success;
+        return setRoleResult;
+    } catch (std::exception& e) {
+        getAccountByUsernameQuery->tryReset();
+        setRoleQuery->tryReset();
+        insertModerationLogQuery->tryReset();
+        LOG_ERROR("Failed to set role: %s", e.what());
+        setRoleResult = {};
+        setRoleResult.result = ConsoleSetRoleResult::Result::DatabaseError;
+        return setRoleResult;
+    }
+}
+
 void Database::initTables()
 {
     // The below commands define the schema for Accounts.db.
@@ -687,6 +966,12 @@ void Database::initTables()
                             'suspended',
                             'disabled'
                         )),
+
+                    -- The ID of a role in AccountRoleDefs.
+                    -- Note: Roles are defined by the project, so we can't
+                    --       constrain this to the valid IDs.
+                    role                 TEXT NOT NULL
+                        CHECK (length(role) BETWEEN 1 AND 32),
 
                     created_at           INTEGER NOT NULL,
                     updated_at           INTEGER NOT NULL,
@@ -828,9 +1113,139 @@ void Database::initTables()
                 ) STRICT
             )");
         }
+
+        // Account bans. A ban is in effect until it expires or is lifted.
+        // Lifted and expired bans are kept as a history.
+        if (!database.tableExists("account_bans")) {
+            database.exec(R"(
+                CREATE TABLE account_bans
+                (
+                    ban_id      INTEGER PRIMARY KEY,
+
+                    account_id  INTEGER NOT NULL
+                        REFERENCES accounts(account_id)
+                        ON DELETE CASCADE,
+
+                    -- The account that issued the ban.
+                    banned_by   INTEGER
+                        REFERENCES accounts(account_id)
+                        ON DELETE SET NULL,
+
+                    reason      TEXT NOT NULL,
+
+                    created_at  INTEGER NOT NULL,
+                    -- If null, the ban is permanent.
+                    expires_at  INTEGER,
+
+                    -- Set when the ban is lifted early (unbanned or
+                    -- replaced by a newer ban).
+                    lifted_at   INTEGER,
+                    lifted_by   INTEGER
+                        REFERENCES accounts(account_id)
+                        ON DELETE SET NULL,
+
+                    CHECK (expires_at IS NULL OR expires_at > created_at),
+                    CHECK (lifted_at IS NULL OR lifted_at >= created_at)
+                ) STRICT;
+
+                CREATE INDEX account_bans_account_id_idx
+                    ON account_bans(account_id);
+            )");
+        }
+
+        // A record of every moderation action.
+        // Note: Names are stored alongside IDs so that entries stay readable
+        //       if an account is deleted.
+        if (!database.tableExists("moderation_log")) {
+            database.exec(R"(
+                CREATE TABLE moderation_log
+                (
+                    log_id             INTEGER PRIMARY KEY,
+
+                    -- Null if the action was taken through the console.
+                    actor_account_id   INTEGER
+                        REFERENCES accounts(account_id)
+                        ON DELETE SET NULL,
+                    actor_name         TEXT NOT NULL,
+
+                    target_account_id  INTEGER
+                        REFERENCES accounts(account_id)
+                        ON DELETE SET NULL,
+                    target_name        TEXT NOT NULL,
+
+                    action             TEXT NOT NULL
+                        CHECK (action IN (
+                            'ban',
+                            'unban',
+                            'set_role'
+                        )),
+                    -- Action-specific info, e.g. a ban's duration or a role
+                    -- change.
+                    details            TEXT NOT NULL,
+                    reason             TEXT NOT NULL,
+
+                    created_at         INTEGER NOT NULL
+                ) STRICT;
+
+                CREATE INDEX moderation_log_target_account_id_idx
+                    ON moderation_log(target_account_id);
+            )");
+        }
     } catch (std::exception& e) {
         LOG_ERROR("Failed to init table: %s", e.what());
     }
+}
+
+AccountPermission
+    Database::getRequiredPermission(AccountModerationAction action)
+{
+    switch (action) {
+        case AccountModerationAction::Ban:
+        case AccountModerationAction::Unban: {
+            return AccountPermission::Ban;
+        }
+        case AccountModerationAction::SetRole:
+        default: {
+            return AccountPermission::SetRole;
+        }
+    }
+}
+
+const char* Database::getLogActionName(AccountModerationAction action)
+{
+    switch (action) {
+        case AccountModerationAction::Ban: {
+            return "ban";
+        }
+        case AccountModerationAction::Unban: {
+            return "unban";
+        }
+        case AccountModerationAction::SetRole:
+        default: {
+            return "set_role";
+        }
+    }
+}
+
+void Database::insertModerationLog(
+    Sint64 actorAccountID, const std::string& actorName, Sint64 targetAccountID,
+    const std::string& targetName, AccountModerationAction action,
+    const std::string& details, const std::string& reason)
+{
+    if (actorAccountID == 0) {
+        insertModerationLogQuery->bind(":actor_account_id");
+    }
+    else {
+        insertModerationLogQuery->bind(":actor_account_id", actorAccountID);
+    }
+    insertModerationLogQuery->bind(":actor_name", actorName);
+    insertModerationLogQuery->bind(":target_account_id", targetAccountID);
+    insertModerationLogQuery->bind(":target_name", targetName);
+    insertModerationLogQuery->bind(":action", getLogActionName(action));
+    insertModerationLogQuery->bind(":details", details);
+    insertModerationLogQuery->bind(":reason", reason);
+    insertModerationLogQuery->exec();
+    insertModerationLogQuery->reset();
 }
 
 } // End namespace AccountServer

@@ -17,6 +17,7 @@ namespace AM
 struct ChatConnectionRequest;
 struct ChatSendRequest;
 struct ChatHeartbeat;
+struct AccountModeratedNotice;
 class AccountServiceEndpoint;
 
 namespace ChatServer
@@ -34,6 +35,9 @@ class PlayerLocator;
  * ChatConnectionRequest with a valid Chat Server ticket before it can send or
  * receive chat. If its ticket is rejected, it isn't allowed to send any more
  * messages, and will be disconnected if it tries.
+ *
+ * If AccountServer tells us that an account was banned, we disconnect its
+ * client.
  *
  * To add a message:
  *   1. Add #include "MyNewMessage.h" to ClientMessageProcessor.cpp.
@@ -116,6 +120,11 @@ private:
     //-------------------------------------------------------------------------
     // Helpers
     //-------------------------------------------------------------------------
+    /**
+     * Handles AccountServer's notice that an account was moderated.
+     */
+    void handleAccountModeratedNotice(const AccountModeratedNotice& notice);
+
     /**
      * Handles AccountServer's response to the given client's ticket.
      */

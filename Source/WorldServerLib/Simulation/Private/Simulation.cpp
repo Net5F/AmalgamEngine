@@ -43,6 +43,7 @@ Simulation::Simulation(const SimulationContext& inSimContext)
                     network}
 , extension{nullptr}
 , clientConnectionSystem{inSimContext}
+, moderationSystem{inSimContext}
 , nonPlayerEntityLifetimeSystem{inSimContext}
 , componentChangeSystem{inSimContext}
 , tileUpdateSystem{inSimContext}
@@ -116,6 +117,9 @@ void Simulation::tick()
 
     // Process client connections and disconnections.
     clientConnectionSystem.processConnectionEvents();
+
+    // Process moderation actions.
+    moderationSystem.processModeration();
 
     // Process requests to create or destroy non-player entities.
     nonPlayerEntityLifetimeSystem.processUpdateRequests();

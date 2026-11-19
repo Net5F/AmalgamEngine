@@ -73,6 +73,13 @@ public:
     //-------------------------------------------------------------------------
     // These functions allow the project to affect various World state
     // modifications.
+    //
+    // These are the only checks that the engine runs on these requests. It
+    // doesn't enforce AccountPermission::Build itself, so that the project can
+    // decide how it combines with its own rules (e.g. letting anyone build in
+    // certain areas). Use World::hasPermission() with the request's
+    // clientHandle to check it. If a hook always returns true, any client
+    // can make that change.
 
     /** @return true if the given extent is editable, else false. */
     virtual bool isTileExtentEditable(ConnectionHandle clientHandle,

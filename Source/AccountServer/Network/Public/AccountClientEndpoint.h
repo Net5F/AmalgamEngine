@@ -27,10 +27,15 @@ class Database;
 class AccountClientEndpoint
 {
 public:
-    AccountClientEndpoint(asio::io_context& inIoContext,
-                          asio::ssl::context& inSSLContext,
-                          asio::thread_pool& inDatabasePool,
-                          Database& inDatabase);
+    /**
+     * @param inBroadcastToServices Used to send messages to every connected
+     *                              service (see
+     *                              ClientMessageProcessor::BroadcastCallback).
+     */
+    AccountClientEndpoint(
+        asio::io_context& inIoContext, asio::ssl::context& inSSLContext,
+        asio::thread_pool& inDatabasePool, Database& inDatabase,
+        ClientMessageProcessor::BroadcastCallback inBroadcastToServices);
 
     /**
      * Starts our acceptor.
