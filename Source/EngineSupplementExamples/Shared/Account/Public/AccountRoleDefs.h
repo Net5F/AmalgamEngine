@@ -35,8 +35,9 @@ struct AccountRoleDefs {
         AccountRoleDef{.id{"admin"},
                        .displayName{"Admin"},
                        .rank{3},
-                       .permissions{makePermissions(AccountPermission::Ban,
-                                                    AccountPermission::Build)}},
+                       .permissions{makePermissions(
+                           AccountPermission::Ban, AccountPermission::Build,
+                           AccountPermission::SetRole)}},
         AccountRoleDef{.id{"superadmin"},
                        .displayName{"SuperAdmin"},
                        .rank{4},
