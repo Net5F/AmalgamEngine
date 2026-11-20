@@ -136,12 +136,6 @@ public:
      */
     void disconnectAll(DisconnectNotice::Reason reason);
 
-    /**
-     * Returns the endpoint's event dispatcher. All messages that we receive
-     * from clients are pushed into this dispatcher.
-     */
-    EventDispatcher& getEventDispatcher();
-
     /** Used for passing us a pointer to the sim's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
@@ -266,8 +260,9 @@ private:
     /** Used to validate the tickets that clients send us. */
     AccountServiceEndpoint& accountEndpoint;
 
-    /** Used to dispatch events from the network to the simulation. */
-    EventDispatcher eventDispatcher;
+    /** Used to push client connection events to the simulation.
+        Note: Received messages are pushed by messageProcessor. */
+    EventDispatcher& networkEventDispatcher;
 
     /** Deserializes messages, does any network-layer message handling, and
         passes messages down to the simulation. */

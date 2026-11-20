@@ -43,7 +43,7 @@ ClientConnectionSystem::ClientConnectionSystem(
 , network{inSimContext.network}
 , graphicData{inSimContext.graphicData}
 , extension{nullptr}
-, clientConnectionEventQueue{network.clientEndpoint.getEventDispatcher()}
+, clientConnectionEventQueue{inSimContext.networkEventDispatcher}
 , logoutRequestQueue{inSimContext.networkEventDispatcher}
 , castStartedObserver{}
 , accountEntityMap{}

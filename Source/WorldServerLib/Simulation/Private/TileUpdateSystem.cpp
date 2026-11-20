@@ -64,10 +64,10 @@ TileUpdateSystem::TileUpdateSystem(const SimulationContext& inSimContext)
 : world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
 , extension{nullptr}
-, addLayerRequestQueue{network.clientEndpoint.getEventDispatcher()}
-, removeLayerRequestQueue{network.clientEndpoint.getEventDispatcher()}
-, clearLayersRequestQueue{network.clientEndpoint.getEventDispatcher()}
-, extentClearLayersRequestQueue{network.clientEndpoint.getEventDispatcher()}
+, addLayerRequestQueue{inSimContext.networkEventDispatcher}
+, removeLayerRequestQueue{inSimContext.networkEventDispatcher}
+, clearLayersRequestQueue{inSimContext.networkEventDispatcher}
+, extentClearLayersRequestQueue{inSimContext.networkEventDispatcher}
 {
 }
 

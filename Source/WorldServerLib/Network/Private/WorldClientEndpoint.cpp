@@ -30,7 +30,7 @@ WorldClientEndpoint::WorldClientEndpoint(
 : ioContext{inIoContext}
 , sslContext{inSSLContext}
 , accountEndpoint{inAccountEndpoint}
-, eventDispatcher{}
+, networkEventDispatcher{inMessageProcessorContext.networkEventDispatcher}
 , messageProcessor{inMessageProcessorContext}
 , maxClients{UserConfig::get().getMaxClients()}
 , clientRegistry(maxClients)
@@ -108,11 +108,6 @@ void WorldClientEndpoint::disconnectAll(DisconnectNotice::Reason reason)
 {
     outbox.emplace_back(OutboxEntry{.clientHandle{NULL_CONNECTION_HANDLE},
                                     .disconnectReason{reason}});
-}
-
-EventDispatcher& WorldClientEndpoint::getEventDispatcher()
-{
-    return eventDispatcher;
 }
 
 void WorldClientEndpoint::registerCurrentTickPtr(
@@ -225,7 +220,7 @@ void WorldClientEndpoint::onConnectionDisconnected(
 
         // If the sim knows about this client, tell it.
         if (client->getAuthState() == Client::AuthState::Authenticated) {
-            eventDispatcher.emplace<ClientConnectionEvent>(
+            networkEventDispatcher.emplace<ClientConnectionEvent>(
                 ClientDisconnected{.clientHandle{clientHandle}});
         }
     }
@@ -338,7 +333,7 @@ void WorldClientEndpoint::onTicketResult(
                      static_cast<long long>(response.accountID));
 
             // Notify the sim that a client was connected.
-            eventDispatcher.emplace<ClientConnectionEvent>(
+            networkEventDispatcher.emplace<ClientConnectionEvent>(
                 ClientConnected{.clientHandle{clientHandle},
                                 .accountID{response.accountID},
                                 .username{response.username},
@@ -436,7 +431,7 @@ void WorldClientEndpoint::beginClosingClient(
 
     // If the sim knows about this client, tell it.
     if (client.getAuthState() == Client::AuthState::Authenticated) {
-        eventDispatcher.emplace<ClientConnectionEvent>(
+        networkEventDispatcher.emplace<ClientConnectionEvent>(
             ClientDisconnected{.clientHandle{client.getHandle()},
                                .reason{reason}});
     }
