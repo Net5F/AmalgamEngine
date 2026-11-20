@@ -43,7 +43,7 @@ Simulation::Simulation(const SimulationContext& inSimContext)
                     network}
 , extension{nullptr}
 , clientConnectionSystem{inSimContext}
-, moderationSystem{inSimContext}
+, moderationSystem{inSimContext, clientConnectionSystem}
 , nonPlayerEntityLifetimeSystem{inSimContext}
 , componentChangeSystem{inSimContext}
 , tileUpdateSystem{inSimContext}

@@ -16,9 +16,12 @@ namespace AM
 namespace WorldServer
 {
 
-ModerationSystem::ModerationSystem(const SimulationContext& inSimContext)
+ModerationSystem::ModerationSystem(
+    const SimulationContext& inSimContext,
+    ClientConnectionSystem& inClientConnectionSystem)
 : world{inSimContext.simulation.getWorld()}
 , network{inSimContext.network}
+, clientConnectionSystem{inClientConnectionSystem}
 , noticeQueue{inSimContext.networkEventDispatcher}
 , worldRequestQueue{inSimContext.networkEventDispatcher}
 {
@@ -48,13 +51,22 @@ void ModerationSystem::processNotice(const AccountModeratedNotice& notice)
     switch (notice.action) {
         case AccountModerationAction::Ban: {
             // If the account's client is connected, disconnect it.
-            // Note: If the entity is lingering, it'll be removed as usual.
+            // Note: When the disconnect event arrives, ClientConnectionSystem
+            //       will remove the entity immediately (skipping the linger
+            //       time).
             ConnectionHandle clientHandle{
                 world.registry.get<ClientSimData>(entity).clientHandle};
             if (clientHandle != NULL_CONNECTION_HANDLE) {
                 network.clientEndpoint.disconnect(clientHandle,
                                                   DisconnectNotice::Banned);
                 LOG_INFO("Disconnected banned client. AccountID: %lld",
+                         static_cast<long long>(notice.accountID));
+            }
+            else {
+                // The entity is lingering. Remove it now.
+                clientConnectionSystem.removeLingeringEntity(notice.accountID);
+                LOG_INFO("Removed banned account's lingering entity. "
+                         "AccountID: %lld",
                          static_cast<long long>(notice.accountID));
             }
             break;

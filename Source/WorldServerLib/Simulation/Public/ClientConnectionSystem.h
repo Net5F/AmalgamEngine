@@ -64,6 +64,12 @@ public:
 
     void setExtension(ISimulationExtension* inExtension);
 
+    /**
+     * If the given account's entity is lingering, saves and removes it
+     * immediately instead of waiting for its linger time to expire.
+     */
+    void removeLingeringEntity(Sint64 accountID);
+
 private:
     enum class GetSavedComponentsResult { Success, NotFound, Error };
 

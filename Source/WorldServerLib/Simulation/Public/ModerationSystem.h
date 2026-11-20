@@ -14,6 +14,7 @@ namespace WorldServer
 struct SimulationContext;
 class World;
 class Network;
+class ClientConnectionSystem;
 
 /**
  * Handles moderation within this world.
@@ -30,7 +31,8 @@ class Network;
 class ModerationSystem
 {
 public:
-    ModerationSystem(const SimulationContext& inSimContext);
+    ModerationSystem(const SimulationContext& inSimContext,
+                     ClientConnectionSystem& inClientConnectionSystem);
 
     /**
      * Processes AccountServer's moderation notices and clients' world
@@ -73,6 +75,8 @@ private:
     World& world;
     /** Used to send responses and disconnect clients. */
     Network& network;
+    /** Used to remove banned accounts' lingering entities. */
+    ClientConnectionSystem& clientConnectionSystem;
     EventQueue<AccountModeratedNotice> noticeQueue;
     EventQueue<WorldModerationRequest> worldRequestQueue;
 };

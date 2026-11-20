@@ -94,6 +94,13 @@ void ClientConnectionSystem::setExtension(ISimulationExtension* inExtension)
     extension = inExtension;
 }
 
+void ClientConnectionSystem::removeLingeringEntity(Sint64 accountID)
+{
+    if (removalTickMap.erase(accountID)) {
+        removePlayerEntity(accountID);
+    }
+}
+
 void ClientConnectionSystem::processConnectEvent(
     const ClientConnected& clientConnected)
 {
@@ -139,9 +146,10 @@ void ClientConnectionSystem::processDisconnectEvent(
     // If the client was logging out, stop. The entity will linger as usual.
     logoutTickMap.erase(accountID);
 
-    // If the client logged out (or entities don't linger), remove the entity
-    // immediately.
+    // If the client logged out or was banned (or entities don't linger),
+    // remove the entity immediately.
     if ((clientDisconnected.reason == DisconnectNotice::Logout)
+        || (clientDisconnected.reason == DisconnectNotice::Banned)
         || (Config::LOGOUT_DELAY_TICKS == 0)) {
         removePlayerEntity(accountID);
         return;
