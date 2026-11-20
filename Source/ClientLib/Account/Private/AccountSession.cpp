@@ -222,7 +222,6 @@ void AccountSession::handleLoginResponse(LoginResponse& response)
         return;
     }
 
-    LoginResponse::Result result{response.result};
     if (response.result == LoginResponse::Success) {
         accountID = response.accountID;
         sessionToken = response.sessionToken;
@@ -234,8 +233,9 @@ void AccountSession::handleLoginResponse(LoginResponse& response)
         clearSession();
     }
 
+    // Note: We wipe the token before publishing, since listeners don't need it.
     response.sessionToken.wipe();
-    loginCompletedSig.publish(result);
+    loginCompletedSig.publish(response);
 }
 
 void AccountSession::handleRegisterResponse(RegisterResponse& response)

@@ -120,7 +120,7 @@ private:
     Sint64 idleExpiresAt;
     Sint64 absoluteExpiresAt;
 
-    entt::sigh<void(LoginResponse::Result)> loginCompletedSig;
+    entt::sigh<void(const LoginResponse&)> loginCompletedSig;
     entt::sigh<void(const RegisterResponse&)> registrationCompletedSig;
     entt::sigh<void(LogoutResponse::Result)> logoutCompletedSig;
     entt::sigh<void(const RecoverAccountResponse&)> recoveryCompletedSig;
@@ -132,7 +132,7 @@ private:
 
 public:
     /** A login request completed and the session model has been updated. */
-    entt::sink<entt::sigh<void(LoginResponse::Result)>> loginCompleted;
+    entt::sink<entt::sigh<void(const LoginResponse&)>> loginCompleted;
 
     /** An account-registration request completed. */
     entt::sink<entt::sigh<void(const RegisterResponse&)>> registrationCompleted;

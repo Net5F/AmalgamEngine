@@ -71,6 +71,9 @@ public:
         std::string status{};
         /** True if the account has a ban that's in effect. */
         bool isBanned{false};
+        /** If isBanned, this is the Unix timestamp at which the ban will
+            expire. 0 if the ban is permanent. */
+        Sint64 banExpiresAt{0};
     };
     /**
      * Gets the information needed to attempt a login for the account with the

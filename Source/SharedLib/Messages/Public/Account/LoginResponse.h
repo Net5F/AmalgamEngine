@@ -41,6 +41,10 @@ struct LoginResponse {
     /** If result == success, this is the Unix timestamp at which the session
         will expire regardless of activity. */
     Sint64 absoluteExpiresAt{0};
+
+    /** If result == Banned, this is the Unix timestamp at which the ban will
+        expire. 0 if the ban is permanent. */
+    Sint64 banExpiresAt{0};
 };
 
 template<typename S>
@@ -51,6 +55,7 @@ void serialize(S& serializer, LoginResponse& loginResponse)
     serializer.container1b(loginResponse.sessionToken.get());
     serializer.value8b(loginResponse.idleExpiresAt);
     serializer.value8b(loginResponse.absoluteExpiresAt);
+    serializer.value8b(loginResponse.banExpiresAt);
 }
 
 } // End namespace AM

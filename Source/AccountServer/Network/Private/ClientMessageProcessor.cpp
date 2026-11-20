@@ -307,6 +307,7 @@ LoginResponse ClientMessageProcessor::authenticateAndCreateSession(
     // banned.
     if (loginInfo.isBanned) {
         response.result = LoginResponse::Banned;
+        response.banExpiresAt = loginInfo.banExpiresAt;
         return response;
     }
 

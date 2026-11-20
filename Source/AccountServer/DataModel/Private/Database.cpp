@@ -87,6 +87,16 @@ Database::Database(const std::string& databasePath)
                     WHERE account_bans.account_id = accounts.account_id
                       AND lifted_at IS NULL
                       AND (expires_at IS NULL OR expires_at > unixepoch())
+                ),
+                (
+                    -- The latest-expiring active ban. Null if permanent.
+                    SELECT expires_at
+                    FROM account_bans
+                    WHERE account_bans.account_id = accounts.account_id
+                      AND lifted_at IS NULL
+                      AND (expires_at IS NULL OR expires_at > unixepoch())
+                    ORDER BY (expires_at IS NULL) DESC, expires_at DESC
+                    LIMIT 1
                 )
             FROM accounts
             WHERE normalized_username = lower(:username)
@@ -399,6 +409,10 @@ Database::AccountLoginInfo
         loginInfo.status = getAccountLoginInfoQuery->getColumn(2).getString();
         loginInfo.isBanned
             = (getAccountLoginInfoQuery->getColumn(3).getInt() != 0);
+        SQLite::Column banExpiresAtColumn{
+            getAccountLoginInfoQuery->getColumn(4)};
+        loginInfo.banExpiresAt
+            = (banExpiresAtColumn.isNull() ? 0 : banExpiresAtColumn.getInt64());
 
         getAccountLoginInfoQuery->reset();
         loginInfo.result = AccountLoginInfo::Result::Success;
