@@ -2,7 +2,7 @@
 
 #include "AccountServiceMessageType.h"
 #include "ModerationDefs.h"
-#include "AccountRoleDef.h"
+#include "AccountRoleDefs.h"
 #include <SDL3/SDL_stdinc.h>
 #include <string>
 

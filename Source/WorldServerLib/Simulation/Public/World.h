@@ -2,7 +2,7 @@
 
 #include "TileMap.h"
 #include "ConnectionHandle.h"
-#include "AccountRoleDef.h"
+#include "AccountRoleDefs.h"
 #include "EntityLocator.h"
 #include "CollisionLocator.h"
 #include "Pathfinder.h"

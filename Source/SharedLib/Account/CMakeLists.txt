@@ -6,7 +6,7 @@ target_sources(SharedLib
     PUBLIC
         Public/AccountDefs.h
         Public/AccountHelpers.h
-        Public/AccountRoleDef.h
+        Public/AccountRoleDefs.h
         Public/AccountRoleHelpers.h
         Public/ModerationDefs.h
         Public/Shared/AccountServiceEndpoint.h

@@ -2,7 +2,7 @@
 
 #include "AccountDefs.h"
 #include "AccountData.h"
-#include "AccountRoleDef.h"
+#include "AccountRoleDefs.h"
 #include "ModerationDefs.h"
 #include "SQLiteCpp/SQLiteCpp.h"
 #include <SDL3/SDL_stdinc.h>
