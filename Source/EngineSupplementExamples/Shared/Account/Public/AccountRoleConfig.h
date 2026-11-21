@@ -17,7 +17,7 @@ namespace AM
  * To give an account a role from outside the game (e.g. to create the first
  * SuperAdmin), run: AccountServer --set-role <username> <roleID>
  */
-struct AccountRoleDefs {
+struct AccountRoleConfig {
     /** The role that new accounts are given. Must match a role in ROLES. */
     static constexpr std::string_view DEFAULT_ROLE_ID{"player"};
 

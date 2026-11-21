@@ -8,7 +8,7 @@ namespace AM
 
 /**
  * Helper functions for looking up the project's account roles (see
- * AccountRoleDefs.h) and applying our moderation rules.
+ * AccountRoleConfig.h) and applying our moderation rules.
  */
 class AccountRoleHelpers
 {

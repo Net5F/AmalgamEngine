@@ -40,7 +40,7 @@ struct ConsumeServiceTicketResponse {
     std::string username{};
 
     /** If result == success, this is the ID of the account's role (see
-        AccountRoleDefs.h). */
+        AccountRoleConfig.h). */
     std::string roleID{};
 
     /** If result == success and the request set includeAccountData, this is

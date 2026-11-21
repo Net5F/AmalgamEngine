@@ -41,7 +41,7 @@ inline constexpr std::size_t ACCOUNT_ROLE_ID_MAX_LENGTH{32};
 /**
  * A role that an account may hold.
  *
- * Roles are defined by the project, in AccountRoleDefs.h.
+ * Roles are defined by the project, in AccountRoleConfig.h.
  */
 struct AccountRoleDef {
     /** The role's unique ID. This is what gets saved to the database, so

@@ -1,7 +1,7 @@
 #include "CommandLineTool.h"
 #include "Database.h"
 #include "AccountRoleHelpers.h"
-#include "AccountRoleDefs.h"
+#include "AccountRoleConfig.h"
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
@@ -79,7 +79,7 @@ void CommandLineTool::printUsage()
 void CommandLineTool::printRoles()
 {
     std::printf("Valid roles:");
-    for (const AccountRoleDef& role : AccountRoleDefs::ROLES) {
+    for (const AccountRoleDef& role : AccountRoleConfig::ROLES) {
         std::printf(" %s", std::string{role.id}.c_str());
     }
     std::printf("\n");

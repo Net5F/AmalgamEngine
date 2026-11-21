@@ -1,5 +1,5 @@
 #include "AccountRoleHelpers.h"
-#include "AccountRoleDefs.h"
+#include "AccountRoleConfig.h"
 #include "Log.h"
 #include <algorithm>
 #include <string>
@@ -10,18 +10,18 @@ namespace AM
 // Validate the project's role definitions.
 static_assert(
     []() {
-        for (const AccountRoleDef& role : AccountRoleDefs::ROLES) {
-            if (role.id == AccountRoleDefs::DEFAULT_ROLE_ID) {
+        for (const AccountRoleDef& role : AccountRoleConfig::ROLES) {
+            if (role.id == AccountRoleConfig::DEFAULT_ROLE_ID) {
                 return true;
             }
         }
         return false;
     }(),
-    "AccountRoleDefs::DEFAULT_ROLE_ID must match a role in ROLES.");
+    "AccountRoleConfig::DEFAULT_ROLE_ID must match a role in ROLES.");
 static_assert(
     []() {
-        for (std::size_t i{0}; i < AccountRoleDefs::ROLES.size(); ++i) {
-            const AccountRoleDef& role{AccountRoleDefs::ROLES[i]};
+        for (std::size_t i{0}; i < AccountRoleConfig::ROLES.size(); ++i) {
+            const AccountRoleDef& role{AccountRoleConfig::ROLES[i]};
             if (role.id.empty()
                 || (role.id.size() > ACCOUNT_ROLE_ID_MAX_LENGTH)) {
                 return false;
@@ -31,22 +31,23 @@ static_assert(
                     return false;
                 }
             }
-            for (std::size_t j{i + 1}; j < AccountRoleDefs::ROLES.size(); ++j) {
-                if (role.id == AccountRoleDefs::ROLES[j].id) {
+            for (std::size_t j{i + 1}; j < AccountRoleConfig::ROLES.size();
+                 ++j) {
+                if (role.id == AccountRoleConfig::ROLES[j].id) {
                     return false;
                 }
             }
         }
         return true;
     }(),
-    "AccountRoleDefs::ROLES IDs must be unique, non-empty, lowercase, and at "
+    "AccountRoleConfig::ROLES IDs must be unique, non-empty, lowercase, and at "
     "most ACCOUNT_ROLE_ID_MAX_LENGTH chars.");
 
 const AccountRoleDef* AccountRoleHelpers::findRole(std::string_view roleID)
 {
-    auto roleIt{
-        std::ranges::find(AccountRoleDefs::ROLES, roleID, &AccountRoleDef::id)};
-    if (roleIt == AccountRoleDefs::ROLES.end()) {
+    auto roleIt{std::ranges::find(AccountRoleConfig::ROLES, roleID,
+                                  &AccountRoleDef::id)};
+    if (roleIt == AccountRoleConfig::ROLES.end()) {
         return nullptr;
     }
 
@@ -56,7 +57,7 @@ const AccountRoleDef* AccountRoleHelpers::findRole(std::string_view roleID)
 const AccountRoleDef& AccountRoleHelpers::getDefaultRole()
 {
     // Note: Our static_assert guarantees that the default role exists.
-    return *findRole(AccountRoleDefs::DEFAULT_ROLE_ID);
+    return *findRole(AccountRoleConfig::DEFAULT_ROLE_ID);
 }
 
 const AccountRoleDef&

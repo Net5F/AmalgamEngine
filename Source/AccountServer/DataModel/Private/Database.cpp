@@ -1,7 +1,7 @@
 #include "Database.h"
 #include "Paths.h"
 #include "AccountRoleHelpers.h"
-#include "AccountRoleDefs.h"
+#include "AccountRoleConfig.h"
 #include "Log.h"
 #include <mutex>
 #include <string>
@@ -359,7 +359,7 @@ Database::RegisterResult
         registerAccountQuery->bind(":username", username);
         registerAccountQuery->bind(":password_hash", passwordHash);
         registerAccountQuery->bind(
-            ":role", std::string{AccountRoleDefs::DEFAULT_ROLE_ID});
+            ":role", std::string{AccountRoleConfig::DEFAULT_ROLE_ID});
 
         int changedRowCount{registerAccountQuery->exec()};
 
@@ -981,7 +981,7 @@ void Database::initTables()
                             'disabled'
                         )),
 
-                    -- The ID of a role in AccountRoleDefs.
+                    -- The ID of a role in AccountRoleConfig.
                     -- Note: Roles are defined by the project, so we can't
                     --       constrain this to the valid IDs.
                     role                 TEXT NOT NULL

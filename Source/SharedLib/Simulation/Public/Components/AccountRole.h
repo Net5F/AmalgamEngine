@@ -1,14 +1,14 @@
 #pragma once
 
 #include "AccountRoleDef.h"
-#include "AccountRoleDefs.h"
+#include "AccountRoleConfig.h"
 #include <string>
 
 namespace AM
 {
 
 /**
- * The role held by a player entity's account (see AccountRoleDefs.h).
+ * The role held by a player entity's account (see AccountRoleConfig.h).
  *
  * Set by the world server when the account's client connects, and updated if
  * the account's role changes while it's online. Replicated to the owning
@@ -20,7 +20,7 @@ namespace AM
 struct AccountRole {
     /** The ID of the role. Use AccountRoleHelpers::getRoleOrDefault() to get
         its definition. */
-    std::string roleID{AccountRoleDefs::DEFAULT_ROLE_ID};
+    std::string roleID{AccountRoleConfig::DEFAULT_ROLE_ID};
 };
 
 template<typename S>

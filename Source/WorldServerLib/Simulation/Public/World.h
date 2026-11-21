@@ -136,7 +136,7 @@ public:
 
     /**
      * Returns true if the given client's account holds a role that grants
-     * the given permission (see AccountRoleDefs.h).
+     * the given permission (see AccountRoleConfig.h).
      *
      * If the client doesn't exist (e.g. it disconnected), returns false.
      */

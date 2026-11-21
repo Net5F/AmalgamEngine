@@ -23,7 +23,7 @@ struct ClientConnected {
 
     /** The username of the account that the client authenticated as. */
     std::string username{};
-    /** The ID of the account's role (see AccountRoleDefs.h), as of when its
+    /** The ID of the account's role (see AccountRoleConfig.h), as of when its
         ticket was consumed. */
     std::string roleID{};
 
