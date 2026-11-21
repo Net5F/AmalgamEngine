@@ -65,6 +65,16 @@ struct AccountRoleDef {
     {
         return (permissions & static_cast<Uint8>(permission)) != 0;
     }
+
+    /**
+     * Returns true if this role's rank is higher than the given role's.
+     *
+     * Note: This doesn't check permissions, only rank.
+     */
+    constexpr bool outranks(const AccountRoleDef& other) const
+    {
+        return rank > other.rank;
+    }
 };
 
 } // End namespace AM

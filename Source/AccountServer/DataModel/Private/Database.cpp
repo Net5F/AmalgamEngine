@@ -797,7 +797,7 @@ Database::ModerationOutcome Database::moderate(const ModerationInfo& info)
             getAccountByUsernameQuery->getColumn(2).getString())};
         getAccountByUsernameQuery->reset();
 
-        if (!(AccountRoleHelpers::canActOn(actorRole, targetRole))) {
+        if (!(actorRole.outranks(targetRole))) {
             outcome.result = ModerationResult::NotPermitted;
             return outcome;
         }
@@ -850,7 +850,7 @@ Database::ModerationOutcome Database::moderate(const ModerationInfo& info)
                     outcome.result = ModerationResult::InvalidRole;
                     return outcome;
                 }
-                if (!(AccountRoleHelpers::canAssign(actorRole, *newRole))) {
+                if (!(actorRole.outranks(*newRole))) {
                     outcome.result = ModerationResult::NotPermitted;
                     return outcome;
                 }

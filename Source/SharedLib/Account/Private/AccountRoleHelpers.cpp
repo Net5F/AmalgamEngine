@@ -72,16 +72,4 @@ const AccountRoleDef&
     return getDefaultRole();
 }
 
-bool AccountRoleHelpers::canActOn(const AccountRoleDef& actorRole,
-                                  const AccountRoleDef& targetRole)
-{
-    return actorRole.rank > targetRole.rank;
-}
-
-bool AccountRoleHelpers::canAssign(const AccountRoleDef& actorRole,
-                                   const AccountRoleDef& newRole)
-{
-    return actorRole.rank > newRole.rank;
-}
-
 } // End namespace AM

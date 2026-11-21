@@ -111,7 +111,7 @@ void ModerationSystem::processWorldRequest(
             //   2. Find the target with findConnectedPlayer(). If they aren't
             //      in the world, respond with TargetNotOnline.
             //   3. If the target isn't the requester, check that the
-            //      requester outranks them (AccountRoleHelpers::canActOn()).
+            //      requester outranks them (AccountRoleDef::outranks()).
             //   4. Teleport the target with world.teleportEntity(), and
             //      respond with Success.
             // Until then, nobody is permitted to teleport.
