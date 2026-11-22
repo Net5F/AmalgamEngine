@@ -26,26 +26,30 @@ void ModerationCommands::registerCommands(ChatCommandRegistry& registry)
 {
     registry.registerCommand(
         "/ban", "/ban <username> [duration, e.g. 30m, 12h, 7d, 2w] [reason]",
-        [this](std::string_view arguments) {
+        AccountPermission::Ban, [this](std::string_view arguments) {
             return sendAccountRequest(AccountModerationAction::Ban, arguments);
         });
     registry.registerCommand("/unban", "/unban <username> [reason]",
+                             AccountPermission::Ban,
                              [this](std::string_view arguments) {
                                  return sendAccountRequest(
                                      AccountModerationAction::Unban, arguments);
                              });
-    registry.registerCommand("/role", "/role <username> <role> [reason]",
-                             [this](std::string_view arguments) {
-                                 return sendAccountRequest(
-                                     AccountModerationAction::SetRole,
-                                     arguments);
-                             });
-
-    // TODO: Add the teleport destination to /tp's usage.
     registry.registerCommand(
-        "/tp", "/tp <username>", [this](std::string_view arguments) {
-            return sendWorldRequest(WorldModerationAction::Teleport, arguments);
+        "/role", "/role <username> <role> [reason]", AccountPermission::SetRole,
+        [this](std::string_view arguments) {
+            return sendAccountRequest(AccountModerationAction::SetRole,
+                                      arguments);
         });
+
+    // TODO: When teleporting is implemented on the server, add a Teleport
+    //       permission and register /tp (with the destination in its usage):
+    //   registry.registerCommand(
+    //       "/tp", "/tp <username>", AccountPermission::Teleport,
+    //       [this](std::string_view arguments) {
+    //           return sendWorldRequest(WorldModerationAction::Teleport,
+    //                                   arguments);
+    //       });
 }
 
 ChatCommandRegistry::Result

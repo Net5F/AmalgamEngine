@@ -27,7 +27,8 @@ class Network;
  *
  * World-level commands send a WorldModerationRequest to the world server:
  *   /tp <username>
- *     TODO: Not implemented yet. The server will respond with NotPermitted.
+ *     TODO: Not registered yet, since the server doesn't implement it. See
+ *           registerCommands().
  *
  * The server checks the requester's permissions, so these can be offered to
  * everyone. The server's responses are delivered through

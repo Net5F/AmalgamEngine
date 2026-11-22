@@ -35,6 +35,27 @@ constexpr Uint8 makePermissions(Permissions... permissions)
     return static_cast<Uint8>((static_cast<Uint8>(permissions) | ... | 0));
 }
 
+/**
+ * Returns the user-facing name of the given permission, e.g. "Set Role".
+ */
+constexpr std::string_view
+    getPermissionDisplayName(AccountPermission permission)
+{
+    switch (permission) {
+        case AccountPermission::Ban: {
+            return "Ban";
+        }
+        case AccountPermission::Build: {
+            return "Build";
+        }
+        case AccountPermission::SetRole: {
+            return "Set Role";
+        }
+    }
+
+    return "Unknown";
+}
+
 /** The max length of a role's ID. */
 inline constexpr std::size_t ACCOUNT_ROLE_ID_MAX_LENGTH{32};
 
