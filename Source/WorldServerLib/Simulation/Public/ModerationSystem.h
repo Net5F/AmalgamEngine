@@ -53,6 +53,13 @@ private:
     void processWorldRequest(const WorldModerationRequest& request);
 
     /**
+     * Teleports the given request's target to its destination, if the
+     * requester is permitted to.
+     */
+    ModerationResult teleport(const WorldModerationRequest& request,
+                              entt::entity requesterEntity);
+
+    /**
      * Sends the given result to the requester of the given request.
      */
     void sendWorldResponse(const WorldModerationRequest& request,

@@ -6,6 +6,8 @@
 #include "WorldModerationResponse.h"
 #include "DisconnectNotice.h"
 #include "AccountRole.h"
+#include "AccountRoleHelpers.h"
+#include "Position.h"
 #include "ClientSimData.h"
 #include "Log.h"
 #include <algorithm>
@@ -104,18 +106,7 @@ void ModerationSystem::processWorldRequest(
 
     switch (request.action) {
         case WorldModerationAction::Teleport: {
-            // TODO: Implement teleporting:
-            //   1. Check that the requester has the needed permission (add one
-            //      to AccountPermission), using world.hasPermission(). If they
-            //      don't, respond with NotPermitted.
-            //   2. Find the target with findConnectedPlayer(). If they aren't
-            //      in the world, respond with TargetNotOnline.
-            //   3. If the target isn't the requester, check that the
-            //      requester outranks them (AccountRoleDef::outranks()).
-            //   4. Teleport the target with world.teleportEntity(), and
-            //      respond with Success.
-            // Until then, nobody is permitted to teleport.
-            sendWorldResponse(request, ModerationResult::NotPermitted);
+            sendWorldResponse(request, teleport(request, requesterEntity));
             break;
         }
         default: {
@@ -124,14 +115,83 @@ void ModerationSystem::processWorldRequest(
     }
 }
 
+ModerationResult
+    ModerationSystem::teleport(const WorldModerationRequest& request,
+                               entt::entity requesterEntity)
+{
+    if (!(world.hasPermission(request.clientHandle,
+                              AccountPermission::Teleport))) {
+        return ModerationResult::NotPermitted;
+    }
+
+    // Find the target. If none was given, the requester is teleporting
+    // themselves.
+    entt::entity targetEntity{requesterEntity};
+    if (!(request.targetUsername.empty())) {
+        targetEntity = findConnectedPlayer(request.targetUsername);
+        if (targetEntity == entt::null) {
+            return ModerationResult::TargetNotOnline;
+        }
+    }
+
+    // If the target is someone else, the requester must outrank them.
+    if (targetEntity != requesterEntity) {
+        const AccountRoleDef& requesterRole{
+            AccountRoleHelpers::getRoleOrDefault(
+                world.registry.get<AccountRole>(requesterEntity).roleID)};
+        const AccountRoleDef& targetRole{AccountRoleHelpers::getRoleOrDefault(
+            world.registry.get<AccountRole>(targetEntity).roleID)};
+        if (!(requesterRole.outranks(targetRole))) {
+            return ModerationResult::NotPermitted;
+        }
+    }
+
+    // Find the destination: either another player's position, or the bottom
+    // center of a tile.
+    Vector3 destination{};
+    if (!(request.destinationUsername.empty())) {
+        entt::entity destinationEntity{
+            findConnectedPlayer(request.destinationUsername)};
+        if (destinationEntity == entt::null) {
+            return ModerationResult::DestinationNotOnline;
+        }
+        destination = world.registry.get<Position>(destinationEntity);
+    }
+    else {
+        // Note: teleportEntity() doesn't check bounds, so we have to.
+        if (!(world.tileMap.getTileExtent().contains(
+                request.destinationTile))) {
+            return ModerationResult::InvalidDestination;
+        }
+        destination = request.destinationTile.getCenteredBottomPoint();
+    }
+
+    if (!(world.teleportEntity(targetEntity, destination))) {
+        return ModerationResult::InternalError;
+    }
+
+    const ClientSimData& requesterClient{
+        world.registry.get<ClientSimData>(requesterEntity)};
+    const ClientSimData& targetClient{
+        world.registry.get<ClientSimData>(targetEntity)};
+    LOG_INFO("%s teleported %s to (%.2f, %.2f, %.2f).",
+             requesterClient.username.c_str(), targetClient.username.c_str(),
+             destination.x, destination.y, destination.z);
+
+    return ModerationResult::Success;
+}
+
 void ModerationSystem::sendWorldResponse(const WorldModerationRequest& request,
                                          ModerationResult result)
 {
     network.clientEndpoint.send(
         request.clientHandle,
-        WorldModerationResponse{.action{request.action},
-                                .result{result},
-                                .targetUsername{request.targetUsername}});
+        WorldModerationResponse{
+            .action{request.action},
+            .result{result},
+            .targetUsername{request.targetUsername},
+            .destinationUsername{request.destinationUsername},
+            .destinationTile{request.destinationTile}});
 }
 
 entt::entity ModerationSystem::findConnectedPlayer(std::string_view username)

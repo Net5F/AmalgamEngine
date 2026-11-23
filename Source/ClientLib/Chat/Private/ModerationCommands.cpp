@@ -9,6 +9,7 @@
 #include <charconv>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace AM
 {
@@ -42,14 +43,11 @@ void ModerationCommands::registerCommands(ChatCommandRegistry& registry)
                                       arguments);
         });
 
-    // TODO: When teleporting is implemented on the server, add a Teleport
-    //       permission and register /tp (with the destination in its usage):
-    //   registry.registerCommand(
-    //       "/tp", "/tp <username>", AccountPermission::Teleport,
-    //       [this](std::string_view arguments) {
-    //           return sendWorldRequest(WorldModerationAction::Teleport,
-    //                                   arguments);
-    //       });
+    registry.registerCommand(
+        "/tp", "/tp <player> [destination player], or /tp <player> <x> <y> [z]",
+        AccountPermission::Teleport, [this](std::string_view arguments) {
+            return sendWorldRequest(WorldModerationAction::Teleport, arguments);
+        });
 }
 
 ChatCommandRegistry::Result
@@ -126,19 +124,75 @@ ChatCommandRegistry::Result
     WorldModerationRequest request{};
     request.action = action;
 
-    // Parse the target.
-    auto [targetUsername, remainingText]
-        = ChatCommandParser::splitFirstToken(arguments);
-    if (!isValidTargetUsername(targetUsername)) {
-        return {ChatCommandRegistry::Result::Status::InvalidUsage};
+    // Parse the action-specific arguments.
+    // Note: Unlike account commands, the target isn't always the first
+    //       argument (e.g. "/tp <destination player>"), so each action
+    //       parses its own.
+    if (request.action == WorldModerationAction::Teleport) {
+        if (!parseTeleportArguments(arguments, request)) {
+            return {ChatCommandRegistry::Result::Status::InvalidUsage};
+        }
     }
-    request.targetUsername = targetUsername;
-
-    // TODO: When teleporting is implemented, parse the destination from
-    //       remainingText.
 
     network.worldEndpoint.send(request);
     return {};
+}
+
+bool ModerationCommands::parseTeleportArguments(std::string_view arguments,
+                                                WorldModerationRequest& request)
+{
+    // Split the arguments into tokens. There may be up to 4.
+    constexpr std::size_t MAX_TOKENS{4};
+    std::vector<std::string_view> tokens{};
+    std::string_view remainingText{arguments};
+    while (!remainingText.empty()) {
+        auto [token, textAfterToken]
+            = ChatCommandParser::splitFirstToken(remainingText);
+        if (token.empty()) {
+            break;
+        }
+        else if (tokens.size() == MAX_TOKENS) {
+            return false;
+        }
+
+        tokens.push_back(token);
+        remainingText = textAfterToken;
+    }
+
+    if (tokens.size() == 1) {
+        // "/tp <player>": Teleport ourselves to the player.
+        // Note: An empty target tells the server to teleport us.
+        if (!isValidTargetUsername(tokens[0])) {
+            return false;
+        }
+        request.destinationUsername = tokens[0];
+    }
+    else if (tokens.size() == 2) {
+        // "/tp <player> <destination player>"
+        if (!isValidTargetUsername(tokens[0])
+            || !isValidTargetUsername(tokens[1])) {
+            return false;
+        }
+        request.targetUsername = tokens[0];
+        request.destinationUsername = tokens[1];
+    }
+    else if (tokens.size() >= 3) {
+        // "/tp <player> <x> <y> [z]"
+        std::optional<int> x{parseInt(tokens[1])};
+        std::optional<int> y{parseInt(tokens[2])};
+        std::optional<int> z{(tokens.size() == 4) ? parseInt(tokens[3])
+                                                  : std::optional<int>{0}};
+        if (!isValidTargetUsername(tokens[0]) || !x || !y || !z) {
+            return false;
+        }
+        request.targetUsername = tokens[0];
+        request.destinationTile = {*x, *y, *z};
+    }
+    else {
+        return false;
+    }
+
+    return true;
 }
 
 bool ModerationCommands::isValidTargetUsername(std::string_view username)
@@ -191,6 +245,18 @@ std::optional<Sint64> ModerationCommands::parseDuration(std::string_view token)
     }
 
     return amount * unitS;
+}
+
+std::optional<int> ModerationCommands::parseInt(std::string_view token)
+{
+    int value{0};
+    const char* tokenEnd{token.data() + token.size()};
+    auto [parseEnd, error] = std::from_chars(token.data(), tokenEnd, value);
+    if ((error != std::errc{}) || (parseEnd != tokenEnd)) {
+        return std::nullopt;
+    }
+
+    return value;
 }
 
 ChatCommandRegistry::Result ModerationCommands::getInvalidRoleResult()

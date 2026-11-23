@@ -23,6 +23,8 @@ enum class AccountPermission : Uint8 {
     Build = 1 << 1,
     /** Change a lower-ranked account's role to a lower-ranked role. */
     SetRole = 1 << 2,
+    /** Teleport yourself, or a lower-ranked player. */
+    Teleport = 1 << 3,
 };
 
 /**
@@ -50,6 +52,9 @@ constexpr std::string_view
         }
         case AccountPermission::SetRole: {
             return "Set Role";
+        }
+        case AccountPermission::Teleport: {
+            return "Teleport";
         }
     }
 

@@ -61,6 +61,10 @@ enum class ModerationResult : Uint8 {
     InvalidRole,
     /** (Unban only) The target isn't banned. */
     NotBanned,
+    /** (Teleport only) The destination player isn't in the world. */
+    DestinationNotOnline,
+    /** (Teleport only) The destination tile is outside of the tile map. */
+    InvalidDestination,
     /** The request couldn't be processed (e.g. the server couldn't be
         reached). */
     InternalError,

@@ -28,22 +28,26 @@ struct AccountRoleConfig {
                        .displayName{"Builder"},
                        .rank{1},
                        .permissions{makePermissions(AccountPermission::Build)}},
-        AccountRoleDef{.id{"mod"},
-                       .displayName{"Mod"},
-                       .rank{2},
-                       .permissions{makePermissions(AccountPermission::Ban)}},
-        AccountRoleDef{.id{"admin"},
-                       .displayName{"Admin"},
-                       .rank{3},
-                       .permissions{makePermissions(
-                           AccountPermission::Ban, AccountPermission::Build,
-                           AccountPermission::SetRole)}},
-        AccountRoleDef{.id{"superadmin"},
-                       .displayName{"SuperAdmin"},
-                       .rank{4},
-                       .permissions{makePermissions(
-                           AccountPermission::Ban, AccountPermission::Build,
-                           AccountPermission::SetRole)}},
+        AccountRoleDef{
+            .id{"mod"},
+            .displayName{"Mod"},
+            .rank{2},
+            .permissions{makePermissions(AccountPermission::Ban,
+                                         AccountPermission::Teleport)}},
+        AccountRoleDef{
+            .id{"admin"},
+            .displayName{"Admin"},
+            .rank{3},
+            .permissions{makePermissions(
+                AccountPermission::Ban, AccountPermission::Build,
+                AccountPermission::SetRole, AccountPermission::Teleport)}},
+        AccountRoleDef{
+            .id{"superadmin"},
+            .displayName{"SuperAdmin"},
+            .rank{4},
+            .permissions{makePermissions(
+                AccountPermission::Ban, AccountPermission::Build,
+                AccountPermission::SetRole, AccountPermission::Teleport)}},
     };
 };
 

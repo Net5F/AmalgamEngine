@@ -26,9 +26,12 @@ class Network;
  *   /role <username> <roleID> [reason]
  *
  * World-level commands send a WorldModerationRequest to the world server:
- *   /tp <username>
- *     TODO: Not registered yet, since the server doesn't implement it. See
- *           registerCommands().
+ *   /tp <player>
+ *     Teleports you to the given player.
+ *   /tp <player> <destination player>
+ *     Teleports the first player to the second.
+ *   /tp <player> <x> <y> [z]
+ *     Teleports the player to the given tile. If no z is given, uses 0.
  *
  * The server checks the requester's permissions, so these can be offered to
  * everyone. The server's responses are delivered through
@@ -64,6 +67,14 @@ private:
                                                  std::string_view arguments);
 
     /**
+     * Parses the arguments of a /tp command into the given request.
+     *
+     * @return true if the arguments are valid, else false.
+     */
+    bool parseTeleportArguments(std::string_view arguments,
+                                WorldModerationRequest& request);
+
+    /**
      * Returns true if the given username could be a valid target.
      */
     bool isValidTargetUsername(std::string_view username);
@@ -75,6 +86,13 @@ private:
      *         than MAX_BAN_DURATION_S.
      */
     std::optional<Sint64> parseDuration(std::string_view token);
+
+    /**
+     * Parses the given token as a whole integer, e.g. "-12".
+     *
+     * @return The integer, or nullopt if the token isn't one.
+     */
+    std::optional<int> parseInt(std::string_view token);
 
     /**
      * Returns a failure message that lists the valid roles.
