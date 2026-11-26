@@ -32,6 +32,10 @@ inline constexpr std::size_t SESSION_TOKEN_BYTES{32};
 /** Length of a service ticket in bytes. */
 inline constexpr std::size_t SERVICE_TICKET_BYTES{32};
 
+/** The max length of a moderation action's (e.g. a ban's) reason, as recorded
+    in the moderation log. */
+inline constexpr std::size_t MODERATION_REASON_MAX_LENGTH{200};
+
 //--------------------------------------------------------------------------
 // Secrets
 //--------------------------------------------------------------------------

@@ -4,7 +4,8 @@
 #include "AccountServiceMessageType.h"
 #include "ConsumeServiceTicketResponse.h"
 #include "SaveAccountDataResponse.h"
-#include "AccountModeratedNotice.h"
+#include "AccountBannedNotice.h"
+#include "AccountRoleChangedNotice.h"
 #include "AccountData.h"
 #include "SimpleConnection.h"
 #include "SimpleMessageFramer.h"
@@ -44,7 +45,7 @@ namespace AM
  * delay. Requests that are made while we're disconnected fail immediately.
  *
  * AccountServer may also send us notices that aren't responses to a request
- * (e.g. AccountModeratedNotice). See setAccountModeratedHandler().
+ * (e.g. AccountBannedNotice). See setAccountBannedHandler(), etc.
  *
  * Note: Public functions are thread-safe. All other work happens on the
  *       network IO thread.
@@ -82,13 +83,16 @@ public:
         = std::function<void(const SaveAccountDataResponse&)>;
 
     /**
-     * Called when AccountServer tells us that an account was moderated.
+     * Called when AccountServer tells us that an account was banned, or had
+     * its role changed.
      *
-     * Note: This is called on the network IO thread. Callers should forward
+     * Note: These are called on the network IO thread. Callers should forward
      *       the notice to their own thread rather than doing work here.
      */
-    using AccountModeratedHandler
-        = std::function<void(const AccountModeratedNotice&)>;
+    using AccountBannedHandler
+        = std::function<void(const AccountBannedNotice&)>;
+    using AccountRoleChangedHandler
+        = std::function<void(const AccountRoleChangedNotice&)>;
 
     /**
      * @param inSSLContext Must present the service's certificate, and verify
@@ -146,11 +150,20 @@ public:
 
     /**
      * Sets the handler that's called when AccountServer tells us that an
-     * account was moderated. If no handler is set, these notices are ignored.
+     * account was banned. If no handler is set, these notices are ignored.
      *
      * Must be called before start().
      */
-    void setAccountModeratedHandler(AccountModeratedHandler handler);
+    void setAccountBannedHandler(AccountBannedHandler handler);
+
+    /**
+     * Sets the handler that's called when AccountServer tells us that an
+     * account's role was changed. If no handler is set, these notices are
+     * ignored.
+     *
+     * Must be called before start().
+     */
+    void setAccountRoleChangedHandler(AccountRoleChangedHandler handler);
 
 private:
     using Connection = SimpleConnection<AccountServiceMessageType>;
@@ -269,9 +282,12 @@ private:
     void handleResponse(std::span<const Uint8> messageBuffer);
 
     /**
-     * Deserializes an AccountModeratedNotice and passes it to our handler.
+     * Deserializes a notice of the given type and passes it to the given
+     * handler, if it's set.
      */
-    void handleAccountModeratedNotice(std::span<const Uint8> messageBuffer);
+    template<typename Notice>
+    void handleNotice(std::span<const Uint8> messageBuffer,
+                      const std::function<void(const Notice&)>& handler);
 
     asio::io_context& ioContext;
     asio::ssl::context& sslContext;
@@ -292,8 +308,11 @@ private:
 
     SimpleMessageFramer<AccountServiceMessageType> messageFramer;
 
-    /** If set, called when we receive an AccountModeratedNotice. */
-    AccountModeratedHandler accountModeratedHandler;
+    /** If set, called when we receive an AccountBannedNotice. */
+    AccountBannedHandler accountBannedHandler;
+
+    /** If set, called when we receive an AccountRoleChangedNotice. */
+    AccountRoleChangedHandler accountRoleChangedHandler;
 
     /** Maps request IDs to the callback that's waiting on a response. */
     std::unordered_map<Uint32, PendingCallback> pendingRequests;

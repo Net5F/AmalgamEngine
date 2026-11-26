@@ -4,6 +4,7 @@
 #include "ClientConnectionEvent.h"
 #include "QueuedEvents.h"
 #include "WorldLogoutRequest.h"
+#include "AccountBannedNotice.h"
 #include "EnttObserver.h"
 #include "PersistedComponentList.h"
 #include "SaveHelper.h"
@@ -46,6 +47,9 @@ class ISimulationExtension;
  * load, the client is rejected instead of being given fresh data (which would
  * overwrite its real data on the next save).
  *
+ * When AccountServer tells us that an account was banned, its client is
+ * disconnected and its entity is removed immediately (it doesn't linger).
+ *
  * Note: If an account connects while it already has a connected client, the
  *       Network disconnects the old client before telling us about the new
  *       one, so we see it as a normal disconnect followed by a quick reconnect.
@@ -57,18 +61,13 @@ public:
 
     /**
      * Processes new connections and disconnections, updating the sim state
-     * appropriately. Processes logout requests and updates ongoing logouts.
-     * Removes the entities of any clients whose linger time has expired.
+     * appropriately. Processes ban notices, logout requests, and ongoing
+     * logouts. Removes the entities of any clients whose linger time has
+     * expired.
      */
     void processConnectionEvents();
 
     void setExtension(ISimulationExtension* inExtension);
-
-    /**
-     * If the given account's entity is lingering, saves and removes it
-     * immediately instead of waiting for its linger time to expire.
-     */
-    void removeLingeringEntity(Sint64 accountID);
 
 private:
     enum class GetSavedComponentsResult { Success, NotFound, Error };
@@ -84,6 +83,13 @@ private:
      * time. If the client logged out, removes its entity immediately.
      */
     void processDisconnectEvent(const ClientDisconnected& clientDisconnected);
+
+    /**
+     * If the banned account's client is connected, disconnects it (its entity
+     * will be removed when the disconnect event arrives). If its entity is
+     * lingering, removes it immediately.
+     */
+    void processBannedNotice(const AccountBannedNotice& notice);
 
     /**
      * Creates a new entity for the given client and loads its saved
@@ -198,14 +204,12 @@ private:
 
     EventQueue<WorldLogoutRequest> logoutRequestQueue;
 
+    EventQueue<AccountBannedNotice> bannedNoticeQueue;
+
     /** Observes CastState construction, so we can cancel logouts when the
         entity casts something (even instant casts, which never persist a
         CastState across ticks). */
     EnttObserver castStartedObserver;
-
-    /** Maps account IDs to their player entity. Includes entities that are
-        lingering. */
-    std::unordered_map<Sint64, entt::entity> accountEntityMap;
 
     /** Maps the account IDs of entities that are lingering -> the tick
         that their entity should be removed on. */

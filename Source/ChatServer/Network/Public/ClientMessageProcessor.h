@@ -17,7 +17,7 @@ namespace AM
 struct ChatConnectionRequest;
 struct ChatSendRequest;
 struct ChatHeartbeat;
-struct AccountModeratedNotice;
+struct AccountBannedNotice;
 class AccountServiceEndpoint;
 
 namespace ChatServer
@@ -121,9 +121,9 @@ private:
     // Helpers
     //-------------------------------------------------------------------------
     /**
-     * Handles AccountServer's notice that an account was moderated.
+     * Handles AccountServer's notice that an account was banned.
      */
-    void handleAccountModeratedNotice(const AccountModeratedNotice& notice);
+    void handleAccountBannedNotice(const AccountBannedNotice& notice);
 
     /**
      * Handles AccountServer's response to the given client's ticket.

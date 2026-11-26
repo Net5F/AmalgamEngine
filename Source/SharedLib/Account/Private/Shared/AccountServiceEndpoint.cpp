@@ -40,7 +40,8 @@ AccountServiceEndpoint::AccountServiceEndpoint(asio::io_context& inIoContext,
 , connectingSocket{}
 , connection{}
 , messageFramer{MAX_WRITE_PAYLOAD_SIZE}
-, accountModeratedHandler{}
+, accountBannedHandler{}
+, accountRoleChangedHandler{}
 , pendingRequests{}
 , nextRequestID{0}
 , reconnectDelayS{RECONNECT_MIN_DELAY_S}
@@ -103,10 +104,16 @@ void AccountServiceEndpoint::saveAccountData(Sint64 accountID,
     });
 }
 
-void AccountServiceEndpoint::setAccountModeratedHandler(
-    AccountModeratedHandler handler)
+void AccountServiceEndpoint::setAccountBannedHandler(
+    AccountBannedHandler handler)
 {
-    accountModeratedHandler = std::move(handler);
+    accountBannedHandler = std::move(handler);
+}
+
+void AccountServiceEndpoint::setAccountRoleChangedHandler(
+    AccountRoleChangedHandler handler)
+{
+    accountRoleChangedHandler = std::move(handler);
 }
 
 void AccountServiceEndpoint::consumeServiceTicketOnIOThread(
@@ -532,8 +539,14 @@ void AccountServiceEndpoint::onMessageReceived(
             handleResponse<SaveAccountDataResponse>(messageBuffer);
             break;
         }
-        case AccountServiceMessageType::AccountModeratedNotice: {
-            handleAccountModeratedNotice(messageBuffer);
+        case AccountServiceMessageType::AccountBannedNotice: {
+            handleNotice<AccountBannedNotice>(messageBuffer,
+                                              accountBannedHandler);
+            break;
+        }
+        case AccountServiceMessageType::AccountRoleChangedNotice: {
+            handleNotice<AccountRoleChangedNotice>(messageBuffer,
+                                                   accountRoleChangedHandler);
             break;
         }
         case AccountServiceMessageType::ServiceHeartbeatResponse: {
@@ -566,10 +579,12 @@ void AccountServiceEndpoint::handleResponse(
     completeRequest(response.requestID, response);
 }
 
-void AccountServiceEndpoint::handleAccountModeratedNotice(
-    std::span<const Uint8> messageBuffer)
+template<typename Notice>
+void AccountServiceEndpoint::handleNotice(
+    std::span<const Uint8> messageBuffer,
+    const std::function<void(const Notice&)>& handler)
 {
-    AccountModeratedNotice notice{};
+    Notice notice{};
     if (!Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
                                  notice)) {
         LOG_WARN("Failed to deserialize an AccountServer message.");
@@ -578,8 +593,8 @@ void AccountServiceEndpoint::handleAccountModeratedNotice(
         return;
     }
 
-    if (accountModeratedHandler) {
-        accountModeratedHandler(notice);
+    if (handler) {
+        handler(notice);
     }
 }
 

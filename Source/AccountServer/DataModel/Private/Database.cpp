@@ -753,149 +753,82 @@ Database::SaveAccountDataResult
     }
 }
 
-Database::ModerationOutcome Database::moderate(const ModerationInfo& info)
+Database::ModerationOutcome<BanResponse::Result>
+    Database::ban(Sint64 actorAccountID, const std::string& targetUsername,
+                  Sint64 durationS, const std::string& reason)
 {
-    std::scoped_lock lock{databaseMutex};
+    return moderate<BanResponse::Result>(
+        actorAccountID, AccountPermission::Ban, targetUsername, "ban", reason,
+        [&](const ModerationParticipants& participants, std::string& details) {
+            // Replace any existing ban.
+            liftBansQuery->bind(":account_id", participants.targetAccountID);
+            liftBansQuery->bind(":lifted_by", actorAccountID);
+            liftBansQuery->exec();
+            liftBansQuery->reset();
 
-    ModerationOutcome outcome{};
+            insertBanQuery->bind(":account_id", participants.targetAccountID);
+            insertBanQuery->bind(":banned_by", actorAccountID);
+            insertBanQuery->bind(":reason", reason);
+            insertBanQuery->bind(":duration_s", durationS);
+            insertBanQuery->exec();
+            insertBanQuery->reset();
 
-    try {
-        // Note: If we return before committing, the transaction is rolled
-        //       back.
-        SQLite::Transaction transaction{database};
+            // Log out everywhere.
+            // Note: Outstanding service tickets become unusable along with
+            //       their sessions.
+            revokeAllSessionsQuery->bind(":account_id",
+                                         participants.targetAccountID);
+            revokeAllSessionsQuery->exec();
+            revokeAllSessionsQuery->reset();
 
-        // Get the actor's role, and check that it permits this action.
-        getAccountByIDQuery->bind(":account_id", info.actorAccountID);
-        if (!(getAccountByIDQuery->executeStep())) {
-            // The actor's account no longer exists.
-            getAccountByIDQuery->reset();
-            outcome.result = ModerationResult::NotPermitted;
-            return outcome;
-        }
-        std::string actorName{getAccountByIDQuery->getColumn(0).getString()};
-        const AccountRoleDef& actorRole{AccountRoleHelpers::getRoleOrDefault(
-            getAccountByIDQuery->getColumn(1).getString())};
-        getAccountByIDQuery->reset();
+            details = (durationS > 0) ? (std::to_string(durationS) + "s")
+                                      : "permanent";
+            return BanResponse::Success;
+        });
+}
 
-        if (!(actorRole.hasPermission(getRequiredPermission(info.action)))) {
-            outcome.result = ModerationResult::NotPermitted;
-            return outcome;
-        }
+Database::ModerationOutcome<UnbanResponse::Result>
+    Database::unban(Sint64 actorAccountID, const std::string& targetUsername,
+                    const std::string& reason)
+{
+    return moderate<UnbanResponse::Result>(
+        actorAccountID, AccountPermission::Ban, targetUsername, "unban", reason,
+        [&](const ModerationParticipants& participants, std::string&) {
+            liftBansQuery->bind(":account_id", participants.targetAccountID);
+            liftBansQuery->bind(":lifted_by", actorAccountID);
+            int liftedCount{liftBansQuery->exec()};
+            liftBansQuery->reset();
 
-        // Get the target, and check that the actor outranks them.
-        getAccountByUsernameQuery->bind(":username", info.targetUsername);
-        if (!(getAccountByUsernameQuery->executeStep())) {
-            getAccountByUsernameQuery->reset();
-            outcome.result = ModerationResult::TargetNotFound;
-            return outcome;
-        }
-        Sint64 targetAccountID{
-            getAccountByUsernameQuery->getColumn(0).getInt64()};
-        std::string targetName{
-            getAccountByUsernameQuery->getColumn(1).getString()};
-        const AccountRoleDef& targetRole{AccountRoleHelpers::getRoleOrDefault(
-            getAccountByUsernameQuery->getColumn(2).getString())};
-        getAccountByUsernameQuery->reset();
+            return (liftedCount > 0) ? UnbanResponse::Success
+                                     : UnbanResponse::NotBanned;
+        });
+}
 
-        if (!(actorRole.outranks(targetRole))) {
-            outcome.result = ModerationResult::NotPermitted;
-            return outcome;
-        }
-
-        // Apply the action.
-        std::string details{};
-        switch (info.action) {
-            case AccountModerationAction::Ban: {
-                // Replace any existing ban.
-                liftBansQuery->bind(":account_id", targetAccountID);
-                liftBansQuery->bind(":lifted_by", info.actorAccountID);
-                liftBansQuery->exec();
-                liftBansQuery->reset();
-
-                insertBanQuery->bind(":account_id", targetAccountID);
-                insertBanQuery->bind(":banned_by", info.actorAccountID);
-                insertBanQuery->bind(":reason", info.reason);
-                insertBanQuery->bind(":duration_s", info.durationS);
-                insertBanQuery->exec();
-                insertBanQuery->reset();
-
-                // Log out everywhere.
-                // Note: Outstanding service tickets become unusable along
-                //       with their sessions.
-                revokeAllSessionsQuery->bind(":account_id", targetAccountID);
-                revokeAllSessionsQuery->exec();
-                revokeAllSessionsQuery->reset();
-
-                details = (info.durationS > 0)
-                              ? (std::to_string(info.durationS) + "s")
-                              : "permanent";
-                break;
+Database::ModerationOutcome<SetRoleResponse::Result>
+    Database::setRole(Sint64 actorAccountID, const std::string& targetUsername,
+                      const std::string& roleID, const std::string& reason)
+{
+    return moderate<SetRoleResponse::Result>(
+        actorAccountID, AccountPermission::SetRole, targetUsername, "set_role",
+        reason,
+        [&](const ModerationParticipants& participants, std::string& details) {
+            const AccountRoleDef* newRole{AccountRoleHelpers::findRole(roleID)};
+            if (!newRole) {
+                return SetRoleResponse::InvalidRole;
             }
-            case AccountModerationAction::Unban: {
-                liftBansQuery->bind(":account_id", targetAccountID);
-                liftBansQuery->bind(":lifted_by", info.actorAccountID);
-                int liftedCount{liftBansQuery->exec()};
-                liftBansQuery->reset();
-
-                if (liftedCount == 0) {
-                    outcome.result = ModerationResult::NotBanned;
-                    return outcome;
-                }
-                break;
+            if (!(participants.actorRole.outranks(*newRole))) {
+                return SetRoleResponse::NotPermitted;
             }
-            case AccountModerationAction::SetRole: {
-                const AccountRoleDef* newRole{
-                    AccountRoleHelpers::findRole(info.roleID)};
-                if (!newRole) {
-                    outcome.result = ModerationResult::InvalidRole;
-                    return outcome;
-                }
-                if (!(actorRole.outranks(*newRole))) {
-                    outcome.result = ModerationResult::NotPermitted;
-                    return outcome;
-                }
 
-                setRoleQuery->bind(":account_id", targetAccountID);
-                setRoleQuery->bind(":role", std::string{newRole->id});
-                setRoleQuery->exec();
-                setRoleQuery->reset();
+            setRoleQuery->bind(":account_id", participants.targetAccountID);
+            setRoleQuery->bind(":role", std::string{newRole->id});
+            setRoleQuery->exec();
+            setRoleQuery->reset();
 
-                details = std::string{targetRole.id} + " -> "
-                          + std::string{newRole->id};
-                outcome.roleID = newRole->id;
-                break;
-            }
-            default: {
-                LOG_ERROR("Unknown moderation action: %u",
-                          static_cast<unsigned int>(info.action));
-                outcome.result = ModerationResult::InternalError;
-                return outcome;
-            }
-        }
-
-        insertModerationLog(info.actorAccountID, actorName, targetAccountID,
-                            targetName, info.action, details, info.reason);
-
-        transaction.commit();
-
-        outcome.result = ModerationResult::Success;
-        outcome.targetAccountID = targetAccountID;
-        outcome.targetUsername = std::move(targetName);
-        return outcome;
-    } catch (std::exception& e) {
-        // Ensure the pre-built statements are reusable after a failure.
-        getAccountByIDQuery->tryReset();
-        getAccountByUsernameQuery->tryReset();
-        liftBansQuery->tryReset();
-        insertBanQuery->tryReset();
-        revokeAllSessionsQuery->tryReset();
-        setRoleQuery->tryReset();
-        insertModerationLogQuery->tryReset();
-        LOG_ERROR("Failed to apply moderation action: %s", e.what());
-        outcome = {};
-        outcome.result = ModerationResult::InternalError;
-        return outcome;
-    }
+            details = std::string{participants.targetRole.id} + " -> "
+                      + std::string{newRole->id};
+            return SetRoleResponse::Success;
+        });
 }
 
 Database::ConsoleSetRoleResult
@@ -930,8 +863,7 @@ Database::ConsoleSetRoleResult
 
         insertModerationLog(
             0, CONSOLE_ACTOR_NAME, accountID, setRoleResult.username,
-            AccountModerationAction::SetRole,
-            (setRoleResult.previousRoleID + " -> " + roleID), "");
+            "set_role", (setRoleResult.previousRoleID + " -> " + roleID), "");
 
         transaction.commit();
         setRoleResult.result = ConsoleSetRoleResult::Result::Success;
@@ -1210,40 +1142,100 @@ void Database::initTables()
     }
 }
 
-AccountPermission
-    Database::getRequiredPermission(AccountModerationAction action)
+template<typename Result, typename ApplyAction>
+Database::ModerationOutcome<Result>
+    Database::moderate(Sint64 actorAccountID,
+                       AccountPermission requiredPermission,
+                       const std::string& targetUsername, const char* logAction,
+                       const std::string& reason, ApplyAction applyAction)
 {
-    switch (action) {
-        case AccountModerationAction::Ban:
-        case AccountModerationAction::Unban: {
-            return AccountPermission::Ban;
-        }
-        case AccountModerationAction::SetRole:
-        default: {
-            return AccountPermission::SetRole;
-        }
-    }
-}
+    std::scoped_lock lock{databaseMutex};
 
-const char* Database::getLogActionName(AccountModerationAction action)
-{
-    switch (action) {
-        case AccountModerationAction::Ban: {
-            return "ban";
+    ModerationOutcome<Result> outcome{};
+
+    try {
+        // Note: If we return before committing, the transaction is rolled
+        //       back.
+        SQLite::Transaction transaction{database};
+
+        // Get the actor's role, and check that it permits this action.
+        getAccountByIDQuery->bind(":account_id", actorAccountID);
+        if (!(getAccountByIDQuery->executeStep())) {
+            // The actor's account no longer exists.
+            getAccountByIDQuery->reset();
+            outcome.result = Result::NotPermitted;
+            return outcome;
         }
-        case AccountModerationAction::Unban: {
-            return "unban";
+        std::string actorName{getAccountByIDQuery->getColumn(0).getString()};
+        const AccountRoleDef& actorRole{AccountRoleHelpers::getRoleOrDefault(
+            getAccountByIDQuery->getColumn(1).getString())};
+        getAccountByIDQuery->reset();
+
+        if (!(actorRole.hasPermission(requiredPermission))) {
+            outcome.result = Result::NotPermitted;
+            return outcome;
         }
-        case AccountModerationAction::SetRole:
-        default: {
-            return "set_role";
+
+        // Get the target, and check that the actor outranks them.
+        getAccountByUsernameQuery->bind(":username", targetUsername);
+        if (!(getAccountByUsernameQuery->executeStep())) {
+            getAccountByUsernameQuery->reset();
+            outcome.result = Result::TargetNotFound;
+            return outcome;
         }
+        Sint64 targetAccountID{
+            getAccountByUsernameQuery->getColumn(0).getInt64()};
+        std::string targetName{
+            getAccountByUsernameQuery->getColumn(1).getString()};
+        const AccountRoleDef& targetRole{AccountRoleHelpers::getRoleOrDefault(
+            getAccountByUsernameQuery->getColumn(2).getString())};
+        getAccountByUsernameQuery->reset();
+
+        if (!(actorRole.outranks(targetRole))) {
+            outcome.result = Result::NotPermitted;
+            return outcome;
+        }
+
+        // Apply the action.
+        std::string details{};
+        outcome.result = applyAction(
+            ModerationParticipants{.actorAccountID{actorAccountID},
+                                   .actorRole{actorRole},
+                                   .targetAccountID{targetAccountID},
+                                   .targetRole{targetRole}},
+            details);
+        if (outcome.result != Result::Success) {
+            return outcome;
+        }
+
+        insertModerationLog(actorAccountID, actorName, targetAccountID,
+                            targetName, logAction, details, reason);
+
+        transaction.commit();
+
+        outcome.targetAccountID = targetAccountID;
+        outcome.targetUsername = std::move(targetName);
+        return outcome;
+    } catch (std::exception& e) {
+        // Ensure the pre-built statements are reusable after a failure.
+        getAccountByIDQuery->tryReset();
+        getAccountByUsernameQuery->tryReset();
+        liftBansQuery->tryReset();
+        insertBanQuery->tryReset();
+        revokeAllSessionsQuery->tryReset();
+        setRoleQuery->tryReset();
+        insertModerationLogQuery->tryReset();
+        LOG_ERROR("Failed to apply moderation action (%s): %s", logAction,
+                  e.what());
+        outcome = {};
+        outcome.result = Result::InternalError;
+        return outcome;
     }
 }
 
 void Database::insertModerationLog(
     Sint64 actorAccountID, const std::string& actorName, Sint64 targetAccountID,
-    const std::string& targetName, AccountModerationAction action,
+    const std::string& targetName, const char* action,
     const std::string& details, const std::string& reason)
 {
     if (actorAccountID == 0) {
@@ -1255,7 +1247,7 @@ void Database::insertModerationLog(
     insertModerationLogQuery->bind(":actor_name", actorName);
     insertModerationLogQuery->bind(":target_account_id", targetAccountID);
     insertModerationLogQuery->bind(":target_name", targetName);
-    insertModerationLogQuery->bind(":action", getLogActionName(action));
+    insertModerationLogQuery->bind(":action", action);
     insertModerationLogQuery->bind(":details", details);
     insertModerationLogQuery->bind(":reason", reason);
     insertModerationLogQuery->exec();

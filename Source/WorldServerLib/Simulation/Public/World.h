@@ -109,14 +109,20 @@ public:
 
     /** Maps client handles to entity IDs.
         Used for interfacing with the Network.
-        Note: To go the other way (entt::entity -> ConnectionHandle), use
-              ClientSimData. */
+        Note: You probably want to use getPlayerEntity() below instead of using
+              this directly. */
     std::unordered_map<ConnectionHandle, entt::entity> clientHandleMap;
+
+    /** Maps account IDs to their player entity. Includes entities that are
+        lingering (whose client has disconnected).
+        Note: You probably want to use getAccountEntity() below instead of using
+              this directly. */
+    std::unordered_map<Sint64, entt::entity> accountEntityMap;
 
     /** Maps stable IDs to the entity that holds them.
         Kept in sync with StableID components automatically.
         Note: To go the other way (entt::entity -> stable ID), use StableID.
-        string_hash and equal_to are added for heterogeneous access. */
+              string_hash and equal_to are added for heterogeneous access. */
     std::unordered_map<std::string, entt::entity, string_hash, std::equal_to<>>
         stableIDMap;
 
@@ -127,12 +133,22 @@ public:
      * Returns the entity associated with the given client handle, or entt::null
      * if the client doesn't exist.
      *
-     * Use this instead of directly using clientHandleMap.
-     *
      * Note: To go the other way (entt::entity -> ConnectionHandle), use
-     * ClientSimData.
+     *       ClientSimData.
      */
     entt::entity getPlayerEntity(ConnectionHandle clientHandle);
+
+    /**
+     * Returns the player entity that belongs to the given account, or
+     * entt::null if there isn't one.
+     *
+     * Unlike getPlayerEntity(), this includes entities that are lingering
+     * (whose client has disconnected).
+     *
+     * Note: To go the other way (entt::entity -> account ID), use
+     *       ClientSimData.
+     */
+    entt::entity getAccountEntity(Sint64 accountID);
 
     /**
      * Returns true if the given client's account holds a role that grants

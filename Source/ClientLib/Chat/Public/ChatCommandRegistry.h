@@ -17,9 +17,8 @@ class World;
  * Holds the chat's slash commands (e.g. /g, /ban), and routes entered text
  * to the matching command's handler.
  *
- * The engine registers its own commands (e.g. /help, and see
- * ModerationCommands), and the project can register any others that it needs
- * (e.g. /dance).
+ * The engine registers its own commands (/help, and see EngineChatCommands),
+ * and the project can register any others that it needs (e.g. /dance).
  */
 class ChatCommandRegistry
 {

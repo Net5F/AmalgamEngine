@@ -45,8 +45,8 @@ ClientConnectionSystem::ClientConnectionSystem(
 , extension{nullptr}
 , clientConnectionEventQueue{inSimContext.networkEventDispatcher}
 , logoutRequestQueue{inSimContext.networkEventDispatcher}
+, bannedNoticeQueue{inSimContext.networkEventDispatcher}
 , castStartedObserver{}
-, accountEntityMap{}
 , removalTickMap{}
 , logoutTickMap{}
 , rejectedClients{}
@@ -76,6 +76,12 @@ void ClientConnectionSystem::processConnectionEvents()
                    clientConnectionEvent);
     }
 
+    // Disconnect any banned accounts' clients.
+    AccountBannedNotice bannedNotice{};
+    while (bannedNoticeQueue.pop(bannedNotice)) {
+        processBannedNotice(bannedNotice);
+    }
+
     // Start or cancel any requested logouts.
     WorldLogoutRequest logoutRequest{};
     while (logoutRequestQueue.pop(logoutRequest)) {
@@ -94,26 +100,19 @@ void ClientConnectionSystem::setExtension(ISimulationExtension* inExtension)
     extension = inExtension;
 }
 
-void ClientConnectionSystem::removeLingeringEntity(Sint64 accountID)
-{
-    if (removalTickMap.erase(accountID)) {
-        removePlayerEntity(accountID);
-    }
-}
-
 void ClientConnectionSystem::processConnectEvent(
     const ClientConnected& clientConnected)
 {
     // If this account's entity is still in the world, take it over.
-    auto entityIt{accountEntityMap.find(clientConnected.accountID)};
-    if ((entityIt != accountEntityMap.end())
-        && world.registry.valid(entityIt->second)) {
-        attachClientToEntity(clientConnected, entityIt->second);
+    entt::entity existingEntity{
+        world.getAccountEntity(clientConnected.accountID)};
+    if (existingEntity != entt::null) {
+        attachClientToEntity(clientConnected, existingEntity);
     }
     else {
         entt::entity newEntity{createPlayerEntity(clientConnected)};
         if (newEntity != entt::null) {
-            accountEntityMap[clientConnected.accountID] = newEntity;
+            world.accountEntityMap[clientConnected.accountID] = newEntity;
         }
     }
 }
@@ -165,6 +164,35 @@ void ClientConnectionSystem::processDisconnectEvent(
     LOG_INFO("Client disconnected, entity is lingering. clientID: %u, "
              "entityID: %u",
              clientDisconnected.clientHandle.id(), entity);
+}
+
+void ClientConnectionSystem::processBannedNotice(
+    const AccountBannedNotice& notice)
+{
+    entt::entity entity{world.getAccountEntity(notice.accountID)};
+    if (entity == entt::null) {
+        // The account isn't in the world. Nothing to do.
+        return;
+    }
+
+    // If the account's client is connected, disconnect it.
+    // Note: When the disconnect event arrives, we'll remove the entity
+    //       immediately (skipping the linger time).
+    ConnectionHandle clientHandle{
+        world.registry.get<ClientSimData>(entity).clientHandle};
+    if (clientHandle != NULL_CONNECTION_HANDLE) {
+        network.clientEndpoint.disconnect(clientHandle,
+                                          DisconnectNotice::Banned);
+        LOG_INFO("Disconnected banned client. AccountID: %lld",
+                 static_cast<long long>(notice.accountID));
+    }
+    else {
+        // The entity is lingering. Remove it now.
+        removalTickMap.erase(notice.accountID);
+        removePlayerEntity(notice.accountID);
+        LOG_INFO("Removed banned account's lingering entity. AccountID: %lld",
+                 static_cast<long long>(notice.accountID));
+    }
 }
 
 entt::entity ClientConnectionSystem::createPlayerEntity(
@@ -367,9 +395,8 @@ void ClientConnectionSystem::updateLogouts()
         auto [accountID, logoutTick] = *it;
         ++it;
 
-        auto entityIt{accountEntityMap.find(accountID)};
-        if ((entityIt == accountEntityMap.end())
-            || !(registry.valid(entityIt->second))) {
+        entt::entity entity{world.getAccountEntity(accountID)};
+        if (entity == entt::null) {
             LOG_ERROR("Failed to find entity for accountID: %lld while "
                       "logging out.",
                       static_cast<long long>(accountID));
@@ -377,7 +404,6 @@ void ClientConnectionSystem::updateLogouts()
             continue;
         }
 
-        entt::entity entity{entityIt->second};
         if (entityIsMoving(entity)) {
             cancelLogout(accountID, entity);
         }
@@ -452,8 +478,8 @@ void ClientConnectionSystem::removeExpiredEntities()
 
 void ClientConnectionSystem::removePlayerEntity(Sint64 accountID)
 {
-    auto entityIt{accountEntityMap.find(accountID)};
-    if (entityIt == accountEntityMap.end()) {
+    auto entityIt{world.accountEntityMap.find(accountID)};
+    if (entityIt == world.accountEntityMap.end()) {
         LOG_ERROR("Failed to find entity for accountID: %lld while removing.",
                   static_cast<long long>(accountID));
         return;
@@ -470,7 +496,7 @@ void ClientConnectionSystem::removePlayerEntity(Sint64 accountID)
         LOG_INFO("Removed entity with entityID: %u", entity);
     }
 
-    accountEntityMap.erase(entityIt);
+    world.accountEntityMap.erase(entityIt);
 }
 
 void ClientConnectionSystem::sendConnectionResponse(

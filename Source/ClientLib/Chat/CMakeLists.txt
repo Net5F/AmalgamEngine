@@ -3,12 +3,12 @@ target_sources(ClientLib
         Private/ChatCommandParser.cpp
         Private/ChatCommandRegistry.cpp
         Private/ChatSession.cpp
-        Private/ModerationCommands.cpp
+        Private/EngineChatCommands.cpp
     PUBLIC
         Public/ChatCommandParser.h
         Public/ChatCommandRegistry.h
         Public/ChatSession.h
-        Public/ModerationCommands.h
+        Public/EngineChatCommands.h
 )
 
 target_include_directories(ClientLib

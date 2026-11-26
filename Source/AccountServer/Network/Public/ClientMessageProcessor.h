@@ -10,8 +10,9 @@
 #include "LogoutResponse.h"
 #include "RecoverAccountResponse.h"
 #include "ServiceTicketResponse.h"
-#include "AccountModerationResponse.h"
-#include "AccountModeratedNotice.h"
+#include "BanResponse.h"
+#include "UnbanResponse.h"
+#include "SetRoleResponse.h"
 #include "asio/error_code.hpp"
 #include "asio/thread_pool.hpp"
 #include "asio/io_context.hpp"
@@ -31,7 +32,9 @@ struct LoginRequest;
 struct LogoutRequest;
 struct RecoverAccountRequest;
 struct ServiceTicketRequest;
-struct AccountModerationRequest;
+struct BanRequest;
+struct UnbanRequest;
+struct SetRoleRequest;
 
 namespace AccountServer
 {
@@ -94,8 +97,11 @@ private:
     void handleMessage(ConnectionHandle handle,
                        const ServiceTicketRequest& message);
 
-    void handleMessage(ConnectionHandle handle,
-                       const AccountModerationRequest& message);
+    void handleMessage(ConnectionHandle handle, const BanRequest& message);
+
+    void handleMessage(ConnectionHandle handle, const UnbanRequest& message);
+
+    void handleMessage(ConnectionHandle handle, const SetRoleRequest& message);
 
     //-------------------------------------------------------------------------
     // Helpers
@@ -139,13 +145,28 @@ private:
                            const SessionToken& accountSessionToken);
 
     /**
-     * Validates the requester's session, then attempts to apply the given
-     * moderation action.
-     * Returns an appropriate response message. If the action affects
-     * connected clients, also returns the notice to send to our services.
+     * On a database worker, validates the requester's session. If it's valid,
+     * calls moderate. Either way, sends the response to the given connection.
+     *
+     * @param response The response to send. Should be filled in with the
+     *                 request's info, e.g. the target's username.
+     * @param moderate Called as moderate(actorAccountID, response). Applies
+     *                 the action and sets the response's result. If the
+     *                 action affects connected clients, it should also call
+     *                 broadcastNotice().
      */
-    std::pair<AccountModerationResponse, std::optional<AccountModeratedNotice>>
-        moderate(const AccountModerationRequest& request);
+    template<typename Response, typename Moderate>
+    void moderateFromDatabasePool(ConnectionHandle handle,
+                                  const SessionToken& accountSessionToken,
+                                  Response response, Moderate moderate);
+
+    /**
+     * Sends the given notice to every connected service.
+     *
+     * Note: May be called from any thread.
+     */
+    template<typename Notice>
+    void broadcastNotice(const Notice& notice);
 
     /**
      * Runs createResponse on a database worker, then sends the returned

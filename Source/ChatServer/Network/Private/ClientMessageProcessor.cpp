@@ -13,7 +13,7 @@
 #include "ChatHeartbeatResponse.h"
 #include "ChatHelpers.h"
 #include "Shared/AccountServiceEndpoint.h"
-#include "AccountModeratedNotice.h"
+#include "AccountBannedNotice.h"
 #include "Log.h"
 #include "asio/error.hpp"
 #include <algorithm>
@@ -39,9 +39,9 @@ ClientMessageProcessor::ClientMessageProcessor(
     // Note: The handler is called on the network IO thread (this thread).
     // Note: This must be set before accountEndpoint is started, which it is
     //       since Network starts its endpoints after constructing us.
-    accountEndpoint.setAccountModeratedHandler(
-        [this](const AccountModeratedNotice& notice) {
-            handleAccountModeratedNotice(notice);
+    accountEndpoint.setAccountBannedHandler(
+        [this](const AccountBannedNotice& notice) {
+            handleAccountBannedNotice(notice);
         });
 }
 
@@ -195,14 +195,9 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
     sendCallback(handle, messageFramer.frameMessage(ChatHeartbeatResponse{}));
 }
 
-void ClientMessageProcessor::handleAccountModeratedNotice(
-    const AccountModeratedNotice& notice)
+void ClientMessageProcessor::handleAccountBannedNotice(
+    const AccountBannedNotice& notice)
 {
-    // We only care about bans.
-    if (notice.action != AccountModerationAction::Ban) {
-        return;
-    }
-
     auto accountIt{accountClients.find(notice.accountID)};
     if (accountIt == accountClients.end()) {
         return;

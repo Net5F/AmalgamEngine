@@ -8,8 +8,11 @@
 #include "LogoutRequest.h"
 #include "RecoverAccountRequest.h"
 #include "ServiceTicketRequest.h"
-#include "AccountModerationRequest.h"
-#include "AccountModeratedNotice.h"
+#include "BanRequest.h"
+#include "UnbanRequest.h"
+#include "SetRoleRequest.h"
+#include "AccountBannedNotice.h"
+#include "AccountRoleChangedNotice.h"
 #include "AccountHelpers.h"
 #include "Log.h"
 #include "asio/error.hpp"
@@ -86,8 +89,16 @@ void ClientMessageProcessor::processReceivedMessage(
             handleMessage<ServiceTicketRequest>(handle, messageBuffer);
             break;
         }
-        case AccountClientMessageType::AccountModerationRequest: {
-            handleMessage<AccountModerationRequest>(handle, messageBuffer);
+        case AccountClientMessageType::BanRequest: {
+            handleMessage<BanRequest>(handle, messageBuffer);
+            break;
+        }
+        case AccountClientMessageType::UnbanRequest: {
+            handleMessage<UnbanRequest>(handle, messageBuffer);
+            break;
+        }
+        case AccountClientMessageType::SetRoleRequest: {
+            handleMessage<SetRoleRequest>(handle, messageBuffer);
             break;
         }
         default: {
@@ -198,35 +209,64 @@ void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
         });
 }
 
-void ClientMessageProcessor::handleMessage(
-    ConnectionHandle handle, const AccountModerationRequest& message)
+void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
+                                           const BanRequest& message)
 {
-    // Validate the action.
-    // Note: A real client will never send an invalid action, so we treat it
-    //       as a malformed message.
-    if (!isValidAccountModerationAction(message.action)) {
-        LOG_WARN("Received moderation request with invalid action: %u",
-                 static_cast<unsigned int>(message.action));
-        disconnectCallback(handle, asio::error::make_error_code(
-                                       asio::error::invalid_argument));
-        return;
-    }
-
-    // Note: We use a database worker so we don't hold up the network thread.
-    asio::post(databasePool, [this, handle, request = message]() {
-        auto [response, notice] = moderate(request);
-
-        // Send the response, then tell our services about the change (must be
-        // done on the network thread).
-        asio::post(networkIoContext, [this, handle,
-                                      response = std::move(response),
-                                      notice = std::move(notice)]() {
-            sendCallback(handle, messageFramer.frameMessage(response));
-            if (notice) {
-                broadcastCallback(serviceMessageFramer.frameMessage(*notice));
+    BanResponse response{.targetUsername{message.targetUsername},
+                         .durationS{std::clamp(message.durationS, Sint64{0},
+                                               BanRequest::MAX_DURATION_S)}};
+    moderateFromDatabasePool(
+        handle, message.accountSessionToken, std::move(response),
+        [this, reason = message.reason](Sint64 actorAccountID,
+                                        BanResponse& response) {
+            auto outcome{database.ban(actorAccountID, response.targetUsername,
+                                      response.durationS, reason)};
+            response.result = outcome.result;
+            if (outcome.result == BanResponse::Success) {
+                response.targetUsername = std::move(outcome.targetUsername);
+                broadcastNotice(
+                    AccountBannedNotice{.accountID{outcome.targetAccountID}});
             }
         });
-    });
+}
+
+void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
+                                           const UnbanRequest& message)
+{
+    UnbanResponse response{.targetUsername{message.targetUsername}};
+    moderateFromDatabasePool(
+        handle, message.accountSessionToken, std::move(response),
+        [this, reason = message.reason](Sint64 actorAccountID,
+                                        UnbanResponse& response) {
+            auto outcome{database.unban(actorAccountID, response.targetUsername,
+                                        reason)};
+            response.result = outcome.result;
+            if (outcome.result == UnbanResponse::Success) {
+                response.targetUsername = std::move(outcome.targetUsername);
+            }
+        });
+}
+
+void ClientMessageProcessor::handleMessage(ConnectionHandle handle,
+                                           const SetRoleRequest& message)
+{
+    SetRoleResponse response{.targetUsername{message.targetUsername},
+                             .roleID{message.roleID}};
+    moderateFromDatabasePool(
+        handle, message.accountSessionToken, std::move(response),
+        [this, reason = message.reason](Sint64 actorAccountID,
+                                        SetRoleResponse& response) {
+            auto outcome{database.setRole(actorAccountID,
+                                          response.targetUsername,
+                                          response.roleID, reason)};
+            response.result = outcome.result;
+            if (outcome.result == SetRoleResponse::Success) {
+                response.targetUsername = std::move(outcome.targetUsername);
+                broadcastNotice(AccountRoleChangedNotice{
+                    .accountID{outcome.targetAccountID},
+                    .roleID{response.roleID}});
+            }
+        });
 }
 
 RegisterResponse
@@ -501,63 +541,53 @@ ServiceTicketResponse ClientMessageProcessor::issueServiceTicket(
     return response;
 }
 
-std::pair<AccountModerationResponse, std::optional<AccountModeratedNotice>>
-    ClientMessageProcessor::moderate(const AccountModerationRequest& request)
+template<typename Response, typename Moderate>
+void ClientMessageProcessor::moderateFromDatabasePool(
+    ConnectionHandle handle, const SessionToken& accountSessionToken,
+    Response response, Moderate moderate)
 {
-    // Note: The request's details are echoed back, so the client can describe
-    //       the result.
-    AccountModerationResponse response{
-        .action{request.action},
-        .targetUsername{request.targetUsername},
-        .roleID{request.roleID},
-        .durationS{
-            std::clamp(request.durationS, Sint64{0}, MAX_BAN_DURATION_S)}};
+    // Note: We use a database worker so we don't hold up the network thread.
+    asio::post(databasePool, [this, handle, accountSessionToken,
+                              response = std::move(response),
+                              moderate = std::move(moderate)]() mutable {
+        // Validate the requester's session. If it's valid, apply the action.
+        std::optional<std::string> sessionTokenHash{
+            CryptoHelpers::hashSecret(accountSessionToken.get())};
+        if (!sessionTokenHash) {
+            LOG_ERROR("Failed to hash account session token.");
+            response.result = Response::InternalError;
+        }
+        else {
+            Database::AccountSessionInfo sessionInfo{database.validateSession(
+                *sessionTokenHash, Config::ACCOUNT_SESSION_IDLE_TIMEOUT_S)};
+            if (sessionInfo.result
+                == Database::AccountSessionInfo::Result::DatabaseError) {
+                response.result = Response::InternalError;
+            }
+            else if (sessionInfo.result
+                     == Database::AccountSessionInfo::Result::SessionNotFound) {
+                response.result = Response::InvalidSession;
+            }
+            else {
+                moderate(sessionInfo.accountID, response);
+            }
+        }
 
-    // Validate the requester's session.
-    std::optional<std::string> sessionTokenHash{
-        CryptoHelpers::hashSecret(request.accountSessionToken.get())};
-    if (!sessionTokenHash) {
-        LOG_ERROR("Failed to hash account session token.");
-        response.result = ModerationResult::InternalError;
-        return {response, std::nullopt};
-    }
+        // Send the response (must be done on the network thread).
+        asio::post(
+            networkIoContext, [this, handle, response = std::move(response)]() {
+                sendCallback(handle, messageFramer.frameMessage(response));
+            });
+    });
+}
 
-    Database::AccountSessionInfo sessionInfo{database.validateSession(
-        *sessionTokenHash, Config::ACCOUNT_SESSION_IDLE_TIMEOUT_S)};
-    if (sessionInfo.result
-        == Database::AccountSessionInfo::Result::DatabaseError) {
-        response.result = ModerationResult::InternalError;
-        return {response, std::nullopt};
-    }
-    if (sessionInfo.result
-        == Database::AccountSessionInfo::Result::SessionNotFound) {
-        response.result = ModerationResult::InvalidSession;
-        return {response, std::nullopt};
-    }
-
-    // Apply the action.
-    Database::ModerationOutcome outcome{
-        database.moderate({.actorAccountID{sessionInfo.accountID},
-                           .action{request.action},
-                           .targetUsername{request.targetUsername},
-                           .roleID{request.roleID},
-                           .durationS{response.durationS},
-                           .reason{request.reason}})};
-    response.result = outcome.result;
-    if (outcome.result != ModerationResult::Success) {
-        return {response, std::nullopt};
-    }
-    response.targetUsername = outcome.targetUsername;
-
-    // Unbans don't affect any connected clients.
-    if (request.action == AccountModerationAction::Unban) {
-        return {response, std::nullopt};
-    }
-
-    return {response,
-            AccountModeratedNotice{.accountID{outcome.targetAccountID},
-                                   .action{request.action},
-                                   .roleID{outcome.roleID}}};
+template<typename Notice>
+void ClientMessageProcessor::broadcastNotice(const Notice& notice)
+{
+    // Note: broadcastCallback must be called on the network thread.
+    asio::post(networkIoContext, [this, notice]() {
+        broadcastCallback(serviceMessageFramer.frameMessage(notice));
+    });
 }
 
 template<typename CreateResponse>

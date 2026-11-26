@@ -119,6 +119,17 @@ entt::entity World::getPlayerEntity(ConnectionHandle clientHandle)
     return it->second;
 }
 
+entt::entity World::getAccountEntity(Sint64 accountID)
+{
+    auto it{accountEntityMap.find(accountID)};
+    if ((it == accountEntityMap.end()) || !(registry.valid(it->second))) {
+        // The account has no entity in the world.
+        return entt::null;
+    }
+
+    return it->second;
+}
+
 bool World::hasPermission(ConnectionHandle clientHandle,
                           AccountPermission permission) const
 {

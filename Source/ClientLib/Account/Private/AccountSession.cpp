@@ -5,7 +5,11 @@
 #include "RecoverAccountRequest.h"
 #include "RegisterRequest.h"
 #include "ServiceTicketRequest.h"
+#include "BanRequest.h"
+#include "UnbanRequest.h"
+#include "SetRoleRequest.h"
 #include "Log.h"
+#include <utility>
 
 namespace AM
 {
@@ -20,13 +24,17 @@ AccountSession::AccountSession(Network& inNetwork,
 , logoutResponseQueue{networkEventDispatcher}
 , recoverAccountResponseQueue{networkEventDispatcher}
 , serviceTicketQueue{networkEventDispatcher}
-, moderationResponseQueue{networkEventDispatcher}
+, banResponseQueue{networkEventDispatcher}
+, unbanResponseQueue{networkEventDispatcher}
+, setRoleResponseQueue{networkEventDispatcher}
 , connectionEventQueue{networkEventDispatcher}
 , loginState{LoginState::LoggedOut}
 , registrationPending{false}
 , recoveryPending{false}
 , serviceTicketRequestPending{}
-, moderationRequestsPending{0}
+, pendingBanRequests{}
+, pendingUnbanRequests{}
+, pendingSetRoleRequests{}
 , accountID{0}
 , sessionToken{}
 , idleExpiresAt{0}
@@ -36,14 +44,18 @@ AccountSession::AccountSession(Network& inNetwork,
 , logoutCompletedSig{}
 , recoveryCompletedSig{}
 , serviceTicketRequestCompletedSig{}
-, moderationRequestCompletedSig{}
+, banRequestCompletedSig{}
+, unbanRequestCompletedSig{}
+, setRoleRequestCompletedSig{}
 , requestConnectionFailedSig{}
 , loginCompleted{loginCompletedSig}
 , registrationCompleted{registrationCompletedSig}
 , logoutCompleted{logoutCompletedSig}
 , recoveryCompleted{recoveryCompletedSig}
 , serviceTicketRequestCompleted{serviceTicketRequestCompletedSig}
-, moderationRequestCompleted{moderationRequestCompletedSig}
+, banRequestCompleted{banRequestCompletedSig}
+, unbanRequestCompleted{unbanRequestCompletedSig}
+, setRoleRequestCompleted{setRoleRequestCompletedSig}
 , requestConnectionFailed{requestConnectionFailedSig}
 {
 }
@@ -80,9 +92,22 @@ void AccountSession::tick()
         handleServiceTicketResponse(newServiceTicketResponse);
     }
 
-    AccountModerationResponse moderationResponse{};
-    while (moderationResponseQueue.pop(moderationResponse)) {
-        handleModerationResponse(moderationResponse);
+    BanResponse banResponse{};
+    while (banResponseQueue.pop(banResponse)) {
+        handleTrackedResponse(banResponse, pendingBanRequests,
+                              banRequestCompletedSig);
+    }
+
+    UnbanResponse unbanResponse{};
+    while (unbanResponseQueue.pop(unbanResponse)) {
+        handleTrackedResponse(unbanResponse, pendingUnbanRequests,
+                              unbanRequestCompletedSig);
+    }
+
+    SetRoleResponse setRoleResponse{};
+    while (setRoleResponseQueue.pop(setRoleResponse)) {
+        handleTrackedResponse(setRoleResponse, pendingSetRoleRequests,
+                              setRoleRequestCompletedSig);
     }
 
     AccountConnectionEvent connectionEvent{};
@@ -177,16 +202,41 @@ bool AccountSession::requestServiceTicket(ServiceTicketAudience audience)
     return true;
 }
 
-bool AccountSession::sendModerationRequest(AccountModerationRequest request)
+bool AccountSession::requestBan(const std::string& targetUsername,
+                                Sint64 durationS, const std::string& reason)
 {
-    if (loginState != LoginState::LoggedIn) {
-        return false;
-    }
+    BanRequest request{.targetUsername{targetUsername},
+                       .durationS{durationS},
+                       .reason{reason}};
+    BanResponse failedResponse{.result{BanResponse::InternalError},
+                               .targetUsername{targetUsername},
+                               .durationS{durationS}};
+    return sendTrackedRequest(request, std::move(failedResponse),
+                              pendingBanRequests);
+}
 
-    request.accountSessionToken = sessionToken;
-    moderationRequestsPending++;
-    network.accountEndpoint.send(request);
-    return true;
+bool AccountSession::requestUnban(const std::string& targetUsername,
+                                  const std::string& reason)
+{
+    UnbanRequest request{.targetUsername{targetUsername}, .reason{reason}};
+    UnbanResponse failedResponse{.result{UnbanResponse::InternalError},
+                                 .targetUsername{targetUsername}};
+    return sendTrackedRequest(request, std::move(failedResponse),
+                              pendingUnbanRequests);
+}
+
+bool AccountSession::requestSetRole(const std::string& targetUsername,
+                                    const std::string& roleID,
+                                    const std::string& reason)
+{
+    SetRoleRequest request{.targetUsername{targetUsername},
+                           .roleID{roleID},
+                           .reason{reason}};
+    SetRoleResponse failedResponse{.result{SetRoleResponse::InternalError},
+                                   .targetUsername{targetUsername},
+                                   .roleID{roleID}};
+    return sendTrackedRequest(request, std::move(failedResponse),
+                              pendingSetRoleRequests);
 }
 
 AccountSession::LoginState AccountSession::getLoginState() const noexcept
@@ -301,21 +351,6 @@ void AccountSession::handleServiceTicketResponse(
     response.ticket.wipe();
 }
 
-void AccountSession::handleModerationResponse(
-    const AccountModerationResponse& response)
-{
-    if (moderationRequestsPending == 0) {
-        LOG_WARN("Received an unexpected moderation response.");
-        return;
-    }
-
-    moderationRequestsPending--;
-    if (response.result == ModerationResult::InvalidSession) {
-        clearSession();
-    }
-    moderationRequestCompletedSig.publish(response);
-}
-
 void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
 {
     if (event.type == AccountConnectionEvent::Type::Connected) {
@@ -336,11 +371,10 @@ void AccountSession::handleConnectionEvent(const AccountConnectionEvent& event)
         }
     }
 
-    // Fail any pending moderation requests.
-    for (; moderationRequestsPending > 0; --moderationRequestsPending) {
-        moderationRequestCompletedSig.publish(AccountModerationResponse{
-            .result{ModerationResult::InternalError}});
-    }
+    // Fail any pending ban, unban, and set role requests.
+    failPendingRequests(pendingBanRequests, banRequestCompletedSig);
+    failPendingRequests(pendingUnbanRequests, unbanRequestCompletedSig);
+    failPendingRequests(pendingSetRoleRequests, setRoleRequestCompletedSig);
 
     bool requestWasPending{(loginState == LoginState::LoggingIn)
                            || (loginState == LoginState::LoggingOut)
@@ -370,8 +404,60 @@ void AccountSession::clearSession() noexcept
     idleExpiresAt = 0;
     absoluteExpiresAt = 0;
     serviceTicketRequestPending.fill(false);
-    moderationRequestsPending = 0;
+    pendingBanRequests.clear();
+    pendingUnbanRequests.clear();
+    pendingSetRoleRequests.clear();
     loginState = LoginState::LoggedOut;
+}
+
+template<typename Request, typename Response>
+bool AccountSession::sendTrackedRequest(Request& request,
+                                        Response failedResponse,
+                                        std::vector<Response>& pendingRequests)
+{
+    if (loginState != LoginState::LoggedIn) {
+        return false;
+    }
+
+    request.accountSessionToken = sessionToken;
+    pendingRequests.push_back(std::move(failedResponse));
+    network.accountEndpoint.send(request);
+    return true;
+}
+
+template<typename Response>
+void AccountSession::handleTrackedResponse(
+    const Response& response, std::vector<Response>& pendingRequests,
+    entt::sigh<void(const Response&)>& completedSig)
+{
+    // Remove one of the pending requests.
+    // Note: AccountServer may process requests in parallel, so responses
+    //       can arrive out of order. We only need to know how many requests
+    //       are still pending, so it doesn't matter which one we remove.
+    if (pendingRequests.empty()) {
+        LOG_WARN("Received an unexpected response.");
+        return;
+    }
+    pendingRequests.erase(pendingRequests.begin());
+
+    if (response.result == Response::InvalidSession) {
+        clearSession();
+    }
+    completedSig.publish(response);
+}
+
+template<typename Response>
+void AccountSession::failPendingRequests(
+    std::vector<Response>& pendingRequests,
+    entt::sigh<void(const Response&)>& completedSig)
+{
+    // Note: We move the requests out first, in case a listener sends a new
+    //       request (which would modify pendingRequests).
+    std::vector<Response> failedResponses{std::move(pendingRequests)};
+    pendingRequests.clear();
+    for (const Response& failedResponse : failedResponses) {
+        completedSig.publish(failedResponse);
+    }
 }
 
 } // namespace Client

@@ -3,7 +3,9 @@
 #include "AccountDefs.h"
 #include "AccountData.h"
 #include "AccountRoleDefs.h"
-#include "ModerationDefs.h"
+#include "BanResponse.h"
+#include "UnbanResponse.h"
+#include "SetRoleResponse.h"
 #include "SQLiteCpp/SQLiteCpp.h"
 #include <SDL3/SDL_stdinc.h>
 #include <memory>
@@ -250,40 +252,53 @@ public:
     //-------------------------------------------------------------------------
     // Moderation
     //-------------------------------------------------------------------------
-    struct ModerationInfo {
-        /** The account that's taking the action. */
-        Sint64 actorAccountID{0};
-        AccountModerationAction action{AccountModerationAction::Ban};
-        std::string targetUsername{};
-        /** (SetRole only) The role to give the target. */
-        std::string roleID{};
-        /** (Ban only) How long the ban lasts. 0 means permanent. */
-        Sint64 durationS{0};
-        std::string reason{};
-    };
+    // Moderation actions are actions that one account takes against another
+    // (e.g. a ban). Each atomically checks that the actor has the required
+    // permission and outranks the target, applies the action, and records it
+    // in the moderation log.
+    // Roles are read from the database, so the result reflects any role
+    // changes that services haven't heard about yet.
+    //
+    // To add a moderation action, add a public function that calls
+    // moderate().
+    /**
+     * The outcome of a moderation action.
+     *
+     * @tparam Result The action's response result enum, e.g.
+     *                BanResponse::Result.
+     */
+    template<typename Result>
     struct ModerationOutcome {
-        ModerationResult result{ModerationResult::InternalError};
+        Result result{Result::InternalError};
         /** If result == Success, the target's account ID. */
         Sint64 targetAccountID{0};
         /** If result == Success, the target's username as registered. */
         std::string targetUsername{};
-        /** If result == Success and action == SetRole, the target's new role
-            ID. */
-        std::string roleID{};
     };
+
     /**
-     * Atomically checks that the actor may take the given action against the
-     * target, applies it, and records it in the moderation log.
+     * Lifts the target's existing ban (if any), adds the new one, and revokes
+     * all of the target's sessions.
      *
-     * Roles are read from the database, so the result reflects any role
-     * changes that services haven't heard about yet.
-     *
-     * Ban: Lifts any existing ban, adds the new one, and revokes all of the
-     *      target's sessions.
-     * Unban: Lifts the target's active ban.
-     * SetRole: Changes the target's role.
+     * @param durationS How long the ban lasts. 0 means permanent.
      */
-    ModerationOutcome moderate(const ModerationInfo& info);
+    ModerationOutcome<BanResponse::Result>
+        ban(Sint64 actorAccountID, const std::string& targetUsername,
+            Sint64 durationS, const std::string& reason);
+
+    /**
+     * Lifts the target's active ban.
+     */
+    ModerationOutcome<UnbanResponse::Result>
+        unban(Sint64 actorAccountID, const std::string& targetUsername,
+              const std::string& reason);
+
+    /**
+     * Changes the target's role.
+     */
+    ModerationOutcome<SetRoleResponse::Result>
+        setRole(Sint64 actorAccountID, const std::string& targetUsername,
+                const std::string& roleID, const std::string& reason);
 
     struct ConsoleSetRoleResult {
         enum class Result { Success, AccountNotFound, DatabaseError };
@@ -319,14 +334,33 @@ protected:
     void initTables();
 
     /**
-     * Returns the permission that the given action requires.
+     * The accounts involved in a moderation action.
      */
-    AccountPermission getRequiredPermission(AccountModerationAction action);
+    struct ModerationParticipants {
+        Sint64 actorAccountID{0};
+        const AccountRoleDef& actorRole;
+        Sint64 targetAccountID{0};
+        const AccountRoleDef& targetRole;
+    };
 
     /**
-     * Returns the name that the moderation log uses for the given action.
+     * Runs a moderation action in a transaction.
+     *
+     * Checks that the actor has the given permission and outranks the
+     * target, then calls applyAction. If it succeeds, records the action in
+     * the moderation log and commits.
+     *
+     * @param logAction The name that the moderation log uses for this action,
+     *                  e.g. "ban".
+     * @param applyAction Called as applyAction(participants, details). Applies
+     *                    the action and returns its result. May set details,
+     *                    which is recorded in the moderation log.
      */
-    const char* getLogActionName(AccountModerationAction action);
+    template<typename Result, typename ApplyAction>
+    ModerationOutcome<Result>
+        moderate(Sint64 actorAccountID, AccountPermission requiredPermission,
+                 const std::string& targetUsername, const char* logAction,
+                 const std::string& reason, ApplyAction applyAction);
 
     /**
      * Adds an entry to the moderation log.
@@ -337,8 +371,7 @@ protected:
     void insertModerationLog(Sint64 actorAccountID,
                              const std::string& actorName,
                              Sint64 targetAccountID,
-                             const std::string& targetName,
-                             AccountModerationAction action,
+                             const std::string& targetName, const char* action,
                              const std::string& details,
                              const std::string& reason);
 

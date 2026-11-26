@@ -1,7 +1,8 @@
 #include "Network.h"
 #include "MessageProcessorContext.h"
 #include "QueuedEvents.h"
-#include "AccountModeratedNotice.h"
+#include "AccountBannedNotice.h"
+#include "AccountRoleChangedNotice.h"
 #include "UserConfig.h"
 #include "TlsHelpers.h"
 #include "Paths.h"
@@ -41,14 +42,21 @@ Network::Network(const MessageProcessorContext& inMessageProcessorContext)
     configureServerVerification(chatSSLContext, "chat-server.pin",
                                 "ChatServer");
 
-    // Push AccountServer's moderation notices to the sim, like any other
+    // Push AccountServer's notices to the sim, like any other
     // received message.
-    // Note: We have to do this extra step because AccountEndpoint is in 
+    // Note: We have to do this extra step because AccountEndpoint is in
     //       SharedLib and doesn't know about our dispatcher.
     // Note: The handler is called on the network IO thread.
-    accountEndpoint.setAccountModeratedHandler(
-        [&dispatcher{inMessageProcessorContext.networkEventDispatcher}](
-            const AccountModeratedNotice& notice) { dispatcher.push(notice); });
+    EventDispatcher& dispatcher{
+        inMessageProcessorContext.networkEventDispatcher};
+    accountEndpoint.setAccountBannedHandler(
+        [&dispatcher](const AccountBannedNotice& notice) {
+            dispatcher.push(notice);
+        });
+    accountEndpoint.setAccountRoleChangedHandler(
+        [&dispatcher](const AccountRoleChangedNotice& notice) {
+            dispatcher.push(notice);
+        });
 }
 
 Network::~Network()

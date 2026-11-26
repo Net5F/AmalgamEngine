@@ -5,7 +5,9 @@
 #include "RecoverAccountResponse.h"
 #include "RegisterResponse.h"
 #include "ServiceTicketResponse.h"
-#include "AccountModerationResponse.h"
+#include "BanResponse.h"
+#include "UnbanResponse.h"
+#include "SetRoleResponse.h"
 #include "Deserialize.h"
 #include "QueuedEvents.h"
 #include "Log.h"
@@ -48,8 +50,16 @@ void AccountMessageProcessor::processReceivedMessage(
             dispatchMessage<ServiceTicketResponse>(messageBuffer);
             break;
         }
-        case AccountClientMessageType::AccountModerationResponse: {
-            dispatchMessage<AccountModerationResponse>(messageBuffer);
+        case AccountClientMessageType::BanResponse: {
+            dispatchMessage<BanResponse>(messageBuffer);
+            break;
+        }
+        case AccountClientMessageType::UnbanResponse: {
+            dispatchMessage<UnbanResponse>(messageBuffer);
+            break;
+        }
+        case AccountClientMessageType::SetRoleResponse: {
+            dispatchMessage<SetRoleResponse>(messageBuffer);
             break;
         }
         default: {

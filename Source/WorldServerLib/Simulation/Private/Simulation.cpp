@@ -43,7 +43,8 @@ Simulation::Simulation(const SimulationContext& inSimContext)
                     network}
 , extension{nullptr}
 , clientConnectionSystem{inSimContext}
-, moderationSystem{inSimContext, clientConnectionSystem}
+, accountRoleSystem{inSimContext}
+, teleportSystem{inSimContext}
 , nonPlayerEntityLifetimeSystem{inSimContext}
 , componentChangeSystem{inSimContext}
 , tileUpdateSystem{inSimContext}
@@ -118,8 +119,11 @@ void Simulation::tick()
     // Process client connections and disconnections.
     clientConnectionSystem.processConnectionEvents();
 
-    // Process moderation actions.
-    moderationSystem.processModeration();
+    // Apply any role changes from AccountServer.
+    accountRoleSystem.processRoleChanges();
+
+    // Process teleport requests.
+    teleportSystem.processTeleportRequests();
 
     // Process requests to create or destroy non-player entities.
     nonPlayerEntityLifetimeSystem.processUpdateRequests();

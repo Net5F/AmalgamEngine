@@ -8,7 +8,6 @@ target_sources(SharedLib
         Public/AccountHelpers.h
         Public/AccountRoleDefs.h
         Public/AccountRoleHelpers.h
-        Public/ModerationDefs.h
         Public/Shared/AccountServiceEndpoint.h
 )
 

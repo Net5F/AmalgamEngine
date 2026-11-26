@@ -1,5 +1,6 @@
 target_sources(WorldServerLib
     PRIVATE
+        Private/AccountRoleSystem.cpp
         Private/AccountSaveQueue.cpp
         Private/AISystem.cpp
         Private/CastHelper.cpp
@@ -17,7 +18,6 @@ target_sources(WorldServerLib
         Private/InventorySystem.cpp
         Private/ItemSystem.cpp
         Private/LoadHelper.cpp
-        Private/ModerationSystem.cpp
         Private/MovementSyncSystem.cpp
         Private/MovementSystem.cpp
         Private/NonPlayerEntityLifetimeSystem.cpp
@@ -25,6 +25,7 @@ target_sources(WorldServerLib
         Private/SaveSystem.cpp
         Private/ScriptDataSystem.cpp
         Private/Simulation.cpp
+        Private/TeleportSystem.cpp
         Private/TileUpdateSystem.cpp
         Private/World.cpp
         Private/Components/StoredValues.cpp
@@ -34,6 +35,7 @@ target_sources(WorldServerLib
         Private/Lua/EngineLuaBindings.cpp
         Private/TileMap/TileMap.cpp
     PUBLIC
+        Public/AccountRoleSystem.h
         Public/AccountSaveQueue.h
         Public/AILogic.h
         Public/AISystem.h
@@ -61,7 +63,6 @@ target_sources(WorldServerLib
         Public/ISimulationExtension.h
         Public/ItemSystem.h
         Public/LoadHelper.h
-        Public/ModerationSystem.h
         Public/MovementSyncSystem.h
         Public/MovementSystem.h
         Public/NonPlayerEntityLifetimeSystem.h
@@ -71,6 +72,7 @@ target_sources(WorldServerLib
         Public/SaveSystem.h
         Public/ScriptDataSystem.h
         Public/Simulation.h
+        Public/TeleportSystem.h
         Public/SimulationContext.h
         Public/SpawnStrategy.h
         Public/TileUpdateSystem.h

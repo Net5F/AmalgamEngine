@@ -7,13 +7,15 @@
 #include "RecoverAccountResponse.h"
 #include "RegisterResponse.h"
 #include "ServiceTicketResponse.h"
-#include "AccountModerationRequest.h"
-#include "AccountModerationResponse.h"
+#include "BanResponse.h"
+#include "UnbanResponse.h"
+#include "SetRoleResponse.h"
 #include "QueuedEvents.h"
 #include "entt/signal/sigh.hpp"
 #include <array>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace AM
 {
@@ -71,11 +73,33 @@ public:
     bool requestServiceTicket(ServiceTicketAudience audience);
 
     /**
-     * Sends the given moderation request (ban, unban, set role) to
-     * AccountServer. Its session token is filled in by us.
-     * Returns false if we aren't logged in.
+     * Requests to ban the given account. Returns false if we aren't logged
+     * in.
+     *
+     * @param durationS How long the ban lasts. 0 means permanent. Must be at
+     *                  most BanRequest::MAX_DURATION_S.
+     * @param reason (Optional) Why the ban was given.
      */
-    bool sendModerationRequest(AccountModerationRequest request);
+    bool requestBan(const std::string& targetUsername, Sint64 durationS,
+                    const std::string& reason);
+
+    /**
+     * Requests to lift the given account's active ban. Returns false if we
+     * aren't logged in.
+     *
+     * @param reason (Optional) Why the ban was lifted.
+     */
+    bool requestUnban(const std::string& targetUsername,
+                      const std::string& reason);
+
+    /**
+     * Requests to change the given account's role. Returns false if we aren't
+     * logged in.
+     *
+     * @param reason (Optional) Why the role was changed.
+     */
+    bool requestSetRole(const std::string& targetUsername,
+                        const std::string& roleID, const std::string& reason);
 
     LoginState getLoginState() const noexcept;
     bool isAuthenticated() const noexcept;
@@ -89,10 +113,40 @@ private:
     void handleLogoutResponse(const LogoutResponse& response);
     void handleRecoverAccountResponse(RecoverAccountResponse& response);
     void handleServiceTicketResponse(ServiceTicketResponse& response);
-    void handleModerationResponse(const AccountModerationResponse& response);
     void handleConnectionEvent(const AccountConnectionEvent& event);
 
     void clearSession() noexcept;
+
+    /**
+     * Fills in the given request's session token, sends it, and tracks it as
+     * pending.
+     *
+     * Used for requests that may be pending more than once at a time (e.g.
+     * BanRequest).
+     *
+     * @param failedResponse The response to publish if the connection drops
+     *                       before AccountServer responds.
+     */
+    template<typename Request, typename Response>
+    bool sendTrackedRequest(Request& request, Response failedResponse,
+                            std::vector<Response>& pendingRequests);
+
+    /**
+     * Removes one of the given pending requests, and publishes the given
+     * response.
+     */
+    template<typename Response>
+    void handleTrackedResponse(const Response& response,
+                               std::vector<Response>& pendingRequests,
+                               entt::sigh<void(const Response&)>& completedSig);
+
+    /**
+     * Publishes the failed response of each of the given pending requests,
+     * and clears them.
+     */
+    template<typename Response>
+    void failPendingRequests(std::vector<Response>& pendingRequests,
+                             entt::sigh<void(const Response&)>& completedSig);
 
     Network& network;
 
@@ -101,7 +155,9 @@ private:
     EventQueue<LogoutResponse> logoutResponseQueue;
     EventQueue<RecoverAccountResponse> recoverAccountResponseQueue;
     EventQueue<ServiceTicketResponse> serviceTicketQueue;
-    EventQueue<AccountModerationResponse> moderationResponseQueue;
+    EventQueue<BanResponse> banResponseQueue;
+    EventQueue<UnbanResponse> unbanResponseQueue;
+    EventQueue<SetRoleResponse> setRoleResponseQueue;
     EventQueue<AccountConnectionEvent> connectionEventQueue;
 
     /** The current state of our various operations. */
@@ -111,8 +167,11 @@ private:
     /** Tracks which audiences have a service ticket request pending. */
     std::array<bool, static_cast<std::size_t>(ServiceTicketAudience::Count)>
         serviceTicketRequestPending;
-    /** The number of moderation requests that are awaiting a response. */
-    std::size_t moderationRequestsPending;
+    /** The ban, unban, and set role requests that are awaiting a response,
+        stored as the responses to publish if the connection drops. */
+    std::vector<BanResponse> pendingBanRequests;
+    std::vector<UnbanResponse> pendingUnbanRequests;
+    std::vector<SetRoleResponse> pendingSetRoleRequests;
 
     /** If we're logged in, these are our current session's info. */
     Sint64 accountID;
@@ -126,8 +185,9 @@ private:
     entt::sigh<void(const RecoverAccountResponse&)> recoveryCompletedSig;
     entt::sigh<void(const ServiceTicketResponse&)>
         serviceTicketRequestCompletedSig;
-    entt::sigh<void(const AccountModerationResponse&)>
-        moderationRequestCompletedSig;
+    entt::sigh<void(const BanResponse&)> banRequestCompletedSig;
+    entt::sigh<void(const UnbanResponse&)> unbanRequestCompletedSig;
+    entt::sigh<void(const SetRoleResponse&)> setRoleRequestCompletedSig;
     entt::sigh<void()> requestConnectionFailedSig;
 
 public:
@@ -151,11 +211,13 @@ public:
     entt::sink<entt::sigh<void(const ServiceTicketResponse&)>>
         serviceTicketRequestCompleted;
 
-    /** A moderation request completed.
+    /** A ban, unban, or set role request completed.
         If the AccountServer connection is lost while a request is pending,
-        this is published with result == InternalError. */
-    entt::sink<entt::sigh<void(const AccountModerationResponse&)>>
-        moderationRequestCompleted;
+        these are published with result == InternalError. */
+    entt::sink<entt::sigh<void(const BanResponse&)>> banRequestCompleted;
+    entt::sink<entt::sigh<void(const UnbanResponse&)>> unbanRequestCompleted;
+    entt::sink<entt::sigh<void(const SetRoleResponse&)>>
+        setRoleRequestCompleted;
 
     /** An in-progress login, logout, registration, or recovery request lost
         its AccountServer connection. */

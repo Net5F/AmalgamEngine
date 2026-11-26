@@ -79,7 +79,7 @@ struct AccountRoleDef {
     /** The role's user-facing name. */
     std::string_view displayName{};
 
-    /** Used to decide who can moderate whom. An account can only act on
+    /** Used to decide who can act on whom. An account can only act on
         accounts whose role has a lower rank than its own, and can only
         assign roles with a lower rank than its own. */
     Uint8 rank{0};
